@@ -1,8 +1,9 @@
 #include "Common/MPassPch.h"
-#include <Buffers/BufferAllocator.h>
-#include <Common/CacheLIne.h>
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
+
+#include <Buffers/BufferAllocator.h>
+#include <Common/CacheLIne.h>
 
 using namespace MPass;
 using namespace Buffers;

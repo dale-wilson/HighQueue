@@ -7,10 +7,10 @@ namespace MPass
 {
 	namespace InfiniteVector
 	{
-		struct IvReservePositionStructure
+		struct IvReservePosition
 		{
             AtomicPosition reservePosition_;
-            SpinLock spinLock_;
+            Spinlock spinlock_;
         };
     }  
 }

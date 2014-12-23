@@ -5,7 +5,7 @@
 #include <InfiniteVector/IvAllocator.h>
 #include <InfiniteVector/IvResolver.h>
 #include <InfiniteVector/IvEntry.h>
-#include <InfiniteVector/IvReservePositionStructure.h>
+#include <InfiniteVector/IvReservePosition.h>
 #include <Buffers/BufferAllocator.h>
 
 namespace MPass
@@ -20,7 +20,9 @@ namespace InfiniteVector
     , version_(Version)
     , entryCount_(parameters.entryCount_)
     , entries_(0)
-    , positions_(0)
+    , readPosition_(0)
+    , publishPosition_(0)
+    , reservePosition_(0)
     , consumerWaitsViaMutexCondition_(false)
     , consumerWaitMutex_()
     , consumerWaitConditionVariable_()
@@ -42,15 +44,18 @@ namespace InfiniteVector
     IvResolver resolver(this);
 
     entries_ = allocator.allocate(IvEntry::alignedSize() * entryCount_, CacheLineSize);
-    positions_ = allocator.allocate(3 * CacheLineSize, CacheLineSize);
-
-    auto readPosition = resolver.resolve<Position>(positions_, CacheLineSize, 0);
+    readPosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
+    auto readPosition = resolver.resolve<Position>(readPosition_);
     *readPosition = entryCount_;
-    auto publishPosition = resolver.resolve<Position>(positions_, CacheLineSize, 1);
+
+    publishPosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
+    auto publishPosition = resolver.resolve<Position>(publishPosition_);
     *publishPosition = entryCount_;
-    auto reservePosition = resolver.resolve<IvReservePositionStructure>(positions_, CacheLineSize, 2);
+
+    reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
+    auto reservePosition = resolver.resolve<IvReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
-    new (&reservePosition->spinLock_) SpinLock();   
+    new (&reservePosition->spinlock_) Spinlock();   
 
     auto bufferBase = reinterpret_cast<byte_t *>(this);
     auto cacheAlignedBufferSize = Buffers::BufferAllocator::cacheAlignedBufferSize(parameters.bufferSize_);
@@ -62,7 +67,6 @@ namespace InfiniteVector
 
     // Now initialize the entries that were previously allocated.
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
-
     for(size_t nEntry = 0; nEntry < parameters.entryCount_; ++nEntry)
     {
         // consider an entry resolver if the alignment doesn't work out.

@@ -25,9 +25,13 @@ void IvConnection::CreateLocal(const std::string & name, const IvCreationParamet
     auto header = block + headerOffset;
     header_ = new (header) IvHeader(name, allocator, parameters);
     bufferAllocator_.reset(new Buffers::BufferAllocator(header, header_->bufferContainer_));
-
 }
 
+IvHeader * IvConnection::getHeader() const
+{
+    return header_;
+}
+            
 void IvConnection::OpenOrCreateShared(const std::string & name, const IvCreationParameters & parameters)
 {
 }

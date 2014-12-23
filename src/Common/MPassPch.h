@@ -46,29 +46,31 @@ const size_t CacheLineSize = 64;
 // #define BOOST_LIB_DIAGNOSTIC
 
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <sstream>
-#include <string>
-#include <vector>
-#include <map>
-#include <stack>
-#include <stdexcept>
-#include <math.h>
-#include <iostream>
-#include <iomanip>
-#include <fstream>
+#include <atomic>
+#include <chrono>
 #include <cstdlib>
 #include <cstdint>
-#include <atomic>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+#include <map>
+#include <memory>
 #include <mutex>
 #include <condition_variable>
-#include <memory>
+#include <stack>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <vector>
 
-#include <boost/chrono.hpp>
 
 #ifdef NEED_BOOST_YET
+#include <boost/chrono.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/shared_ptr.hpp>

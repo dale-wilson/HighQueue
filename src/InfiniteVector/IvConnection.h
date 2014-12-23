@@ -28,10 +28,7 @@ namespace MPass
             size_t getBufferCount()const;
             bool hasBuffers() const;
 
-            const IvHeader & getHeader() const
-            {
-                return *header_;
-            }
+            IvHeader * getHeader() const;
             
         private:
             std::unique_ptr<byte_t[]> localMemory_;

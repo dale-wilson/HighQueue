@@ -1,6 +1,7 @@
 /// @file IvEntry.h
 #pragma once
 #include "IvDefinitions.h"
+#include <InfiniteVector/IvAllocator.h>
 #include <Buffers/Buffer.h>
 namespace MPass
 {

@@ -4,6 +4,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <InfiniteVector/IvConnection.h>
+#include <InfiniteVector/IvResolver.h>
+#include <InfiniteVector/IvReservePosition.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
@@ -29,4 +31,14 @@ BOOST_AUTO_TEST_CASE(testIvConnectionBuffers)
     }
     BOOST_CHECK(! connection.hasBuffers());
     BOOST_CHECK(!connection.allocate(buffer));
+
+    // peek inside
+    auto header = connection.getHeader();
+    IvResolver resolver(header);
+    auto readPosition = resolver.resolve<Position>(header->readPosition_);
+    auto publishPosition = resolver.resolve<Position>(header->publishPosition_);
+    auto reservePosition = resolver.resolve<IvReservePosition>(header->reservePosition_);
+    BOOST_CHECK_EQUAL(*readPosition, *publishPosition);
+    BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
+
 }

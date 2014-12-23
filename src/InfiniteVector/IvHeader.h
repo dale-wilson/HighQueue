@@ -16,7 +16,10 @@ namespace InfiniteVector
         char name_[32 - sizeof(uint8_t) - sizeof(Signature)];
         size_t entryCount_;
         Offset entries_;
-        Offset positions_;
+        Offset readPosition_;
+        Offset publishPosition_;
+        Offset reservePosition_;
+
         Buffers::BufferAllocator::BufferContainer bufferContainer_;
         bool consumerWaitsViaMutexCondition_;
         std::mutex consumerWaitMutex_;

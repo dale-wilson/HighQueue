@@ -12,14 +12,14 @@ namespace InfiniteVector
         size_t spinCount_;
         size_t yieldCount_;
         size_t sleepCount_;
-        boost::chrono::nanoseconds sleepPeriod_;
-        boost::chrono::nanoseconds mutexWaitTimeout_;
+        std::chrono::nanoseconds sleepPeriod_;
+        std::chrono::nanoseconds mutexWaitTimeout_;
         explicit IvConsumerWaitStrategy(
             size_t spinCount = FOREVER,
             size_t yieldCount = FOREVER,
             size_t sleepCount = FOREVER,
-            boost::chrono::nanoseconds sleepPeriod = boost::chrono::nanoseconds(),
-            boost::chrono::nanoseconds mutexWaitTimeout = boost::chrono::nanoseconds())
+            std::chrono::nanoseconds sleepPeriod = std::chrono::nanoseconds(),
+            std::chrono::nanoseconds mutexWaitTimeout = std::chrono::nanoseconds())
         : spinCount_(spinCount)
         , yieldCount_(yieldCount)
         , sleepCount_(sleepCount)
