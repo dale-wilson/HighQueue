@@ -34,29 +34,32 @@ BOOST_AUTO_TEST_CASE(testProducer)
     IvConnection connection;
     connection.CreateLocal("LocalIv", parameters);
     IvProducer producer(connection);
-    Buffers::Buffer buffer;
-    connection.allocate(buffer);
-    auto testMessage = buffer.get<TestMessage>();
-    new (testMessage) TestMessage("Hello world");
-    buffer.setUsed(sizeof(TestMessage));
-    BOOST_CHECK(!buffer.isEmpty());;;
 
-    producer.publish(buffer);
-    BOOST_CHECK(buffer.isEmpty());
-    BOOST_CHECK(buffer.isValid());
-
-    // now peek inside to see if it looks as expected.
+    // peek inside the IV.
     auto header = connection.getHeader();
     IvResolver resolver(header);
     auto readPosition = resolver.resolve<Position>(header->readPosition_);
     auto publishPosition = resolver.resolve<Position>(header->publishPosition_);
     auto reservePosition = resolver.resolve<IvReservePosition>(header->reservePosition_);
+    IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
+
+
+    Buffers::Buffer buffer;
+    connection.allocate(buffer);
+    auto testMessage = buffer.get<TestMessage>();
+    new (testMessage) TestMessage("Hello world");
+    buffer.setUsed(sizeof(TestMessage));
+    BOOST_CHECK(!buffer.isEmpty());
+
+    producer.publish(buffer);
+    BOOST_CHECK(buffer.isEmpty());
+    BOOST_CHECK(buffer.isValid());
+
     BOOST_CHECK_EQUAL(*readPosition + 1, *publishPosition);
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 
-    IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
-    IvEntry & firstEntry = accessor[*publishPosition];
+    IvEntry & firstEntry = accessor[*readPosition];
     BOOST_CHECK_EQUAL(firstEntry.status_, IvEntry::Status::OK);
     Buffers::Buffer & publishedBuffer = firstEntry.buffer_;
     auto publishedMessage = publishedBuffer.get<TestMessage>(); 
