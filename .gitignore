@@ -1,0 +1,9 @@
+Debug/
+Release/
+MPass.opensdf
+MPass.sdf
+MPass.sln
+*.vcxproj*
+*.suo
+ipch/
+x64/
