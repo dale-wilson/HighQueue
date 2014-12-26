@@ -267,4 +267,7 @@ BOOST_AUTO_TEST_CASE(testBufferAppend)
 /*
 Still needs testing:
 Split buffers
+
+Memory ownership
+
 */
