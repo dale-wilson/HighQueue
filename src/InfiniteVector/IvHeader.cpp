@@ -6,7 +6,7 @@
 #include <InfiniteVector/IvResolver.h>
 #include <InfiniteVector/IvEntry.h>
 #include <InfiniteVector/IvReservePosition.h>
-#include <Buffers/BufferAllocator.h>
+#include <Buffers/MemoryBlockAllocator.h>
 
 namespace MPass
 {
@@ -58,12 +58,12 @@ namespace InfiniteVector
     new (&reservePosition->spinlock_) Spinlock();   
 
     auto bufferBase = reinterpret_cast<byte_t *>(this);
-    auto cacheAlignedBufferSize = Buffers::BufferAllocator::cacheAlignedBufferSize(parameters.bufferSize_);
+    auto cacheAlignedBufferSize = Buffers::MemoryBlockAllocator::cacheAlignedBufferSize(parameters.bufferSize_);
     auto blockSize = cacheAlignedBufferSize * parameters.bufferCount_;
     auto blockOffset = allocator.allocate(blockSize, CacheLineSize);
-    bufferContainer_ = Buffers::BufferAllocator::BufferContainer(
+    blockInfo_ = Buffers::MemoryBlockInfo(
         blockOffset + blockSize, cacheAlignedBufferSize);
-    bufferContainer_.preAllocate(bufferBase, blockOffset);
+    blockInfo_.preAllocate(bufferBase, blockOffset);
 
     // Now initialize the entries that were previously allocated.
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
@@ -73,7 +73,7 @@ namespace InfiniteVector
         IvEntry & entry = entryPointer[nEntry];
         new (&entry) IvEntry;
         Buffers::Buffer & buffer = entry.buffer_;
-        if(!bufferContainer_.allocate(bufferBase, buffer))
+        if(!blockInfo_.allocate(bufferBase, buffer))
         {
             throw std::runtime_error("Not enough buffers for entries.");
         }

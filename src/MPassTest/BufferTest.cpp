@@ -22,6 +22,7 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     std::memcpy(work1, alphabet.data(), alphabet.size());
     byte_t work2[letterCount * 2];
     std::memcpy(work2, alphabet.data(), alphabet.size());
+    Buffer::MemoryOwnerPtr owner;
 
     Buffer buffer1;
 
@@ -42,7 +43,7 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK_THROW(buffer1.appendNewCopy(alphabet), std::runtime_error);
     BOOST_CHECK_THROW(buffer1.appendBinaryCopy(work1, letterCount), std::runtime_error);
 
-    buffer1.set(work1, sizeof(work1), 0, letterCount);
+    buffer1.set(owner, work1, sizeof(work1), 0, letterCount);
 
     BOOST_CHECK_EQUAL(buffer1.getType(), Buffer::Type::Normal);
     BOOST_CHECK(buffer1.isValid());
@@ -63,7 +64,7 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK_EQUAL(alphabet.substr(0, letterCount), value1);
 
     Buffer buffer2;
-    buffer2.set(work2, sizeof(work2), letterCount, letterCount);
+    buffer2.set(owner, work2, sizeof(work2), letterCount, letterCount);
 
     BOOST_CHECK_EQUAL(buffer2.getType(), Buffer::Type::Normal);
     BOOST_CHECK(buffer2.isValid());
@@ -153,7 +154,7 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     std::string value2c(buffer2.get<char>(), buffer2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value2c);
 
-    buffer1.forget();
+    buffer1.release();
     BOOST_CHECK_EQUAL(buffer1.getType(), Buffer::Type::Invalid);
     BOOST_CHECK(!buffer1.isValid());
     BOOST_CHECK(!buffer1.isBorrowed());
@@ -175,6 +176,8 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
 
 BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 {
+    Buffer::MemoryOwnerPtr owner;
+
     Buffer buffer1;
     auto data = reinterpret_cast<const byte_t *>(alphabet.data());
     buffer1.borrow(data, 0u, letterCount);
@@ -197,7 +200,7 @@ BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
     auto workSize = workString.size();
 
     Buffer buffer2;
-    buffer2.set(workData, workSize, letterCount, letterCount);
+    buffer2.set(owner, workData, workSize, letterCount, letterCount);
 
     std::string value2(buffer2.get<char>(), buffer2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value2);
@@ -229,10 +232,11 @@ BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 
 BOOST_AUTO_TEST_CASE(testBufferAppend)
 {
+    Buffer::MemoryOwnerPtr owner;
     byte_t work[letterCount * 2];
     std::memset(work, '\0', sizeof(work));
     Buffer buffer;
-    buffer.set(work, sizeof(work), 0U);
+    buffer.set(owner, work, sizeof(work), 0U);
     BOOST_CHECK_EQUAL(buffer.getUsed(), 0U);
     BOOST_CHECK_EQUAL(buffer.available(), sizeof(work));
 

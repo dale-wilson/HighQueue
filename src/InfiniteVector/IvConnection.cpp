@@ -24,7 +24,7 @@ void IvConnection::CreateLocal(const std::string & name, const IvCreationParamet
 
     auto header = block + headerOffset;
     header_ = new (header) IvHeader(name, allocator, parameters);
-    bufferAllocator_.reset(new Buffers::BufferAllocator(header, header_->bufferContainer_));
+    bemoryBlockAllocator_.reset(new Buffers::MemoryBlockAllocator(header, header_->blockInfo_));
 }
 
 IvHeader * IvConnection::getHeader() const
@@ -53,22 +53,22 @@ size_t IvConnection::spaceNeeded(const IvCreationParameters & parameters)
 
 bool IvConnection::allocate(Buffers::Buffer & buffer)
 {
-    return bufferAllocator_->allocate(buffer);
+    return bemoryBlockAllocator_->allocate(buffer);
 }
 
 void IvConnection::free(Buffers::Buffer & buffer)
 {
-    bufferAllocator_->free(buffer);
+    bemoryBlockAllocator_->free(buffer);
 }
 size_t IvConnection::getBufferSize()const
 {
-    return bufferAllocator_->getBufferSize();
+    return bemoryBlockAllocator_->getBufferSize();
 }
 size_t IvConnection::getBufferCount()const
 {
-    return bufferAllocator_->getBufferCount();
+    return bemoryBlockAllocator_->getBufferCount();
 }
 bool IvConnection::hasBuffers() const
 {
-    return bufferAllocator_->hasBuffers();
+    return bemoryBlockAllocator_->hasBuffers();
 }

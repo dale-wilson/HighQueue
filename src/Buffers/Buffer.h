@@ -7,16 +7,24 @@ namespace MPass
         class Buffer
         {
         public:
+            // an interface for objects that own the memory contained in a buffer;
+            class MemoryOwner
+            {
+            public:
+                virtual void release(Buffer & buffer) = 0;
+            };
             enum Type
             {
                 Normal,
                 Borrowed,
                 Invalid
             };
+            typedef std::shared_ptr<MemoryOwner> MemoryOwnerPtr;
 
             Buffer();
 
-            void set(byte_t * container, size_t capacity, size_t offset, size_t used = 0, Type type = Normal);
+            void set(const MemoryOwnerPtr & owner, byte_t * container, size_t capacity, size_t offset, size_t used = 0, Type type = Normal);
+            void reset();
             void borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit = 0, size_t usedSplit = 0);
             size_t setUsed(size_t used);
             void setEmpty();
@@ -27,7 +35,6 @@ namespace MPass
             Type getType() const;
             void swap(Buffer & rhs);
             void moveTo(Buffer & rhs);
-            void forget();
 
             template <typename T = byte_t>
             T* get()const;
@@ -58,7 +65,10 @@ namespace MPass
             bool isSplit() const;
             void mustBeNormal(const char * = "Operation cannot be applied to an immutable buffer.") const;
             void mustBeValid(const char * message = "Operation requires a valid buffer.") const;
+
+            void release();
         private:
+            MemoryOwnerPtr owner_;
             byte_t * container_;
             size_t capacity_;
             size_t offset_;
@@ -70,7 +80,8 @@ namespace MPass
 
         inline
         Buffer::Buffer()
-        : container_(0)
+        : owner_()
+        , container_(0)
         , capacity_(0)
         , offset_(0)
         , used_(0)
@@ -81,8 +92,9 @@ namespace MPass
         }
 
         inline
-        void Buffer::set(byte_t * container, size_t capacity, size_t offset, size_t used, Type type)
+        void Buffer::set(const MemoryOwnerPtr & owner, byte_t * container, size_t capacity, size_t offset, size_t used, Type type)
         {
+            owner_ = owner;
             container_ = container;
             capacity_ = (capacity == 0) ? used : capacity;
             offset_ = offset;
@@ -198,6 +210,7 @@ namespace MPass
             {
                 throw std::runtime_error("Buffer::swap: Invalid operation on Borrowed buffer.");
             }
+            owner_.swap(rhs.owner_);
             std::swap(container_, rhs.container_);
             std::swap(offset_, rhs.offset_);
             std::swap(used_, rhs.used_);
@@ -225,6 +238,7 @@ namespace MPass
             }
             else
             {
+                owner_.swap(rhs.owner_);
                 std::swap(container_,rhs.container_);
                 std::swap(capacity_, rhs.capacity_);
                 std::swap(offset_,rhs.offset_);
@@ -234,8 +248,22 @@ namespace MPass
         }
 
         inline
-        void Buffer::forget()
+        void Buffer::release()
         {
+            if(owner_)
+            {
+                owner_->release(*this);
+                owner_.reset();
+            }
+            else
+            {
+                reset();
+            }
+        }
+
+        inline void Buffer::reset()
+        {
+            owner_.reset();
             container_ = 0;
             capacity_ = 0;
             offset_ = 0;

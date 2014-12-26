@@ -2,7 +2,7 @@
 #pragma once
 #include <InfiniteVector/IvHeader.h>
 #include <InfiniteVector/IvCreationParameters.h>
-#include <Buffers/BufferAllocator.h>
+#include <Buffers/MemoryBlockAllocator.h>
 
 namespace MPass
 {
@@ -33,7 +33,7 @@ namespace MPass
         private:
             std::unique_ptr<byte_t[]> localMemory_;
             IvHeader * header_;
-            std::unique_ptr<Buffers::BufferAllocator> bufferAllocator_;
+            std::unique_ptr<Buffers::MemoryBlockAllocator> bemoryBlockAllocator_;
 		};
 	}
 }

@@ -3,7 +3,7 @@
 #include "IvDefinitions.h"
 #include <InfiniteVector/IvCreationParameters.h>
 #include <InfiniteVector/IvAllocator_fwd.h>
-#include <Buffers/BufferAllocator.h>
+#include <Buffers/MemoryBlockAllocator.h>
 
 namespace MPass
 {
@@ -20,7 +20,7 @@ namespace InfiniteVector
         Offset publishPosition_;
         Offset reservePosition_;
 
-        Buffers::BufferAllocator::BufferContainer bufferContainer_;
+        Buffers::MemoryBlockInfo blockInfo_;
         bool consumerWaitsViaMutexCondition_;
         std::mutex consumerWaitMutex_;
         std::condition_variable consumerWaitConditionVariable_;
