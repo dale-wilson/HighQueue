@@ -2,8 +2,9 @@ Debug/
 Release/
 MPass.opensdf
 MPass.sdf
-MPass.sln
-*.vcxproj*
+#MPass.sln
+#*.vcxproj*
+*.vcxproj.user
 *.suo
 *.suo.*
 ipch/
