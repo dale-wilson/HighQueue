@@ -20,7 +20,7 @@ namespace MPass
             Offset allocate(size_t size, size_t alignment)
             {
                 Offset location = align(position_, alignment);
-                position_ += size;
+                position_ += Offset(size);
                 return location;
             }
 

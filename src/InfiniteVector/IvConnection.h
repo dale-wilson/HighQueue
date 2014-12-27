@@ -31,9 +31,9 @@ namespace MPass
             IvHeader * getHeader() const;
             
         private:
-            std::unique_ptr<byte_t[]> localMemory_;
+            boost::shared_array<byte_t> localMemory_;
             IvHeader * header_;
-            std::unique_ptr<Buffers::MemoryBlockAllocator> bemoryBlockAllocator_;
+            std::shared_ptr<Buffers::MemoryBlockAllocator> bemoryBlockAllocator_;
 		};
 	}
 }

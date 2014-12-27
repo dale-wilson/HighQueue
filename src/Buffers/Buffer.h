@@ -23,25 +23,47 @@ namespace MPass
 
             Buffer();
 
-            void set(const MemoryOwnerPtr & owner, byte_t * container, size_t capacity, size_t offset, size_t used = 0, Type type = Normal);
-            void reset();
-            void borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit = 0, size_t usedSplit = 0);
-            size_t setUsed(size_t used);
-            void setEmpty();
-            size_t getUsed() const;
-            bool isEmpty()const;
-            byte_t * getContainer()const;
-            size_t getOffset()const;
-            Type getType() const;
-            void swap(Buffer & rhs);
-            void moveTo(Buffer & rhs);
 
             template <typename T = byte_t>
             T* get()const;
-            
             template <typename T = byte_t>
             const T* getConst()const;
-            
+
+
+            size_t setUsed(size_t used);
+            size_t getUsed() const;
+#ifdef VISUAL_C_WAS_A_REAL_COMPILER
+            template <typename T, typename ...Args>
+            T* construct(Args... & args)
+            {
+                auto result =  new (get<T>()) T (std::forward<Args>(arg)...);
+                setUsed(sizeof(T));
+                return result;
+            }
+#else
+            template <typename T>
+            T* construct()
+            {
+                auto result = new (get<T>()) T();
+                setUsed(sizeof(T));
+                return result;
+            }
+            template <typename T, typename Arg1>
+            T* construct(Arg1 && arg1)
+            {
+                auto result = new (get<T>()) T(std::forward<Arg1>(arg1));
+                setUsed(sizeof(T));
+                return result;
+            }
+
+            template <typename T, typename Arg1, typename Arg2>
+            T* construct(Arg1 && arg1, Arg2 && arg2)
+            {
+                auto result = new (get<T>()) T(std::forward<Arg1>(arg1), std::forward(arg2));
+                setUsed(sizeof(T));
+                return result;
+            }
+#endif            
             template <typename T = byte_t>
             size_t available() const;
 
@@ -59,6 +81,18 @@ namespace MPass
 
             template <typename T = byte_t>
             size_t appendBinaryCopy(const T * data, size_t count);
+
+
+            void set(const MemoryOwnerPtr & owner, byte_t * container, size_t capacity, size_t offset, size_t used = 0, Type type = Normal);
+            void reset();
+            void borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit = 0, size_t usedSplit = 0);
+            void setEmpty();
+            bool isEmpty()const;
+            byte_t * getContainer()const;
+            size_t getOffset()const;
+            Type getType() const;
+            void swap(Buffer & rhs);
+            void moveTo(Buffer & rhs);
 
             bool isValid() const;
             bool isBorrowed() const;

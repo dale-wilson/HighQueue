@@ -17,7 +17,7 @@ void IvConnection::CreateLocal(const std::string & name, const IvCreationParamet
     localMemory_.reset(new byte_t[allocatedSize]);
     byte_t * block = localMemory_.get();
     byte_t * alignedBlock = IvAllocator::align(block, CacheLineSize);
-    Offset headerOffset = alignedBlock - block;
+    Offset headerOffset = Offset(alignedBlock - block);
     size_t availableSize = allocatedSize - headerOffset;
 
     IvAllocator allocator(allocatedSize, sizeof(IvHeader));
