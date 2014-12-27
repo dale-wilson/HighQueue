@@ -60,9 +60,6 @@
     <ClInclude Include="..\src\Common\Spinlock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\IvAllocator_fwd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\InfiniteVector\IvReservePosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>

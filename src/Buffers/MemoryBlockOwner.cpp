@@ -17,9 +17,9 @@ bool MemoryBlockOwner::allocate(Buffer & buffer)
     return allocator_.allocate(buffer);
 }
 
-size_t MemoryBlockOwner::getBufferSize()const
+size_t MemoryBlockOwner::getBufferCapacity()const
 {
-    return allocator_.getBufferSize();
+    return allocator_.getBufferCapacity();
 }
 
 size_t MemoryBlockOwner::getStorageSize()const
@@ -37,9 +37,9 @@ size_t MemoryBlockOwner::getBufferCount()const
     return allocator_.getBufferCount();
 }
 
-bool MemoryBlockOwner::hasBuffers() const
+bool MemoryBlockOwner::hasMemoryAvailable() const
 {
-    return allocator_.hasBuffers();
+    return allocator_.hasMemoryAvailable();
 }
 
 void MemoryBlockOwner::release(Buffer & buffer)

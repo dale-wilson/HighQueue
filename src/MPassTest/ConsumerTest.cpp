@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     size_t bufferCount = 50;
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
-    connection.CreateLocal("LocalIv", parameters);
+    connection.createLocal("LocalIv", parameters);
 
     // We'll need these later.
     auto header = connection.getHeader();

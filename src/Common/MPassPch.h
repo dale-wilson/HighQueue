@@ -1,8 +1,8 @@
-// Copyright (c) 2009, 2010, 2011, 2014 Object Computing, Inc.
+// Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-
 #pragma once
+
 // Suppress spurious Visual C++ warnings
 #if defined(_MSC_VER)
 # pragma warning(disable:4251) // Disable VC warning about dll linkage required (for private members?)

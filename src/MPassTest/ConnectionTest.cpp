@@ -18,18 +18,18 @@ BOOST_AUTO_TEST_CASE(testIvConnectionBuffers)
     size_t bufferCount = 150;
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
-    connection.CreateLocal("LocalIv", parameters);
+    connection.createLocal("LocalIv", parameters);
 
-    BOOST_CHECK_LE(bufferSize, connection.getBufferSize());
+    BOOST_CHECK_LE(bufferSize, connection.getBufferCapacity());
     BOOST_CHECK_LE(bufferCount, connection.getBufferCount());
 
     Buffers::Buffer buffer;
     for(size_t nBuffer = 0; nBuffer < (bufferCount - entryCount); ++nBuffer)
     {
-        BOOST_CHECK(connection.hasBuffers());
+        BOOST_CHECK(connection.hasMemoryAvailable());
         BOOST_CHECK(connection.allocate(buffer));
     }
-    BOOST_CHECK(! connection.hasBuffers());
+    BOOST_CHECK(! connection.hasMemoryAvailable());
     BOOST_CHECK(!connection.allocate(buffer));
 
     // peek inside

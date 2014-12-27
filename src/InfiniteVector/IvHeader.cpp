@@ -55,7 +55,6 @@ namespace InfiniteVector
     reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
     auto reservePosition = resolver.resolve<IvReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
-    new (&reservePosition->spinlock_) Spinlock();   
 
     auto bufferBase = reinterpret_cast<byte_t *>(this);
     auto cacheAlignedBufferSize = Buffers::MemoryBlockAllocator::cacheAlignedBufferSize(parameters.bufferSize_);

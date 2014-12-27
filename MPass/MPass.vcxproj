@@ -140,7 +140,6 @@
     <ClInclude Include="..\src\Common\MPassPch.h" />
     <ClInclude Include="..\src\Common\Spinlock.h" />
     <ClInclude Include="..\src\InfiniteVector\IvAllocator.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvAllocator_fwd.h" />
     <ClInclude Include="..\src\InfiniteVector\IvConnection.h" />
     <ClInclude Include="..\src\InfiniteVector\IvConsumer.h" />
     <ClInclude Include="..\src\InfiniteVector\IvConsumerWaitStrategy.h" />

@@ -1,6 +1,11 @@
+// Copyright (c) 2014 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
 #pragma once
+
 #include <Buffers/MemoryBlockInfo.h>
 #include <Buffers/Buffer.h>
+
 namespace MPass
 {
 	namespace Buffers
@@ -20,13 +25,13 @@ namespace MPass
 			bool allocate(Buffer & buffer);
 			void free(Buffer & buffer);
 
-            size_t getBufferSize()const;
+            size_t getBufferCapacity()const;
             size_t getStorageSize()const;
             byte_t const * getStorageAddress()const;
             MemoryBlockInfo & getContainer();
             const MemoryBlockInfo & getContainer() const;
             size_t getBufferCount()const;
-            bool hasBuffers() const;
+            bool hasMemoryAvailable() const;
 
             static size_t cacheAlignedBufferSize(size_t bufferSize);
 

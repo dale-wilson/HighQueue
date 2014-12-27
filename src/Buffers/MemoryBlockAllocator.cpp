@@ -56,7 +56,7 @@ void MemoryBlockAllocator::free(Buffer & buffer)
     container_.free(baseAddress_, buffer);
 }
 
-size_t MemoryBlockAllocator::getBufferSize()const
+size_t MemoryBlockAllocator::getBufferCapacity()const
 {
     return container_.bufferSize_;
 }
@@ -86,7 +86,7 @@ size_t MemoryBlockAllocator::getBufferCount()const
     return container_.bufferCount_;
 }
 
-bool MemoryBlockAllocator::hasBuffers() const
+bool MemoryBlockAllocator::hasMemoryAvailable() const
 {
     return container_.rootOffset_ + container_.bufferSize_ <= container_.blockSize_;
 }

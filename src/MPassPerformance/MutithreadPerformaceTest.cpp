@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
-    connection.CreateLocal("LocalIv", parameters);
+    connection.createLocal("LocalIv", parameters);
 
     IvConsumer consumer(connection);
     Buffers::Buffer consumerBuffer;

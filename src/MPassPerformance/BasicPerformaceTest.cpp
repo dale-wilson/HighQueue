@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     size_t bufferCount = entryCount + 10;
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
-    connection.CreateLocal("LocalIv", parameters);
+    connection.createLocal("LocalIv", parameters);
 
     IvProducer producer(connection);
     IvConsumer consumer(connection);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
     size_t bufferCount = entryCount + 10;
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
-    connection.CreateLocal("LocalIv", parameters);
+    connection.createLocal("LocalIv", parameters);
 
     uint64_t limit1 = 100000;
     uint64_t limit2 = 10000;

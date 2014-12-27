@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     size_t bufferCount = 50;
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
-    connection.CreateLocal("LocalIv", parameters);
+    connection.createLocal("LocalIv", parameters);
     IvProducer producer(connection);
 
     // peek inside the IV.

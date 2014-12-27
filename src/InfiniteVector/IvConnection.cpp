@@ -11,7 +11,7 @@ IvConnection::IvConnection()
 {
 }
 
-void IvConnection::CreateLocal(const std::string & name, const IvCreationParameters & parameters)
+void IvConnection::createLocal(const std::string & name, const IvCreationParameters & parameters)
 {
     const size_t allocatedSize = spaceNeeded(parameters) + CacheLineSize;
     localMemory_.reset(new byte_t[allocatedSize]);
@@ -32,11 +32,11 @@ IvHeader * IvConnection::getHeader() const
     return header_;
 }
             
-void IvConnection::OpenOrCreateShared(const std::string & name, const IvCreationParameters & parameters)
+void IvConnection::openOrCreateShared(const std::string & name, const IvCreationParameters & parameters)
 {
 }
 
-void IvConnection::OpenExistingShared(const std::string & name)
+void IvConnection::openExistingShared(const std::string & name)
 {
 }
 
@@ -56,19 +56,15 @@ bool IvConnection::allocate(Buffers::Buffer & buffer)
     return bemoryBlockAllocator_->allocate(buffer);
 }
 
-void IvConnection::free(Buffers::Buffer & buffer)
+size_t IvConnection::getBufferCapacity()const
 {
-    bemoryBlockAllocator_->free(buffer);
-}
-size_t IvConnection::getBufferSize()const
-{
-    return bemoryBlockAllocator_->getBufferSize();
+    return bemoryBlockAllocator_->getBufferCapacity();
 }
 size_t IvConnection::getBufferCount()const
 {
     return bemoryBlockAllocator_->getBufferCount();
 }
-bool IvConnection::hasBuffers() const
+bool IvConnection::hasMemoryAvailable() const
 {
-    return bemoryBlockAllocator_->hasBuffers();
+    return bemoryBlockAllocator_->hasMemoryAvailable();
 }

@@ -1,5 +1,9 @@
 /// @file IvAllocator.h
+// Copyright (c) 2014 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
 #pragma once
+
 #include <InfiniteVector/IvDefinitions.h>
 #include <Common/Spinlock.h>
 
@@ -10,7 +14,6 @@ namespace MPass
 		struct IvReservePosition
 		{
             AtomicPosition reservePosition_;
-            Spinlock spinlock_;
         };
     }  
 }
