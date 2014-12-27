@@ -34,7 +34,7 @@ bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
         IvEntry & entry = entryAccessor_[readPosition];
         if(entry.status_ == IvEntry::Status::OK)
         {
-            entry.buffer_.swap(buffer);
+            entry.buffer_.moveTo(buffer);
             ++readPosition_;
             return true;
         }

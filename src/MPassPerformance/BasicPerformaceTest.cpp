@@ -68,24 +68,24 @@ BOOST_AUTO_TEST_CASE(testBasicMessagePassingPerformance)
     timer.reset();
     uint64_t limit1 = 100000;
     uint64_t limit2 = 1000;
-    uint64_t messageNumber = 0;
-    for(uint64_t nLoop1 = 0; nLoop1 < limit1; ++nLoop1)
+    uint64_t messageCount = limit1 * limit2;
+
+
+    for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        for(uint64_t nLoop2 = 0; nLoop2 < limit2; ++nLoop2)
+        producerBuffer.construct<TestMessage>(messageNumber);
+        producer.publish(producerBuffer);
+        consumer.getNext(consumerBuffer);
+        auto testMessage = consumerBuffer.get<TestMessage>();
+        if(messageNumber != testMessage->data_)
         {
-            ++messageNumber;
-            producerBuffer.construct<TestMessage>(messageNumber);
-            producer.publish(producerBuffer);
-            consumer.getNext(consumerBuffer);
-            auto testMessage = consumerBuffer.get<TestMessage>();
-            if(messageNumber != testMessage->data_)
-            {
-                // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-                BOOST_CHECK_EQUAL(messageNumber, testMessage->data_);
-            }
+            // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
+            BOOST_CHECK_EQUAL(messageNumber, testMessage->data_);
         }
     }
-    auto messagePassTime = timer.microseconds();
-    std::cout << messageNumber << " messages.  Message Pass time " << messagePassTime * 1000 / messageNumber << " nsec." << std::endl;
 
+    auto lapse = timer.nanoseconds();
+    std::cout << "Single threaded: Passed " << messageCount << " messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message " 
+        << messageCount * 1000L * sizeof(TestMessage) * 8 / lapse << " GBits/second."
+        << std::endl;
 }

@@ -1,24 +1,17 @@
-//@brief Stopwatch.cpp defines a stopwatch for performance measurement
+// @brief Stopwatch.cpp defines a stopwatch for performance measurement
+
 #pragma once
-
-
 namespace MPass
 {
-
-#ifdef _WIN32
-
     class Stopwatch
     {
     public:
+        static const uint64_t millisecondsPerSecond = 1000LL;
         static const uint64_t microsecondsPerSecond = 1000LL * 1000LL;
+        static const uint64_t nanosecondsPerSecond = 1000LL * 1000LL * 1000LL;
 
         Stopwatch()
-        : frequency_(0)
-        , start_(0)
         {
-            LARGE_INTEGER freq;
-            (void)QueryPerformanceFrequency(&freq);
-            frequency_ = (uint64_t)freq.QuadPart;
             start_ = now();
         }
 
@@ -27,26 +20,35 @@ namespace MPass
             start_ = now();
         }
 
+        uint64_t nanoseconds() const
+        {
+            return now() - start_;
+        }
+
         uint64_t microseconds() const
         {
-            uint64_t lapse = now() - start_;
-            return (lapse * microsecondsPerSecond) / frequency_;
+            return (nanoseconds() * microsecondsPerSecond) / nanosecondsPerSecond;
+        }
+
+        uint64_t milliseconds() const
+        {
+            return (nanoseconds() * millisecondsPerSecond) / nanosecondsPerSecond;
+        }
+
+        double seconds() const
+        {
+            return double(nanoseconds()) / double(nanosecondsPerSecond);
         }
 
         static uint64_t now()
         {
-            LARGE_INTEGER time;
-            (void)QueryPerformanceCounter(&time);
-            return (uint64_t) time.QuadPart;
+            auto point = std::chrono::high_resolution_clock::now();
+            std::chrono::nanoseconds duration = point.time_since_epoch();
+            return duration.count();
         }
 
     private:
-        uint64_t frequency_;
         uint64_t start_;
     };
-
-#else _WIN32
-#error need non windows version of stopwatch
-#endif // _WIN32
 
 } // namespace MPass
