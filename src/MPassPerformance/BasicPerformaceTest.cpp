@@ -21,7 +21,7 @@ namespace
     };
 }
 
-BOOST_AUTO_TEST_CASE(testBasicMessagePassingPerformance)
+BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
     IvConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
@@ -50,7 +50,6 @@ BOOST_AUTO_TEST_CASE(testBasicMessagePassingPerformance)
     // if we published another message now, it would hang.
     // todo: think of some way around that.
 
-
     // consume the messages.
     for(uint64_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
@@ -65,11 +64,31 @@ BOOST_AUTO_TEST_CASE(testBasicMessagePassingPerformance)
     auto consumeTime = timer.microseconds();
 
     std::cout << entryCount << " messages.  Publish " << publishTime * 1000 / entryCount << " nsec.  Consume " << consumeTime * 1000 / entryCount << " nsec." << std::endl;
-    timer.reset();
+
+}
+
+BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
+{
+    IvConsumerWaitStrategy strategy;
+    size_t entryCount = 100000;
+    size_t bufferSize = sizeof(TestMessage);
+    size_t bufferCount = entryCount + 10;
+    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
+    IvConnection connection;
+    connection.CreateLocal("LocalIv", parameters);
+
     uint64_t limit1 = 100000;
-    uint64_t limit2 = 1000;
+    uint64_t limit2 = 10000;
     uint64_t messageCount = limit1 * limit2;
 
+    IvProducer producer(connection);
+    IvConsumer consumer(connection);
+    Buffers::Buffer producerBuffer;
+    connection.allocate(producerBuffer);
+    Buffers::Buffer consumerBuffer;
+    connection.allocate(consumerBuffer);
+
+    Stopwatch timer;
 
     for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
@@ -83,9 +102,10 @@ BOOST_AUTO_TEST_CASE(testBasicMessagePassingPerformance)
             BOOST_CHECK_EQUAL(messageNumber, testMessage->data_);
         }
     }
-
     auto lapse = timer.nanoseconds();
-    std::cout << "Single threaded: Passed " << messageCount << " messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message " 
-        << messageCount * 1000L * sizeof(TestMessage) * 8 / lapse << " GBits/second."
+
+    auto messageBits = sizeof(TestMessage) * 8;
+    std::cout << "Single threaded: Passed " << messageCount << ' ' << messageBits << " bit messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message "
+        << messageCount * 1000L * messageBits / lapse << " GBits/second."
         << std::endl;
 }

@@ -14,9 +14,15 @@ namespace
     struct TestMessage
     {
         uint64_t data_;
+        uint64_t extra_[3];
         TestMessage(uint64_t data)
         :data_(data)
         {
+            extra_[0] = extra_[1] = extra_[2] = data;
+        }
+        uint64_t touch() const
+        {
+            return data_ + extra_[0] + extra_[1] + extra_[2];
         }
     };
 
@@ -36,7 +42,8 @@ void producerFunction(IvConnection connection, uint64_t messageCount)
     }
     for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        producerBuffer.construct<TestMessage>(messageNumber);
+        auto testMessage = producerBuffer.construct<TestMessage>(messageNumber);
+        testMessage->touch();
         producer.publish(producerBuffer);
     }
 }
@@ -49,7 +56,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     size_t bufferCount = entryCount + 10;
 
     uint64_t limit1 = 100000;
-    uint64_t limit2 = 1000;
+    uint64_t limit2 = 10000;
     uint64_t messageCount = limit1 * limit2;
 
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
@@ -78,6 +85,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     {
         consumer.getNext(consumerBuffer);
         auto testMessage = consumerBuffer.get<TestMessage>();
+        testMessage->touch();
         if(messageNumber != testMessage->data_)
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
@@ -87,8 +95,10 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     auto lapse = timer.nanoseconds();
     producerThread.join();
-    std::cout << "Multithreaded: Passed " << messageCount << " messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message " 
-        << messageCount * 1000L * sizeof(TestMessage) * 8 / lapse << " GBits/second."
+
+    auto messageBits = sizeof(TestMessage) * 8;
+    std::cout << "Multithreaded: Passed " << messageCount << ' ' << messageBits << " bit messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message "
+        << messageCount * 1000L * messageBits / lapse << " GBits/second."
         << std::endl;
 
 }
