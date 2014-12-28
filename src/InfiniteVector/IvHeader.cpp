@@ -57,12 +57,11 @@ namespace InfiniteVector
     reservePosition->reservePosition_ = entryCount_;
 
     auto bufferBase = reinterpret_cast<byte_t *>(this);
-    auto cacheAlignedBufferSize = Buffers::MemoryBlockAllocator::cacheAlignedBufferSize(parameters.bufferSize_);
+    auto cacheAlignedBufferSize = Buffers::MemoryBlockPool::cacheAlignedBufferSize(parameters.bufferSize_);
     auto blockSize = cacheAlignedBufferSize * parameters.bufferCount_;
     auto blockOffset = allocator.allocate(blockSize, CacheLineSize);
-    blockInfo_ = Buffers::MemoryBlockInfo(
-        blockOffset + blockSize, cacheAlignedBufferSize);
-    blockInfo_.preAllocate(bufferBase, blockOffset);
+    memoryPool_ = Buffers::MemoryBlockPool(bufferBase,
+        blockOffset + blockSize, cacheAlignedBufferSize, blockOffset);
 
     // Now initialize the entries that were previously allocated.
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
@@ -72,7 +71,7 @@ namespace InfiniteVector
         IvEntry & entry = entryPointer[nEntry];
         new (&entry) IvEntry;
         Buffers::Buffer & buffer = entry.buffer_;
-        if(!blockInfo_.allocate(bufferBase, buffer))
+        if(!memoryPool_.allocate(bufferBase, buffer))
         {
             throw std::runtime_error("Not enough buffers for entries.");
         }

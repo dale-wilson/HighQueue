@@ -6,9 +6,10 @@ using namespace MPass;
 using namespace Buffers;
 
 MemoryBlockHolder::MemoryBlockHolder(size_t bufferSize, size_t bufferCount)
-    : blockSize_(MemoryBlockAllocator::spaceNeeded(bufferSize, bufferCount))
-    , block_(new byte_t[blockSize_])
-    , allocator_(block_.get(), blockSize_, bufferSize)
+    : blockSize_(MemoryBlockPool::spaceNeeded(bufferSize, bufferCount))
+    , baseAddress_(new byte_t[blockSize_])
+    , internalPool_(baseAddress_.get(), blockSize_, MemoryBlockPool::cacheAlignedBufferSize(bufferSize))
+    , allocator_(baseAddress_.get(), internalPool_)
 {
 }
 

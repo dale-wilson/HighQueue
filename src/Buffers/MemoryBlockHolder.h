@@ -50,7 +50,8 @@ namespace MPass
 
         private:
             size_t blockSize_;
-            std::unique_ptr<byte_t> block_;
+            std::unique_ptr<byte_t> baseAddress_;
+            MemoryBlockPool internalPool_;
             MemoryBlockAllocator allocator_;
         };
         typedef std::shared_ptr<MemoryBlockHolder> MemoryBlockHolderPtr;

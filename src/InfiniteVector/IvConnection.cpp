@@ -26,7 +26,7 @@ void IvConnection::createLocal(const std::string & name, const IvCreationParamet
     header_ = new (header) IvHeader(name, allocator, parameters);
     memoryBlockManager_.reset(new Buffers::MemoryBlockManager(
 
-    header, header_->blockInfo_));
+    header, header_->memoryPool_));
 }
 
 IvHeader * IvConnection::getHeader() const

@@ -14,7 +14,7 @@ namespace MPass
         {
         public:
             /// @brief Construct -- using external memory
-            MemoryBlockManager(byte_t * baseAddress, Buffers::MemoryBlockInfo & blockInfo);
+            MemoryBlockManager(byte_t * baseAddress, Buffers::MemoryBlockPool & blockInfo);
 
             /// @brief Populate a Buffer with memory from the block.
             bool allocate(Buffer & buffer);

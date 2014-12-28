@@ -5,65 +5,44 @@
 using namespace MPass;
 using namespace Buffers;
 
-size_t MemoryBlockAllocator::cacheAlignedBufferSize(size_t bufferSize)
-{
-    return ((bufferSize + CacheLineSize - 1) / CacheLineSize) * CacheLineSize;
-}
-
-size_t MemoryBlockAllocator::spaceNeeded(size_t bufferSize, size_t bufferCount)
-{
-    return cacheAlignedBufferSize(bufferSize) * bufferCount + CacheLineSize;
-}
-
-
-MemoryBlockAllocator::MemoryBlockAllocator(byte_t * baseAddress, size_t blockSize, size_t bufferSize)
+MemoryBlockAllocator::MemoryBlockAllocator(byte_t * baseAddress, MemoryBlockPool & pool)
 : baseAddress_(baseAddress)
-, internalContainer_(blockSize, cacheAlignedBufferSize(bufferSize))
-, container_(internalContainer_)
-{
-   container_.preAllocate(baseAddress_, 0);
-}
-
-MemoryBlockAllocator::MemoryBlockAllocator(byte_t * baseAddress, MemoryBlockInfo & container)
-: baseAddress_(baseAddress)
-, internalContainer_()
-, container_(container)
+, memoryPool_(pool)
 {
 }
 
-MemoryBlockAllocator::MemoryBlockAllocator(
-    byte_t * block, 
-    size_t blockSize, 
-    size_t offsetWithinBlock,
-    MemoryBlockInfo & container, 
-    size_t bufferSize)
-: baseAddress_(block)
-, internalContainer_()
-, container_(container)
-{
-    container.blockSize_ = blockSize;
-    container_.bufferSize_ = bufferSize;
-    container_.preAllocate(baseAddress_, offsetWithinBlock);
-}
+//MemoryBlockAllocator::MemoryBlockAllocator(
+//    byte_t * baseAddress, 
+//    size_t blockSize, 
+//    size_t offsetWithinBlock,
+//    MemoryBlockPool & container, 
+//    size_t bufferSize)
+//: baseAddress_(baseAddress)
+//, memoryPool_(container)
+//{
+//    container.blockSize_ = blockSize;
+//    memoryPool_.bufferSize_ = bufferSize;
+//    memoryPool_.preAllocate(baseAddress_, offsetWithinBlock);
+//}
 
 bool MemoryBlockAllocator::allocate(Buffer & buffer, const Buffer::MemoryOwnerPtr & owner)
 {
-    return container_.allocate(baseAddress_, buffer, owner);
+    return memoryPool_.allocate(baseAddress_, buffer, owner);
 }
 
 void MemoryBlockAllocator::release(Buffer & buffer)
 {
-    container_.release(baseAddress_, buffer);
+    memoryPool_.release(baseAddress_, buffer);
 }
 
 size_t MemoryBlockAllocator::getBufferCapacity()const
 {
-    return container_.bufferSize_;
+    return memoryPool_.bufferSize_;
 }
 
 size_t MemoryBlockAllocator::getStorageSize()const
 {
-    return container_.blockSize_;
+    return memoryPool_.blockSize_;
 }
 
 byte_t const * MemoryBlockAllocator::getStorageAddress()const
@@ -71,23 +50,23 @@ byte_t const * MemoryBlockAllocator::getStorageAddress()const
     return baseAddress_;
 }
 
-MemoryBlockInfo & MemoryBlockAllocator::getContainer()
+MemoryBlockPool & MemoryBlockAllocator::getContainer()
 {
-    return container_;
+    return memoryPool_;
 }
 
-const MemoryBlockInfo & MemoryBlockAllocator::getContainer() const
+const MemoryBlockPool & MemoryBlockAllocator::getContainer() const
 {
-    return container_;
+    return memoryPool_;
 }
 
 size_t MemoryBlockAllocator::getBufferCount()const
 {
-    return container_.bufferCount_;
+    return memoryPool_.bufferCount_;
 }
 
 bool MemoryBlockAllocator::hasMemoryAvailable() const
 {
-    return container_.rootOffset_ + container_.bufferSize_ <= container_.blockSize_;
+    return memoryPool_.rootOffset_ + memoryPool_.bufferSize_ <= memoryPool_.blockSize_;
 }
 

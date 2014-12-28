@@ -5,7 +5,7 @@
 using namespace MPass;
 using namespace Buffers;
 
-MemoryBlockManager::MemoryBlockManager(byte_t * baseAddress, Buffers::MemoryBlockInfo & blockInfo)
+MemoryBlockManager::MemoryBlockManager(byte_t * baseAddress, Buffers::MemoryBlockPool & blockInfo)
     : allocator_(baseAddress, blockInfo)
 {
 }
