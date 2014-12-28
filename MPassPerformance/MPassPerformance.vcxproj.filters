@@ -30,9 +30,15 @@
     <ClCompile Include="..\src\MPassPerformance\MutithreadPerformaceTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MPassPerformance\TwoThreadPerformaceTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Common\Stopwatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MPassPerformance\TestMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

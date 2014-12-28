@@ -1,6 +1,5 @@
 #include "Common/MPassPch.h"
 
-#if 0 // turn this off for now
 #define BOOST_TEST_NO_MAIN MPassPerformanceTest
 #include <boost/test/unit_test.hpp>
 
@@ -18,7 +17,8 @@ namespace
     const size_t letterCount = 26;
 }
 
-
+#define DISABLE_BUFFER_MOVESWAP_PERFORMANCE
+#ifndef DISABLE_BUFFER_MOVESWAP_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testBufferMoveSwapPerformance)
 {
     byte_t work1[letterCount * 2];
@@ -61,8 +61,10 @@ BOOST_AUTO_TEST_CASE(testBufferMoveSwapPerformance)
     BOOST_CHECK(true);
 
 }
+#endif // DISABLE_BUFFER_MOVESWAP_PERFORMANCE
 
-#if 0
+#define DISABLE_BORROWED_BUFFER_PERFORMANCE
+#ifndef DISABLE_BORROWED_BUFFER_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 {
     Buffer::MemoryOwnerPtr owner;
@@ -118,40 +120,4 @@ BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 
     BOOST_CHECK_NE(alphabet, workString);
 }
-
-BOOST_AUTO_TEST_CASE(testBufferAppend)
-{
-    Buffer::MemoryOwnerPtr owner;
-    byte_t work[letterCount * 2];
-    std::memset(work, '\0', sizeof(work));
-    Buffer buffer;
-    buffer.set(owner, work, sizeof(work), 0U);
-    BOOST_CHECK_EQUAL(buffer.getUsed(), 0U);
-    BOOST_CHECK_EQUAL(buffer.available(), sizeof(work));
-
-    buffer.appendBinaryCopy(alphabet.data(), letterCount);
-    buffer.appendBinaryCopy(alphabet.data() + letterCount, letterCount);
-    std::string value(buffer.get<char>(), buffer.getUsed());
-    BOOST_CHECK_EQUAL(alphabet, value);
-    BOOST_CHECK_THROW(buffer.appendBinaryCopy(alphabet.data(), 1), std::runtime_error);
-
-    buffer.setUsed(0);
-    struct MonoCase
-    {
-        char data_[letterCount];
-        MonoCase(const char * data)
-        {
-            std::memcpy(data_, data, sizeof(data_));
-        }
-    };
-    MonoCase lowerCase(alphabet.data());
-    MonoCase upperCase(alphabet.data() + letterCount);
-    buffer.appendNewCopy(lowerCase);
-    buffer.appendNewCopy(upperCase);
-    std::string value2(buffer.get<char>(), buffer.getUsed());
-    BOOST_CHECK_EQUAL(alphabet, value2);
-    BOOST_CHECK_THROW(buffer.appendNewCopy(lowerCase), std::runtime_error);
-}
-#endif
-
-#endif // turned off
+#endif // DISABLE_BORROWED_BUFFER_PERFORMANCE

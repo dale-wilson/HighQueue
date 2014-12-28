@@ -249,10 +249,10 @@ BOOST_AUTO_TEST_CASE(testBufferAppend)
     buffer.setUsed(0);
     struct MonoCase
     {
-        char data_[letterCount];
+        char messageNumber_[letterCount];
         MonoCase(const char * data)
         {
-            std::memcpy(data_, data, sizeof(data_));
+            std::memcpy(messageNumber_, data, sizeof(messageNumber_));
         }
     };
     MonoCase lowerCase(alphabet.data());

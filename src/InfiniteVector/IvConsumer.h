@@ -47,11 +47,11 @@ namespace MPass
             IvConnection & connection_;
             IvHeader * header_;
             IvResolver resolver_;
+            IvEntryAccessor entryAccessor_;
             volatile Position & readPosition_;
             volatile Position & publishPosition_;
-            IvEntryAccessor entryAccessor_;
+            Position cachedPublishPosition_;
 
-            Position publishedPosition_;
 
 		};
 	}

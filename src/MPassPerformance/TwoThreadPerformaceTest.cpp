@@ -4,8 +4,8 @@
 
 #include <InfiniteVector/IvProducer.h>
 #include <InfiniteVector/IvConsumer.h>
-#include <Common/Stopwatch.h>
 #include <MPassPerformance/TestMessage.h>
+#include <Common/Stopwatch.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
@@ -43,23 +43,19 @@ namespace
         //    msg << "ready to Exit " << producerNumber << " T#: " << std::this_thread::get_id() << std::endl;
         //    std::cerr << msg.str() << std::flush;
         //}
-
     }
 }
 
-BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
+#define DISABLE_TWO_THREAD_PERFORMANCEx
+#ifndef DISABLE_TWO_THREAD_PERFORMANCE
+BOOST_AUTO_TEST_CASE(testTwoThreadPerformance)
 {
+    std::cerr << "Start 1 producer/1 consumer thread test." << std::endl;
     IvConsumerWaitStrategy strategy;
-    static const size_t entryCount = 100000;
-    static const size_t bufferSize = sizeof(TestMessage);
-    static const size_t bufferCount = entryCount + 10;
-
-    static const uint64_t perProducer = 1000000 * 10; // runs about 5 seconds in release/optimized build
-    static const size_t producerCount = 7; // TODO: This fails if producerCount >= 10.  Not sure why.
-    
-    static const uint64_t messageCount = perProducer * producerCount;
-
-    std::cerr << "Start "<< producerCount << " producer/1 consumer thread test." << std::endl;
+    size_t entryCount = 100000;
+    size_t bufferSize = sizeof(TestMessage);
+    size_t bufferCount = entryCount + 10;
+    uint64_t messageCount = 1000000 * 100;
 
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
@@ -69,20 +65,13 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     Buffers::Buffer consumerBuffer;
     connection.allocate(consumerBuffer);
 
-    std::thread producerThreads[producerCount + 1];
-    uint64_t nextMessage[producerCount + 1];
     producersWaiting = 0;
     producersGo = false;
+    std::thread producerThread =
+        std::thread(
+            std::bind(producerFunction, connection, 0, messageCount));
 
-    for(uint32_t nTh = 0; nTh < producerCount; ++nTh)
-    {
-        nextMessage[nTh] = 0u;
-        producerThreads[nTh] = std::thread(
-            std::bind(producerFunction, std::ref(connection), nTh, perProducer));
-    }
-    std::this_thread::yield();
-
-    while(producersWaiting < producerCount)
+    while(producersWaiting < 1)
     {
         std::this_thread::yield();
     }
@@ -94,28 +83,20 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         consumer.getNext(consumerBuffer);
         auto testMessage = consumerBuffer.get<TestMessage>();
         testMessage->touch();
-        auto producerNumber = testMessage->producerNumber_;
-        auto & msgNumber = nextMessage[producerNumber];
-        if(msgNumber != testMessage->messageNumber_)
+        if(messageNumber != testMessage->messageNumber_)
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
             BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber_);
         }
-        ++ msgNumber; 
     }
 
     auto lapse = timer.nanoseconds();
-
-    producersGo = false;
-
-    for(size_t nTh = 0; nTh < producerCount; ++nTh)
-    {
-        producerThreads[nTh].join();
-    }
+    producerThread.join();
 
     auto messageBits = sizeof(TestMessage) * 8;
-    std::cout << "Multithreaded: " << producerCount  << " producers. Passed " << messageCount << ' ' << messageBits << " bit messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message "
+    std::cout << "Multithreaded: Passed " << messageCount << ' ' << messageBits << " bit messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message "
         << messageCount * 1000L * messageBits / lapse << " GBits/second."
         << std::endl;
 
 }
+#endif // DISABLE_TWO_THREAD_PERFORMANCE

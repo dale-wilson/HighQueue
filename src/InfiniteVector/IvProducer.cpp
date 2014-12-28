@@ -43,8 +43,8 @@ void IvProducer::publish(Buffers::Buffer & buffer)
         if(publishPosition_  == reserved)
         {
             ++publishPosition_;
-            std::atomic_thread_fence(std::memory_order::memory_order_release);
         }
+        std::atomic_thread_fence(std::memory_order::memory_order_release);
     }
 }
 

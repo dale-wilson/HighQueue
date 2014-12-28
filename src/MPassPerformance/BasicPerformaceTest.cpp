@@ -4,23 +4,14 @@
 
 #include <InfiniteVector/IvProducer.h>
 #include <InfiniteVector/IvConsumer.h>
+#include <MPassPerformance/TestMessage.h>
 #include <Common/Stopwatch.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
 
-namespace
-{
-    struct TestMessage
-    {
-        uint64_t data_;
-        TestMessage(uint64_t data)
-        :data_(data)
-        {
-        }
-    };
-}
-
+#define DISABLE_CONSUME_SEPARATELYx
+#ifndef DISABLE_CONSUME_SEPARATELY
 BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
     IvConsumerWaitStrategy strategy;
@@ -42,7 +33,7 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 
     for(uint64_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
-        producerBuffer.construct<TestMessage>(nMessage);
+        producerBuffer.construct<TestMessage>(1, nMessage);
         producer.publish(producerBuffer);
     }
     auto publishTime = timer.microseconds();
@@ -55,10 +46,10 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     {
         consumer.getNext(producerBuffer);
         auto testMessage = producerBuffer.get<TestMessage>();
-        if(nMessage != testMessage->data_)
+        if(nMessage != testMessage->messageNumber_)
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(nMessage, testMessage->data_);
+            BOOST_CHECK_EQUAL(nMessage, testMessage->messageNumber_);
         }
     }
     auto consumeTime = timer.microseconds();
@@ -66,20 +57,24 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     std::cout << entryCount << " messages.  Publish " << publishTime * 1000 / entryCount << " nsec.  Consume " << consumeTime * 1000 / entryCount << " nsec." << std::endl;
 
 }
+#endif // DISABLE_CONSUME_SEPARATELY
 
+#define DISABLE_ST_PERFORMANCEx
+#ifndef DISABLE_ST_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 {
+    std::cerr << "Start producer and consumer in the same thread test." << std::endl;
+
     IvConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
     size_t bufferSize = sizeof(TestMessage);
     size_t bufferCount = entryCount + 10;
+    uint64_t messageCount = 1000000 * 100;
+
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
     connection.createLocal("LocalIv", parameters);
 
-    uint64_t limit1 = 100000;
-    uint64_t limit2 = 10000;
-    uint64_t messageCount = limit1 * limit2;
 
     IvProducer producer(connection);
     IvConsumer consumer(connection);
@@ -92,14 +87,14 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        producerBuffer.construct<TestMessage>(messageNumber);
+        producerBuffer.construct<TestMessage>(1, messageNumber);
         producer.publish(producerBuffer);
         consumer.getNext(consumerBuffer);
         auto testMessage = consumerBuffer.get<TestMessage>();
-        if(messageNumber != testMessage->data_)
+        if(messageNumber != testMessage->messageNumber_)
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(messageNumber, testMessage->data_);
+            BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber_);
         }
     }
     auto lapse = timer.nanoseconds();
@@ -109,3 +104,5 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
         << messageCount * 1000L * messageBits / lapse << " GBits/second."
         << std::endl;
 }
+#endif // DISABLE_ST_PERFORMANCE
+

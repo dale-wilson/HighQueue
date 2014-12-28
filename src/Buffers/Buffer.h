@@ -104,7 +104,7 @@ namespace MPass
             template <typename T, typename Arg1, typename Arg2>
             T* construct(Arg1 && arg1, Arg2 && arg2)
             {
-                auto result = new (get<T>()) T(std::forward<Arg1>(arg1), std::forward(arg2));
+                auto result = new (get<T>()) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
                 setUsed(sizeof(T));
                 return result;
             }

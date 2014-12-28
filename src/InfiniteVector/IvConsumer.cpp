@@ -9,10 +9,10 @@ IvConsumer::IvConsumer(IvConnection & connection)
 : connection_(connection)
 , header_(connection.getHeader())
 , resolver_(header_)
+, entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
 , publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
-, entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
-, publishedPosition_(publishPosition_)
+, cachedPublishPosition_(publishPosition_)
 {
 }
 
@@ -21,12 +21,12 @@ bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
     while(true)
     {
         Position readPosition = readPosition_;
-        if(readPosition >= publishedPosition_)
+        if(readPosition >= cachedPublishPosition_)
         {
             std::_Atomic_thread_fence(std::memory_order::memory_order_consume);
             readPosition = readPosition_;
-            publishedPosition_ = publishPosition_;
-            if(readPosition >= publishedPosition_)
+            cachedPublishPosition_ = publishPosition_;
+            if(readPosition >= cachedPublishPosition_)
             {
                 return false;
             }
