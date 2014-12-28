@@ -2,7 +2,7 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <Buffers/MemoryBlockOwner.h>
+#include <Buffers/MemoryBlockHolder.h>
 #include <Common/CacheLIne.h>
 
 using namespace MPass;
@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(testMemoryBlockAllocator)
 
     Buffer buffers[bufferCount + 5];
     
-    MemoryBlockOwnerPtr allocatorOneLess(std::make_shared<MemoryBlockOwner>(oneLess,bufferCount));
+    MemoryBlockHolderPtr allocatorOneLess(std::make_shared<MemoryBlockHolder>(oneLess,bufferCount));
     BOOST_CHECK_GE(allocatorOneLess->getBufferCount(), bufferCount);
     BOOST_CHECK_GE(allocatorOneLess->getBufferCapacity(), oneLess);
     for(size_t nBuffer = 0; nBuffer < allocatorOneLess->getBufferCount(); ++nBuffer)
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(testMemoryBlockAllocator)
         BOOST_CHECK_EQUAL(buffer.getType(), Buffer::Type::Invalid);
     }
     
-    MemoryBlockOwnerPtr allocatorExact(std::make_shared<MemoryBlockOwner>(CacheLineSize,bufferCount));
+    MemoryBlockHolderPtr allocatorExact(std::make_shared<MemoryBlockHolder>(CacheLineSize,bufferCount));
     BOOST_CHECK_GE(allocatorExact->getBufferCount(), bufferCount);
     BOOST_CHECK_GE(allocatorExact->getBufferCapacity(), oneLess);
     for(size_t nBuffer = 0; nBuffer < allocatorExact->getBufferCount(); ++nBuffer)
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(testMemoryBlockAllocator)
         BOOST_CHECK_EQUAL(buffer.getType(), Buffer::Type::Invalid);
     }
 
-    MemoryBlockOwnerPtr allocatorOneMore(std::make_shared<MemoryBlockOwner>(oneMore,bufferCount));
+    MemoryBlockHolderPtr allocatorOneMore(std::make_shared<MemoryBlockHolder>(oneMore,bufferCount));
     BOOST_CHECK_GE(allocatorOneMore->getBufferCount(), bufferCount);
     BOOST_CHECK_GE(allocatorOneMore->getBufferCapacity(), oneLess);
     for(size_t nBuffer = 0; nBuffer < allocatorOneMore->getBufferCount(); ++nBuffer)

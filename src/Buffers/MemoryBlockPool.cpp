@@ -1,11 +1,11 @@
 #include <Common/MPassPch.h>
 
-#include <Buffers/MemoryBlockInfo.h>
+#include <Buffers/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace Buffers;
 
-MemoryBlockInfo::MemoryBlockInfo()
+MemoryBlockPool::MemoryBlockPool()
 : blockSize_(0)
 , bufferSize_(0)
 , bufferCount_(0)
@@ -13,17 +13,20 @@ MemoryBlockInfo::MemoryBlockInfo()
 {
 }
 
-MemoryBlockInfo::MemoryBlockInfo(
+MemoryBlockPool::MemoryBlockPool(
+    byte_t * baseAddress,
     size_t blockSize, 
-    size_t bufferSize)
+    size_t bufferSize,
+    size_t initialOffset)
 : blockSize_(blockSize)
 , bufferSize_(bufferSize)
 , bufferCount_(0)
 , rootOffset_(0)
 {
+    preAllocate(baseAddress, initialOffset);
 }
 
-size_t MemoryBlockInfo::preAllocate(byte_t * baseAddress, size_t initialOffset)
+size_t MemoryBlockPool::preAllocate(byte_t * baseAddress, size_t initialOffset)
 {
     size_t offset = initialOffset + uintptr_t(baseAddress) % CacheLineSize;
     rootOffset_ = offset;
@@ -40,7 +43,7 @@ size_t MemoryBlockInfo::preAllocate(byte_t * baseAddress, size_t initialOffset)
     return bufferCount_;
 }
 
-bool MemoryBlockInfo::allocate(byte_t * baseAddress, Buffer & buffer, const Buffer::MemoryOwnerPtr & owner)
+bool MemoryBlockPool::allocate(byte_t * baseAddress, Buffer & buffer, const Buffer::MemoryOwnerPtr & owner)
 {
     bool ok = false;
     auto next = rootOffset_;
@@ -53,7 +56,7 @@ bool MemoryBlockInfo::allocate(byte_t * baseAddress, Buffer & buffer, const Buff
     return ok;
 }
 
-void MemoryBlockInfo::free(byte_t * baseAddress, Buffer & buffer)
+void MemoryBlockPool::release(byte_t * baseAddress, Buffer & buffer)
 {
     if(buffer.getContainer() != baseAddress)
     {
@@ -64,3 +67,15 @@ void MemoryBlockInfo::free(byte_t * baseAddress, Buffer & buffer)
     rootOffset_ = buffer.getOffset();
     buffer.reset();
 }
+
+
+size_t MemoryBlockPool::cacheAlignedBufferSize(size_t bufferSize)
+{
+    return ((bufferSize + CacheLineSize - 1) / CacheLineSize) * CacheLineSize;
+}
+
+size_t MemoryBlockPool::spaceNeeded(size_t bufferSize, size_t bufferCount)
+{
+    return cacheAlignedBufferSize(bufferSize) * bufferCount + CacheLineSize;
+}
+

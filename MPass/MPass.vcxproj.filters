@@ -69,10 +69,13 @@
     <ClInclude Include="..\src\Buffers\MemoryBlockAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Buffers\MemoryBlockInfo.h">
+    <ClInclude Include="..\src\Buffers\MemoryBlockManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Buffers\MemoryBlockOwner.h">
+    <ClInclude Include="..\src\Buffers\MemoryBlockHolder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Buffers\MemoryBlockPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,10 +98,13 @@
     <ClCompile Include="..\src\Buffers\MemoryBlockAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Buffers\MemoryBlockInfo.cpp">
+    <ClCompile Include="..\src\Buffers\MemoryBlockManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Buffers\MemoryBlockOwner.cpp">
+    <ClCompile Include="..\src\Buffers\MemoryBlockHolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Buffers\MemoryBlockPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

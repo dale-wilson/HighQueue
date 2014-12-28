@@ -24,7 +24,7 @@ namespace InfiniteVector
         Offset publishPosition_;
         Offset reservePosition_;
 
-        Buffers::MemoryBlockInfo blockInfo_;
+        Buffers::MemoryBlockPool memoryPool_;
         IvConsumerWaitStrategy consumerWaitStrategy_;
         std::mutex consumerWaitMutex_;
         std::condition_variable consumerWaitConditionVariable_;

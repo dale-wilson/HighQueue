@@ -134,8 +134,9 @@
   <ItemGroup>
     <ClInclude Include="..\src\Buffers\Buffer.h" />
     <ClInclude Include="..\src\Buffers\MemoryBlockAllocator.h" />
-    <ClInclude Include="..\src\Buffers\MemoryBlockInfo.h" />
-    <ClInclude Include="..\src\Buffers\MemoryBlockOwner.h" />
+    <ClInclude Include="..\src\Buffers\MemoryBlockPool.h" />
+    <ClInclude Include="..\src\Buffers\MemoryBlockManager.h" />
+    <ClInclude Include="..\src\Buffers\MemoryBlockHolder.h" />
     <ClInclude Include="..\src\Common\CacheLIne.h" />
     <ClInclude Include="..\src\Common\MPassPch.h" />
     <ClInclude Include="..\src\Common\Spinlock.h" />
@@ -155,8 +156,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Buffers\MemoryBlockAllocator.cpp" />
-    <ClCompile Include="..\src\Buffers\MemoryBlockInfo.cpp" />
-    <ClCompile Include="..\src\Buffers\MemoryBlockOwner.cpp" />
+    <ClCompile Include="..\src\Buffers\MemoryBlockPool.cpp" />
+    <ClCompile Include="..\src\Buffers\MemoryBlockManager.cpp" />
+    <ClCompile Include="..\src\Buffers\MemoryBlockHolder.cpp" />
     <ClCompile Include="..\src\Common\MPassPch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

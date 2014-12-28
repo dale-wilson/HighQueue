@@ -24,11 +24,7 @@ namespace
             std::cerr << "Failed to allocate buffer for producer Number " << producerNumber << std::endl;
             return;
         }
-        //{
-        //    std::stringstream msg;
-        //    msg << "Start producer " <<producerNumber << " in thread " << std::this_thread::get_id() << std::endl;
-        //    std::cerr << msg.str() << std::flush;
-        //}
+
         ++producersWaiting;
         while(!producersGo)
         {
@@ -41,30 +37,22 @@ namespace
             testMessage->touch();
             producer.publish(producerBuffer);
         }
-
-        //{
-        //    std::stringstream msg;
-        //    msg << "ready to Exit " << producerNumber << " T#: " << std::this_thread::get_id() << std::endl;
-        //    std::cerr << msg.str() << std::flush;
-        //}
-
     }
 }
 
 BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 {
-    IvConsumerWaitStrategy strategy;
     static const size_t entryCount = 100000;
     static const size_t bufferSize = sizeof(TestMessage);
 
-    static const uint64_t perProducer = 1000000 * 10; // runs about 5 seconds in release/optimized build
-    static const size_t producerCount = 7; // running on 8 core system.
-    static const size_t bufferCount = entryCount + producerCount + 1;
+    static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
+    static const size_t producerLimit = 10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
+    static const size_t bufferCount = entryCount + producerLimit + 100; /// TODO: Why are we running out of buffers with a 1 rather than a 100?
 
-    static const uint64_t messageCount = perProducer * producerCount;
+    static const size_t spinCount = 10;
+    static const size_t yieldCount = IvConsumerWaitStrategy::FOREVER;
 
-    std::cerr << "Start "<< producerCount << " producer/1 consumer thread test." << std::endl;
-
+    IvConsumerWaitStrategy strategy(spinCount, yieldCount);
     IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
     IvConnection connection;
     connection.createLocal("LocalIv", parameters);
@@ -73,54 +61,64 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     Buffers::Buffer consumerBuffer;
     BOOST_REQUIRE(connection.allocate(consumerBuffer));
 
-
-    std::thread producerThreads[producerCount + 1];
-    uint64_t nextMessage[producerCount + 1];
-    producersWaiting = 0;
-    producersGo = false;
-
-    for(uint32_t nTh = 0; nTh < producerCount; ++nTh)
+    for(size_t producerCount = 1; producerCount < producerLimit; ++producerCount)
     {
-        nextMessage[nTh] = 0u;
-        producerThreads[nTh] = std::thread(
-            std::bind(producerFunction, std::ref(connection), nTh, perProducer));
-    }
-    std::this_thread::yield();
+        std::cerr << "Start " << producerCount << " producer thread / 1 consumer thread test." << std::endl;
 
-    while(producersWaiting < producerCount)
-    {
-        std::this_thread::yield();
-    }
-    Stopwatch timer;
-    producersGo = true;
+        std::vector<std::thread> producerThreads;
+        std::vector<uint64_t> nextMessage;
 
-    for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
-    {
-        consumer.getNext(consumerBuffer);
-        auto testMessage = consumerBuffer.get<TestMessage>();
-        testMessage->touch();
-        auto producerNumber = testMessage->producerNumber_;
-        auto & msgNumber = nextMessage[producerNumber];
-        if(msgNumber != testMessage->messageNumber_)
+        producersWaiting = 0;
+        producersGo = false;
+        size_t perProducer = targetMessageCount / producerCount;
+        size_t actualMessageCount = perProducer * producerCount;
+
+        for(uint32_t nTh = 0; nTh < producerCount; ++nTh)
         {
-            // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber_);
+            nextMessage.emplace_back(0u);
+            producerThreads.emplace_back(
+                std::bind(producerFunction, std::ref(connection), nTh, perProducer));
         }
-        ++ msgNumber; 
+        std::this_thread::yield();
+
+        while(producersWaiting < producerCount)
+        {
+            std::this_thread::yield();
+        }
+
+        Stopwatch timer;
+        producersGo = true;
+
+        for(uint64_t messageNumber = 0; messageNumber < actualMessageCount; ++messageNumber)
+        {
+            consumer.getNext(consumerBuffer);
+            auto testMessage = consumerBuffer.get<TestMessage>();
+            testMessage->touch();
+            auto producerNumber = testMessage->producerNumber_;
+            auto & msgNumber = nextMessage[producerNumber];
+            if(msgNumber != testMessage->messageNumber_)
+            {
+                // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
+                BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber_);
+            }
+            ++ msgNumber; 
+        }
+
+        auto lapse = timer.nanoseconds();
+
+        // sometimes we synchronize thread shut down.
+        producersGo = false;
+
+        for(size_t nTh = 0; nTh < producerCount; ++nTh)
+        {
+            producerThreads[nTh].join();
+        }
+
+        auto messageBits = sizeof(TestMessage) * 8;
+        std::cout << "Multithreaded: " << producerCount << " producers. Passed " << actualMessageCount << ' ' << messageBits << " bit messages in " 
+            << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
+            << lapse / actualMessageCount << " nsec./message "
+            << actualMessageCount * 1000L * messageBits / lapse << " GBits/second."
+            << std::endl;
     }
-
-    auto lapse = timer.nanoseconds();
-
-    producersGo = false;
-
-    for(size_t nTh = 0; nTh < producerCount; ++nTh)
-    {
-        producerThreads[nTh].join();
-    }
-
-    auto messageBits = sizeof(TestMessage) * 8;
-    std::cout << "Multithreaded: " << producerCount  << " producers. Passed " << messageCount << ' ' << messageBits << " bit messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message "
-        << messageCount * 1000L * messageBits / lapse << " GBits/second."
-        << std::endl;
-
 }
