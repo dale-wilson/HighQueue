@@ -53,7 +53,7 @@ bool MemoryBlockInfo::allocate(byte_t * baseAddress, Buffer & buffer, const Buff
     return ok;
 }
 
-void MemoryBlockInfo::free(byte_t * baseAddress, Buffer & buffer)
+void MemoryBlockInfo::release(byte_t * baseAddress, Buffer & buffer)
 {
     if(buffer.getContainer() != baseAddress)
     {

@@ -22,8 +22,12 @@ namespace MPass
             /// @brief Construct -- initializing a preallocated, but uninitialized MemoryBlockInfo
             MemoryBlockAllocator(byte_t * block, size_t blockSize, size_t offsetWithinBlock, MemoryBlockInfo & container, size_t bufferSize);
 
-			bool allocate(Buffer & buffer);
-			void free(Buffer & buffer);
+            /// @brief Allocate a block of memory into a buffer.  
+            /// @param buffer is the Buffer to receive the block of memory.
+            /// @param owner will be notified when the buffer is released.
+            bool allocate(Buffer & buffer, const Buffer::MemoryOwnerPtr & owner = Buffer::MemoryOwnerPtr());
+
+            void release(Buffer & buffer);
 
             size_t getBufferCapacity()const;
             size_t getStorageSize()const;

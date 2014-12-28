@@ -51,7 +51,7 @@ namespace MPass
             /// @param baseAddress is the address used to resolve the offsets into actual addresses.
             /// @param buffer is the Buffer from which the memory will be returned.
             /// @throws runtime_error if the memory did not come from this block.
-            void free(byte_t * baseAddress, Buffer & buffer);
+            void release(byte_t * baseAddress, Buffer & buffer);
         };
 	}
 }

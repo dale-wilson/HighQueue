@@ -1,48 +1,48 @@
 #include <Common/MPassPch.h>
 
-#include <Buffers/MemoryBlockOwner.h>
+#include <Buffers/MemoryBlockHolder.h>
 
 using namespace MPass;
 using namespace Buffers;
 
-MemoryBlockOwner::MemoryBlockOwner(size_t bufferSize, size_t bufferCount)
+MemoryBlockHolder::MemoryBlockHolder(size_t bufferSize, size_t bufferCount)
     : blockSize_(MemoryBlockAllocator::spaceNeeded(bufferSize, bufferCount))
     , block_(new byte_t[blockSize_])
     , allocator_(block_.get(), blockSize_, bufferSize)
 {
 }
 
-bool MemoryBlockOwner::allocate(Buffer & buffer)
+bool MemoryBlockHolder::allocate(Buffer & buffer)
 {
     return allocator_.allocate(buffer);
 }
 
-size_t MemoryBlockOwner::getBufferCapacity()const
+size_t MemoryBlockHolder::getBufferCapacity()const
 {
     return allocator_.getBufferCapacity();
 }
 
-size_t MemoryBlockOwner::getStorageSize()const
+size_t MemoryBlockHolder::getStorageSize()const
 {
     return allocator_.getStorageSize();
 }
 
-byte_t const * MemoryBlockOwner::getStorageAddress()const
+byte_t const * MemoryBlockHolder::getStorageAddress()const
 {
     return allocator_.getStorageAddress();
 }
 
-size_t MemoryBlockOwner::getBufferCount()const
+size_t MemoryBlockHolder::getBufferCount()const
 {
     return allocator_.getBufferCount();
 }
 
-bool MemoryBlockOwner::hasMemoryAvailable() const
+bool MemoryBlockHolder::hasMemoryAvailable() const
 {
     return allocator_.hasMemoryAvailable();
 }
 
-void MemoryBlockOwner::release(Buffer & buffer)
+void MemoryBlockHolder::release(Buffer & buffer)
 {
-    allocator_.free(buffer);
+    allocator_.release(buffer);
 }

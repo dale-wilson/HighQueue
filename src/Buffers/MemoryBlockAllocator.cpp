@@ -46,14 +46,14 @@ MemoryBlockAllocator::MemoryBlockAllocator(
     container_.preAllocate(baseAddress_, offsetWithinBlock);
 }
 
-bool MemoryBlockAllocator::allocate(Buffer & buffer)
+bool MemoryBlockAllocator::allocate(Buffer & buffer, const Buffer::MemoryOwnerPtr & owner)
 {
-    return container_.allocate(baseAddress_, buffer);
+    return container_.allocate(baseAddress_, buffer, owner);
 }
 
-void MemoryBlockAllocator::free(Buffer & buffer)
+void MemoryBlockAllocator::release(Buffer & buffer)
 {
-    container_.free(baseAddress_, buffer);
+    container_.release(baseAddress_, buffer);
 }
 
 size_t MemoryBlockAllocator::getBufferCapacity()const

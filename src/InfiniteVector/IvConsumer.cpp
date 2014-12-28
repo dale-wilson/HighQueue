@@ -14,6 +14,9 @@ IvConsumer::IvConsumer(IvConnection & connection)
 , publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
 , cachedPublishPosition_(publishPosition_)
 , waitStrategy_(header_->consumerWaitStrategy_)
+, spins_(waitStrategy_.spinCount_)
+, yields_(waitStrategy_.yieldCount_)
+, sleeps_(waitStrategy_.sleepCount_)
 {
 }
 
@@ -46,9 +49,9 @@ bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
 
 void IvConsumer::getNext(Buffers::Buffer & buffer)
 {
-    size_t remainingSpins = waitStrategy_.spinCount_;
-    size_t remainingYields = waitStrategy_.yieldCount_;
-    size_t remainingSleeps = waitStrategy_.sleepCount_;
+    size_t remainingSpins = spins_;
+    size_t remainingYields = yields_;
+    size_t remainingSleeps = sleeps_;
     while(true)
     {
         if(tryGetNext(buffer))
