@@ -51,8 +51,7 @@ namespace MPass
             volatile Position & readPosition_;
             volatile Position & publishPosition_;
             Position cachedPublishPosition_;
-
-
+            const IvConsumerWaitStrategy & waitStrategy_;
 		};
 	}
 }
