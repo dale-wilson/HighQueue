@@ -40,9 +40,14 @@ void IvProducer::publish(Buffers::Buffer & buffer)
             std::this_thread::yield();
             std::atomic_thread_fence(std::memory_order::memory_order_acquire);
         }
-        if(publishPosition_  == reserved)
+        if(publishPosition_ == reserved)
         {
             ++publishPosition_;
+            if(header_->consumerWaitStrategy_.mutexUsed_)
+            {
+                std::unique_lock<std::mutex> guard(header_->consumerWaitMutex_);
+                header_->consumerWaitConditionVariable_.notify_all();
+            }
         }
         std::atomic_thread_fence(std::memory_order::memory_order_release);
     }

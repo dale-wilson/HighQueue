@@ -17,7 +17,7 @@ namespace InfiniteVector
     {
         Signature signature_;
         uint8_t version_;
-        char name_[32 - sizeof(uint8_t) - sizeof(Signature)];
+        char name_[32];
         size_t entryCount_;
         Offset entries_;
         Offset readPosition_;
@@ -25,7 +25,7 @@ namespace InfiniteVector
         Offset reservePosition_;
 
         Buffers::MemoryBlockInfo blockInfo_;
-        bool consumerWaitsViaMutexCondition_;
+        IvConsumerWaitStrategy consumerWaitStrategy_;
         std::mutex consumerWaitMutex_;
         std::condition_variable consumerWaitConditionVariable_;
 

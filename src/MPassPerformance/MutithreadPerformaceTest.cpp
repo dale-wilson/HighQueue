@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t bufferSize = sizeof(TestMessage);
 
     static const uint64_t perProducer = 1000000 * 10; // runs about 5 seconds in release/optimized build
-    static const size_t producerCount = 20; 
+    static const size_t producerCount = 7; // running on 8 core system.
     static const size_t bufferCount = entryCount + producerCount + 1;
 
     static const uint64_t messageCount = perProducer * producerCount;

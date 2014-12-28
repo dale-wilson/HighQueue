@@ -23,7 +23,7 @@ namespace InfiniteVector
     , readPosition_(0)
     , publishPosition_(0)
     , reservePosition_(0)
-    , consumerWaitsViaMutexCondition_(false)
+    , consumerWaitStrategy_(parameters.strategy_)
     , consumerWaitMutex_()
     , consumerWaitConditionVariable_()
 {
