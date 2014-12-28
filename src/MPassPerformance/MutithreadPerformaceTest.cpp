@@ -19,7 +19,11 @@ namespace
     {
         IvProducer producer(connection);
         Buffers::Buffer producerBuffer;
-        connection.allocate(producerBuffer);
+        if(!connection.allocate(producerBuffer))
+        {
+            std::cerr << "Failed to allocate buffer for producer Number " << producerNumber << std::endl;
+            return;
+        }
         //{
         //    std::stringstream msg;
         //    msg << "Start producer " <<producerNumber << " in thread " << std::this_thread::get_id() << std::endl;
@@ -52,11 +56,11 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     IvConsumerWaitStrategy strategy;
     static const size_t entryCount = 100000;
     static const size_t bufferSize = sizeof(TestMessage);
-    static const size_t bufferCount = entryCount + 10;
 
     static const uint64_t perProducer = 1000000 * 10; // runs about 5 seconds in release/optimized build
-    static const size_t producerCount = 7; // TODO: This fails if producerCount >= 10.  Not sure why.
-    
+    static const size_t producerCount = 20; 
+    static const size_t bufferCount = entryCount + producerCount + 1;
+
     static const uint64_t messageCount = perProducer * producerCount;
 
     std::cerr << "Start "<< producerCount << " producer/1 consumer thread test." << std::endl;
@@ -67,7 +71,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     IvConsumer consumer(connection);
     Buffers::Buffer consumerBuffer;
-    connection.allocate(consumerBuffer);
+    BOOST_REQUIRE(connection.allocate(consumerBuffer));
+
 
     std::thread producerThreads[producerCount + 1];
     uint64_t nextMessage[producerCount + 1];
