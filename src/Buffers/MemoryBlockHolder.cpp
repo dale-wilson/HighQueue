@@ -15,7 +15,7 @@ MemoryBlockHolder::MemoryBlockHolder(size_t bufferSize, size_t bufferCount)
 
 bool MemoryBlockHolder::allocate(Buffer & buffer)
 {
-    return allocator_.allocate(buffer);
+    return allocator_.allocate(buffer, shared_from_this());
 }
 
 size_t MemoryBlockHolder::getBufferCapacity()const

@@ -90,3 +90,20 @@ BOOST_AUTO_TEST_CASE(testMemoryBlockAllocator)
     BOOST_CHECK_THROW(allocatorExact->release(oops), std::runtime_error);
 
 }
+
+
+BOOST_AUTO_TEST_CASE(testBufferOwner)
+{
+    const static size_t bufferSize = 100;
+    const static size_t bufferCount = 5;
+
+    MemoryBlockHolderPtr holder(std::make_shared<MemoryBlockHolder>(bufferSize, bufferCount));
+
+    for(size_t nBuffer= 0;nBuffer < bufferCount * 10; ++nBuffer)
+    {
+        Buffer buffer;
+        BOOST_REQUIRE(holder->allocate(buffer));
+        (void)buffer.get();
+    }
+}
+
