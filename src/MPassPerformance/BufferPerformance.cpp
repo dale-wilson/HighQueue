@@ -17,7 +17,7 @@ namespace
     const size_t letterCount = 26;
 }
 
-#define DISABLE_BUFFER_MOVESWAP_PERFORMANCE
+#define DISABLE_BUFFER_MOVESWAP_PERFORMANCEx
 #ifndef DISABLE_BUFFER_MOVESWAP_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testBufferMoveSwapPerformance)
 {
@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(testBufferMoveSwapPerformance)
     }
     auto swapLapse = timer.microseconds();
 
-    std::cout << "Swap: " << swapLapse << " " << (double(swapLapse) / double(totalOps)) * 1000.0L
-        << "  Move Normal: " << moveNormalLapse << " " << (double(moveNormalLapse) / double(totalOps)) * 1000.0L
+    std::cout << "Swap: " << swapLapse 
+        << "  Move Normal: " << moveNormalLapse 
         << std::endl;
 
 
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(testBufferMoveSwapPerformance)
 }
 #endif // DISABLE_BUFFER_MOVESWAP_PERFORMANCE
 
-#define DISABLE_BORROWED_BUFFER_PERFORMANCE
+#define DISABLE_BORROWED_BUFFER_PERFORMANCEx
 #ifndef DISABLE_BORROWED_BUFFER_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 {

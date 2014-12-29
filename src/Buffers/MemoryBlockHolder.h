@@ -35,8 +35,8 @@ namespace MPass
             /// @returns a value >= bufferCount requested in the constructor.
             size_t getBufferCount()const;
 
-            /// @brief Is enough space available for a successful call to allocate()?
-            bool hasMemoryAvailable() const;
+            /// @brief Are we out of buffer space?
+            bool isEmpty() const;
 
             /// @brief Get the total amount of storage allocated.
             /// This is not a very interesting number!
@@ -52,7 +52,7 @@ namespace MPass
             size_t blockSize_;
             std::unique_ptr<byte_t> baseAddress_;
             MemoryBlockPool internalPool_;
-            MemoryBlockAllocator allocator_;
+            MemoryBlockAllocatorPtr allocator_;
         };
         typedef std::shared_ptr<MemoryBlockHolder> MemoryBlockHolderPtr;
 	}

@@ -10,26 +10,26 @@ namespace MPass
 {
 	namespace Buffers
 	{
-        class MemoryBlockAllocator
+        class MemoryBlockAllocator: public Buffer::MemoryOwner, public std::enable_shared_from_this<MemoryBlockAllocator>
 		{
         public:
 
         public:
-            // /// @brief Construct -- using external memory
-            // MemoryBlockAllocator(byte_t * baseAddress, size_t blockSize, size_t bufferSize);
-            
             /// @brief Construct -- using an existing MemoryBlockPool.
             MemoryBlockAllocator(byte_t * baseAddress, MemoryBlockPool & pool);
 
-            ///// @brief Construct -- initializing a preallocated, but uninitialized MemoryBlockPool
-            //MemoryBlockAllocator(byte_t * baseAddress, size_t blockSize, size_t offsetWithinBlock, MemoryBlockPool & container, size_t bufferSize);
+            /// @brief Allocate a block of memory into a buffer.  
+            /// @param buffer is the Buffer to receive the block of memory.
+            /// This will act as the buffer's owner
+            bool allocate(Buffer & buffer);
 
             /// @brief Allocate a block of memory into a buffer.  
             /// @param buffer is the Buffer to receive the block of memory.
             /// @param owner will be notified when the buffer is released.
-            bool allocate(Buffer & buffer, const Buffer::MemoryOwnerPtr & owner = Buffer::MemoryOwnerPtr());
+            bool allocate(Buffer & buffer, Buffer::MemoryOwnerPtr & owner);
 
-            void release(Buffer & buffer);
+            /// @brief Implement MemoryOwner method
+            virtual void release(Buffer & buffer);
 
             size_t getBufferCapacity()const;
             size_t getStorageSize()const;
@@ -37,11 +37,13 @@ namespace MPass
             MemoryBlockPool & getContainer();
             const MemoryBlockPool & getContainer() const;
             size_t getBufferCount()const;
-            bool hasMemoryAvailable() const;
+            /// @brief Are we out of buffer space?
+            bool isEmpty() const;
 
         private:
             byte_t * baseAddress_;
             MemoryBlockPool & memoryPool_;
 		};
+        typedef std::shared_ptr<MemoryBlockAllocator> MemoryBlockAllocatorPtr;
 	}
 }

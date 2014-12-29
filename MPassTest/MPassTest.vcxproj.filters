@@ -18,9 +18,6 @@
     <ClCompile Include="..\src\Common\MPassPch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\MPassTest\MPassTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\MPassTest\TestMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

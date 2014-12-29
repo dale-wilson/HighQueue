@@ -9,7 +9,7 @@ MemoryBlockPool::MemoryBlockPool()
 : blockSize_(0)
 , bufferSize_(0)
 , bufferCount_(0)
-, rootOffset_(0)
+, rootOffset_(NULL_OFFSET)
 {
 }
 
@@ -19,40 +19,50 @@ MemoryBlockPool::MemoryBlockPool(
     size_t bufferSize,
     size_t initialOffset)
 : blockSize_(blockSize)
-, bufferSize_(bufferSize)
+, bufferSize_(cacheAlignedBufferSize(bufferSize))
 , bufferCount_(0)
-, rootOffset_(0)
+, rootOffset_(NULL_OFFSET)
 {
-    preAllocate(baseAddress, initialOffset);
+    preAllocate(baseAddress, initialOffset, bufferSize_, blockSize_);
 }
 
-size_t MemoryBlockPool::preAllocate(byte_t * baseAddress, size_t initialOffset)
+size_t MemoryBlockPool::preAllocate(byte_t * baseAddress, size_t initialOffset, size_t bufferSize, size_t blockSize)
 {
-    size_t offset = initialOffset + uintptr_t(baseAddress) % CacheLineSize;
-    rootOffset_ = offset;
+    size_t current = initialOffset + uintptr_t(baseAddress) % CacheLineSize;
+    if(current + bufferSize_ > blockSize)
+    {
+        throw std::invalid_argument("MemoryBlockPool: aligned offset + buffer size exceeds pool size."); 
+    }
+    blockSize_ = blockSize;
+    bufferSize_ = bufferSize;
     bufferCount_ = 0;
 
-    auto next = offset + bufferSize_;
-    while(next <= blockSize_)
+    rootOffset_ = current;
+    while(current != NULL_OFFSET)
     {
-        reinterpret_cast<size_t &>(baseAddress[offset]) = next;
-        offset = next;
-        next = offset + bufferSize_;
+        auto next = current + bufferSize_;
+        if(next + bufferSize_ > blockSize_)
+        {
+            next = NULL_OFFSET;
+        }
+        reinterpret_cast<size_t &>(baseAddress[current]) = next;
+        current = next;
         bufferCount_ += 1;
     }
+//    std::cerr << "Preallocate " << bufferCount_ << " Buffers." << std::endl;
     return bufferCount_;
 }
 
 bool MemoryBlockPool::allocate(byte_t * baseAddress, Buffer & buffer, const Buffer::MemoryOwnerPtr & owner)
 {
     Spinlock::Guard guard(lock_);
-    bool ok = false;
-    auto next = rootOffset_;
-    if(next + bufferSize_ <= blockSize_)
+    auto offset = rootOffset_;
+    auto ok = offset != NULL_OFFSET;
+    if(ok)
     {
-        rootOffset_ = reinterpret_cast<size_t &>(baseAddress[next]);
-        buffer.set(owner, baseAddress, bufferSize_, next);
-        ok = true;
+//        std::cerr << "Allocate buffer " << offset << std::endl;
+        rootOffset_ = reinterpret_cast<size_t &>(baseAddress[offset]);
+        buffer.set(owner, baseAddress, bufferSize_, offset);
     }
     return ok;
 }
@@ -65,9 +75,15 @@ void MemoryBlockPool::release(byte_t * baseAddress, Buffer & buffer)
     }
 
     Spinlock::Guard guard(lock_);
-    *reinterpret_cast<size_t *>(buffer.getContainer()) = rootOffset_;
+//    std::cerr << "Release buffer " << buffer.getOffset() << std::endl;
+    *buffer.get<size_t>() = rootOffset_;
     rootOffset_ = buffer.getOffset();
     buffer.reset();
+}
+
+bool MemoryBlockPool::isEmpty() const
+{
+    return rootOffset_ == NULL_OFFSET;
 }
 
 

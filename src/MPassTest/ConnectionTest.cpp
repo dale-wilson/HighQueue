@@ -10,6 +10,10 @@
 using namespace MPass;
 using namespace InfiniteVector;
 
+#define DISABLE_testIvConnectionBuffersx
+#ifdef DISABLE_testIvConnectionBuffers
+#pragma message ("DISABLE_testIvConnectionBuffers " __FILE__)
+#else // DISABLE DISABLE_testIvConnectionBuffers
 BOOST_AUTO_TEST_CASE(testIvConnectionBuffers)
 {
     IvConsumerWaitStrategy strategy;
@@ -40,5 +44,6 @@ BOOST_AUTO_TEST_CASE(testIvConnectionBuffers)
     auto reservePosition = resolver.resolve<IvReservePosition>(header->reservePosition_);
     BOOST_CHECK_EQUAL(*readPosition, *publishPosition);
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
-
 }
+#endif //  DISABLE_testIvConnectionBuffers
+

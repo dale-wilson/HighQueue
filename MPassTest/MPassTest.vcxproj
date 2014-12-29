@@ -177,7 +177,6 @@
     <ClCompile Include="..\src\MPassTest\BufferTest.cpp" />
     <ClCompile Include="..\src\MPassTest\ConnectionTest.cpp" />
     <ClCompile Include="..\src\MPassTest\ConsumerTest.cpp" />
-    <ClCompile Include="..\src\MPassTest\MPassTest.cpp" />
     <ClCompile Include="..\src\MPassTest\ProducerTest.cpp" />
     <ClCompile Include="..\src\MPassTest\SpinlockTest.cpp" />
     <ClCompile Include="..\src\MPassTest\TestMain.cpp" />

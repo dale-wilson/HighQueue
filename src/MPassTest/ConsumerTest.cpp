@@ -30,6 +30,10 @@ namespace
     };
 }
 
+#define DISABLE_testConsumerWithoutWaitsx
+#ifdef DISABLE_testConsumerWithoutWaits
+#pragma message ("DISABLE_testConsumerWithoutWaits " __FILE__)
+#else // DISABLE DISABLE_testConsumerWithoutWaits
 BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
 {
     IvConsumerWaitStrategy strategy;
@@ -77,5 +81,5 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     }
 
     BOOST_CHECK(! consumer.tryGetNext(buffer));
-
 }
+#endif //  DISABLE_testConsumerWithoutWaits

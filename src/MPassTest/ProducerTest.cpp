@@ -24,6 +24,11 @@ namespace
     };
 }
 
+
+#define DISABLE_testProducerx
+#ifdef DISABLE_testProducer
+#pragma message ("DISABLE_testProducer " __FILE__)
+#else // DISABLE_testProducer
 BOOST_AUTO_TEST_CASE(testProducer)
 {
     IvConsumerWaitStrategy strategy;
@@ -105,3 +110,5 @@ BOOST_AUTO_TEST_CASE(testProducer)
     BOOST_CHECK_EQUAL(newestMessage, fromTheTopMessage);
     BOOST_CHECK_EQUAL(sizeof(topMessage), newestSize);
 }
+#endif //  DISABLE_testProducer
+

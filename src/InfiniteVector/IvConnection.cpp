@@ -11,6 +11,14 @@ IvConnection::IvConnection()
 {
 }
 
+IvConnection::~IvConnection()
+{
+    if(localMemory_ && header_)
+    {
+        header_->releaseInternalBuffers();
+    }
+}
+
 void IvConnection::createLocal(const std::string & name, const IvCreationParameters & parameters)
 {
     const size_t allocatedSize = spaceNeeded(parameters) + CacheLineSize;
@@ -68,5 +76,5 @@ size_t IvConnection::getBufferCount()const
 }
 bool IvConnection::hasMemoryAvailable() const
 {
-    return memoryBlockAllocator_->hasMemoryAvailable();
+    return !memoryBlockAllocator_->isEmpty();
 }
