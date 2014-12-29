@@ -8,24 +8,23 @@
 #include <InfiniteVector/IvReservePosition.h>
 #include <Buffers/MemoryBlockAllocator.h>
 
-namespace MPass
-{
-namespace InfiniteVector
-{
-    IvHeader::IvHeader(
-        const std::string & name, 
-        IvAllocator & allocator, 
-        const IvCreationParameters & parameters)
-    : signature_(InitializingSignature)
-    , version_(Version)
-    , entryCount_(parameters.entryCount_)
-    , entries_(0)
-    , readPosition_(0)
-    , publishPosition_(0)
-    , reservePosition_(0)
-    , consumerWaitStrategy_(parameters.strategy_)
-    , consumerWaitMutex_()
-    , consumerWaitConditionVariable_()
+using namespace MPass;
+using namespace InfiniteVector;
+
+IvHeader::IvHeader(
+    const std::string & name,
+    IvAllocator & allocator,
+    const IvCreationParameters & parameters)
+: signature_(InitializingSignature)
+, version_(Version)
+, entryCount_(parameters.entryCount_)
+, entries_(0)
+, readPosition_(0)
+, publishPosition_(0)
+, reservePosition_(0)
+, consumerWaitStrategy_(parameters.strategy_)
+, consumerWaitMutex_()
+, consumerWaitConditionVariable_()
 {
     uintptr_t here = reinterpret_cast<uintptr_t>(this);
     if(IvAllocator::align(here, CacheLineSize) != here)
@@ -60,8 +59,11 @@ namespace InfiniteVector
     auto cacheAlignedBufferSize = Buffers::MemoryBlockPool::cacheAlignedBufferSize(parameters.bufferSize_);
     auto blockSize = cacheAlignedBufferSize * parameters.bufferCount_;
     auto blockOffset = allocator.allocate(blockSize, CacheLineSize);
-    memoryPool_ = Buffers::MemoryBlockPool(bufferBase,
-        blockOffset + blockSize, cacheAlignedBufferSize, blockOffset);
+    new (&memoryPool_) Buffers::MemoryBlockPool(
+        bufferBase,
+        blockOffset + blockSize, 
+        cacheAlignedBufferSize, 
+        size_t(blockOffset));
 
     // Now initialize the entries that were previously allocated.
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
@@ -78,7 +80,5 @@ namespace InfiniteVector
     }
 
     signature_ = LiveSignature;
- }
+}
 
-} // InfiniteVector
-} // MPass

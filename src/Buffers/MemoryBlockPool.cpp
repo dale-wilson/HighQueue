@@ -45,6 +45,7 @@ size_t MemoryBlockPool::preAllocate(byte_t * baseAddress, size_t initialOffset)
 
 bool MemoryBlockPool::allocate(byte_t * baseAddress, Buffer & buffer, const Buffer::MemoryOwnerPtr & owner)
 {
+    Spinlock::Guard guard(lock_);
     bool ok = false;
     auto next = rootOffset_;
     if(next + bufferSize_ <= blockSize_)
@@ -63,6 +64,7 @@ void MemoryBlockPool::release(byte_t * baseAddress, Buffer & buffer)
         throw std::runtime_error("Buffer returned to wrong allocator.");
     }
 
+    Spinlock::Guard guard(lock_);
     *reinterpret_cast<size_t *>(buffer.getContainer()) = rootOffset_;
     rootOffset_ = buffer.getOffset();
     buffer.reset();

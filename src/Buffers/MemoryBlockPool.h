@@ -4,6 +4,7 @@
 #pragma once
 
 #include <Buffers/Buffer.h>
+#include <Common/Spinlock.h>
 
 namespace MPass
 {
@@ -31,6 +32,9 @@ namespace MPass
             /// @brief The root of a linked list.  This is an offset to the block origin. 
             size_t rootOffset_;
 
+            /// @brief Synchronize access to rootOffset_
+            Spinlock lock_;
+
             /// @brief Construct an empty info.
             /// Used in a placement new to interpret a location in memory as a MemoryBlockPool.
             /// This is particularly useful when the MemoryBlockPool is in shared memory that was initialized by another process.
@@ -38,6 +42,11 @@ namespace MPass
 
             /// @brief Construct a MemoryBlockPool and initialize a block
             MemoryBlockPool(byte_t * baseAddress, size_t blockSize, size_t bufferSize, size_t initialOffset = 0);
+
+            /// @brief Do not allow copies
+            MemoryBlockPool(const MemoryBlockPool &) = delete;
+            /// @brief Do not allow assignment
+            MemoryBlockPool & operator=(const MemoryBlockPool &) = delete;
 
             /// @brief Initialize a block.
             size_t preAllocate(byte_t * baseAddress, size_t initialOffset/* = 0u*/);
