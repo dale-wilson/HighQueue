@@ -6,7 +6,7 @@
 
 #include <InfiniteVector/IvHeader.h>
 #include <InfiniteVector/IvCreationParameters.h>
-#include <Buffers/MemoryBlockManager.h>
+#include <Buffers/MemoryBlockAllocator.h>
 
 namespace MPass
 {
@@ -28,6 +28,8 @@ namespace MPass
             /// @brief Construct.
 			IvConnection();
             
+            ~IvConnection();
+
             /// @brief Allocate a block of local memory and create an InfiniteVector in that block. 
             void createLocal(
                 const std::string & name, 
@@ -67,7 +69,7 @@ namespace MPass
         private:
             boost::shared_array<byte_t> localMemory_;
             IvHeader * header_;
-            std::shared_ptr<Buffers::MemoryBlockManager> memoryBlockManager_;
+            Buffers::MemoryBlockAllocatorPtr memoryBlockAllocator_;
 		};
 	}
 }

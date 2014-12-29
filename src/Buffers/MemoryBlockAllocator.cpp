@@ -11,21 +11,12 @@ MemoryBlockAllocator::MemoryBlockAllocator(byte_t * baseAddress, MemoryBlockPool
 {
 }
 
-//MemoryBlockAllocator::MemoryBlockAllocator(
-//    byte_t * baseAddress, 
-//    size_t blockSize, 
-//    size_t offsetWithinBlock,
-//    MemoryBlockPool & container, 
-//    size_t bufferSize)
-//: baseAddress_(baseAddress)
-//, memoryPool_(container)
-//{
-//    container.blockSize_ = blockSize;
-//    memoryPool_.bufferSize_ = bufferSize;
-//    memoryPool_.preAllocate(baseAddress_, offsetWithinBlock);
-//}
+bool MemoryBlockAllocator::allocate(Buffer & buffer)
+{
+    return memoryPool_.allocate(baseAddress_, buffer, shared_from_this());
+}
 
-bool MemoryBlockAllocator::allocate(Buffer & buffer, const Buffer::MemoryOwnerPtr & owner)
+bool MemoryBlockAllocator::allocate(Buffer & buffer, Buffer::MemoryOwnerPtr & owner)
 {
     return memoryPool_.allocate(baseAddress_, buffer, owner);
 }
@@ -65,8 +56,8 @@ size_t MemoryBlockAllocator::getBufferCount()const
     return memoryPool_.bufferCount_;
 }
 
-bool MemoryBlockAllocator::hasMemoryAvailable() const
+bool MemoryBlockAllocator::isEmpty() const
 {
-    return memoryPool_.rootOffset_ + memoryPool_.bufferSize_ <= memoryPool_.blockSize_;
+    return memoryPool_.isEmpty();
 }
 

@@ -33,6 +33,9 @@ namespace InfiniteVector
             const std::string & name, 
             IvAllocator & allocator, 
             const IvCreationParameters & parameters);
+        void allocateInternalBuffers();
+        void releaseInternalBuffers();
+
     };
 }
 }

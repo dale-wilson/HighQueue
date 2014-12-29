@@ -47,7 +47,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
     static const size_t producerLimit = 10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
-    static const size_t bufferCount = entryCount + producerLimit + 100; /// TODO: Why are we running out of buffers with a 1 rather than a 100?
+    static const size_t bufferCount = entryCount + producerLimit * producerLimit;
+    /// TODO: Why are we running out of buffers?
 
     static const size_t spinCount = 10;
     static const size_t yieldCount = IvConsumerWaitStrategy::FOREVER;

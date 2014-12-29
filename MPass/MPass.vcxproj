@@ -135,7 +135,6 @@
     <ClInclude Include="..\src\Buffers\Buffer.h" />
     <ClInclude Include="..\src\Buffers\MemoryBlockAllocator.h" />
     <ClInclude Include="..\src\Buffers\MemoryBlockPool.h" />
-    <ClInclude Include="..\src\Buffers\MemoryBlockManager.h" />
     <ClInclude Include="..\src\Buffers\MemoryBlockHolder.h" />
     <ClInclude Include="..\src\Common\CacheLIne.h" />
     <ClInclude Include="..\src\Common\MPassPch.h" />
@@ -157,7 +156,6 @@
   <ItemGroup>
     <ClCompile Include="..\src\Buffers\MemoryBlockAllocator.cpp" />
     <ClCompile Include="..\src\Buffers\MemoryBlockPool.cpp" />
-    <ClCompile Include="..\src\Buffers\MemoryBlockManager.cpp" />
     <ClCompile Include="..\src\Buffers\MemoryBlockHolder.cpp" />
     <ClCompile Include="..\src\Common\MPassPch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

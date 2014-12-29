@@ -61,6 +61,13 @@ namespace MPass
 
 
 #ifdef VISUAL_C_WAS_A_REAL_COMPILER
+            template<class... _Types>
+            _Ref_count_obj(_Types&&... _Args)
+                : _Ref_count_base()
+            {	// construct from argument list
+                ::new ((void *)&_Storage) _Ty(_STD forward<_Types>(_Args)...);
+            }
+
             /// @brief construct a new object of type T in the buffer using placement new.
             /// @tparam T is the type of object to be constructed.
             /// @tparam Args are the types arguments to pass to the constructor.
@@ -428,7 +435,6 @@ namespace MPass
             if(owner_)
             {
                 owner_->release(*this);
-                owner_.reset();
             }
             else
             {

@@ -15,7 +15,10 @@ namespace
     const size_t letterCount = 26;
 }
 
-
+#define DISABLE_testNormalBuffersx
+#ifdef DISABLE_testNormalBuffers
+#pragma message ("DISABLE_testNormalBuffers " __FILE__)
+#else // DISABLE_testNormalBuffers
 BOOST_AUTO_TEST_CASE(testNormalBuffers)
 {
     byte_t work1[letterCount * 2];
@@ -171,9 +174,13 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK_THROW(buffer1.addUsed(1u), std::runtime_error);
     BOOST_CHECK_THROW(buffer1.appendNewCopy(alphabet), std::runtime_error);
     BOOST_CHECK_THROW(buffer1.appendBinaryCopy(work1, letterCount), std::runtime_error);
-
 }
+#endif // DISABLE_testNormalBuffers
 
+#define DISABLE_testBorrowedBuffersx
+#ifdef DISABLE_testMemoryBlockHolder
+#pragma message ("DISABLE_testBorrowedBuffers " __FILE__)
+#else // DISABLE DISABLE_testBorrowedBuffers
 BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 {
     Buffer::MemoryOwnerPtr owner;
@@ -229,7 +236,12 @@ BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 
     BOOST_CHECK_NE(alphabet, workString);
 }
+#endif //  DISABLE_testBorrowedBuffers
 
+#define DISABLE_testBufferAppendx
+#ifdef DISABLE_testBufferAppend
+#pragma message ("DISABLE_testBufferAppend " __FILE__)
+#else // DISABLE DISABLE_testBufferAppend
 BOOST_AUTO_TEST_CASE(testBufferAppend)
 {
     Buffer::MemoryOwnerPtr owner;
@@ -263,6 +275,7 @@ BOOST_AUTO_TEST_CASE(testBufferAppend)
     BOOST_CHECK_EQUAL(alphabet, value2);
     BOOST_CHECK_THROW(buffer.appendNewCopy(lowerCase), std::runtime_error);
 }
+#endif // DISABLE_testBufferAppend
 
 /*
 Still needs testing:

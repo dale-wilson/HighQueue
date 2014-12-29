@@ -8,24 +8,23 @@
 #include <InfiniteVector/IvReservePosition.h>
 #include <Buffers/MemoryBlockAllocator.h>
 
-namespace MPass
-{
-namespace InfiniteVector
-{
-    IvHeader::IvHeader(
-        const std::string & name, 
-        IvAllocator & allocator, 
-        const IvCreationParameters & parameters)
-    : signature_(InitializingSignature)
-    , version_(Version)
-    , entryCount_(parameters.entryCount_)
-    , entries_(0)
-    , readPosition_(0)
-    , publishPosition_(0)
-    , reservePosition_(0)
-    , consumerWaitStrategy_(parameters.strategy_)
-    , consumerWaitMutex_()
-    , consumerWaitConditionVariable_()
+using namespace MPass;
+using namespace InfiniteVector;
+
+IvHeader::IvHeader(
+    const std::string & name,
+    IvAllocator & allocator,
+    const IvCreationParameters & parameters)
+: signature_(InitializingSignature)
+, version_(Version)
+, entryCount_(parameters.entryCount_)
+, entries_(0)
+, readPosition_(0)
+, publishPosition_(0)
+, reservePosition_(0)
+, consumerWaitStrategy_(parameters.strategy_)
+, consumerWaitMutex_()
+, consumerWaitConditionVariable_()
 {
     uintptr_t here = reinterpret_cast<uintptr_t>(this);
     if(IvAllocator::align(here, CacheLineSize) != here)
@@ -57,17 +56,27 @@ namespace InfiniteVector
     reservePosition->reservePosition_ = entryCount_;
 
     auto bufferBase = reinterpret_cast<byte_t *>(this);
-    auto cacheAlignedBufferSize = Buffers::MemoryBlockPool::cacheAlignedBufferSize(parameters.bufferSize_);
-    auto blockSize = cacheAlignedBufferSize * parameters.bufferCount_;
+    auto blockSize = Buffers::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
     auto blockOffset = allocator.allocate(blockSize, CacheLineSize);
-    memoryPool_ = Buffers::MemoryBlockPool(bufferBase,
-        blockOffset + blockSize, cacheAlignedBufferSize, blockOffset);
+    new (&memoryPool_) Buffers::MemoryBlockPool(
+        bufferBase,
+        blockOffset + blockSize, 
+        parameters.bufferSize_,
+        size_t(blockOffset));
 
+    allocateInternalBuffers();
+
+    signature_ = LiveSignature;
+}
+
+void IvHeader::allocateInternalBuffers()
+{
+    IvResolver resolver(this);
+    auto bufferBase = reinterpret_cast<byte_t *>(this);
     // Now initialize the entries that were previously allocated.
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
-    for(size_t nEntry = 0; nEntry < parameters.entryCount_; ++nEntry)
+    for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
-        // consider an entry resolver if the alignment doesn't work out.
         IvEntry & entry = entryPointer[nEntry];
         new (&entry) IvEntry;
         Buffers::Buffer & buffer = entry.buffer_;
@@ -76,9 +85,17 @@ namespace InfiniteVector
             throw std::runtime_error("Not enough buffers for entries.");
         }
     }
+}
 
-    signature_ = LiveSignature;
- }
+void IvHeader::releaseInternalBuffers()
+{
+    IvResolver resolver(this);
+    auto entryPointer = resolver.resolve<IvEntry>(entries_);
+    for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
+    {
+        IvEntry & entry = entryPointer[nEntry];
+        Buffers::Buffer & buffer = entry.buffer_;
+        buffer.release();
+    }
+}
 
-} // InfiniteVector
-} // MPass

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <Buffers/Buffer.h>
+#include <Common/Spinlock.h>
 
 namespace MPass
 {
@@ -19,28 +20,42 @@ namespace MPass
         /// to different addresses in different processes.
         struct MemoryBlockPool
         {
-            /// @brief The size of the entire block of memory from which the memory is allocated.
+            /// A flag to mark the end of the linked list of memory blocks.
+
+            const size_t NULL_OFFSET = ~(size_t(0));
+            /// @brief The size of the entire pool of memory
             size_t blockSize_;
 
-            /// @brief The size of each chuck of memory in the block. 
+            /// @brief The size of each block of memory in the pool. 
             size_t bufferSize_;
             
-            /// @brief The total number of chunks in the block (constant -- does not change as memory is allocated or freed)
+            /// @brief The total number of block in the pool
+            /// constant: does not change as memory is allocated or freed)
             size_t bufferCount_;
             
-            /// @brief The root of a linked list.  This is an offset to the block origin. 
+            /// @brief The root of a linked list.  This is an offset to the pool base address
             size_t rootOffset_;
 
-            /// @brief Construct an empty info.
-            /// Used in a placement new to interpret a location in memory as a MemoryBlockPool.
-            /// This is particularly useful when the MemoryBlockPool is in shared memory that was initialized by another process.
+            /// @brief Synchronize access to rootOffset_
+            Spinlock lock_;
+
+            /// @brief Construct an empty pool.
+            ///
+            /// This is mostly useless, but there are occasions where it is needed to
+            /// allocate a pool to be initialized "by hand" later.
             MemoryBlockPool();
 
-            /// @brief Construct a MemoryBlockPool and initialize a block
+            /// @brief Construct and initialize a MemoryBlockPool
             MemoryBlockPool(byte_t * baseAddress, size_t blockSize, size_t bufferSize, size_t initialOffset = 0);
 
+            /// @brief Do not allow copies
+            MemoryBlockPool(const MemoryBlockPool &) = delete;
+
+            /// @brief Do not allow assignment
+            MemoryBlockPool & operator=(const MemoryBlockPool &) = delete;
+
             /// @brief Initialize a block.
-            size_t preAllocate(byte_t * baseAddress, size_t initialOffset/* = 0u*/);
+            size_t preAllocate(byte_t * baseAddress, size_t initialOffset, size_t bufferSize, size_t blockSize);
             
             /// @brief Allocate a block of memory into a buffer.  
             /// @param baseAddress is the address used to resolve the offsets into actual addresses.
@@ -52,6 +67,12 @@ namespace MPass
             /// @param buffer is the Buffer from which the memory will be returned.
             /// @throws runtime_error if the memory did not come from this block.
             void release(byte_t * baseAddress, Buffer & buffer);
+
+            /// @brief Are buffers available?
+            ///
+            /// Warning.  This is not threadsafe.  If you really want to know, try to allocate.
+            /// (this is here mostly for unit testing.)
+            bool isEmpty() const;
 
             /// @brief Helper function to round a buffer size up to the next cache-line boundary.
             static size_t cacheAlignedBufferSize(size_t bufferSize);
