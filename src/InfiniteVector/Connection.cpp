@@ -1,9 +1,9 @@
 /// @file Connection.cpp
 #include <Common/MPassPch.h>
 #include "Connection.h"
-#include <InfiniteVector/IvAllocator.h>
-#include <InfiniteVector/IvEntry.h>
-#include <InfiniteVector/IvResolver.h>
+#include <InfiniteVector/details/IvAllocator.h>
+#include <InfiniteVector/details/IvEntry.h>
+#include <InfiniteVector/details/IvResolver.h>
 
 using namespace MPass;
 using namespace InfiniteVector;

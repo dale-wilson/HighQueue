@@ -4,8 +4,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <InfiniteVector/Connection.h>
-#include <InfiniteVector/IvResolver.h>
-#include <InfiniteVector/IvReservePosition.h>
+#include <InfiniteVector/details/IvResolver.h>
+#include <InfiniteVector/details/IvReservePosition.h>
 
 using namespace MPass;
 using namespace InfiniteVector;

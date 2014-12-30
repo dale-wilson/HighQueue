@@ -2,11 +2,11 @@
 #include <Common/MPassPch.h>
 #include "IvHeader.h"
 #include <InfiniteVector/CreationParameters.h>
-#include <InfiniteVector/IvAllocator.h>
-#include <InfiniteVector/IvResolver.h>
-#include <InfiniteVector/IvEntry.h>
-#include <InfiniteVector/IvReservePosition.h>
-#include <InfiniteVector/MemoryBlockPool.h>
+#include <InfiniteVector/details/IvAllocator.h>
+#include <InfiniteVector/details/IvResolver.h>
+#include <InfiniteVector/details/IvEntry.h>
+#include <InfiniteVector/details/IvReservePosition.h>
+#include <InfiniteVector/details/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace InfiniteVector;

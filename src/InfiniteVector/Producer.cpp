@@ -1,7 +1,7 @@
 /// @file Connection.cpp
 #include <Common/MPassPch.h>
 #include "Producer.h"
-#include <InfiniteVector/IvReservePosition.h>
+#include <InfiniteVector/details/IvReservePosition.h>
 using namespace MPass;
 using namespace InfiniteVector;
 

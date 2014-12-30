@@ -5,9 +5,9 @@
 #pragma once
 
 #include <InfiniteVector/Connection.h>
-#include <InfiniteVector/IvResolver.h>
-#include <InfiniteVector/IvReservePosition.h>
-#include <InfiniteVector/IvEntryAccessor.h>
+#include <InfiniteVector/details/IvResolver.h>
+#include <InfiniteVector/details/IvReservePosition.h>
+#include <InfiniteVector/details/IvEntryAccessor.h>
 
 namespace MPass
 {

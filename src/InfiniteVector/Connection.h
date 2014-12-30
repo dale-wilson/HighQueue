@@ -4,9 +4,9 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <InfiniteVector/IvHeader.h>
+#include <InfiniteVector/details/IvHeader.h>
 #include <InfiniteVector/CreationParameters.h>
-#include <InfiniteVector/MemoryBlockPool.h>
+#include <InfiniteVector/details/MemoryBlockPool.h>
 
 namespace MPass
 {

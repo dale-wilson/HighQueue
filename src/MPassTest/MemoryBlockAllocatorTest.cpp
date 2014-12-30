@@ -2,7 +2,7 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/MemoryBlockPool.h>
+#include <InfiniteVector/details/MemoryBlockPool.h>
 #include <Common/CacheLIne.h>
 
 using namespace MPass;

@@ -5,7 +5,7 @@
 #pragma once
 
 #include "IvDefinitions.h"
-#include <InfiniteVector/IvAllocator.h>
+#include <InfiniteVector/details/IvAllocator.h>
 #include <InfiniteVector/Message.h>
 
 namespace MPass

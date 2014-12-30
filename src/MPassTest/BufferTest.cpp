@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <InfiniteVector/Message.h>
-#include <InfiniteVector/MemoryBlockPool.h>
+#include <InfiniteVector/details/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace InfiniteVector;

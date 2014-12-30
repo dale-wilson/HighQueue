@@ -6,7 +6,7 @@
 
 #include "IvDefinitions.h"
 #include <InfiniteVector/CreationParameters.h>
-#include <InfiniteVector/IvAllocator.h>
+#include <InfiniteVector/details/IvAllocator.h>
 
 namespace MPass
 {

@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <InfiniteVector/MemoryBlockPoolFwd.h>
+#include <InfiniteVector/details/MemoryBlockPoolFwd.h>
 namespace MPass
 {
     namespace InfiniteVector

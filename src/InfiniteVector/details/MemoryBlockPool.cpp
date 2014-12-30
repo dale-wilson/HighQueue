@@ -1,6 +1,6 @@
 #include <Common/MPassPch.h>
 
-#include <InfiniteVector/MemoryBlockPool.h>
+#include <InfiniteVector/details/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
