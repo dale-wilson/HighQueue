@@ -162,7 +162,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\src\MPassPerformance\BasicPerformaceTest.cpp" />
-    <ClCompile Include="..\src\MPassPerformance\BufferPerformance.cpp" />
     <ClCompile Include="..\src\MPassPerformance\MutithreadPerformaceTest.cpp" />
     <ClCompile Include="..\src\MPassPerformance\TestMain.cpp" />
   </ItemGroup>

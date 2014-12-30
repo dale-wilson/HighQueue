@@ -39,7 +39,6 @@ BOOST_AUTO_TEST_CASE(testProducer)
     IvConnection connection;
     connection.createLocal("LocalIv", parameters);
     IvProducer producer(connection);
-
     // peek inside the IV.
     auto header = connection.getHeader();
     IvResolver resolver(header);

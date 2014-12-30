@@ -5,6 +5,10 @@
 #include <Common/Spinlock.h>
 using namespace MPass;
 
+#define DISABLE_testSpinlockx
+#ifdef DISABLE_testSpinlock
+#pragma message("DISABLE_testSpinlock")
+#else // DISABLE_testSpinlock
 BOOST_AUTO_TEST_CASE(testSpinlock)
 {
     Spinlock lock;
@@ -20,6 +24,7 @@ BOOST_AUTO_TEST_CASE(testSpinlock)
         }
     }
 }
+#endif // DISABLE_testSpinlock
 /*
 Still to test:
 

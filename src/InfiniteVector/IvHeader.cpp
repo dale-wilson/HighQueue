@@ -6,7 +6,7 @@
 #include <InfiniteVector/IvResolver.h>
 #include <InfiniteVector/IvEntry.h>
 #include <InfiniteVector/IvReservePosition.h>
-#include <Buffers/MemoryBlockAllocator.h>
+#include <Buffers/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
@@ -55,14 +55,10 @@ IvHeader::IvHeader(
     auto reservePosition = resolver.resolve<IvReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
 
-    auto bufferBase = reinterpret_cast<byte_t *>(this);
-    auto blockSize = Buffers::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
-    auto blockOffset = allocator.allocate(blockSize, CacheLineSize);
-    new (&memoryPool_) Buffers::MemoryBlockPool(
-        bufferBase,
-        blockOffset + blockSize, 
-        parameters.bufferSize_,
-        size_t(blockOffset));
+    auto bufferPoolSize = Buffers::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
+    memoryPool_ = allocator.allocate(bufferPoolSize, CacheLineSize);
+    auto pool = new (resolver.resolve<Buffers::MemoryBlockPool>(memoryPool_)) 
+        Buffers::MemoryBlockPool(bufferPoolSize, parameters.bufferSize_);
 
     allocateInternalBuffers();
 
@@ -72,15 +68,15 @@ IvHeader::IvHeader(
 void IvHeader::allocateInternalBuffers()
 {
     IvResolver resolver(this);
-    auto bufferBase = reinterpret_cast<byte_t *>(this);
-    // Now initialize the entries that were previously allocated.
+    auto pool = resolver.resolve<Buffers::MemoryBlockPool>(memoryPool_);
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
+
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
         IvEntry & entry = entryPointer[nEntry];
         new (&entry) IvEntry;
         Buffers::Buffer & buffer = entry.buffer_;
-        if(!memoryPool_.allocate(bufferBase, buffer))
+        if(!pool->allocate(buffer))
         {
             throw std::runtime_error("Not enough buffers for entries.");
         }
@@ -91,6 +87,7 @@ void IvHeader::releaseInternalBuffers()
 {
     IvResolver resolver(this);
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
+
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
         IvEntry & entry = entryPointer[nEntry];

@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-
+#include <Buffers/MemoryBlockPoolFwd.h>
 namespace MPass
 {
     namespace Buffers
@@ -11,19 +11,14 @@ namespace MPass
         class Buffer
         {
         public:
-            /// @brief an interface for objects that own the memory contained in a buffer;
-            class MemoryOwner
-            {
-            public:
-                virtual void release(Buffer & buffer) = 0;
-            };
             enum Type
             {
                 Normal,
+                Orphan,
                 Borrowed,
                 Invalid
             };
-            typedef std::shared_ptr<MemoryOwner> MemoryOwnerPtr;
+            const static size_t NO_POOL = ~size_t(0);
 
             /// @brief construct an empty (Invalid) buffer.
             Buffer();
@@ -59,63 +54,17 @@ namespace MPass
             /// @param returns the number of bytes used.
             size_t getUsed() const;
 
-
-#ifdef VISUAL_C_WAS_A_REAL_COMPILER
-            template<class... _Types>
-            _Ref_count_obj(_Types&&... _Args)
-                : _Ref_count_base()
-            {	// construct from argument list
-                ::new ((void *)&_Storage) _Ty(_STD forward<_Types>(_Args)...);
-            }
-
             /// @brief construct a new object of type T in the buffer using placement new.
             /// @tparam T is the type of object to be constructed.
-            /// @tparam Args are the types arguments to pass to the constructor.
+            /// @tparam ArgTypes are the types arguments to pass to the constructor.
             /// @param args are the actual arguments.
-            template <typename T, typename ...Args>
-            T* construct(Args... & args)
+            template <typename T, typename... ArgTypes>
+            T* construct(ArgTypes&&... args)
             {
-                auto result =  new (get<T>()) T (std::forward<Args>(arg)...);
                 setUsed(sizeof(T));
-                return result;
-            }
-#else
-            /// @brief construct a new object of type T in the buffer using placement new.
-            /// @tparam T is the type of object to be constructed.
-            template <typename T>
-            T* construct()
-            {
-                auto result = new (get<T>()) T();
-                setUsed(sizeof(T));
-                return result;
-            }
-            
-            /// @brief Construct a new object of type T in the buffer using placement new.
-            /// @tparam T is the type of object to be constructed.
-            /// @tparam Arg is the type of an argument to pass to the contructor.
-            /// @param arg1 is the actual arguments.
-            template <typename T, typename Arg1>
-            T* construct(Arg1 && arg1)
-            {
-                auto result = new (get<T>()) T(std::forward<Arg1>(arg1));
-                setUsed(sizeof(T));
-                return result;
+                return new (get<T>()) T(std::forward<ArgTypes>(args)...);
             }
 
-            /// @brief Construct a new object of type T in the buffer using placement new.
-            /// @tparam T is the type of object to be constructed.
-            /// @tparam Arg1 is the type of an argument to pass to the contructor.
-            /// @tparam Arg2 is the type of an argument to pass to the contructor.
-            /// @param arg1 is the actual arguments.
-            /// @param arg2 is the actual arguments.
-            template <typename T, typename Arg1, typename Arg2>
-            T* construct(Arg1 && arg1, Arg2 && arg2)
-            {
-                auto result = new (get<T>()) T(std::forward<Arg1>(arg1), std::forward<Arg2>(arg2));
-                setUsed(sizeof(T));
-                return result;
-            }
-#endif            
             /// @brief How many objects of type T can be added to the buffer.
             /// @tparam T is the type of object
             template <typename T = byte_t>
@@ -152,24 +101,21 @@ namespace MPass
             template <typename T = byte_t>
             T* appendBinaryCopy(const T * data, size_t count);
 
-            /// @brief Associate a memory block owned by a MemoryOwner with this buffer.
+            /// @brief Associate a memory block from a MemoryBlockPool with this buffer.
             /// The block of data is general purpose.  It can be written to and reused as necessary.
             /// Normally this is only called once per buffer.  The buffer continues to use the same memory for its
             /// entire lifetime.  This is a typical use, not a requirement.
-            /// @param owner The owner to which this block will be returned when the buffer is released or deleted.  Null means no owner
-            ///              Note that this is a shared pointer so the owner will live longer than the buffers it has populated.
-            /// @param container The base address for the block containing ths buffer.
+            /// @param pool The address of the pool containing ths buffer.
             /// @param capacity  The capacity of this buffer
-            /// @param offset The offset to this buffer within the container
+            /// @param offset The offset to this buffer within the pool
             /// @param used The number of bytes used
-            /// @param type The type of buffer (Normal means memory owned by a MemoryOwner 
-            void set(const MemoryOwnerPtr & owner, byte_t * container, size_t capacity, size_t offset, size_t used = 0, Type type = Normal);
+            void set(MemoryBlockPool * pool, size_t capacity, size_t offset, size_t used = 0);
 
-            /// @brief Undo a set.  Return the memory to the owner, and make the buffer Invalid.
+            /// @brief Undo a set.  Return the memory to the pool (if any), and make the buffer Invalid.
             void release();
 
             /// @brief Associate this memory block with one or two segments of memory contained in some other object.
-            /// Note: "borrow" is a useful concept borrowe from Rust.
+            /// Note: "borrow" is a useful concept borrowed from Rust.
             ///
             /// Normally this method will be used when the data appears inside an external buffer used for some other purpose 
             /// for example a buffer read from a TCP stream or a file stream.  Because the message boundaries don't
@@ -238,7 +184,6 @@ namespace MPass
             void reset();
 
         private:
-            MemoryOwnerPtr owner_;
             byte_t * container_;
             size_t capacity_;
             size_t offset_;
@@ -249,46 +194,10 @@ namespace MPass
         };
 
         inline
-        Buffer::Buffer()
-        : owner_()
-        , container_(0)
-        , capacity_(0)
-        , offset_(0)
-        , used_(0)
-        , offsetSplit_(0)
-        , usedSplit_(0)
-        , type_(Invalid)
-        {
-        }
-
-        inline
-        Buffer::~Buffer()
-        {
-            try{
-                release();
-            }
-            catch(...) 
-            {
-                //ignore this (sorry!)
-            }
-        }
-
-        inline
-        void Buffer::set(const MemoryOwnerPtr & owner, byte_t * container, size_t capacity, size_t offset, size_t used, Type type)
-        {
-            owner_ = owner;
-            container_ = container;
-            capacity_ = (capacity == 0) ? used : capacity;
-            offset_ = offset;
-            used_ = used;
-            offsetSplit_ = 0;
-            usedSplit_ = 0;
-            type_ = type;
-        }
-
-        inline
         void Buffer::borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit, size_t usedSplit)
         {
+            int todo_ReleaseNormalIfNecessary;
+
             // setting type=Borrowed enforces the constness.
             container_ = const_cast<byte_t *>(container);
             capacity_ = used;
@@ -328,19 +237,6 @@ namespace MPass
         bool Buffer::isEmpty()const
         {
             return used_ + usedSplit_ == 0;
-        }
-
-        inline
-        byte_t * Buffer::getContainer()const
-        {
-            mustBeValid();
-            return container_;
-        }
-
-        inline
-        size_t Buffer::getOffset()const
-        {
-            return offset_;
         }
 
         inline
@@ -392,10 +288,11 @@ namespace MPass
             {
                 throw std::runtime_error("Buffer::swap: Invalid operation on Borrowed buffer.");
             }
-            owner_.swap(rhs.owner_);
             std::swap(container_, rhs.container_);
+            std::swap(capacity_, rhs.capacity_);
             std::swap(offset_, rhs.offset_);
             std::swap(used_, rhs.used_);
+            std::swap(type_, rhs.type_);
             // no need to swap the split offset and used.  Normal buffers cannot be split.
         }
 
@@ -406,7 +303,7 @@ namespace MPass
             rhs.mustBeNormal("Buffer::moveTo: target buffer not suitable for operation." );
             if(type_ == Borrowed)
             {
-                if(used_ > rhs.capacity_)
+                if(used_ + usedSplit_ > rhs.capacity_)
                 {
                     throw std::runtime_error("Move to: target buffer too small");
                 }
@@ -420,38 +317,9 @@ namespace MPass
             }
             else
             {
-                owner_.swap(rhs.owner_);
-                std::swap(container_,rhs.container_);
-                std::swap(capacity_, rhs.capacity_);
-                std::swap(offset_,rhs.offset_);
+                swap(rhs);
             }
-            rhs.used_ = used_;
             used_ = 0;
-        }
-
-        inline
-        void Buffer::release()
-        {
-            if(owner_)
-            {
-                owner_->release(*this);
-            }
-            else
-            {
-                reset();
-            }
-        }
-
-        inline void Buffer::reset()
-        {
-            owner_.reset();
-            container_ = 0;
-            capacity_ = 0;
-            offset_ = 0;
-            used_ = 0;
-            offsetSplit_ = 0;
-            usedSplit_ = 0;
-            type_ = Invalid;
         }
 
         template <typename T>
@@ -471,7 +339,7 @@ namespace MPass
         template <typename T>
         size_t Buffer::available() const
         {
-            return (capacity_ - offset_ - used_) / sizeof(T);
+            return (capacity_ - used_) / sizeof(T);
         }
 
         template <typename T>

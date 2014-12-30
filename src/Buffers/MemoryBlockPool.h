@@ -46,7 +46,7 @@ namespace MPass
             MemoryBlockPool();
 
             /// @brief Construct and initialize a MemoryBlockPool
-            MemoryBlockPool(byte_t * baseAddress, size_t blockSize, size_t bufferSize, size_t initialOffset = 0);
+            MemoryBlockPool(size_t blockSize, size_t bufferSize);
 
             /// @brief Do not allow copies
             MemoryBlockPool(const MemoryBlockPool &) = delete;
@@ -54,25 +54,37 @@ namespace MPass
             /// @brief Do not allow assignment
             MemoryBlockPool & operator=(const MemoryBlockPool &) = delete;
 
-            /// @brief Initialize a block.
-            size_t preAllocate(byte_t * baseAddress, size_t initialOffset, size_t bufferSize, size_t blockSize);
-            
             /// @brief Allocate a block of memory into a buffer.  
             /// @param baseAddress is the address used to resolve the offsets into actual addresses.
             /// @param buffer is the Buffer to receive the block of memory.
-            bool allocate(byte_t * baseAddress, Buffer & buffer, const Buffer::MemoryOwnerPtr & owner = Buffer::MemoryOwnerPtr());
+            bool allocate(Buffer & buffer);
 
             /// @brief Free the block of memory from a buffer.
             /// @param baseAddress is the address used to resolve the offsets into actual addresses.
             /// @param buffer is the Buffer from which the memory will be returned.
             /// @throws runtime_error if the memory did not come from this block.
-            void release(byte_t * baseAddress, Buffer & buffer);
+            void release(Buffer & buffer);
 
             /// @brief Are buffers available?
             ///
             /// Warning.  This is not threadsafe.  If you really want to know, try to allocate.
             /// (this is here mostly for unit testing.)
             bool isEmpty() const;
+
+            size_t getBufferCapacity()const
+            {
+                return bufferSize_;
+            }
+            size_t getBufferCount()const
+            {
+                return bufferCount_;
+            }
+
+            /// @brief Initialize a block.
+            /// for internal use (and testing)
+            size_t preAllocate(size_t bufferSize, size_t blockSize);
+
+            static MemoryBlockPool * makeNew(size_t bufferSize, size_t bufferCount);
 
             /// @brief Helper function to round a buffer size up to the next cache-line boundary.
             static size_t cacheAlignedBufferSize(size_t bufferSize);

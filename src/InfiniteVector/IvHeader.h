@@ -7,7 +7,6 @@
 #include "IvDefinitions.h"
 #include <InfiniteVector/IvCreationParameters.h>
 #include <InfiniteVector/IvAllocator.h>
-#include <Buffers/MemoryBlockAllocator.h>
 
 namespace MPass
 {
@@ -23,8 +22,8 @@ namespace InfiniteVector
         Offset readPosition_;
         Offset publishPosition_;
         Offset reservePosition_;
+        Offset memoryPool_;
 
-        Buffers::MemoryBlockPool memoryPool_;
         IvConsumerWaitStrategy consumerWaitStrategy_;
         std::mutex consumerWaitMutex_;
         std::condition_variable consumerWaitConditionVariable_;
@@ -35,7 +34,6 @@ namespace InfiniteVector
             const IvCreationParameters & parameters);
         void allocateInternalBuffers();
         void releaseInternalBuffers();
-
     };
 }
 }

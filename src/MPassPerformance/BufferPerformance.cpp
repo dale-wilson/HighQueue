@@ -25,7 +25,6 @@ BOOST_AUTO_TEST_CASE(testBufferMoveSwapPerformance)
     std::memcpy(work1, alphabet.data(), alphabet.size());
     byte_t work2[letterCount * 2];
     std::memcpy(work2, alphabet.data(), alphabet.size());
-    Buffer::MemoryOwnerPtr owner;
 
     Buffer buffer1;
     buffer1.set(owner, work1, sizeof(work1), 0, letterCount);

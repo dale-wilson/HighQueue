@@ -6,7 +6,7 @@
 
 #include <InfiniteVector/IvHeader.h>
 #include <InfiniteVector/IvCreationParameters.h>
-#include <Buffers/MemoryBlockAllocator.h>
+#include <Buffers/MemoryBlockPool.h>
 
 namespace MPass
 {
@@ -69,7 +69,7 @@ namespace MPass
         private:
             boost::shared_array<byte_t> localMemory_;
             IvHeader * header_;
-            Buffers::MemoryBlockAllocatorPtr memoryBlockAllocator_;
+            Buffers::MemoryBlockPool * memoryPool_;
 		};
 	}
 }

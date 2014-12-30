@@ -3,6 +3,7 @@
 #include "IvConnection.h"
 #include <InfiniteVector/IvAllocator.h>
 #include <InfiniteVector/IvEntry.h>
+#include <InfiniteVector/IvResolver.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
@@ -32,9 +33,8 @@ void IvConnection::createLocal(const std::string & name, const IvCreationParamet
 
     auto header = block + headerOffset;
     header_ = new (header) IvHeader(name, allocator, parameters);
-    memoryBlockAllocator_.reset(new Buffers::MemoryBlockAllocator(
-
-    header, header_->memoryPool_));
+    IvResolver resolver(header_);
+    memoryPool_ = resolver.resolve<Buffers::MemoryBlockPool>(header_->memoryPool_);
 }
 
 IvHeader * IvConnection::getHeader() const
@@ -54,27 +54,25 @@ size_t IvConnection::spaceNeeded(const IvCreationParameters & parameters)
 {
     size_t headerSize = IvAllocator::align(sizeof(IvHeader), CacheLineSize);
     size_t entriesSize = IvEntry::alignedSize() * parameters.entryCount_;
-    size_t positionsSize = CacheLineSize; // note the assumption that positions fit in a single cache line
-    size_t bufferPoolSize = parameters.bufferCount_ * IvAllocator::align(parameters.bufferSize_, CacheLineSize);
-    // producers?
-    // Consumer wait strategy?
+    size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
+    size_t bufferPoolSize = Buffers::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
     return headerSize + entriesSize + positionsSize + bufferPoolSize;
 }
 
 bool IvConnection::allocate(Buffers::Buffer & buffer)
 {
-    return memoryBlockAllocator_->allocate(buffer);
+    return memoryPool_->allocate(buffer);
 }
 
 size_t IvConnection::getBufferCapacity()const
 {
-    return memoryBlockAllocator_->getBufferCapacity();
+    return memoryPool_->getBufferCapacity();
 }
 size_t IvConnection::getBufferCount()const
 {
-    return memoryBlockAllocator_->getBufferCount();
+    return memoryPool_->getBufferCount();
 }
 bool IvConnection::hasMemoryAvailable() const
 {
-    return !memoryBlockAllocator_->isEmpty();
+    return !memoryPool_->isEmpty();
 }

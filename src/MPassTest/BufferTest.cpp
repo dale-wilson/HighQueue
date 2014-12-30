@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <Buffers/Buffer.h>
+#include <Buffers/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace Buffers;
@@ -11,7 +12,6 @@ namespace
 {
     // extra characters at beginning and end prevent the compiler from sharing this const string.
     const std::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const std::string alphatwo = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const size_t letterCount = 26;
 }
 
@@ -21,11 +21,12 @@ namespace
 #else // DISABLE_testNormalBuffers
 BOOST_AUTO_TEST_CASE(testNormalBuffers)
 {
-    byte_t work1[letterCount * 2];
-    std::memcpy(work1, alphabet.data(), alphabet.size());
-    byte_t work2[letterCount * 2];
-    std::memcpy(work2, alphabet.data(), alphabet.size());
-    Buffer::MemoryOwnerPtr owner;
+    static const size_t bufferSize = sizeof(alphabet);
+    static const size_t bufferCount = 2;
+ 
+    auto bytesNeeded = MemoryBlockPool::spaceNeeded(bufferSize, bufferCount);
+    std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
+    auto pool = new (block.get()) MemoryBlockPool(bytesNeeded, bufferSize);
 
     Buffer buffer1;
 
@@ -44,44 +45,38 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK_THROW(buffer1.getWritePosition(), std::runtime_error);
     BOOST_CHECK_THROW(buffer1.addUsed(1u), std::runtime_error);
     BOOST_CHECK_THROW(buffer1.appendNewCopy(alphabet), std::runtime_error);
-    BOOST_CHECK_THROW(buffer1.appendBinaryCopy(work1, letterCount), std::runtime_error);
 
-    buffer1.set(owner, work1, sizeof(work1), 0, letterCount);
-
+    pool->allocate(buffer1);
+    
     BOOST_CHECK_EQUAL(buffer1.getType(), Buffer::Type::Normal);
     BOOST_CHECK(buffer1.isValid());
     BOOST_CHECK(!buffer1.isBorrowed());
     BOOST_CHECK_NO_THROW(buffer1.mustBeNormal());
+    BOOST_CHECK_EQUAL(buffer1.getUsed(), 0u);
+    BOOST_CHECK(buffer1.isEmpty());
+
+    buffer1.appendBinaryCopy(alphabet.data(), letterCount);
     BOOST_CHECK_EQUAL(buffer1.getUsed(), letterCount);
-    BOOST_CHECK_EQUAL(buffer1.getOffset(), 0U);
     BOOST_CHECK(!buffer1.isEmpty());
-    BOOST_CHECK_EQUAL(work1, buffer1.getContainer());
-    BOOST_CHECK_EQUAL(work1, buffer1.get());
-    BOOST_CHECK_EQUAL(work1, buffer1.getConst());
-    BOOST_CHECK_EQUAL(buffer1.available(), letterCount);
+
+    BOOST_CHECK_EQUAL(buffer1.get(), buffer1.getConst());
     BOOST_CHECK(buffer1.needSpace(letterCount));
-    BOOST_CHECK(!buffer1.needSpace(letterCount + 1));
-    BOOST_CHECK_EQUAL(work1 + letterCount, buffer1.getWritePosition());
+    BOOST_CHECK(!buffer1.needSpace(buffer1.available() + 1));
 
     std::string value1(buffer1.get<char>(), buffer1.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(0, letterCount), value1);
 
     Buffer buffer2;
-    buffer2.set(owner, work2, sizeof(work2), letterCount, letterCount);
+    pool->allocate(buffer2);
+    buffer2.appendBinaryCopy(alphabet.data() + letterCount, letterCount);
 
     BOOST_CHECK_EQUAL(buffer2.getType(), Buffer::Type::Normal);
     BOOST_CHECK(buffer2.isValid());
     BOOST_CHECK(!buffer2.isBorrowed());
     BOOST_CHECK_NO_THROW(buffer2.mustBeNormal());
+
     BOOST_CHECK_EQUAL(buffer2.getUsed(), letterCount);
-    BOOST_CHECK_EQUAL(buffer2.getOffset(), letterCount);
     BOOST_CHECK(!buffer2.isEmpty());
-    BOOST_CHECK_EQUAL(work2, buffer2.getContainer());
-    BOOST_CHECK_EQUAL(&work2[letterCount], buffer2.get());
-    BOOST_CHECK_EQUAL(&work2[letterCount], buffer2.getConst());
-    BOOST_CHECK_EQUAL(buffer2.available(), 0u);
-    BOOST_CHECK(!buffer2.needSpace(1));
-    BOOST_CHECK_EQUAL(work2 + 2*letterCount, buffer2.getWritePosition());
 
     std::string value2(buffer2.get<char>(), buffer2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value2);
@@ -93,14 +88,7 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK(!buffer1.isBorrowed());
     BOOST_CHECK_NO_THROW(buffer1.mustBeNormal());
     BOOST_CHECK_EQUAL(buffer1.getUsed(), letterCount);
-    BOOST_CHECK_EQUAL(buffer1.getOffset(), letterCount);
     BOOST_CHECK(!buffer1.isEmpty());
-    BOOST_CHECK_EQUAL(work2, buffer1.getContainer());
-    BOOST_CHECK_EQUAL(work2 + letterCount, buffer1.get());
-    BOOST_CHECK_EQUAL(work2 + letterCount, buffer1.getConst());
-    BOOST_CHECK_EQUAL(buffer1.available(), 0u);
-    BOOST_CHECK(!buffer1.needSpace(1));
-    BOOST_CHECK_EQUAL(work2 + 2 * letterCount, buffer1.getWritePosition());
 
     std::string value1a(buffer1.get<char>(), buffer1.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value1a);
@@ -110,15 +98,9 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK(!buffer2.isBorrowed());
     BOOST_CHECK_NO_THROW(buffer2.mustBeNormal());
     BOOST_CHECK_EQUAL(buffer2.getUsed(), letterCount);
-    BOOST_CHECK_EQUAL(buffer2.getOffset(), 0U);
     BOOST_CHECK(!buffer2.isEmpty());
-    BOOST_CHECK_EQUAL(work1, buffer2.getContainer());
-    BOOST_CHECK_EQUAL(work1, buffer2.get());
-    BOOST_CHECK_EQUAL(work1, buffer2.getConst());
-    BOOST_CHECK_EQUAL(buffer2.available(), letterCount);
+    BOOST_CHECK_GE(buffer2.available(), letterCount);
     BOOST_CHECK(buffer2.needSpace(letterCount));
-    BOOST_CHECK(!buffer2.needSpace(letterCount + 1));
-    BOOST_CHECK_EQUAL(work1 + letterCount, buffer2.getWritePosition());
 
     std::string value2a(buffer2.get<char>(), buffer2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(0, letterCount), value2a);
@@ -130,29 +112,15 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK(!buffer1.isBorrowed());
     BOOST_CHECK_NO_THROW(buffer1.mustBeNormal());
     BOOST_CHECK_EQUAL(buffer1.getUsed(), 0U);
-    BOOST_CHECK_EQUAL(buffer1.getOffset(), 0U);
     BOOST_CHECK(buffer1.isEmpty());
-    BOOST_CHECK_EQUAL(work1, buffer1.getContainer());
-    BOOST_CHECK_EQUAL(work1, buffer1.get());
-    BOOST_CHECK_EQUAL(work1, buffer1.getConst());
-    BOOST_CHECK_EQUAL(buffer1.available(), 2 * letterCount);
     BOOST_CHECK(buffer1.needSpace(2 * letterCount));
-    BOOST_CHECK(!buffer1.needSpace(2 * letterCount + 1));
-    BOOST_CHECK_EQUAL(work1, buffer1.getWritePosition());
 
     BOOST_CHECK_EQUAL(buffer2.getType(), Buffer::Type::Normal);
     BOOST_CHECK(buffer2.isValid());
     BOOST_CHECK(!buffer2.isBorrowed());
     BOOST_CHECK_NO_THROW(buffer2.mustBeNormal());
     BOOST_CHECK_EQUAL(buffer2.getUsed(), letterCount);
-    BOOST_CHECK_EQUAL(buffer2.getOffset(), letterCount);
     BOOST_CHECK(!buffer2.isEmpty());
-    BOOST_CHECK_EQUAL(work2, buffer2.getContainer());
-    BOOST_CHECK_EQUAL(&work2[letterCount], buffer2.get());
-    BOOST_CHECK_EQUAL(&work2[letterCount], buffer2.getConst());
-    BOOST_CHECK_EQUAL(buffer2.available(), 0u);
-    BOOST_CHECK(!buffer2.needSpace(1));
-    BOOST_CHECK_EQUAL(work2 + 2*letterCount, buffer2.getWritePosition());
 
     std::string value2c(buffer2.get<char>(), buffer2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value2c);
@@ -173,17 +141,20 @@ BOOST_AUTO_TEST_CASE(testNormalBuffers)
     BOOST_CHECK_THROW(buffer1.getWritePosition(), std::runtime_error);
     BOOST_CHECK_THROW(buffer1.addUsed(1u), std::runtime_error);
     BOOST_CHECK_THROW(buffer1.appendNewCopy(alphabet), std::runtime_error);
-    BOOST_CHECK_THROW(buffer1.appendBinaryCopy(work1, letterCount), std::runtime_error);
 }
 #endif // DISABLE_testNormalBuffers
 
 #define DISABLE_testBorrowedBuffersx
-#ifdef DISABLE_testMemoryBlockHolder
+#ifdef DISABLE_testBorrowedBuffers
 #pragma message ("DISABLE_testBorrowedBuffers " __FILE__)
-#else // DISABLE DISABLE_testBorrowedBuffers
+#else // DISABLE_testBorrowedBuffers
 BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
 {
-    Buffer::MemoryOwnerPtr owner;
+    static const size_t bufferSize = alphabet.size();
+    static const size_t bufferCount = 2;
+    auto bytesNeeded = MemoryBlockPool::spaceNeeded(bufferSize, bufferCount);
+    std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
+    auto pool = new (block.get()) MemoryBlockPool(bytesNeeded, bufferSize);
 
     Buffer buffer1;
     auto data = reinterpret_cast<const byte_t *>(alphabet.data());
@@ -202,12 +173,9 @@ BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
     BOOST_CHECK(!buffer1.needSpace(1));
     BOOST_CHECK_THROW(buffer1.getWritePosition(), std::runtime_error);
 
-    std::string workString(alphabet);
-    auto workData = const_cast<byte_t *>(reinterpret_cast<const byte_t *>(workString.c_str()));
-    auto workSize = workString.size();
-
     Buffer buffer2;
-    buffer2.set(owner, workData, workSize, letterCount, letterCount);
+    pool->allocate(buffer2);
+    buffer2.appendBinaryCopy(alphabet.data() + letterCount, letterCount);
 
     std::string value2(buffer2.get<char>(), buffer2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value2);
@@ -222,42 +190,33 @@ BOOST_AUTO_TEST_CASE(testBorrowedBuffers)
     BOOST_CHECK(!buffer2.isBorrowed());
     BOOST_CHECK_NO_THROW(buffer2.mustBeNormal());
     BOOST_CHECK_EQUAL(buffer2.getUsed(), letterCount);
-    BOOST_CHECK_EQUAL(buffer2.getOffset(), letterCount);
     BOOST_CHECK(!buffer2.isEmpty());
-    BOOST_CHECK_EQUAL(workData, buffer2.getContainer());
-    BOOST_CHECK_EQUAL(workData + letterCount, buffer2.get());
-    BOOST_CHECK_EQUAL(workData + letterCount, buffer2.getConst());
-    BOOST_CHECK_EQUAL(buffer2.available(), 0);
-    BOOST_CHECK(!buffer2.needSpace(1));
-    BOOST_CHECK_EQUAL(workData + 2 * letterCount, buffer2.getWritePosition());
 
     std::string value2a(buffer2.get<char>(), buffer2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(0,letterCount), value2a);
-
-    BOOST_CHECK_NE(alphabet, workString);
 }
 #endif //  DISABLE_testBorrowedBuffers
 
-#define DISABLE_testBufferAppendx
+#define DISABLE_testBufferAppendz
 #ifdef DISABLE_testBufferAppend
 #pragma message ("DISABLE_testBufferAppend " __FILE__)
 #else // DISABLE DISABLE_testBufferAppend
 BOOST_AUTO_TEST_CASE(testBufferAppend)
 {
-    Buffer::MemoryOwnerPtr owner;
-    byte_t work[letterCount * 2];
-    std::memset(work, '\0', sizeof(work));
+    static const size_t bufferSize = alphabet.size();
+    static const size_t bufferCount = 2;
+    auto bytesNeeded = MemoryBlockPool::spaceNeeded(bufferSize, bufferCount);
+    std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
+    auto pool = new (block.get()) MemoryBlockPool(bytesNeeded, bufferSize);
+
     Buffer buffer;
-    buffer.set(owner, work, sizeof(work), 0U);
-    BOOST_CHECK_EQUAL(buffer.getUsed(), 0U);
-    BOOST_CHECK_EQUAL(buffer.available(), sizeof(work));
+    pool->allocate(buffer);
 
     buffer.appendBinaryCopy(alphabet.data(), letterCount);
     buffer.appendBinaryCopy(alphabet.data() + letterCount, letterCount);
+
     std::string value(buffer.get<char>(), buffer.getUsed());
     BOOST_CHECK_EQUAL(alphabet, value);
-    BOOST_CHECK_THROW(buffer.appendBinaryCopy(alphabet.data(), 1), std::runtime_error);
-
     buffer.setUsed(0);
     struct MonoCase
     {
@@ -273,7 +232,6 @@ BOOST_AUTO_TEST_CASE(testBufferAppend)
     buffer.appendNewCopy(upperCase);
     std::string value2(buffer.get<char>(), buffer.getUsed());
     BOOST_CHECK_EQUAL(alphabet, value2);
-    BOOST_CHECK_THROW(buffer.appendNewCopy(lowerCase), std::runtime_error);
 }
 #endif // DISABLE_testBufferAppend
 
