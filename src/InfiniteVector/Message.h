@@ -14,7 +14,6 @@ namespace MPass
             enum Type
             {
                 Normal,
-                Orphan,
                 Borrowed,
                 Invalid
             };
@@ -194,7 +193,10 @@ namespace MPass
         inline
         void Message::borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit, size_t usedSplit)
         {
-            int todo_ReleaseNormalIfNecessary;
+            if(type_ == Normal)
+            {
+                throw std::runtime_error("Message: Can't borrow a normal buffer.");
+            }
 
             // setting type=Borrowed enforces the constness.
             container_ = const_cast<byte_t *>(container);

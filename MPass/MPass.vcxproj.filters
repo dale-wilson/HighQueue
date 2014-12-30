@@ -57,9 +57,6 @@
     <ClInclude Include="..\src\InfiniteVector\details\IvHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvPositionEntry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\InfiniteVector\details\IvReservePosition.h">
       <Filter>Header Files</Filter>
     </ClInclude>

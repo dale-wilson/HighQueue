@@ -140,7 +140,6 @@
     <ClInclude Include="..\src\InfiniteVector\details\IvEntry.h" />
     <ClInclude Include="..\src\InfiniteVector\details\IvEntryAccessor.h" />
     <ClInclude Include="..\src\InfiniteVector\details\IvHeader.h" />
-    <ClInclude Include="..\src\InfiniteVector\details\IvPositionEntry.h" />
     <ClInclude Include="..\src\InfiniteVector\details\IvReservePosition.h" />
     <ClInclude Include="..\src\InfiniteVector\details\IvResolver.h" />
     <ClInclude Include="..\src\InfiniteVector\details\MemoryBlockPool.h" />
