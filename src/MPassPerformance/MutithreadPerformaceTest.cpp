@@ -47,10 +47,10 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
     static const size_t producerLimit = 10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
-    static const size_t bufferCount = entryCount + producerLimit * producerLimit;
-    /// TODO: Why are we running out of buffers?
+    static const size_t consumerLimit = 1;  // Just for documentation
+    static const size_t bufferCount = entryCount + consumerLimit +  producerLimit;
 
-    static const size_t spinCount = 10;
+    static const size_t spinCount = 0;
     static const size_t yieldCount = IvConsumerWaitStrategy::FOREVER;
 
     IvConsumerWaitStrategy strategy(spinCount, yieldCount);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     for(size_t producerCount = 1; producerCount < producerLimit; ++producerCount)
     {
-        std::cerr << "Start " << producerCount << " producer thread / 1 consumer thread test." << std::endl;
+        std::cerr << "Test " << producerCount << " producer";
 
         std::vector<std::thread> producerThreads;
         std::vector<uint64_t> nextMessage;
@@ -116,10 +116,10 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         }
 
         auto messageBits = sizeof(TestMessage) * 8;
-        std::cout << "Multithreaded: " << producerCount << " producers. Passed " << actualMessageCount << ' ' << messageBits << " bit messages in " 
+        std::cout << " Passed " << actualMessageCount << ' ' << messageBits << " bit messages in " 
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
             << lapse / actualMessageCount << " nsec./message "
-            << actualMessageCount * 1000L * messageBits / lapse << " GBits/second."
+            << std::setprecision(2) << double(actualMessageCount * messageBits) / double(lapse) << " GBits/second."
             << std::endl;
     }
 }

@@ -100,8 +100,10 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
     auto lapse = timer.nanoseconds();
 
     auto messageBits = sizeof(TestMessage) * 8;
-    std::cout << "Single threaded: Passed " << messageCount << ' ' << messageBits << " bit messages in " << lapse << " nanoseconds.  " << lapse / messageCount << " nsec./message "
-        << messageCount * 1000L * messageBits / lapse << " GBits/second."
+    std::cout << "Single threaded: Passed " << messageCount << ' ' << messageBits << " bit messages in "  
+        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
+        << lapse / messageCount << " nsec./message "
+        << std::setprecision(2) << double(messageCount * messageBits) / double(lapse) << " GBits/second."
         << std::endl;
 }
 #endif // DISABLE_ST_PERFORMANCE
