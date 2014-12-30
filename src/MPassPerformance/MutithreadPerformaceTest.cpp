@@ -18,10 +18,10 @@ namespace
     void producerFunction(IvConnection & connection, uint32_t producerNumber, uint64_t messageCount)
     {
         IvProducer producer(connection);
-        InfiniteVector::Buffer producerBuffer;
-        if(!connection.allocate(producerBuffer))
+        InfiniteVector::Message producerMessage;
+        if(!connection.allocate(producerMessage))
         {
-            std::cerr << "Failed to allocate buffer for producer Number " << producerNumber << std::endl;
+            std::cerr << "Failed to allocate message for producer Number " << producerNumber << std::endl;
             return;
         }
 
@@ -33,9 +33,9 @@ namespace
 
         for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
         {
-            auto testMessage = producerBuffer.construct<TestMessage>(producerNumber, messageNumber);
+            auto testMessage = producerMessage.construct<TestMessage>(producerNumber, messageNumber);
             testMessage->touch();
-            producer.publish(producerBuffer);
+            producer.publish(producerMessage);
         }
     }
 }
@@ -43,24 +43,24 @@ namespace
 BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 {
     static const size_t entryCount = 100000;
-    static const size_t bufferSize = sizeof(TestMessage);
+    static const size_t messageSize = sizeof(TestMessage);
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
     static const size_t producerLimit = 10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
     static const size_t consumerLimit = 1;  // Just for documentation
-    static const size_t bufferCount = entryCount + consumerLimit +  producerLimit;
+    static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
 
     static const size_t spinCount = 0;
     static const size_t yieldCount = IvConsumerWaitStrategy::FOREVER;
 
     IvConsumerWaitStrategy strategy(spinCount, yieldCount);
-    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
+    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
     IvConnection connection;
     connection.createLocal("LocalIv", parameters);
 
     IvConsumer consumer(connection);
-    InfiniteVector::Buffer consumerBuffer;
-    BOOST_REQUIRE(connection.allocate(consumerBuffer));
+    InfiniteVector::Message consumerMessage;
+    BOOST_REQUIRE(connection.allocate(consumerMessage));
 
     for(size_t producerCount = 1; producerCount < producerLimit; ++producerCount)
     {
@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
         for(uint64_t messageNumber = 0; messageNumber < actualMessageCount; ++messageNumber)
         {
-            consumer.getNext(consumerBuffer);
-            auto testMessage = consumerBuffer.get<TestMessage>();
+            consumer.getNext(consumerMessage);
+            auto testMessage = consumerMessage.get<TestMessage>();
             testMessage->touch();
             auto producerNumber = testMessage->producerNumber_;
             auto & msgNumber = nextMessage[producerNumber];

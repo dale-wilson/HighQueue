@@ -38,9 +38,9 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
 {
     IvConsumerWaitStrategy strategy;
     size_t entryCount = 10;
-    size_t bufferSize = sizeof(TestMessage);
-    size_t bufferCount = 50;
-    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
+    size_t messageSize = sizeof(TestMessage);
+    size_t messageCount = 50;
+    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
     IvConnection connection;
     connection.createLocal("LocalIv", parameters);
 
@@ -50,22 +50,22 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
     IvProducer producer(connection);
-    InfiniteVector::Buffer buffer;
-    connection.allocate(buffer);
+    InfiniteVector::Message message;
+    connection.allocate(message);
 
     for(size_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
         std::stringstream msg;
         msg << nMessage << std::ends;
-        new (buffer.get<TestMessage>()) TestMessage(msg.str());
-        buffer.setUsed(sizeof(TestMessage));
-        producer.publish(buffer);
+        new (message.get<TestMessage>()) TestMessage(msg.str());
+        message.setUsed(sizeof(TestMessage));
+        producer.publish(message);
     }
     // if we published another message now, it would hang.
     // todo: think of some way around that.
 
-    InfiniteVector::Buffer consumerBuffer;
-    connection.allocate(consumerBuffer);
+    InfiniteVector::Message consumerMessage;
+    connection.allocate(consumerMessage);
 
     // consume the messages.
     IvConsumer consumer(connection);
@@ -74,12 +74,12 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
         std::stringstream msg;
         msg << nMessage << std::ends;
 
-        consumer.getNext(buffer);
-        BOOST_CHECK_EQUAL(sizeof(TestMessage), buffer.getUsed());
-        auto testMessage = buffer.get<TestMessage>();
+        consumer.getNext(message);
+        BOOST_CHECK_EQUAL(sizeof(TestMessage), message.getUsed());
+        auto testMessage = message.get<TestMessage>();
         BOOST_CHECK_EQUAL(msg.str(), testMessage->getString());                
     }
 
-    BOOST_CHECK(! consumer.tryGetNext(buffer));
+    BOOST_CHECK(! consumer.tryGetNext(message));
 }
 #endif //  DISABLE_testConsumerWithoutWaits

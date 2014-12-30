@@ -15,7 +15,7 @@ namespace MPass
 	{
         /// @brief Support for consuming messages from an InfiniteVector
         /// In addition to having the IvConnection which is used to construct
-        /// this object, you will need a InfiniteVector::Buffer which has been initialized
+        /// this object, you will need a InfiniteVector::Message which has been initialized
         /// by calling the IvConnection::allocate() method.
 		class IvConsumer
 		{
@@ -24,25 +24,25 @@ namespace MPass
             /// @param connection provides access to the InfiniteVector
 			IvConsumer(IvConnection & connection);
 
-            /// @brief Get the next buffer-full of data if it is available
+            /// @brief Get the next message-full of data if it is available
             ///
-            /// You must call one of the Buffer::get() methods after a successful return
+            /// You must call one of the Message::get() methods after a successful return
             /// from this call in order to access the data.  Do NOT save the result
-            /// from a previous Buffer::get() call.  It will be invalidated by this call.
+            /// from a previous Message::get() call.  It will be invalidated by this call.
             ///
-            /// @param buffer The buffer will be populated from the InfiniteVector entry.
-            /// @returns immediately.  true if the buffer now contains data; false if no data is available.
-            bool tryGetNext(InfiniteVector::Buffer & buffer);
+            /// @param message The message will be populated from the InfiniteVector entry.
+            /// @returns immediately.  true if the message now contains data; false if no data is available.
+            bool tryGetNext(InfiniteVector::Message & message);
 
-            /// @brief Get the next buffer-full of data.  Wait if none is available
+            /// @brief Get the next message-full of data.  Wait if none is available
             ///
-            /// You must call one of the Buffer::get() methods after this call returns
+            /// You must call one of the Message::get() methods after this call returns
             /// in order to access the data.  Do NOT save the result
-            /// from a previous Buffer::get() call.  It will be invalidated by this call.
+            /// from a previous Message::get() call.  It will be invalidated by this call.
             ///
-            /// @param buffer The buffer will be populated from the InfiniteVector entry.
+            /// @param message The message will be populated from the InfiniteVector entry.
             /// Note: uses the IvConsumerWaitStrategy to wait.
-            void getNext(InfiniteVector::Buffer & buffer);
+            void getNext(InfiniteVector::Message & message);
         private:
             IvConnection & connection_;
             IvHeader * header_;

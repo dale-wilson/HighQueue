@@ -19,7 +19,7 @@ namespace MPass
         /// actual InfiniteVector.
         /// Once the connection is established and the clients (IvProducer
         /// and/or IvConsumer) are created, the allocate method provides
-        /// access to the memory pool to be used by the buffers.
+        /// access to the memory pool to be used by the messages.
         /// @see IvProducer
         /// @see IvConsumer
 		class IvConnection
@@ -44,19 +44,19 @@ namespace MPass
             /// @brief Connect to an existing InfiniteVector in shared memory.
             void openExistingShared(const std::string & name);
 
-            /// @brief Populate a buffer with data from the InfiniteVector's memory pool
-            /// @param the buffer to be populated.
+            /// @brief Populate a message with data from the InfiniteVector's memory pool
+            /// @param the message to be populated.
             /// @returns true if there was memory available.
-            bool allocate(InfiniteVector::Buffer & buffer);
+            bool allocate(InfiniteVector::Message & message);
 
-            /// @brief Get the capacity of all buffers used with this InfiniteVector
-            size_t getBufferCapacity()const;
+            /// @brief Get the capacity of all messages used with this InfiniteVector
+            size_t getMessageCapacity()const;
             
-            /// @brief How many buffers can this InfiniteVector support?
+            /// @brief How many messages can this InfiniteVector support?
             /// Note this is a constant.  It does not change as memory is allocated or freed.
-            size_t getBufferCount()const;
+            size_t getMessageCount()const;
             
-            /// @brief Is there enough memory available to populate a buffer?
+            /// @brief Is there enough memory available to populate a message?
             bool hasMemoryAvailable() const;
 
             /// @brief Provide direct access to internal implementation details.

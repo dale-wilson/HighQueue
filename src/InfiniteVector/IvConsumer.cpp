@@ -20,7 +20,7 @@ IvConsumer::IvConsumer(IvConnection & connection)
 {
 }
 
-bool IvConsumer::tryGetNext(InfiniteVector::Buffer & buffer)
+bool IvConsumer::tryGetNext(InfiniteVector::Message & message)
 {
     while(true)
     {
@@ -38,7 +38,7 @@ bool IvConsumer::tryGetNext(InfiniteVector::Buffer & buffer)
         IvEntry & entry = entryAccessor_[readPosition];
         if(entry.status_ == IvEntry::Status::OK)
         {
-            entry.buffer_.moveTo(buffer);
+            entry.message_.moveTo(message);
             ++readPosition_;
             return true;
         }
@@ -47,14 +47,14 @@ bool IvConsumer::tryGetNext(InfiniteVector::Buffer & buffer)
 
 }
 
-void IvConsumer::getNext(InfiniteVector::Buffer & buffer)
+void IvConsumer::getNext(InfiniteVector::Message & message)
 {
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;
     size_t remainingSleeps = sleeps_;
     while(true)
     {
-        if(tryGetNext(buffer))
+        if(tryGetNext(message))
         {
             return;
         }
@@ -84,14 +84,14 @@ void IvConsumer::getNext(InfiniteVector::Buffer & buffer)
         else
         {
             std::unique_lock<std::mutex> guard(header_->consumerWaitMutex_);
-            if(tryGetNext(buffer))
+            if(tryGetNext(message))
             {
                 return;
             }
             if(header_->consumerWaitConditionVariable_.wait_for(guard, waitStrategy_.mutexWaitTimeout_)
                 == std::cv_status::timeout)
             {
-                if(tryGetNext(buffer))
+                if(tryGetNext(message))
                 {
                     return;
                 }

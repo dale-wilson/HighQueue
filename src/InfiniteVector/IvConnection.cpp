@@ -16,7 +16,7 @@ IvConnection::~IvConnection()
 {
     if(localMemory_ && header_)
     {
-        header_->releaseInternalBuffers();
+        header_->releaseInternalMessages();
     }
 }
 
@@ -55,22 +55,22 @@ size_t IvConnection::spaceNeeded(const IvCreationParameters & parameters)
     size_t headerSize = IvAllocator::align(sizeof(IvHeader), CacheLineSize);
     size_t entriesSize = IvEntry::alignedSize() * parameters.entryCount_;
     size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
-    size_t bufferPoolSize = InfiniteVector::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
-    return headerSize + entriesSize + positionsSize + bufferPoolSize;
+    size_t messagePoolSize = InfiniteVector::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
+    return headerSize + entriesSize + positionsSize + messagePoolSize;
 }
 
-bool IvConnection::allocate(InfiniteVector::Buffer & buffer)
+bool IvConnection::allocate(InfiniteVector::Message & message)
 {
-    return memoryPool_->allocate(buffer);
+    return memoryPool_->allocate(message);
 }
 
-size_t IvConnection::getBufferCapacity()const
+size_t IvConnection::getMessageCapacity()const
 {
-    return memoryPool_->getBufferCapacity();
+    return memoryPool_->getMessageCapacity();
 }
-size_t IvConnection::getBufferCount()const
+size_t IvConnection::getMessageCount()const
 {
-    return memoryPool_->getBufferCount();
+    return memoryPool_->getMessageCount();
 }
 bool IvConnection::hasMemoryAvailable() const
 {

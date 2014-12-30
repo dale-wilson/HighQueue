@@ -55,17 +55,17 @@ IvHeader::IvHeader(
     auto reservePosition = resolver.resolve<IvReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
 
-    auto bufferPoolSize = InfiniteVector::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
-    memoryPool_ = allocator.allocate(bufferPoolSize, CacheLineSize);
+    auto messagePoolSize = InfiniteVector::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
+    memoryPool_ = allocator.allocate(messagePoolSize, CacheLineSize);
     auto pool = new (resolver.resolve<InfiniteVector::MemoryBlockPool>(memoryPool_)) 
-        InfiniteVector::MemoryBlockPool(bufferPoolSize, parameters.bufferSize_);
+        InfiniteVector::MemoryBlockPool(messagePoolSize, parameters.messageSize_);
 
-    allocateInternalBuffers();
+    allocateInternalMessages();
 
     signature_ = LiveSignature;
 }
 
-void IvHeader::allocateInternalBuffers()
+void IvHeader::allocateInternalMessages()
 {
     IvResolver resolver(this);
     auto pool = resolver.resolve<InfiniteVector::MemoryBlockPool>(memoryPool_);
@@ -75,15 +75,15 @@ void IvHeader::allocateInternalBuffers()
     {
         IvEntry & entry = entryPointer[nEntry];
         new (&entry) IvEntry;
-        InfiniteVector::Buffer & buffer = entry.buffer_;
-        if(!pool->allocate(buffer))
+        InfiniteVector::Message & message = entry.message_;
+        if(!pool->allocate(message))
         {
-            throw std::runtime_error("Not enough buffers for entries.");
+            throw std::runtime_error("Not enough messages for entries.");
         }
     }
 }
 
-void IvHeader::releaseInternalBuffers()
+void IvHeader::releaseInternalMessages()
 {
     IvResolver resolver(this);
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
@@ -91,8 +91,8 @@ void IvHeader::releaseInternalBuffers()
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
         IvEntry & entry = entryPointer[nEntry];
-        InfiniteVector::Buffer & buffer = entry.buffer_;
-        buffer.release();
+        InfiniteVector::Message & message = entry.message_;
+        message.release();
     }
 }
 

@@ -12,14 +12,14 @@ namespace
     struct TestMessage
     {
         char message_[100];
-        TestMessage(const std::string & message)
+        TestMessage(const std::string & text)
         {
             size_t size = sizeof(message_);
-            if(size > message.size())
+            if(size > text.size())
             {
-                size = message.size();
+                size = text.size();
             }
-            std::strncpy(message_, message.data(), size);
+            std::strncpy(message_, text.data(), size);
         }
     };
 }
@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE(testProducer)
 {
     IvConsumerWaitStrategy strategy;
     size_t entryCount = 10;
-    size_t bufferSize = sizeof(TestMessage);
-    size_t bufferCount = 50;
-    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
+    size_t messageSize = sizeof(TestMessage);
+    size_t messageCount = 50;
+    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
     IvConnection connection;
     connection.createLocal("LocalIv", parameters);
     IvProducer producer(connection);
@@ -48,16 +48,16 @@ BOOST_AUTO_TEST_CASE(testProducer)
     IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
 
-    InfiniteVector::Buffer buffer;
-    connection.allocate(buffer);
-    auto testMessage = buffer.get<TestMessage>();
+    InfiniteVector::Message message;
+    connection.allocate(message);
+    auto testMessage = message.get<TestMessage>();
     new (testMessage) TestMessage("Hello world");
-    buffer.setUsed(sizeof(TestMessage));
-    BOOST_CHECK(!buffer.isEmpty());
+    message.setUsed(sizeof(TestMessage));
+    BOOST_CHECK(!message.isEmpty());
 
-    producer.publish(buffer);
-    BOOST_CHECK(buffer.isEmpty());
-    BOOST_CHECK(buffer.isValid());
+    producer.publish(message);
+    BOOST_CHECK(message.isEmpty());
+    BOOST_CHECK(message.isValid());
 
     BOOST_CHECK_EQUAL(*readPosition + 1, *publishPosition);
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
@@ -65,9 +65,9 @@ BOOST_AUTO_TEST_CASE(testProducer)
 
     IvEntry & firstEntry = accessor[*readPosition];
     BOOST_CHECK_EQUAL(firstEntry.status_, IvEntry::Status::OK);
-    InfiniteVector::Buffer & publishedBuffer = firstEntry.buffer_;
-    auto publishedMessage = publishedBuffer.get<TestMessage>(); 
-    auto publishedSize = publishedBuffer.getUsed();
+    InfiniteVector::Message & firstMessage = firstEntry.message_;
+    auto publishedMessage = firstMessage.get<TestMessage>(); 
+    auto publishedSize = firstMessage.getUsed();
     BOOST_CHECK_EQUAL(publishedMessage, testMessage);
     BOOST_CHECK_EQUAL(sizeof(TestMessage), publishedSize);
     
@@ -75,9 +75,9 @@ BOOST_AUTO_TEST_CASE(testProducer)
     {
         std::stringstream msg;
         msg << "Published " << nMessage << std::ends;
-        new (buffer.get<TestMessage>()) TestMessage(msg.str());
-        buffer.setUsed(sizeof(TestMessage));
-        producer.publish(buffer);
+        new (message.get<TestMessage>()) TestMessage(msg.str());
+        message.setUsed(sizeof(TestMessage));
+        producer.publish(message);
     }
     // if we published another message now, it would hang.
     // todo: think of some way around that.
@@ -86,8 +86,8 @@ BOOST_AUTO_TEST_CASE(testProducer)
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 
     // Be sure the first message is still intact:
-    publishedMessage = publishedBuffer.get<TestMessage>(); 
-    publishedSize = publishedBuffer.getUsed();
+    publishedMessage = firstMessage.get<TestMessage>(); 
+    publishedSize = firstMessage.getUsed();
     BOOST_CHECK_EQUAL(publishedMessage, testMessage);
     BOOST_CHECK_EQUAL(sizeof(TestMessage), publishedSize);
 
@@ -95,18 +95,20 @@ BOOST_AUTO_TEST_CASE(testProducer)
     ++(*readPosition);
 
     // Then publish one more
-    auto fromTheTopMessage = buffer.get<TestMessage>();
+    // this technique is for testing, it is not recommended for production!
+    // use the construct method
+    auto fromTheTopMessage = message.get<TestMessage>();
     char topMessage[] = "Take it from the top";
     new (fromTheTopMessage) TestMessage("Take it from the top.");
-    buffer.setUsed(sizeof(topMessage)); // not recommended for production!
-    producer.publish(buffer);
+    message.setUsed(sizeof(topMessage));     
+    producer.publish(message);
 
     // Check to be sure that overwrote the first message.
     BOOST_CHECK_EQUAL(firstEntry.status_, IvEntry::Status::OK);
-    InfiniteVector::Buffer & newestBuffer = firstEntry.buffer_;
-    auto newestMessage = newestBuffer.get<TestMessage>(); 
-    auto newestSize = newestBuffer.getUsed();
-    BOOST_CHECK_EQUAL(newestMessage, fromTheTopMessage);
+    InfiniteVector::Message & newestMessage = firstEntry.message_;
+    auto newestTestMessage = newestMessage.get<TestMessage>(); 
+    auto newestSize = newestMessage.getUsed();
+    BOOST_CHECK_EQUAL(newestTestMessage, fromTheTopMessage);
     BOOST_CHECK_EQUAL(sizeof(topMessage), newestSize);
 }
 #endif //  DISABLE_testProducer

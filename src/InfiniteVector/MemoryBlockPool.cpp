@@ -7,58 +7,58 @@ using namespace InfiniteVector;
 
 MemoryBlockPool::MemoryBlockPool()
 : blockSize_(0)
-, bufferSize_(0)
-, bufferCount_(0)
+, messageSize_(0)
+, messageCount_(0)
 , rootOffset_(NULL_OFFSET)
 {
 }
 
 MemoryBlockPool::MemoryBlockPool(
     size_t blockSize, 
-    size_t bufferSize)
+    size_t messageSize)
 : blockSize_(blockSize)
-, bufferSize_(cacheAlignedBufferSize(bufferSize))
-, bufferCount_(0)
+, messageSize_(cacheAlignedMessageSize(messageSize))
+, messageCount_(0)
 , rootOffset_(NULL_OFFSET)
 {
-    preAllocate(bufferSize_, blockSize_);
+    preAllocate(messageSize_, blockSize_);
 }
 
-size_t MemoryBlockPool::preAllocate(size_t bufferSize, size_t blockSize)
+size_t MemoryBlockPool::preAllocate(size_t messageSize, size_t blockSize)
 {
     auto sizeofthis = sizeof(MemoryBlockPool);
     auto intThis = uintptr_t(this);
     auto endThis = intThis + sizeofthis + CacheLineSize - 1;
     endThis -= endThis % CacheLineSize;
     size_t current = endThis - intThis;
-    if(current + bufferSize_ > blockSize)
+    if(current + messageSize_ > blockSize)
     {
-        throw std::invalid_argument("MemoryBlockPool: aligned offset + buffer size exceeds pool size."); 
+        throw std::invalid_argument("MemoryBlockPool: aligned offset + message size exceeds pool size."); 
     }
     blockSize_ = blockSize;
-    bufferSize_ = bufferSize;
-    bufferCount_ = 0;
+    messageSize_ = messageSize;
+    messageCount_ = 0;
 
     auto baseAddress = reinterpret_cast<byte_t *>(this);
     rootOffset_ = current;
     while(current != NULL_OFFSET)
     {
 //        std::cerr << "Create " << current << std::endl;
-        auto next = current + bufferSize_;
-        if(next + bufferSize_ > blockSize_)
+        auto next = current + messageSize_;
+        if(next + messageSize_ > blockSize_)
         {
             next = NULL_OFFSET;
         }
 
         reinterpret_cast<size_t &>(baseAddress[current]) = next;
         current = next;
-        bufferCount_ += 1;
+        messageCount_ += 1;
     }
-//    std::cerr << "Preallocate " << bufferCount_ << " Buffers. " << rootOffset_ << std::endl;
-    return bufferCount_;
+//    std::cerr << "Preallocate " << messageCount_ << " Messages. " << rootOffset_ << std::endl;
+    return messageCount_;
 }
 
-bool MemoryBlockPool::allocate(Buffer & buffer)
+bool MemoryBlockPool::allocate(Message & message)
 {
     Spinlock::Guard guard(lock_);
     auto offset = rootOffset_;
@@ -68,24 +68,24 @@ bool MemoryBlockPool::allocate(Buffer & buffer)
 //        std::cout << "Allocate " << offset << std::endl;
         auto baseAddress = reinterpret_cast<byte_t *>(this);
         rootOffset_ = reinterpret_cast<size_t &>(baseAddress[offset]);
-        buffer.set(this, bufferSize_, offset, 0);
+        message.set(this, messageSize_, offset, 0);
     }
     return ok;
 }
 
-void MemoryBlockPool::release(Buffer & buffer)
+void MemoryBlockPool::release(Message & message)
 {
     auto baseAddress = reinterpret_cast<byte_t *>(this);
-    if(buffer.getContainer() != baseAddress)
+    if(message.getContainer() != baseAddress)
     {
-        throw std::runtime_error("Buffer returned to wrong allocator.");
+        throw std::runtime_error("Message returned to wrong allocator.");
     }
 
     Spinlock::Guard guard(lock_);
-//    std::cout << "Release " << buffer.getOffset() << std::endl;
-    *buffer.get<size_t>() = rootOffset_;
-    rootOffset_ = buffer.getOffset();
-    buffer.reset();
+//    std::cout << "Release " << message.getOffset() << std::endl;
+    *message.get<size_t>() = rootOffset_;
+    rootOffset_ = message.getOffset();
+    message.reset();
 }
 
 bool MemoryBlockPool::isEmpty() const
@@ -94,12 +94,12 @@ bool MemoryBlockPool::isEmpty() const
 }
 
 
-size_t MemoryBlockPool::cacheAlignedBufferSize(size_t bufferSize)
+size_t MemoryBlockPool::cacheAlignedMessageSize(size_t messageSize)
 {
-    return ((bufferSize + CacheLineSize - 1) / CacheLineSize) * CacheLineSize;
+    return ((messageSize + CacheLineSize - 1) / CacheLineSize) * CacheLineSize;
 }
 
-size_t MemoryBlockPool::spaceNeeded(size_t bufferSize, size_t bufferCount)
+size_t MemoryBlockPool::spaceNeeded(size_t messageSize, size_t messageCount)
 {
-    return sizeof(MemoryBlockPool) + cacheAlignedBufferSize(bufferSize) * bufferCount + CacheLineSize;
+    return sizeof(MemoryBlockPool) + cacheAlignedMessageSize(messageSize) * messageCount + CacheLineSize;
 }

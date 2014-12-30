@@ -6,7 +6,7 @@
 
 #include "IvDefinitions.h"
 #include <InfiniteVector/IvAllocator.h>
-#include <InfiniteVector/Buffer.h>
+#include <InfiniteVector/Message.h>
 
 namespace MPass
 {
@@ -21,7 +21,7 @@ namespace MPass
                 EMPTY,
                 SKIP
             };
-            InfiniteVector::Buffer buffer_;
+            InfiniteVector::Message message_;
             Status status_;
 
             IvEntry()

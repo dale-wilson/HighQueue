@@ -10,31 +10,31 @@
 using namespace MPass;
 using namespace InfiniteVector;
 
-#define DISABLE_testIvConnectionBuffersx
-#ifdef DISABLE_testIvConnectionBuffers
-#pragma message ("DISABLE_testIvConnectionBuffers " __FILE__)
-#else // DISABLE DISABLE_testIvConnectionBuffers
-BOOST_AUTO_TEST_CASE(testIvConnectionBuffers)
+#define DISABLE_testIvConnectionMessagesx
+#ifdef DISABLE_testIvConnectionMessages
+#pragma message ("DISABLE_testIvConnectionMessages " __FILE__)
+#else // DISABLE DISABLE_testIvConnectionMessages
+BOOST_AUTO_TEST_CASE(testIvConnectionMessages)
 {
     IvConsumerWaitStrategy strategy;
     size_t entryCount = 100;
-    size_t bufferSize = 1234;
-    size_t bufferCount = 150;
-    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
+    size_t messageSize = 1234;
+    size_t messageCount = 150;
+    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
     IvConnection connection;
     connection.createLocal("LocalIv", parameters);
 
-    BOOST_CHECK_LE(bufferSize, connection.getBufferCapacity());
-    BOOST_CHECK_LE(bufferCount, connection.getBufferCount());
+    BOOST_CHECK_LE(messageSize, connection.getMessageCapacity());
+    BOOST_CHECK_LE(messageCount, connection.getMessageCount());
 
-    InfiniteVector::Buffer buffer;
-    for(size_t nBuffer = 0; nBuffer < (bufferCount - entryCount); ++nBuffer)
+    InfiniteVector::Message message;
+    for(size_t nMessage = 0; nMessage < (messageCount - entryCount); ++nMessage)
     {
         BOOST_CHECK(connection.hasMemoryAvailable());
-        BOOST_CHECK(connection.allocate(buffer));
+        BOOST_CHECK(connection.allocate(message));
     }
     BOOST_CHECK(! connection.hasMemoryAvailable());
-    BOOST_CHECK(!connection.allocate(buffer));
+    BOOST_CHECK(!connection.allocate(message));
 
     // peek inside
     auto header = connection.getHeader();
@@ -45,5 +45,5 @@ BOOST_AUTO_TEST_CASE(testIvConnectionBuffers)
     BOOST_CHECK_EQUAL(*readPosition, *publishPosition);
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 }
-#endif //  DISABLE_testIvConnectionBuffers
+#endif //  DISABLE_testIvConnectionMessages
 

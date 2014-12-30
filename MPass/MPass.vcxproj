@@ -135,7 +135,7 @@
     <ClInclude Include="..\src\Common\CacheLIne.h" />
     <ClInclude Include="..\src\Common\MPassPch.h" />
     <ClInclude Include="..\src\Common\Spinlock.h" />
-    <ClInclude Include="..\src\InfiniteVector\Buffer.h" />
+    <ClInclude Include="..\src\InfiniteVector\Message.h" />
     <ClInclude Include="..\src\InfiniteVector\IvAllocator.h" />
     <ClInclude Include="..\src\InfiniteVector\IvConnection.h" />
     <ClInclude Include="..\src\InfiniteVector\IvConsumer.h" />
@@ -157,7 +157,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\Buffer.cpp" />
+    <ClCompile Include="..\src\InfiniteVector\Message.cpp" />
     <ClCompile Include="..\src\InfiniteVector\IvConnection.cpp" />
     <ClCompile Include="..\src\InfiniteVector\IvConsumer.cpp" />
     <ClCompile Include="..\src\InfiniteVector\IvHeader.cpp" />

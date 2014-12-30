@@ -17,21 +17,21 @@ namespace MPass
             IvConsumerWaitStrategy strategy_;
             /// @brief How many entries in the visible window of the InfiniteVector
             size_t entryCount_;
-            /// @brief What is the minimum size of a buffer (will be rounded up to the next cache line boundary)
-            size_t bufferSize_;
-            /// @brief What is the minimum number of buffers needed (one extra may be allocated just because...)
-            size_t bufferCount_;
+            /// @brief What is the minimum size of a message (will be rounded up to the next cache line boundary)
+            size_t messageSize_;
+            /// @brief What is the minimum number of messages needed (one extra may be allocated just because...)
+            size_t messageCount_;
 
             IvCreationParameters(
                 const IvConsumerWaitStrategy & strategy_,
                 size_t entryCount,
-                size_t bufferSize,
-                size_t bufferCount
+                size_t messageSize,
+                size_t messageCount
                 )
                 : strategy_(strategy_)
                 , entryCount_(entryCount)
-                , bufferSize_(bufferSize)
-                , bufferCount_(bufferCount)
+                , messageSize_(messageSize)
+                , messageCount_(messageCount)
             {
             }
         };

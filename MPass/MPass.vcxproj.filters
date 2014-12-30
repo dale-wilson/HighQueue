@@ -63,13 +63,13 @@
     <ClInclude Include="..\src\InfiniteVector\IvEntryAccessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\Buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\InfiniteVector\MemoryBlockPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\InfiniteVector\MemoryBlockPoolFwd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\InfiniteVector\Message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,10 +89,10 @@
     <ClCompile Include="..\src\InfiniteVector\IvConsumer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\Buffer.cpp">
+    <ClCompile Include="..\src\InfiniteVector\MemoryBlockPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\MemoryBlockPool.cpp">
+    <ClCompile Include="..\src\InfiniteVector\Message.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

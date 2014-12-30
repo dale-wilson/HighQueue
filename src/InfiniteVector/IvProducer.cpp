@@ -16,7 +16,7 @@ IvProducer::IvProducer(IvConnection & connection)
 {
 }
 
-void IvProducer::publish(InfiniteVector::Buffer & buffer)
+void IvProducer::publish(InfiniteVector::Message & message)
 {
     bool published = false;
     while(!published)
@@ -31,7 +31,7 @@ void IvProducer::publish(InfiniteVector::Buffer & buffer)
         IvEntry & entry = entryAccessor_[reserved];
         if(entry.status_ != IvEntry::Status::SKIP)
         {
-            buffer.moveTo(entry.buffer_);
+            message.moveTo(entry.message_);
             entry.status_ = IvEntry::Status::OK;
             published = true;
         }

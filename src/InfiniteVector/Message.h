@@ -8,7 +8,7 @@ namespace MPass
     namespace InfiniteVector
     {
         /// @brief A handle for a block of memory
-        class Buffer
+        class Message
         {
         public:
             enum Type
@@ -20,41 +20,41 @@ namespace MPass
             };
             const static size_t NO_POOL = ~size_t(0);
 
-            /// @brief construct an empty (Invalid) buffer.
-            Buffer();
+            /// @brief construct an empty (Invalid) message.
+            Message();
 
-            ~Buffer();
+            ~Message();
 
             /// @brief return a pointer to the block of memory cast to the requested type.  
             ///
-            /// This should be used when the buffer already contains an object of the appropriate type.
-            /// or when the caller plans to construct/initialize the contents of the buffer.
+            /// This should be used when the message already contains an object of the appropriate type.
+            /// or when the caller plans to construct/initialize the contents of the message.
             /// The memory is not changed by this call, 
             ///          
-            /// @tparam T is the type of object in the buffer.
+            /// @tparam T is the type of object in the message.
             template <typename T = byte_t>
             T* get()const;
 
             /// @brief return a const pointer to the block of memory cast to the requested type.
             ///
-            /// This should be used when the buffer already contains an object of the appropriate type.
+            /// This should be used when the message already contains an object of the appropriate type.
             /// The memory is not changed by this call.
             ///          
-            /// @tparam T is the type of object in the buffer.
+            /// @tparam T is the type of object in the message.
             template <typename T = byte_t>
             const T* getConst()const;
 
-            /// @brief Set the number of bytes in the buffer that contain valid data.
-            /// @param used is the total number of bytes used in the buffer.
+            /// @brief Set the number of bytes in the message that contain valid data.
+            /// @param used is the total number of bytes used in the message.
             /// @returns its argument for convenience.
-            /// @throws runtime_error if used exceeds the buffer capacity.
+            /// @throws runtime_error if used exceeds the message capacity.
 
             size_t setUsed(size_t used);
-            /// @brief How many bytes in this buffer contain valid data?
+            /// @brief How many bytes in this message contain valid data?
             /// @param returns the number of bytes used.
             size_t getUsed() const;
 
-            /// @brief construct a new object of type T in the buffer using placement new.
+            /// @brief construct a new object of type T in the message using placement new.
             /// @tparam T is the type of object to be constructed.
             /// @tparam ArgTypes are the types arguments to pass to the constructor.
             /// @param args are the actual arguments.
@@ -65,108 +65,108 @@ namespace MPass
                 return new (get<T>()) T(std::forward<ArgTypes>(args)...);
             }
 
-            /// @brief How many objects of type T can be added to the buffer.
+            /// @brief How many objects of type T can be added to the message.
             /// @tparam T is the type of object
             template <typename T = byte_t>
             size_t available() const;
 
-            /// @brief Is there room for count additional objects of type T in the buffer?
+            /// @brief Is there room for count additional objects of type T in the message?
             /// @tparam T is the type of object
             template <typename T = byte_t>
             bool needSpace(size_t count) const;
 
-            /// @brief Increase the amount of space used inthe buffer.
+            /// @brief Increase the amount of space used inthe message.
             /// @tparam T is the type of object
-            /// @param count is the number of T's to be added to the buffer.
+            /// @param count is the number of T's to be added to the message.
             template <typename T = byte_t>
             size_t addUsed(size_t count);
 
-            /// @brief Return the next available location in the buffer as a pointer to T.
+            /// @brief Return the next available location in the message as a pointer to T.
             /// @tparam T is the type of object
             template <typename T = byte_t>
             T* getWritePosition()const;
 
-            /// @brief Use the copy constructor to construct a new object of type T in the next available location in the buffer.
+            /// @brief Use the copy constructor to construct a new object of type T in the next available location in the message.
             /// @tparam T is the type of object
             /// @param object is the object to be copied.
-            /// @returns a pointer to the newly copy-constructed object in the buffer.
+            /// @returns a pointer to the newly copy-constructed object in the message.
             template <typename T = byte_t>
             T* appendNewCopy(const T & object);
 
-            /// @brief Use a binary copy to initialize the next available location in the buffer.
+            /// @brief Use a binary copy to initialize the next available location in the message.
             /// @tparam T is the type of object
             /// @param data is the object to be copied.
             /// @param count is the number of Ts to copy.
-            /// @returns a pointer to the newly initialized data in the buffer.
+            /// @returns a pointer to the newly initialized data in the message.
             template <typename T = byte_t>
             T* appendBinaryCopy(const T * data, size_t count);
 
-            /// @brief Associate a memory block from a MemoryBlockPool with this buffer.
+            /// @brief Associate a memory block from a MemoryBlockPool with this message.
             /// The block of data is general purpose.  It can be written to and reused as necessary.
-            /// Normally this is only called once per buffer.  The buffer continues to use the same memory for its
+            /// Normally this is only called once per message.  The message continues to use the same memory for its
             /// entire lifetime.  This is a typical use, not a requirement.
-            /// @param pool The address of the pool containing ths buffer.
-            /// @param capacity  The capacity of this buffer
-            /// @param offset The offset to this buffer within the pool
+            /// @param pool The address of the pool containing ths message.
+            /// @param capacity  The capacity of this message
+            /// @param offset The offset to this message within the pool
             /// @param used The number of bytes used
             void set(MemoryBlockPool * pool, size_t capacity, size_t offset, size_t used = 0);
 
-            /// @brief Undo a set.  Return the memory to the pool (if any), and make the buffer Invalid.
+            /// @brief Undo a set.  Return the memory to the pool (if any), and make the message Invalid.
             void release();
 
             /// @brief Associate this memory block with one or two segments of memory contained in some other object.
             /// Note: "borrow" is a useful concept borrowed from Rust.
             ///
-            /// Normally this method will be used when the data appears inside an external buffer used for some other purpose 
-            /// for example a buffer read from a TCP stream or a file stream.  Because the message boundaries don't
-            /// necessarily match buffer boundaries in this use case, borrow allows the data to appear in two separate
-            /// chunks within the buffer.
+            /// Normally this method will be used when the data appears inside an external buffeR used for some other purpose 
+            /// for example a buffeR read from a TCP stream or a file stream.  Because the message boundaries don't
+            /// necessarily match buffeR boundaries in this use case, borrow allows the data to appear in two separate
+            /// chunks within the same buffeR.
             ///
-            /// @param container The base address for the external buffer containing the memory.
-            /// @param offset The offset to this buffer within the container
+            /// @param container The base address for the external buffeR containing the memory.
+            /// @param offset The offset to this buffeR within the container
             /// @param used The number of bytes used
-            /// @param offsetSplit The offset to the second chunk data in the external buffer.
+            /// @param offsetSplit The offset to the second chunk data in the external buffeR.
             /// @param usedSplit The number of bytes used in the second chunk.
             void borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit = 0, size_t usedSplit = 0);
 
-            /// @brief Mark the buffer empty.
+            /// @brief Mark the message empty.
             void setEmpty();
 
-            /// @brief Is the buffer empty?
+            /// @brief Is the message empty?
             bool isEmpty()const;
 
-            /// @brief Swap the contents of two buffers.
+            /// @brief Swap the contents of two messages.
             /// Fast
-            /// @param rhs is the buffer that will be swapped with *this
-            /// @throws runtime_exception if either buffer is unsuitable for swapping.
-            void swap(Buffer & rhs);
+            /// @param rhs is the message that will be swapped with *this
+            /// @throws runtime_exception if either message is unsuitable for swapping.
+            void swap(Message & rhs);
 
-            /// @brief Move the data from one buffer to another, leaving the original buffer empty.
-            /// Fast if both buffers are normal.
-            /// Fast enough if the source buffer is borrowed.
-            /// The target buffer must not be borrowed.
-            /// After the move, the target buffer will be normal.
-            /// @param target is the buffer to receive the data
-            /// @throws runtime_exception if the target buffer is not suitable.
-            void moveTo(Buffer & target);
+            /// @brief Move the data from one message to another, leaving the original message empty.
+            /// Fast if both messages are normal.
+            /// Fast enough if the source message is borrowed.
+            /// The target message must not be borrowed.
+            /// After the move, the target message will be normal.
+            /// @param target is the message to receive the data
+            /// @throws runtime_exception if the target message is not suitable.
+            void moveTo(Message & target);
 
-            /// @brief Is this buffer normal or borrowed?
+            /// @brief Is this message normal or borrowed?
             bool isValid() const;
-            /// @brief Is this buffer borrowed?
+            /// @brief Is this message borrowed?
             bool isBorrowed() const;
-            /// @brief Is this buffer contiguous (not split?)
+            /// @brief Is this message contiguous (not split?)
             bool isContiguous() const;
 
-            /// @brief Throw a runtime_exception if this is not a normal buffer
+            /// @brief Throw a runtime_exception if this is not a normal message
             /// For internal use, but you can use it if you feel the need.
             /// @param message to appear in the exception.
-            void mustBeNormal(const char * message = "Operation cannot be applied to an immutable buffer.") const;
+            void mustBeNormal(const char * message = "Operation cannot be applied to an immutable message.") const;
 
-            /// @brief Throw a runtime_exception if this is not a valid buffer
+            /// @brief Throw a runtime_exception if this is not a valid message
             /// For internal use, but you can use it if you feel the need.
-            void mustBeValid(const char * message = "Operation requires a valid buffer.") const;
+            void mustBeValid(const char * message = "Operation requires a valid message.") const;
 
-            /// @brief Get the base address of the block of memory containing this buffers memory.
+            /// @brief Get the base address of the block of memory containing this message's memory.
             /// NOTE: this is not an interesting function.  Do not use it.
             byte_t * getContainer()const;
 
@@ -174,13 +174,11 @@ namespace MPass
             /// NOTE: this is not an interesting function.  Do not use it.
             size_t getOffset()const;
 
-            /// @brief How is this buffer associated with its memory?
+            /// @brief How is this message associated with its memory?
             Type getType() const;
 
-            /// @brief Prepare a buffer for reuse -- make it Invalid.
-            /// Warning:  This is not the method you want.  Call release() instead, or simply delete the Buffer. 
-            /// This method should be private to be called only indirectly by a buffer owner, but
-            /// I can't figure out how to do the appropriate friendship.  
+            /// @brief Prepare a message for reuse -- make it Invalid.
+            /// Warning:  This is not the method you want.  Call release() instead, or simply delete the Message. 
             void reset();
 
         private:
@@ -194,7 +192,7 @@ namespace MPass
         };
 
         inline
-        void Buffer::borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit, size_t usedSplit)
+        void Message::borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit, size_t usedSplit)
         {
             int todo_ReleaseNormalIfNecessary;
 
@@ -209,62 +207,62 @@ namespace MPass
         }
 
         inline
-        size_t Buffer::setUsed(size_t used)
+        size_t Message::setUsed(size_t used)
         {
-            mustBeNormal("Buffer::setUsed: Invalid operation on buffer.");
+            mustBeNormal("Message::setUsed: Invalid operation on message.");
             if(used > capacity_)
             {
-                throw std::runtime_error("Buffer used > capacity");
+                throw std::runtime_error("Message used > capacity");
             }
             used_ = used;
             return used_;
         }
 
         inline
-        void Buffer::setEmpty()
+        void Message::setEmpty()
         {
             used_ = 0;
             usedSplit_ = 0;
         }
 
         inline
-        size_t Buffer::getUsed() const
+        size_t Message::getUsed() const
         {
             return used_ + usedSplit_;
         }
 
         inline
-        bool Buffer::isEmpty()const
+        bool Message::isEmpty()const
         {
             return used_ + usedSplit_ == 0;
         }
 
         inline
-        Buffer::Type Buffer::getType() const
+        Message::Type Message::getType() const
         {
             return type_;
         }
 
         inline
-        bool Buffer::isValid() const
+        bool Message::isValid() const
         {
             return type_ != Invalid;
         }
 
         inline
-        bool Buffer::isBorrowed() const
+        bool Message::isBorrowed() const
         {
             return type_ == Borrowed;
         }
 
         inline
-        bool Buffer::isContiguous() const
+        bool Message::isContiguous() const
         {
             return usedSplit_ == 0;
         }
 
         inline
-        void Buffer::mustBeNormal(const char * message) const
+        void Message::mustBeNormal(const char * message) const
         {
             if(type_ != Normal)
             {
@@ -273,7 +271,7 @@ namespace MPass
         }
 
         inline
-        void Buffer::mustBeValid(const char * message) const
+        void Message::mustBeValid(const char * message) const
         {
             if(type_ == Invalid)
             {
@@ -282,37 +280,37 @@ namespace MPass
         }
 
         inline
-        void Buffer::swap(Buffer & rhs)
+        void Message::swap(Message & rhs)
         {
             if(type_ == Borrowed || rhs.type_ == Borrowed)
             {
-                throw std::runtime_error("Buffer::swap: Invalid operation on Borrowed buffer.");
+                throw std::runtime_error("Message::swap: Invalid operation on Borrowed message.");
             }
             std::swap(container_, rhs.container_);
             std::swap(capacity_, rhs.capacity_);
             std::swap(offset_, rhs.offset_);
             std::swap(used_, rhs.used_);
             std::swap(type_, rhs.type_);
-            // no need to swap the split offset and used.  Normal buffers cannot be split.
+            // no need to swap the split offset and used.  Normal messages cannot be split.
         }
 
         inline
-        void Buffer::moveTo(Buffer & rhs)
+        void Message::moveTo(Message & rhs)
         {
-            mustBeValid("Buffer::moveTo: source buffer is invalid.");
-            rhs.mustBeNormal("Buffer::moveTo: target buffer not suitable for operation." );
+            mustBeValid("Message::moveTo: source message is invalid.");
+            rhs.mustBeNormal("Message::moveTo: target message not suitable for operation." );
             if(type_ == Borrowed)
             {
                 if(used_ + usedSplit_ > rhs.capacity_)
                 {
-                    throw std::runtime_error("Move to: target buffer too small");
+                    throw std::runtime_error("Move to: target message too small");
                 }
-                auto rhsBuffer = rhs.get();
-                memcpy(rhsBuffer, getConst(), used_);
+                auto rhsMessage = rhs.get();
+                memcpy(rhsMessage, getConst(), used_);
                 if(usedSplit_ != 0)
                 {
-                    rhsBuffer += used_;
-                    memcpy(rhsBuffer, container_ + offsetSplit_, usedSplit_);
+                    rhsMessage += used_;
+                    memcpy(rhsMessage, container_ + offsetSplit_, usedSplit_);
                 }
             }
             else
@@ -323,59 +321,59 @@ namespace MPass
         }
 
         template <typename T>
-        T* Buffer::get()const
+        T* Message::get()const
         {
-            mustBeNormal("Buffer::get: Invalid access to buffer");
+            mustBeNormal("Message::get: Invalid access to message");
             return reinterpret_cast<T *>(container_ + offset_);
         }
 
         template <typename T>
-        const T* Buffer::getConst()const
+        const T* Message::getConst()const
         {
             mustBeValid();
             return reinterpret_cast<T *>(container_ + offset_);
         }
 
         template <typename T>
-        size_t Buffer::available() const
+        size_t Message::available() const
         {
             return (capacity_ - used_) / sizeof(T);
         }
 
         template <typename T>
-        bool Buffer::needSpace(size_t count) const
+        bool Message::needSpace(size_t count) const
         {
             return available<T>() >= count;
         }
 
         template <typename T>
-        size_t Buffer::addUsed(size_t count)
+        size_t Message::addUsed(size_t count)
         {
-            mustBeNormal("Buffer::addUsed: Invalid access to buffer.");
+            mustBeNormal("Message::addUsed: Invalid access to message.");
             return setUsed(used_ + count * sizeof(T));
         }
 
         template <typename T>
-        T* Buffer::getWritePosition()const
+        T* Message::getWritePosition()const
         {
-            mustBeNormal("Buffer::getWritePosition: Invalid access to buffer.");
+            mustBeNormal("Message::getWritePosition: Invalid access to message.");
             return reinterpret_cast<T *>(container_ + offset_ + used_);
         }
 
         template <typename T>
-        T * Buffer::appendNewCopy(const T & data)
+        T * Message::appendNewCopy(const T & data)
         {
             auto position = getWritePosition(); 
-            // add used before writing to the buffer to catch overruns first.
+            // add used before writing to the message to catch overruns first.
             addUsed<T>(1);
             return new (position) T(data);
         }
 
         template <typename T>
-        T * Buffer::appendBinaryCopy(const T * data, size_t count)
+        T * Message::appendBinaryCopy(const T * data, size_t count)
         {
             auto position = getWritePosition(); 
-            // add used before writing to the buffer to catch overruns first.
+            // add used before writing to the message to catch overruns first.
             addUsed<T>(count);
             std::memcpy(position, data, count * sizeof(T));
             return reinterpret_cast<T *>(position);
