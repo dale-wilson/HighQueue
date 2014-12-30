@@ -15,9 +15,9 @@ namespace
     volatile std::atomic<uint32_t> producersWaiting = 0;
     volatile bool producersGo = false;
 
-    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount)
+    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
     {
-        Producer producer(connection);
+        Producer producer(connection, solo);
         InfiniteVector::Message producerMessage;
         if(!connection.allocate(producerMessage))
         {
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         {
             nextMessage.emplace_back(0u);
             producerThreads.emplace_back(
-                std::bind(producerFunction, std::ref(connection), nTh, perProducer));
+                std::bind(producerFunction, std::ref(connection), nTh, perProducer, producerCount == 1));
         }
         std::this_thread::yield();
 

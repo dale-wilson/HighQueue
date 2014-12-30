@@ -54,6 +54,7 @@ IvHeader::IvHeader(
     reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
     auto reservePosition = resolver.resolve<IvReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
+    reservePosition->reserveSoloPosition_ = entryCount_;
 
     auto messagePoolSize = InfiniteVector::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
     memoryPool_ = allocator.allocate(messagePoolSize, CacheLineSize);

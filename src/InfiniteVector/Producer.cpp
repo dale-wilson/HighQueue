@@ -5,15 +5,41 @@
 using namespace MPass;
 using namespace InfiniteVector;
 
-Producer::Producer(Connection & connection)
-: connection_(connection)
+Producer::Producer(Connection & connection, bool solo)
+: solo_(solo)
+, connection_(connection)
 , header_(connection.getHeader())
 , resolver_(header_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
 , publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
 , reservePosition_(resolver_.resolve<volatile IvReservePosition>(header_->reservePosition_)->reservePosition_)
+, reserveSoloPosition_(resolver_.resolve<volatile IvReservePosition>(header_->reservePosition_)->reserveSoloPosition_)
+, reserveSpinLock_(resolver_.resolve<IvReservePosition>(header_->reservePosition_)->reserveSpinlock_)
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 {
+    if(solo_ && reservePosition_ > reserveSoloPosition_)
+    {
+        reserveSoloPosition_ = reservePosition_;
+    }
+}
+
+Producer::~Producer()
+{
+    if(solo_)
+    {
+        reservePosition_ = reserveSoloPosition_;
+    }
+
+}
+
+inline
+uint64_t Producer::reserve()
+{
+    if(solo_)
+    {
+        return reserveSoloPosition_++;
+    }
+    return reservePosition_++;
 }
 
 void Producer::publish(InfiniteVector::Message & message)
@@ -21,7 +47,7 @@ void Producer::publish(InfiniteVector::Message & message)
     bool published = false;
     while(!published)
     {
-        auto reserved = reservePosition_++;
+        auto reserved = reserve();
         auto entryEnd = readPosition_ + header_->entryCount_;
         while(entryEnd <= reserved)
         {

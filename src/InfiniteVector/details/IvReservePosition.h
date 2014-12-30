@@ -14,6 +14,8 @@ namespace MPass
 		struct IvReservePosition
 		{
             AtomicPosition reservePosition_;
+            Position reserveSoloPosition_;
+            Spinlock reserveSpinlock_;
         };
     }  
 }

@@ -22,7 +22,13 @@ namespace MPass
         public:
             /// @brief Construct and attach to a connection
             /// @param connection provides access to the InfiniteVector
-			Producer(Connection & connection);  
+            /// @param solo indicates that this is the only producer.
+            ///        solo producers run faster using techniques that would be 
+            ///        unsafe with multiple producers.
+			explicit Producer(Connection & connection, bool solo = false);  
+
+            /// @brief Destructor
+            ~Producer();
             
             /// @brief Publish the data contained in a message.
             ///
@@ -36,13 +42,19 @@ namespace MPass
             ///
             /// @param message contains the data to be published.         
             void publish(InfiniteVector::Message & message);
+
         private:
+            uint64_t reserve();
+        private:
+            bool solo_;
             Connection & connection_;
             IvHeader * header_;
             IvResolver resolver_;
             volatile Position & readPosition_;
             volatile Position & publishPosition_;
             volatile AtomicPosition & reservePosition_;
+            volatile Position & reserveSoloPosition_;
+            Spinlock & reserveSpinLock_;
             IvEntryAccessor entryAccessor_;
 		};
 	}
