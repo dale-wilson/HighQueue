@@ -2,8 +2,8 @@
 #define BOOST_TEST_NO_MAIN MPassPerformanceTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/IvProducer.h>
-#include <InfiniteVector/IvConsumer.h>
+#include <InfiniteVector/Producer.h>
+#include <InfiniteVector/Consumer.h>
 #include <MPassPerformance/TestMessage.h>
 #include <Common/Stopwatch.h>
 
@@ -14,27 +14,27 @@ using namespace InfiniteVector;
 #ifndef DISABLE_CONSUME_SEPARATELY
 BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
-    IvConsumerWaitStrategy strategy;
+    ConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
-    size_t bufferSize = sizeof(TestMessage);
-    size_t bufferCount = entryCount + 10;
-    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
-    IvConnection connection;
+    size_t messageSize = sizeof(TestMessage);
+    size_t messageCount = entryCount + 10;
+    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
-    IvProducer producer(connection);
-    IvConsumer consumer(connection);
-    Buffers::Buffer producerBuffer;
-    connection.allocate(producerBuffer);
-    Buffers::Buffer consumerBuffer;
-    connection.allocate(consumerBuffer);
+    Producer producer(connection);
+    Consumer consumer(connection);
+    InfiniteVector::Message producerMessage;
+    connection.allocate(producerMessage);
+    InfiniteVector::Message consumerMessage;
+    connection.allocate(consumerMessage);
 
     Stopwatch timer;
 
     for(uint64_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
-        producerBuffer.construct<TestMessage>(1, nMessage);
-        producer.publish(producerBuffer);
+        producerMessage.construct<TestMessage>(1, nMessage);
+        producer.publish(producerMessage);
     }
     auto publishTime = timer.microseconds();
     timer.reset();
@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     // consume the messages.
     for(uint64_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
-        consumer.getNext(producerBuffer);
-        auto testMessage = producerBuffer.get<TestMessage>();
+        consumer.getNext(producerMessage);
+        auto testMessage = producerMessage.get<TestMessage>();
         if(nMessage != testMessage->messageNumber_)
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
@@ -65,32 +65,32 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 {
     std::cerr << "Start producer and consumer in the same thread test." << std::endl;
 
-    IvConsumerWaitStrategy strategy;
+    ConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
-    size_t bufferSize = sizeof(TestMessage);
-    size_t bufferCount = entryCount + 10;
+    size_t messageSize = sizeof(TestMessage);
+    size_t messagesNeeded = entryCount + 10;
     uint64_t messageCount = 1000000 * 100;
 
-    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
-    IvConnection connection;
+    CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
 
-    IvProducer producer(connection);
-    IvConsumer consumer(connection);
-    Buffers::Buffer producerBuffer;
-    connection.allocate(producerBuffer);
-    Buffers::Buffer consumerBuffer;
-    connection.allocate(consumerBuffer);
+    Producer producer(connection);
+    Consumer consumer(connection);
+    InfiniteVector::Message producerMessage;
+    connection.allocate(producerMessage);
+    InfiniteVector::Message consumerMessage;
+    connection.allocate(consumerMessage);
 
     Stopwatch timer;
 
     for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        producerBuffer.construct<TestMessage>(1, messageNumber);
-        producer.publish(producerBuffer);
-        consumer.getNext(consumerBuffer);
-        auto testMessage = consumerBuffer.get<TestMessage>();
+        producerMessage.construct<TestMessage>(1, messageNumber);
+        producer.publish(producerMessage);
+        consumer.getNext(consumerMessage);
+        auto testMessage = consumerMessage.get<TestMessage>();
         if(messageNumber != testMessage->messageNumber_)
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.

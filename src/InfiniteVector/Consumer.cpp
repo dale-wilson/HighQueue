@@ -1,11 +1,11 @@
-/// @file IvConnection.cpp
+/// @file Connection.cpp
 #include <Common/MPassPch.h>
-#include "IvConsumer.h"
-#include <InfiniteVector/IvReservePosition.h>
+#include "Consumer.h"
+#include <InfiniteVector/details/IvReservePosition.h>
 using namespace MPass;
 using namespace InfiniteVector;
 
-IvConsumer::IvConsumer(IvConnection & connection)
+Consumer::Consumer(Connection & connection)
 : connection_(connection)
 , header_(connection.getHeader())
 , resolver_(header_)
@@ -20,7 +20,7 @@ IvConsumer::IvConsumer(IvConnection & connection)
 {
 }
 
-bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
+bool Consumer::tryGetNext(InfiniteVector::Message & message)
 {
     while(true)
     {
@@ -38,7 +38,7 @@ bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
         IvEntry & entry = entryAccessor_[readPosition];
         if(entry.status_ == IvEntry::Status::OK)
         {
-            entry.buffer_.moveTo(buffer);
+            entry.message_.moveTo(message);
             ++readPosition_;
             return true;
         }
@@ -47,27 +47,27 @@ bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
 
 }
 
-void IvConsumer::getNext(Buffers::Buffer & buffer)
+void Consumer::getNext(InfiniteVector::Message & message)
 {
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;
     size_t remainingSleeps = sleeps_;
     while(true)
     {
-        if(tryGetNext(buffer))
+        if(tryGetNext(message))
         {
             return;
         }
         if(remainingSpins > 0)
         {
-            if(remainingSpins != IvConsumerWaitStrategy::FOREVER)
+            if(remainingSpins != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingSpins;
             }
         }
         else if(remainingYields > 0)
         {
-            if(remainingYields != IvConsumerWaitStrategy::FOREVER)
+            if(remainingYields != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingYields;
             }
@@ -75,7 +75,7 @@ void IvConsumer::getNext(Buffers::Buffer & buffer)
         }
         else if(remainingSleeps > 0)
         {
-            if(remainingSleeps != IvConsumerWaitStrategy::FOREVER)
+            if(remainingSleeps != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingSleeps;
             }
@@ -84,14 +84,14 @@ void IvConsumer::getNext(Buffers::Buffer & buffer)
         else
         {
             std::unique_lock<std::mutex> guard(header_->consumerWaitMutex_);
-            if(tryGetNext(buffer))
+            if(tryGetNext(message))
             {
                 return;
             }
             if(header_->consumerWaitConditionVariable_.wait_for(guard, waitStrategy_.mutexWaitTimeout_)
                 == std::cv_status::timeout)
             {
-                if(tryGetNext(buffer))
+                if(tryGetNext(message))
                 {
                     return;
                 }

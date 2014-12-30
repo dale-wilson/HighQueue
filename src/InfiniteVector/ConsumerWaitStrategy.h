@@ -1,4 +1,4 @@
-/// @file IvConsumerWaitStrategy.h
+/// @file ConsumerWaitStrategy.h
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
@@ -18,7 +18,7 @@ namespace InfiniteVector
     /// TODO: Support not implemented fully yet!  Right now it yields forever.
     /// TODO: ultimate timeout and or the ability to cancel for shut down purposes is not implemented yet!
     /// 
-    struct IvConsumerWaitStrategy
+    struct ConsumerWaitStrategy
     {
         static const size_t FOREVER = size_t(~0u);
         size_t spinCount_;
@@ -28,7 +28,7 @@ namespace InfiniteVector
         std::chrono::nanoseconds mutexWaitTimeout_;
         bool mutexUsed_;
 
-        explicit IvConsumerWaitStrategy(
+        explicit ConsumerWaitStrategy(
             size_t spinCount = 100,
             size_t yieldCount = 100,
             size_t sleepCount = FOREVER,

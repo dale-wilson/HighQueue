@@ -3,14 +3,14 @@
 // See the file license.txt for licensing information.
 #include <Common/MPassPch.h>
 
-#include "Buffer.h"
-#include <Buffers/MemoryBlockPool.h>
+#include "Message.h"
+#include <InfiniteVector/details/MemoryBlockPool.h>
 
 using namespace MPass;
-using namespace Buffers;
+using namespace InfiniteVector;
 
 
-Buffer::Buffer()
+Message::Message()
 : container_(0)
 , capacity_(0)
 , offset_(0)
@@ -21,7 +21,7 @@ Buffer::Buffer()
 {
 }
 
-Buffer::~Buffer()
+Message::~Message()
 {
     try{
         release();
@@ -32,7 +32,7 @@ Buffer::~Buffer()
     }
 }
 
-void Buffer::set(MemoryBlockPool * container, size_t capacity, size_t offset, size_t used)
+void Message::set(MemoryBlockPool * container, size_t capacity, size_t offset, size_t used)
 {
     container_ = reinterpret_cast<byte_t *>(container);
     capacity_ = (capacity == 0) ? used : capacity;
@@ -43,18 +43,18 @@ void Buffer::set(MemoryBlockPool * container, size_t capacity, size_t offset, si
     type_ = Normal;
 }
 
-byte_t * Buffer::getContainer()const
+byte_t * Message::getContainer()const
 {
     mustBeValid();
     return container_;
 }
 
-size_t Buffer::getOffset()const
+size_t Message::getOffset()const
 {
     return offset_;
 }
 
-void Buffer::release()
+void Message::release()
 {
     if(type_ == Normal)
     {
@@ -67,7 +67,7 @@ void Buffer::release()
     }
 }
 
-inline void Buffer::reset()
+inline void Message::reset()
 {
     container_ = 0;
     capacity_ = 0;

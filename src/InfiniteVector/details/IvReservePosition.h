@@ -4,7 +4,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <InfiniteVector/IvDefinitions.h>
+#include <InfiniteVector/details/IvDefinitions.h>
 #include <Common/Spinlock.h>
 
 namespace MPass
@@ -14,6 +14,8 @@ namespace MPass
 		struct IvReservePosition
 		{
             AtomicPosition reservePosition_;
+            Position reserveSoloPosition_;
+            Spinlock reserveSpinlock_;
         };
     }  
 }

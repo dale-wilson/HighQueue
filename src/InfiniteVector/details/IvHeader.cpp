@@ -1,12 +1,12 @@
 /// @file IvHeader.cpp
 #include <Common/MPassPch.h>
 #include "IvHeader.h"
-#include <InfiniteVector/IvCreationParameters.h>
-#include <InfiniteVector/IvAllocator.h>
-#include <InfiniteVector/IvResolver.h>
-#include <InfiniteVector/IvEntry.h>
-#include <InfiniteVector/IvReservePosition.h>
-#include <Buffers/MemoryBlockPool.h>
+#include <InfiniteVector/CreationParameters.h>
+#include <InfiniteVector/details/IvAllocator.h>
+#include <InfiniteVector/details/IvResolver.h>
+#include <InfiniteVector/details/IvEntry.h>
+#include <InfiniteVector/details/IvReservePosition.h>
+#include <InfiniteVector/details/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
@@ -14,7 +14,7 @@ using namespace InfiniteVector;
 IvHeader::IvHeader(
     const std::string & name,
     IvAllocator & allocator,
-    const IvCreationParameters & parameters)
+    const CreationParameters & parameters)
 : signature_(InitializingSignature)
 , version_(Version)
 , entryCount_(parameters.entryCount_)
@@ -54,36 +54,37 @@ IvHeader::IvHeader(
     reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
     auto reservePosition = resolver.resolve<IvReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
+    reservePosition->reserveSoloPosition_ = entryCount_;
 
-    auto bufferPoolSize = Buffers::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
-    memoryPool_ = allocator.allocate(bufferPoolSize, CacheLineSize);
-    auto pool = new (resolver.resolve<Buffers::MemoryBlockPool>(memoryPool_)) 
-        Buffers::MemoryBlockPool(bufferPoolSize, parameters.bufferSize_);
+    auto messagePoolSize = InfiniteVector::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
+    memoryPool_ = allocator.allocate(messagePoolSize, CacheLineSize);
+    auto pool = new (resolver.resolve<InfiniteVector::MemoryBlockPool>(memoryPool_)) 
+        InfiniteVector::MemoryBlockPool(messagePoolSize, parameters.messageSize_);
 
-    allocateInternalBuffers();
+    allocateInternalMessages();
 
     signature_ = LiveSignature;
 }
 
-void IvHeader::allocateInternalBuffers()
+void IvHeader::allocateInternalMessages()
 {
     IvResolver resolver(this);
-    auto pool = resolver.resolve<Buffers::MemoryBlockPool>(memoryPool_);
+    auto pool = resolver.resolve<InfiniteVector::MemoryBlockPool>(memoryPool_);
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
 
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
         IvEntry & entry = entryPointer[nEntry];
         new (&entry) IvEntry;
-        Buffers::Buffer & buffer = entry.buffer_;
-        if(!pool->allocate(buffer))
+        InfiniteVector::Message & message = entry.message_;
+        if(!pool->allocate(message))
         {
-            throw std::runtime_error("Not enough buffers for entries.");
+            throw std::runtime_error("Not enough messages for entries.");
         }
     }
 }
 
-void IvHeader::releaseInternalBuffers()
+void IvHeader::releaseInternalMessages()
 {
     IvResolver resolver(this);
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
@@ -91,8 +92,8 @@ void IvHeader::releaseInternalBuffers()
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
         IvEntry & entry = entryPointer[nEntry];
-        Buffers::Buffer & buffer = entry.buffer_;
-        buffer.release();
+        InfiniteVector::Message & message = entry.message_;
+        message.release();
     }
 }
 

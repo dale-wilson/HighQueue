@@ -5,8 +5,8 @@
 #pragma once
 
 #include "IvDefinitions.h"
-#include <InfiniteVector/IvCreationParameters.h>
-#include <InfiniteVector/IvAllocator.h>
+#include <InfiniteVector/CreationParameters.h>
+#include <InfiniteVector/details/IvAllocator.h>
 
 namespace MPass
 {
@@ -24,16 +24,16 @@ namespace InfiniteVector
         Offset reservePosition_;
         Offset memoryPool_;
 
-        IvConsumerWaitStrategy consumerWaitStrategy_;
+        ConsumerWaitStrategy consumerWaitStrategy_;
         std::mutex consumerWaitMutex_;
         std::condition_variable consumerWaitConditionVariable_;
 
 	    IvHeader(
             const std::string & name, 
             IvAllocator & allocator, 
-            const IvCreationParameters & parameters);
-        void allocateInternalBuffers();
-        void releaseInternalBuffers();
+            const CreationParameters & parameters);
+        void allocateInternalMessages();
+        void releaseInternalMessages();
     };
 }
 }

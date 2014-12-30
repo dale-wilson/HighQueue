@@ -2,8 +2,8 @@
 #define BOOST_TEST_NO_MAIN MPassPerformanceTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/IvProducer.h>
-#include <InfiniteVector/IvConsumer.h>
+#include <InfiniteVector/Producer.h>
+#include <InfiniteVector/Consumer.h>
 #include <Common/Stopwatch.h>
 #include <MPassPerformance/TestMessage.h>
 
@@ -15,13 +15,13 @@ namespace
     volatile std::atomic<uint32_t> producersWaiting = 0;
     volatile bool producersGo = false;
 
-    void producerFunction(IvConnection & connection, uint32_t producerNumber, uint64_t messageCount)
+    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
     {
-        IvProducer producer(connection);
-        Buffers::Buffer producerBuffer;
-        if(!connection.allocate(producerBuffer))
+        Producer producer(connection, solo);
+        InfiniteVector::Message producerMessage;
+        if(!connection.allocate(producerMessage))
         {
-            std::cerr << "Failed to allocate buffer for producer Number " << producerNumber << std::endl;
+            std::cerr << "Failed to allocate message for producer Number " << producerNumber << std::endl;
             return;
         }
 
@@ -33,9 +33,9 @@ namespace
 
         for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
         {
-            auto testMessage = producerBuffer.construct<TestMessage>(producerNumber, messageNumber);
+            auto testMessage = producerMessage.construct<TestMessage>(producerNumber, messageNumber);
             testMessage->touch();
-            producer.publish(producerBuffer);
+            producer.publish(producerMessage);
         }
     }
 }
@@ -43,24 +43,24 @@ namespace
 BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 {
     static const size_t entryCount = 100000;
-    static const size_t bufferSize = sizeof(TestMessage);
+    static const size_t messageSize = sizeof(TestMessage);
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
     static const size_t producerLimit = 10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
     static const size_t consumerLimit = 1;  // Just for documentation
-    static const size_t bufferCount = entryCount + consumerLimit +  producerLimit;
+    static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
 
     static const size_t spinCount = 0;
-    static const size_t yieldCount = IvConsumerWaitStrategy::FOREVER;
+    static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
 
-    IvConsumerWaitStrategy strategy(spinCount, yieldCount);
-    IvCreationParameters parameters(strategy, entryCount, bufferSize, bufferCount);
-    IvConnection connection;
+    ConsumerWaitStrategy strategy(spinCount, yieldCount);
+    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
-    IvConsumer consumer(connection);
-    Buffers::Buffer consumerBuffer;
-    BOOST_REQUIRE(connection.allocate(consumerBuffer));
+    Consumer consumer(connection);
+    InfiniteVector::Message consumerMessage;
+    BOOST_REQUIRE(connection.allocate(consumerMessage));
 
     for(size_t producerCount = 1; producerCount < producerLimit; ++producerCount)
     {
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         {
             nextMessage.emplace_back(0u);
             producerThreads.emplace_back(
-                std::bind(producerFunction, std::ref(connection), nTh, perProducer));
+                std::bind(producerFunction, std::ref(connection), nTh, perProducer, producerCount == 1));
         }
         std::this_thread::yield();
 
@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
         for(uint64_t messageNumber = 0; messageNumber < actualMessageCount; ++messageNumber)
         {
-            consumer.getNext(consumerBuffer);
-            auto testMessage = consumerBuffer.get<TestMessage>();
+            consumer.getNext(consumerMessage);
+            auto testMessage = consumerMessage.get<TestMessage>();
             testMessage->touch();
             auto producerNumber = testMessage->producerNumber_;
             auto & msgNumber = nextMessage[producerNumber];

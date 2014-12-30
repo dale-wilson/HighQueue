@@ -2,11 +2,11 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <Buffers/MemoryBlockPool.h>
+#include <InfiniteVector/details/MemoryBlockPool.h>
 #include <Common/CacheLIne.h>
 
 using namespace MPass;
-using namespace Buffers;
+using namespace InfiniteVector;
 
 #define DISABLE_testPoolAllocationx
 #ifdef DISABLE_testPoolAllocation
@@ -14,60 +14,60 @@ using namespace Buffers;
 #else // DISABLE testPoolAllocation
 BOOST_AUTO_TEST_CASE(testPoolAllocation)
 {
-    const static size_t bufferSize = 100;
-    const static size_t bufferCount = 5;
-    size_t blockSize = MemoryBlockPool::spaceNeeded(bufferSize, bufferCount);
+    const static size_t messageSize = 100;
+    const static size_t messageCount = 5;
+    size_t blockSize = MemoryBlockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[blockSize]);
-    auto pool = new (block.get()) MemoryBlockPool(blockSize, bufferSize);
-    BOOST_REQUIRE_GE(pool->getBufferCount(), bufferCount);
+    auto pool = new (block.get()) MemoryBlockPool(blockSize, messageSize);
+    BOOST_REQUIRE_GE(pool->getMessageCount(), messageCount);
 
-    for(size_t nLoop = 0; nLoop < bufferCount * 10; ++nLoop)
+    for(size_t nLoop = 0; nLoop < messageCount * 10; ++nLoop)
     {
-        Buffer buffer1;
-        BOOST_REQUIRE(pool->allocate(buffer1));
-        Buffer buffer2;
-        BOOST_REQUIRE(pool->allocate(buffer2));
-        Buffer buffer3;
-        BOOST_REQUIRE(pool->allocate(buffer3));
-        Buffer buffer4;
-        BOOST_REQUIRE(pool->allocate(buffer4));
-        Buffer buffer5;
-        BOOST_REQUIRE(pool->allocate(buffer5));
-        (void)buffer5.get();
-        buffer1.release();
-        buffer5.release();
-        buffer3.release();
-        buffer2.release();
-        buffer4.release();
+        Message message1;
+        BOOST_REQUIRE(pool->allocate(message1));
+        Message message2;
+        BOOST_REQUIRE(pool->allocate(message2));
+        Message message3;
+        BOOST_REQUIRE(pool->allocate(message3));
+        Message message4;
+        BOOST_REQUIRE(pool->allocate(message4));
+        Message message5;
+        BOOST_REQUIRE(pool->allocate(message5));
+        (void)message5.get();
+        message1.release();
+        message5.release();
+        message3.release();
+        message2.release();
+        message4.release();
     }
 }
 #endif // DISABLE testPoolAllocation
 
-#define DISABLE_testAllocatorBufferOwnerx
-#ifdef DISABLE_testAllocatorBufferOwner
-#pragma message ("DISABLE_testAllocatorBufferOwner " __FILE__)
-#else // DISABLE DISABLE_testAllocatorBufferOwner
+#define DISABLE_testAllocatorMessageOwnerx
+#ifdef DISABLE_testAllocatorMessageOwner
+#pragma message ("DISABLE_testAllocatorMessageOwner " __FILE__)
+#else // DISABLE DISABLE_testAllocatorMessageOwner
 BOOST_AUTO_TEST_CASE(testPoolAllocator)
 {
-    const static size_t bufferSize = 100;
-    const static size_t bufferCount = 5;
+    const static size_t messageSize = 100;
+    const static size_t messageCount = 5;
 
-    size_t blockSize = MemoryBlockPool::spaceNeeded(bufferSize, bufferCount);
+    size_t blockSize = MemoryBlockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[blockSize]);
-    auto pool = new (block.get()) MemoryBlockPool(blockSize, bufferSize);
-    for(size_t nLoop = 0; nLoop < bufferCount * 10; ++nLoop)
+    auto pool = new (block.get()) MemoryBlockPool(blockSize, messageSize);
+    for(size_t nLoop = 0; nLoop < messageCount * 10; ++nLoop)
     {
-        Buffer buffer1;
-        BOOST_REQUIRE(pool->allocate(buffer1));
-        Buffer buffer2;
-        BOOST_REQUIRE(pool->allocate(buffer2));
-        Buffer buffer3;
-        BOOST_REQUIRE(pool->allocate(buffer3));
-        Buffer buffer4;
-        BOOST_REQUIRE(pool->allocate(buffer4));
-        Buffer buffer5;
-        BOOST_REQUIRE(pool->allocate(buffer5));
-        (void)buffer5.get();
+        Message message1;
+        BOOST_REQUIRE(pool->allocate(message1));
+        Message message2;
+        BOOST_REQUIRE(pool->allocate(message2));
+        Message message3;
+        BOOST_REQUIRE(pool->allocate(message3));
+        Message message4;
+        BOOST_REQUIRE(pool->allocate(message4));
+        Message message5;
+        BOOST_REQUIRE(pool->allocate(message5));
+        (void)message5.get();
     }
 }
-#endif // DISABLE_testAllocatorBufferOwner
+#endif // DISABLE_testAllocatorMessageOwner

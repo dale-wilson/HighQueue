@@ -3,12 +3,12 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <Buffers/Buffer.h>
+#include <InfiniteVector/Message.h>
 #include <Common/Spinlock.h>
 
 namespace MPass
 {
-	namespace Buffers
+	namespace InfiniteVector
 	{
         /// @brief A pool of memory blocks of the same size. 
         ///
@@ -27,11 +27,11 @@ namespace MPass
             size_t blockSize_;
 
             /// @brief The size of each block of memory in the pool. 
-            size_t bufferSize_;
+            size_t messageSize_;
             
             /// @brief The total number of block in the pool
             /// constant: does not change as memory is allocated or freed)
-            size_t bufferCount_;
+            size_t messageCount_;
             
             /// @brief The root of a linked list.  This is an offset to the pool base address
             size_t rootOffset_;
@@ -46,7 +46,7 @@ namespace MPass
             MemoryBlockPool();
 
             /// @brief Construct and initialize a MemoryBlockPool
-            MemoryBlockPool(size_t blockSize, size_t bufferSize);
+            MemoryBlockPool(size_t blockSize, size_t messageSize);
 
             /// @brief Do not allow copies
             MemoryBlockPool(const MemoryBlockPool &) = delete;
@@ -54,52 +54,52 @@ namespace MPass
             /// @brief Do not allow assignment
             MemoryBlockPool & operator=(const MemoryBlockPool &) = delete;
 
-            /// @brief Allocate a block of memory into a buffer.  
+            /// @brief Allocate a block of memory into a message.  
             /// @param baseAddress is the address used to resolve the offsets into actual addresses.
-            /// @param buffer is the Buffer to receive the block of memory.
-            bool allocate(Buffer & buffer);
+            /// @param message is the Message to receive the block of memory.
+            bool allocate(Message & message);
 
-            /// @brief Free the block of memory from a buffer.
+            /// @brief Free the block of memory from a message.
             /// @param baseAddress is the address used to resolve the offsets into actual addresses.
-            /// @param buffer is the Buffer from which the memory will be returned.
+            /// @param message is the Message from which the memory will be returned.
             /// @throws runtime_error if the memory did not come from this block.
-            void release(Buffer & buffer);
+            void release(Message & message);
 
-            /// @brief Are buffers available?
+            /// @brief Are messages available?
             ///
             /// Warning.  This is not threadsafe.  If you really want to know, try to allocate.
             /// (this is here mostly for unit testing.)
             bool isEmpty() const;
 
-            size_t getBufferCapacity()const
+            size_t getMessageCapacity()const
             {
-                return bufferSize_;
+                return messageSize_;
             }
-            size_t getBufferCount()const
+            size_t getMessageCount()const
             {
-                return bufferCount_;
+                return messageCount_;
             }
 
             /// @brief Initialize a block.
             /// for internal use (and testing)
-            size_t preAllocate(size_t bufferSize, size_t blockSize);
+            size_t preAllocate(size_t messageSize, size_t blockSize);
 
-            static MemoryBlockPool * makeNew(size_t bufferSize, size_t bufferCount);
+            static MemoryBlockPool * makeNew(size_t messageSize, size_t messageCount);
 
-            /// @brief Helper function to round a buffer size up to the next cache-line boundary.
-            static size_t cacheAlignedBufferSize(size_t bufferSize);
+            /// @brief Helper function to round a message size up to the next cache-line boundary.
+            static size_t cacheAlignedMessageSize(size_t messageSize);
 
-            /// @brief Helper function to calculates how much space is needed to allocate 'bufferCount' cache aligned buffers 
-            ///        of at least 'bufferSize' bytes each in an unaligned block of memory..
+            /// @brief Helper function to calculates how much space is needed to allocate 'messageCount' cache aligned messages 
+            ///        of at least 'messageSize' bytes each in an unaligned block of memory..
             ///
             /// Note:  Because this handles the worst-case: 
-            ///        It is likely that the actual buffer sizes will exceed bufferSize, and
-            ///        It is possible that the actual number of buffers will exceed bufferCount.
+            ///        It is likely that the actual message sizes will exceed messageSize, and
+            ///        It is possible that the actual number of messages will exceed messageCount.
             ///
-            /// @param bufferSize the minimum number of bytes per buffer.
-            /// @param bufferCount the minimum number of buffers.
+            /// @param messageSize the minimum number of bytes per message.
+            /// @param messageCount the minimum number of messages.
             /// @returns the number of bytes needed to insure that the size and count requrements can be met.
-            static size_t spaceNeeded(size_t bufferSize, size_t bufferCount);
+            static size_t spaceNeeded(size_t messageSize, size_t messageCount);
         };
 	}
 }

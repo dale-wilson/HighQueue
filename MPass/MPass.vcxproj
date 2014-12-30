@@ -132,37 +132,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\Buffers\Buffer.h" />
-    <ClInclude Include="..\src\Buffers\MemoryBlockPool.h" />
-    <ClInclude Include="..\src\Buffers\MemoryBlockPoolFwd.h" />
     <ClInclude Include="..\src\Common\CacheLIne.h" />
     <ClInclude Include="..\src\Common\MPassPch.h" />
     <ClInclude Include="..\src\Common\Spinlock.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvAllocator.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvConnection.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvConsumer.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvConsumerWaitStrategy.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvCreationParameters.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvDefinitions.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvEntry.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvEntryAccessor.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvHeader.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvPositionEntry.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvProducer.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvResolver.h" />
-    <ClInclude Include="..\src\InfiniteVector\IvReservePosition.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\IvAllocator.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\IvDefinitions.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\IvEntry.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\IvEntryAccessor.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\IvHeader.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\IvReservePosition.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\IvResolver.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\MemoryBlockPool.h" />
+    <ClInclude Include="..\src\InfiniteVector\details\MemoryBlockPoolFwd.h" />
+    <ClInclude Include="..\src\InfiniteVector\Message.h" />
+    <ClInclude Include="..\src\InfiniteVector\Connection.h" />
+    <ClInclude Include="..\src\InfiniteVector\Consumer.h" />
+    <ClInclude Include="..\src\InfiniteVector\ConsumerWaitStrategy.h" />
+    <ClInclude Include="..\src\InfiniteVector\CreationParameters.h" />
+    <ClInclude Include="..\src\InfiniteVector\Producer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\Buffers\Buffer.cpp" />
-    <ClCompile Include="..\src\Buffers\MemoryBlockPool.cpp" />
     <ClCompile Include="..\src\Common\MPassPch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\IvConnection.cpp" />
-    <ClCompile Include="..\src\InfiniteVector\IvConsumer.cpp" />
-    <ClCompile Include="..\src\InfiniteVector\IvHeader.cpp" />
-    <ClCompile Include="..\src\InfiniteVector\IvProducer.cpp" />
+    <ClCompile Include="..\src\InfiniteVector\Connection.cpp" />
+    <ClCompile Include="..\src\InfiniteVector\Consumer.cpp" />
+    <ClCompile Include="..\src\InfiniteVector\details\IvHeader.cpp" />
+    <ClCompile Include="..\src\InfiniteVector\details\MemoryBlockPool.cpp" />
+    <ClCompile Include="..\src\InfiniteVector\Message.cpp" />
+    <ClCompile Include="..\src\InfiniteVector\Producer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

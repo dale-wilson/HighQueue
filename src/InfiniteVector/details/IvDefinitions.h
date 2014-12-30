@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <Buffers/Buffer.h>
+#include <InfiniteVector/Message.h>
 
 namespace MPass
 {
@@ -27,65 +27,65 @@ namespace MPass
 /// Client API:
 ///
 /// Clients interact with an InfiniteVector using an API that consists of the public interfaces of
-/// four primary classes:   Buffer, IvConnection, IvConsumer, and IvProducer.
+/// four primary classes:   Message, Connection, Consumer, and Producer.
 ///
-/// Two additonal classes are used when initializing an InfiniteVector: IvCreationParameters and IvConsumerWaitStrategy.
+/// Two additonal classes are used when initializing an InfiniteVector: CreationParameters and ConsumerWaitStrategy.
 ///
-/// The first step in using an InfiniteVector is to create an IvConnection using the null constructor.
+/// The first step in using an InfiniteVector is to create an Connection using the null constructor.
 ///
 /// This connection may be used to attach to an existing InfiniteVector or to create a new one using 
-/// the methods: IvConnection::createLocal(), IvConnection::openOrCreateShared(), or IvConnection::openExistingShared(). 
+/// the methods: Connection::createLocal(), Connection::openOrCreateShared(), or Connection::openExistingShared(). 
 /// 
-/// The methods that create a new InfiniteVector take an instance of IvCreationParameters as an argument.
-/// The IvCreationParameters in turn contains an IvConsumerWaitStrategy.   See the documentation of these
+/// The methods that create a new InfiniteVector take an instance of CreationParameters as an argument.
+/// The CreationParameters in turn contains an ConsumerWaitStrategy.   See the documentation of these
 /// classes for details about the parameters that can be used to configure the InfiniteVector for the particular use.
 ///
-/// Once the InfinieVector is created or found the IvConnection can be used as the construction parameter for an instance
-/// of an IvProducer and/or an IvConsumer. 
+/// Once the InfinieVector is created or found the Connection can be used as the construction parameter for an instance
+/// of an Producer and/or an Consumer. 
 ///
-/// Each client should own (at least) one Buffer.  A Buffer is actually a reference to an area of memory.  As messages
-/// are handled, the memory associated with any paricular Buffer object may change, but the 
-/// client can always use its own Buffer object to find the message it should be working with.
+/// Each client should own (at least) one Message.  A Message is actually a reference to an area of memory.  As messages
+/// are handled, the memory associated with any paricular Message object may change, but the 
+/// client can always use its own Message object to find the message it should be working with.
 ///
-/// The null Buffer constructor will create Buffer for use by the client.  Before a Buffer is first used, it must
-/// be initialized with memory the memory pool within the Infinite Vector.   The IvConnection::allocate(Buffer &)
+/// The null Message constructor will create Message for use by the client.  Before a Message is first used, it must
+/// be initialized with memory the memory pool within the Infinite Vector.   The Connection::allocate(Message &)
 /// method takes care of this.
 ///
-/// Once the Buffer has been populated the client may use one of the Buffer::get() methods to find the memory it should use.
+/// Once the Message has been populated the client may use one of the Message::get() methods to find the memory it should use.
 /// Alternatively the producer can use the construct() method to construct a new object of the desired type 
-/// directly in the Buffer's memory.
+/// directly in the Message's memory.
 ///
-/// The producer may take as long as it needs to to construct a message directly in the Buffer.  If there are other
+/// The producer may take as long as it needs to to construct a message directly in the Message.  If there are other
 /// producer using the same InfiniteVector they will be unaffected by the time it takes a particular producer
-/// to prepare its buffer for publication. (See the example below.)
+/// to prepare its message for publication. (See the example below.)
 ///
-/// When the producer's Buffer is ready it can call the IvProducer::publish(Buffer &) method.  
+/// When the producer's Message is ready it can call the Producer::publish(Message &) method.  
 ///
 /// Important!  Once the publish method is called, the published data is no longer available to the Producer. 
-/// Instead the Buffer will be automatically attached to a different, empty area of memory. It will be ready
+/// Instead the Message will be automatically attached to a different, empty area of memory. It will be ready
 /// for the producer to began creating or acquiring the next message to publish.  This means the after calling
-/// publish, the producer must call Buffer::get() or Buffer::create() so it will be working with new memory area. 
+/// publish, the producer must call Message::get() or Message::create() so it will be working with new memory area. 
 ///
-/// The consumer receives the message by calling either of the IvConsumer::getNext(Buffer &) or 
-/// IvConsumer::tryGetNext(Buffer &) methods.
+/// The consumer receives the message by calling either of the Consumer::getNext(Message &) or 
+/// Consumer::tryGetNext(Message &) methods.
 ///    Note: getNext() waits, tryGetNext() returns immediately a bool to indicate whether data was available.
 ///
-/// After a getNext() or a successful tryGetNext() call, the buffer will point to a new area of memory.  The consumer
-/// must call Buffer::get() again to find the newly arrived message.
+/// After a getNext() or a successful tryGetNext() call, the message will point to a new area of memory.  The consumer
+/// must call Message::get() again to find the newly arrived message.
 ///
 /// A typical example: 
 ///
 /// A publisher that is accepting and publishing incoming multicast (UDP) messages can issue the socket read request
-/// using the pointer returned by Buffer::get() and the buffer size returned by Buffer::getCapacity().
-/// When the socket read completes the publisher should use the Buffer::setUsed() method to record how many bytes of
+/// using the pointer returned by Message::get() and the message size returned by Message::getCapacity().
+/// When the socket read completes the publisher should use the Message::setUsed() method to record how many bytes of
 /// data were received.
 /// 
 /// Because UDP message boundaries match transmission packet boundaries, the message is now ready to publish.
 ///
-/// After the publish() call the Producer has an empty buffer that it can use for the next socket read request.
+/// After the publish() call the Producer has an empty message that it can use for the next socket read request.
 /// 
-/// When the consumer's call to getNext() returns the Buffer::get() and Buffer::getUsed() methods will allow the 
-/// consumer to access the memory area via its own Buffer object.  This is exactly the same memory area that was
+/// When the consumer's call to getNext() returns the Message::get() and Message::getUsed() methods will allow the 
+/// consumer to access the memory area via its own Message object.  This is exactly the same memory area that was
 /// used to read the packet from the socket. 
 ///
 /// Users of InfiniteVectors may stop reading here.   Developers and maintainers (and curious users) may continue
@@ -104,8 +104,8 @@ namespace MPass
 /// memory is accessed linearly the same way a vector is, but it is not infinite.
 ///
 /// As it turns out a RingBuffer an awkward abstraction to implement because the boundaries of the actual memory 
-/// block used to hold the entries do not have convenient representations in ring-bufferese.  Operations such as 
-/// comparing two positions within the buffer are more difficult when the buffer boundary may, or may not appear
+/// block used to hold the entries do not have convenient representations in ring-buffeRese.  Operations such as 
+/// comparing two positions within the buffeR are more difficult when the buffeR boundary may, or may not appear
 /// between the two positions.  
 /// 
 /// Copying data into or out of a RingBuffer can get complex -- particularly when
@@ -140,19 +140,19 @@ namespace MPass
 /// Caveat: At the time this documentation is being written the Shared Memory suport is incomplete and there are a few issues
 /// to resolve before it goes live.
 ///
-/// Buffers: Memory moves vs Pointer moves.
+/// Messages: Memory moves vs Pointer moves.
 ///
-/// A buffer for the point of this discussion is a handle to a block of memory.
+/// A message for the point of this discussion is a handle to a block of memory.
 ///
 /// In spite of advances in CPU design over the years, the memcpy function still shows up regularly in profiler reports.
 /// This implementation of an Infinite vector attempts to avoid memory copies by using pointers and offsets encapsulated 
-/// in Buffers.  A Buffer is a handle to a section of memory.  Two buffers can be swapped with each other so that buffer 
-/// A now points to the memory formerly held by buffer B, and vice versa.  This is a cheap operation compared to the 
+/// in Messages.  A Message is a handle to a section of memory.  Two messages can be swapped with each other so that message 
+/// A now points to the memory formerly held by message B, and vice versa.  This is a cheap operation compared to the 
 /// cost of moving the actual data.
 /// 
-/// To make this work well, all buffers should be the same size, and they work best if they are all allocated from the 
-/// same pool of memory. In particular all the buffers used in shared memory must be visible to all of the clients of
-/// the InfiniteVector.  Thus there is a pool of memory in the InfiniteVector itself that can be used to populate Buffers.
+/// To make this work well, all messages should be the same size, and they work best if they are all allocated from the 
+/// same pool of memory. In particular all the messages used in shared memory must be visible to all of the clients of
+/// the InfiniteVector.  Thus there is a pool of memory in the InfiniteVector itself that can be used to populate Messages.
 ///
 /// Cache line alignment and related performance issues.
 ///
@@ -179,9 +179,6 @@ typedef std::atomic<Position> AtomicPosition;
 typedef std::mutex Mutex;
 typedef std::condition_variable ConditionVariable;
 typedef std::unique_lock<Mutex> MutexGuard;
-
-/// @brief for the public API, import the name Buffer into this namespace.
-typedef Buffers::Buffer Buffer;
 
 namespace
 {
