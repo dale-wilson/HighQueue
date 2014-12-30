@@ -2,11 +2,11 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <Buffers/MemoryBlockPool.h>
+#include <InfiniteVector/MemoryBlockPool.h>
 #include <Common/CacheLIne.h>
 
 using namespace MPass;
-using namespace Buffers;
+using namespace InfiniteVector;
 
 #define DISABLE_testPoolAllocationx
 #ifdef DISABLE_testPoolAllocation

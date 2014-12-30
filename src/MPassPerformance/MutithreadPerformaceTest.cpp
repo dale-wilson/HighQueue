@@ -18,7 +18,7 @@ namespace
     void producerFunction(IvConnection & connection, uint32_t producerNumber, uint64_t messageCount)
     {
         IvProducer producer(connection);
-        Buffers::Buffer producerBuffer;
+        InfiniteVector::Buffer producerBuffer;
         if(!connection.allocate(producerBuffer))
         {
             std::cerr << "Failed to allocate buffer for producer Number " << producerNumber << std::endl;
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     connection.createLocal("LocalIv", parameters);
 
     IvConsumer consumer(connection);
-    Buffers::Buffer consumerBuffer;
+    InfiniteVector::Buffer consumerBuffer;
     BOOST_REQUIRE(connection.allocate(consumerBuffer));
 
     for(size_t producerCount = 1; producerCount < producerLimit; ++producerCount)

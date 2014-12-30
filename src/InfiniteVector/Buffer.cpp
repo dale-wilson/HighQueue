@@ -4,10 +4,10 @@
 #include <Common/MPassPch.h>
 
 #include "Buffer.h"
-#include <Buffers/MemoryBlockPool.h>
+#include <InfiniteVector/MemoryBlockPool.h>
 
 using namespace MPass;
-using namespace Buffers;
+using namespace InfiniteVector;
 
 
 Buffer::Buffer()

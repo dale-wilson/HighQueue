@@ -24,9 +24,9 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 
     IvProducer producer(connection);
     IvConsumer consumer(connection);
-    Buffers::Buffer producerBuffer;
+    InfiniteVector::Buffer producerBuffer;
     connection.allocate(producerBuffer);
-    Buffers::Buffer consumerBuffer;
+    InfiniteVector::Buffer consumerBuffer;
     connection.allocate(consumerBuffer);
 
     Stopwatch timer;
@@ -78,9 +78,9 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     IvProducer producer(connection);
     IvConsumer consumer(connection);
-    Buffers::Buffer producerBuffer;
+    InfiniteVector::Buffer producerBuffer;
     connection.allocate(producerBuffer);
-    Buffers::Buffer consumerBuffer;
+    InfiniteVector::Buffer consumerBuffer;
     connection.allocate(consumerBuffer);
 
     Stopwatch timer;

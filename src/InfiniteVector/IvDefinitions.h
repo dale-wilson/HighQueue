@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <Buffers/Buffer.h>
+#include <InfiniteVector/Buffer.h>
 
 namespace MPass
 {
@@ -179,9 +179,6 @@ typedef std::atomic<Position> AtomicPosition;
 typedef std::mutex Mutex;
 typedef std::condition_variable ConditionVariable;
 typedef std::unique_lock<Mutex> MutexGuard;
-
-/// @brief for the public API, import the name Buffer into this namespace.
-typedef Buffers::Buffer Buffer;
 
 namespace
 {

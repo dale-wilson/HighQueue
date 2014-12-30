@@ -34,7 +34,7 @@ void IvConnection::createLocal(const std::string & name, const IvCreationParamet
     auto header = block + headerOffset;
     header_ = new (header) IvHeader(name, allocator, parameters);
     IvResolver resolver(header_);
-    memoryPool_ = resolver.resolve<Buffers::MemoryBlockPool>(header_->memoryPool_);
+    memoryPool_ = resolver.resolve<InfiniteVector::MemoryBlockPool>(header_->memoryPool_);
 }
 
 IvHeader * IvConnection::getHeader() const
@@ -55,11 +55,11 @@ size_t IvConnection::spaceNeeded(const IvCreationParameters & parameters)
     size_t headerSize = IvAllocator::align(sizeof(IvHeader), CacheLineSize);
     size_t entriesSize = IvEntry::alignedSize() * parameters.entryCount_;
     size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
-    size_t bufferPoolSize = Buffers::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
+    size_t bufferPoolSize = InfiniteVector::MemoryBlockPool::spaceNeeded(parameters.bufferSize_, parameters.bufferCount_);
     return headerSize + entriesSize + positionsSize + bufferPoolSize;
 }
 
-bool IvConnection::allocate(Buffers::Buffer & buffer)
+bool IvConnection::allocate(InfiniteVector::Buffer & buffer)
 {
     return memoryPool_->allocate(buffer);
 }

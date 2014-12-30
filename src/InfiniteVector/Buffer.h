@@ -2,10 +2,10 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Buffers/MemoryBlockPoolFwd.h>
+#include <InfiniteVector/MemoryBlockPoolFwd.h>
 namespace MPass
 {
-    namespace Buffers
+    namespace InfiniteVector
     {
         /// @brief A handle for a block of memory
         class Buffer

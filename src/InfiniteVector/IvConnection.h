@@ -6,7 +6,7 @@
 
 #include <InfiniteVector/IvHeader.h>
 #include <InfiniteVector/IvCreationParameters.h>
-#include <Buffers/MemoryBlockPool.h>
+#include <InfiniteVector/MemoryBlockPool.h>
 
 namespace MPass
 {
@@ -47,7 +47,7 @@ namespace MPass
             /// @brief Populate a buffer with data from the InfiniteVector's memory pool
             /// @param the buffer to be populated.
             /// @returns true if there was memory available.
-            bool allocate(Buffers::Buffer & buffer);
+            bool allocate(InfiniteVector::Buffer & buffer);
 
             /// @brief Get the capacity of all buffers used with this InfiniteVector
             size_t getBufferCapacity()const;
@@ -69,7 +69,7 @@ namespace MPass
         private:
             boost::shared_array<byte_t> localMemory_;
             IvHeader * header_;
-            Buffers::MemoryBlockPool * memoryPool_;
+            InfiniteVector::MemoryBlockPool * memoryPool_;
 		};
 	}
 }

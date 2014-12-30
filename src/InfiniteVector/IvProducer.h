@@ -15,7 +15,7 @@ namespace MPass
 	{
         /// @brief Support for publishing messages to an InfiniteVector
         /// In addition to having the IvConnection which is used to construct
-        /// this object, you will need a Buffers::Buffer which has been initialized
+        /// this object, you will need a InfiniteVector::Buffer which has been initialized
         /// by calling the IvConnection::allocate() method.
 		class IvProducer
 		{
@@ -35,7 +35,7 @@ namespace MPass
             /// this call invalidates previous get() results.
             ///
             /// @param buffer contains the data to be published.         
-            void publish(Buffers::Buffer & buffer);
+            void publish(InfiniteVector::Buffer & buffer);
         private:
             IvConnection & connection_;
             IvHeader * header_;

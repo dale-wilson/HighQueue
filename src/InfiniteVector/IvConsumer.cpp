@@ -20,7 +20,7 @@ IvConsumer::IvConsumer(IvConnection & connection)
 {
 }
 
-bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
+bool IvConsumer::tryGetNext(InfiniteVector::Buffer & buffer)
 {
     while(true)
     {
@@ -47,7 +47,7 @@ bool IvConsumer::tryGetNext(Buffers::Buffer & buffer)
 
 }
 
-void IvConsumer::getNext(Buffers::Buffer & buffer)
+void IvConsumer::getNext(InfiniteVector::Buffer & buffer)
 {
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;

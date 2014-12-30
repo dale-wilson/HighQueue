@@ -5,7 +5,7 @@
 
 namespace MPass
 {
-	namespace Buffers
+	namespace InfiniteVector
 	{
         struct MemoryBlockPool;
 	}

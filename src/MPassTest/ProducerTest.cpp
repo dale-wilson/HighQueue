@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
 
-    Buffers::Buffer buffer;
+    InfiniteVector::Buffer buffer;
     connection.allocate(buffer);
     auto testMessage = buffer.get<TestMessage>();
     new (testMessage) TestMessage("Hello world");
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
 
     IvEntry & firstEntry = accessor[*readPosition];
     BOOST_CHECK_EQUAL(firstEntry.status_, IvEntry::Status::OK);
-    Buffers::Buffer & publishedBuffer = firstEntry.buffer_;
+    InfiniteVector::Buffer & publishedBuffer = firstEntry.buffer_;
     auto publishedMessage = publishedBuffer.get<TestMessage>(); 
     auto publishedSize = publishedBuffer.getUsed();
     BOOST_CHECK_EQUAL(publishedMessage, testMessage);
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
 
     // Check to be sure that overwrote the first message.
     BOOST_CHECK_EQUAL(firstEntry.status_, IvEntry::Status::OK);
-    Buffers::Buffer & newestBuffer = firstEntry.buffer_;
+    InfiniteVector::Buffer & newestBuffer = firstEntry.buffer_;
     auto newestMessage = newestBuffer.get<TestMessage>(); 
     auto newestSize = newestBuffer.getUsed();
     BOOST_CHECK_EQUAL(newestMessage, fromTheTopMessage);

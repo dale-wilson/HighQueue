@@ -1,9 +1,9 @@
 #include <Common/MPassPch.h>
 
-#include <Buffers/MemoryBlockPool.h>
+#include <InfiniteVector/MemoryBlockPool.h>
 
 using namespace MPass;
-using namespace Buffers;
+using namespace InfiniteVector;
 
 MemoryBlockPool::MemoryBlockPool()
 : blockSize_(0)

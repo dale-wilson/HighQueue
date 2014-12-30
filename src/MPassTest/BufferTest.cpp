@@ -2,11 +2,11 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <Buffers/Buffer.h>
-#include <Buffers/MemoryBlockPool.h>
+#include <InfiniteVector/Buffer.h>
+#include <InfiniteVector/MemoryBlockPool.h>
 
 using namespace MPass;
-using namespace Buffers;
+using namespace InfiniteVector;
 
 namespace
 {

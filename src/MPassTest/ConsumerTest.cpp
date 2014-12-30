@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
     IvProducer producer(connection);
-    Buffers::Buffer buffer;
+    InfiniteVector::Buffer buffer;
     connection.allocate(buffer);
 
     for(size_t nMessage = 0; nMessage < entryCount; ++nMessage)
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     // if we published another message now, it would hang.
     // todo: think of some way around that.
 
-    Buffers::Buffer consumerBuffer;
+    InfiniteVector::Buffer consumerBuffer;
     connection.allocate(consumerBuffer);
 
     // consume the messages.

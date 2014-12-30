@@ -16,7 +16,7 @@ IvProducer::IvProducer(IvConnection & connection)
 {
 }
 
-void IvProducer::publish(Buffers::Buffer & buffer)
+void IvProducer::publish(InfiniteVector::Buffer & buffer)
 {
     bool published = false;
     while(!published)

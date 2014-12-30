@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(testIvConnectionBuffers)
     BOOST_CHECK_LE(bufferSize, connection.getBufferCapacity());
     BOOST_CHECK_LE(bufferCount, connection.getBufferCount());
 
-    Buffers::Buffer buffer;
+    InfiniteVector::Buffer buffer;
     for(size_t nBuffer = 0; nBuffer < (bufferCount - entryCount); ++nBuffer)
     {
         BOOST_CHECK(connection.hasMemoryAvailable());

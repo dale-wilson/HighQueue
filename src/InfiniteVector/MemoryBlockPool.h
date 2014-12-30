@@ -3,12 +3,12 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <Buffers/Buffer.h>
+#include <InfiniteVector/Buffer.h>
 #include <Common/Spinlock.h>
 
 namespace MPass
 {
-	namespace Buffers
+	namespace InfiniteVector
 	{
         /// @brief A pool of memory blocks of the same size. 
         ///
