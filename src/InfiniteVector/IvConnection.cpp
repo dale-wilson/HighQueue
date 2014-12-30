@@ -1,6 +1,6 @@
-/// @file IvConnection.cpp
+/// @file Connection.cpp
 #include <Common/MPassPch.h>
-#include "IvConnection.h"
+#include "Connection.h"
 #include <InfiniteVector/IvAllocator.h>
 #include <InfiniteVector/IvEntry.h>
 #include <InfiniteVector/IvResolver.h>
@@ -8,11 +8,11 @@
 using namespace MPass;
 using namespace InfiniteVector;
 
-IvConnection::IvConnection()
+Connection::Connection()
 {
 }
 
-IvConnection::~IvConnection()
+Connection::~Connection()
 {
     if(localMemory_ && header_)
     {
@@ -20,7 +20,7 @@ IvConnection::~IvConnection()
     }
 }
 
-void IvConnection::createLocal(const std::string & name, const IvCreationParameters & parameters)
+void Connection::createLocal(const std::string & name, const CreationParameters & parameters)
 {
     const size_t allocatedSize = spaceNeeded(parameters) + CacheLineSize;
     localMemory_.reset(new byte_t[allocatedSize]);
@@ -37,20 +37,20 @@ void IvConnection::createLocal(const std::string & name, const IvCreationParamet
     memoryPool_ = resolver.resolve<InfiniteVector::MemoryBlockPool>(header_->memoryPool_);
 }
 
-IvHeader * IvConnection::getHeader() const
+IvHeader * Connection::getHeader() const
 {
     return header_;
 }
             
-void IvConnection::openOrCreateShared(const std::string & name, const IvCreationParameters & parameters)
+void Connection::openOrCreateShared(const std::string & name, const CreationParameters & parameters)
 {
 }
 
-void IvConnection::openExistingShared(const std::string & name)
+void Connection::openExistingShared(const std::string & name)
 {
 }
 
-size_t IvConnection::spaceNeeded(const IvCreationParameters & parameters)
+size_t Connection::spaceNeeded(const CreationParameters & parameters)
 {
     size_t headerSize = IvAllocator::align(sizeof(IvHeader), CacheLineSize);
     size_t entriesSize = IvEntry::alignedSize() * parameters.entryCount_;
@@ -59,20 +59,20 @@ size_t IvConnection::spaceNeeded(const IvCreationParameters & parameters)
     return headerSize + entriesSize + positionsSize + messagePoolSize;
 }
 
-bool IvConnection::allocate(InfiniteVector::Message & message)
+bool Connection::allocate(InfiniteVector::Message & message)
 {
     return memoryPool_->allocate(message);
 }
 
-size_t IvConnection::getMessageCapacity()const
+size_t Connection::getMessageCapacity()const
 {
     return memoryPool_->getMessageCapacity();
 }
-size_t IvConnection::getMessageCount()const
+size_t Connection::getMessageCount()const
 {
     return memoryPool_->getMessageCount();
 }
-bool IvConnection::hasMemoryAvailable() const
+bool Connection::hasMemoryAvailable() const
 {
     return !memoryPool_->isEmpty();
 }

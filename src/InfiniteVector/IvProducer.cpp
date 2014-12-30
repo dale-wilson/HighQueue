@@ -1,11 +1,11 @@
-/// @file IvConnection.cpp
+/// @file Connection.cpp
 #include <Common/MPassPch.h>
-#include "IvProducer.h"
+#include "Producer.h"
 #include <InfiniteVector/IvReservePosition.h>
 using namespace MPass;
 using namespace InfiniteVector;
 
-IvProducer::IvProducer(IvConnection & connection)
+Producer::Producer(Connection & connection)
 : connection_(connection)
 , header_(connection.getHeader())
 , resolver_(header_)
@@ -16,7 +16,7 @@ IvProducer::IvProducer(IvConnection & connection)
 {
 }
 
-void IvProducer::publish(InfiniteVector::Message & message)
+void Producer::publish(InfiniteVector::Message & message)
 {
     bool published = false;
     while(!published)

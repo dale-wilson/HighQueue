@@ -2,7 +2,7 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/IvProducer.h>
+#include <InfiniteVector/Producer.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
@@ -31,14 +31,14 @@ namespace
 #else // DISABLE_testProducer
 BOOST_AUTO_TEST_CASE(testProducer)
 {
-    IvConsumerWaitStrategy strategy;
+    ConsumerWaitStrategy strategy;
     size_t entryCount = 10;
     size_t messageSize = sizeof(TestMessage);
     size_t messageCount = 50;
-    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    IvConnection connection;
+    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
-    IvProducer producer(connection);
+    Producer producer(connection);
     // peek inside the IV.
     auto header = connection.getHeader();
     IvResolver resolver(header);

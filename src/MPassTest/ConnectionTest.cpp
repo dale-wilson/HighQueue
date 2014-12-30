@@ -3,7 +3,7 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/IvConnection.h>
+#include <InfiniteVector/Connection.h>
 #include <InfiniteVector/IvResolver.h>
 #include <InfiniteVector/IvReservePosition.h>
 
@@ -16,12 +16,12 @@ using namespace InfiniteVector;
 #else // DISABLE DISABLE_testIvConnectionMessages
 BOOST_AUTO_TEST_CASE(testIvConnectionMessages)
 {
-    IvConsumerWaitStrategy strategy;
+    ConsumerWaitStrategy strategy;
     size_t entryCount = 100;
     size_t messageSize = 1234;
     size_t messageCount = 150;
-    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    IvConnection connection;
+    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
     BOOST_CHECK_LE(messageSize, connection.getMessageCapacity());

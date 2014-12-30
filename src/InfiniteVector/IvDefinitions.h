@@ -27,28 +27,28 @@ namespace MPass
 /// Client API:
 ///
 /// Clients interact with an InfiniteVector using an API that consists of the public interfaces of
-/// four primary classes:   Message, IvConnection, IvConsumer, and IvProducer.
+/// four primary classes:   Message, Connection, Consumer, and Producer.
 ///
-/// Two additonal classes are used when initializing an InfiniteVector: IvCreationParameters and IvConsumerWaitStrategy.
+/// Two additonal classes are used when initializing an InfiniteVector: CreationParameters and ConsumerWaitStrategy.
 ///
-/// The first step in using an InfiniteVector is to create an IvConnection using the null constructor.
+/// The first step in using an InfiniteVector is to create an Connection using the null constructor.
 ///
 /// This connection may be used to attach to an existing InfiniteVector or to create a new one using 
-/// the methods: IvConnection::createLocal(), IvConnection::openOrCreateShared(), or IvConnection::openExistingShared(). 
+/// the methods: Connection::createLocal(), Connection::openOrCreateShared(), or Connection::openExistingShared(). 
 /// 
-/// The methods that create a new InfiniteVector take an instance of IvCreationParameters as an argument.
-/// The IvCreationParameters in turn contains an IvConsumerWaitStrategy.   See the documentation of these
+/// The methods that create a new InfiniteVector take an instance of CreationParameters as an argument.
+/// The CreationParameters in turn contains an ConsumerWaitStrategy.   See the documentation of these
 /// classes for details about the parameters that can be used to configure the InfiniteVector for the particular use.
 ///
-/// Once the InfinieVector is created or found the IvConnection can be used as the construction parameter for an instance
-/// of an IvProducer and/or an IvConsumer. 
+/// Once the InfinieVector is created or found the Connection can be used as the construction parameter for an instance
+/// of an Producer and/or an Consumer. 
 ///
 /// Each client should own (at least) one Message.  A Message is actually a reference to an area of memory.  As messages
 /// are handled, the memory associated with any paricular Message object may change, but the 
 /// client can always use its own Message object to find the message it should be working with.
 ///
 /// The null Message constructor will create Message for use by the client.  Before a Message is first used, it must
-/// be initialized with memory the memory pool within the Infinite Vector.   The IvConnection::allocate(Message &)
+/// be initialized with memory the memory pool within the Infinite Vector.   The Connection::allocate(Message &)
 /// method takes care of this.
 ///
 /// Once the Message has been populated the client may use one of the Message::get() methods to find the memory it should use.
@@ -59,15 +59,15 @@ namespace MPass
 /// producer using the same InfiniteVector they will be unaffected by the time it takes a particular producer
 /// to prepare its message for publication. (See the example below.)
 ///
-/// When the producer's Message is ready it can call the IvProducer::publish(Message &) method.  
+/// When the producer's Message is ready it can call the Producer::publish(Message &) method.  
 ///
 /// Important!  Once the publish method is called, the published data is no longer available to the Producer. 
 /// Instead the Message will be automatically attached to a different, empty area of memory. It will be ready
 /// for the producer to began creating or acquiring the next message to publish.  This means the after calling
 /// publish, the producer must call Message::get() or Message::create() so it will be working with new memory area. 
 ///
-/// The consumer receives the message by calling either of the IvConsumer::getNext(Message &) or 
-/// IvConsumer::tryGetNext(Message &) methods.
+/// The consumer receives the message by calling either of the Consumer::getNext(Message &) or 
+/// Consumer::tryGetNext(Message &) methods.
 ///    Note: getNext() waits, tryGetNext() returns immediately a bool to indicate whether data was available.
 ///
 /// After a getNext() or a successful tryGetNext() call, the message will point to a new area of memory.  The consumer

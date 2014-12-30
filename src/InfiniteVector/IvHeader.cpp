@@ -1,7 +1,7 @@
 /// @file IvHeader.cpp
 #include <Common/MPassPch.h>
 #include "IvHeader.h"
-#include <InfiniteVector/IvCreationParameters.h>
+#include <InfiniteVector/CreationParameters.h>
 #include <InfiniteVector/IvAllocator.h>
 #include <InfiniteVector/IvResolver.h>
 #include <InfiniteVector/IvEntry.h>
@@ -14,7 +14,7 @@ using namespace InfiniteVector;
 IvHeader::IvHeader(
     const std::string & name,
     IvAllocator & allocator,
-    const IvCreationParameters & parameters)
+    const CreationParameters & parameters)
 : signature_(InitializingSignature)
 , version_(Version)
 , entryCount_(parameters.entryCount_)

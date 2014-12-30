@@ -2,8 +2,8 @@
 #define BOOST_TEST_NO_MAIN MPassPerformanceTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/IvProducer.h>
-#include <InfiniteVector/IvConsumer.h>
+#include <InfiniteVector/Producer.h>
+#include <InfiniteVector/Consumer.h>
 #include <MPassPerformance/TestMessage.h>
 #include <Common/Stopwatch.h>
 
@@ -14,16 +14,16 @@ using namespace InfiniteVector;
 #ifndef DISABLE_CONSUME_SEPARATELY
 BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
-    IvConsumerWaitStrategy strategy;
+    ConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
     size_t messageSize = sizeof(TestMessage);
     size_t messageCount = entryCount + 10;
-    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    IvConnection connection;
+    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
-    IvProducer producer(connection);
-    IvConsumer consumer(connection);
+    Producer producer(connection);
+    Consumer consumer(connection);
     InfiniteVector::Message producerMessage;
     connection.allocate(producerMessage);
     InfiniteVector::Message consumerMessage;
@@ -65,19 +65,19 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 {
     std::cerr << "Start producer and consumer in the same thread test." << std::endl;
 
-    IvConsumerWaitStrategy strategy;
+    ConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
     size_t messageSize = sizeof(TestMessage);
     size_t messagesNeeded = entryCount + 10;
     uint64_t messageCount = 1000000 * 100;
 
-    IvCreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
-    IvConnection connection;
+    CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
 
-    IvProducer producer(connection);
-    IvConsumer consumer(connection);
+    Producer producer(connection);
+    Consumer consumer(connection);
     InfiniteVector::Message producerMessage;
     connection.allocate(producerMessage);
     InfiniteVector::Message consumerMessage;

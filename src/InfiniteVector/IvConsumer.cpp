@@ -1,11 +1,11 @@
-/// @file IvConnection.cpp
+/// @file Connection.cpp
 #include <Common/MPassPch.h>
-#include "IvConsumer.h"
+#include "Consumer.h"
 #include <InfiniteVector/IvReservePosition.h>
 using namespace MPass;
 using namespace InfiniteVector;
 
-IvConsumer::IvConsumer(IvConnection & connection)
+Consumer::Consumer(Connection & connection)
 : connection_(connection)
 , header_(connection.getHeader())
 , resolver_(header_)
@@ -20,7 +20,7 @@ IvConsumer::IvConsumer(IvConnection & connection)
 {
 }
 
-bool IvConsumer::tryGetNext(InfiniteVector::Message & message)
+bool Consumer::tryGetNext(InfiniteVector::Message & message)
 {
     while(true)
     {
@@ -47,7 +47,7 @@ bool IvConsumer::tryGetNext(InfiniteVector::Message & message)
 
 }
 
-void IvConsumer::getNext(InfiniteVector::Message & message)
+void Consumer::getNext(InfiniteVector::Message & message)
 {
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;
@@ -60,14 +60,14 @@ void IvConsumer::getNext(InfiniteVector::Message & message)
         }
         if(remainingSpins > 0)
         {
-            if(remainingSpins != IvConsumerWaitStrategy::FOREVER)
+            if(remainingSpins != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingSpins;
             }
         }
         else if(remainingYields > 0)
         {
-            if(remainingYields != IvConsumerWaitStrategy::FOREVER)
+            if(remainingYields != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingYields;
             }
@@ -75,7 +75,7 @@ void IvConsumer::getNext(InfiniteVector::Message & message)
         }
         else if(remainingSleeps > 0)
         {
-            if(remainingSleeps != IvConsumerWaitStrategy::FOREVER)
+            if(remainingSleeps != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingSleeps;
             }

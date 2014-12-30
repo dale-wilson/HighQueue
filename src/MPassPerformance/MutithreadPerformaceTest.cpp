@@ -2,8 +2,8 @@
 #define BOOST_TEST_NO_MAIN MPassPerformanceTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/IvProducer.h>
-#include <InfiniteVector/IvConsumer.h>
+#include <InfiniteVector/Producer.h>
+#include <InfiniteVector/Consumer.h>
 #include <Common/Stopwatch.h>
 #include <MPassPerformance/TestMessage.h>
 
@@ -15,9 +15,9 @@ namespace
     volatile std::atomic<uint32_t> producersWaiting = 0;
     volatile bool producersGo = false;
 
-    void producerFunction(IvConnection & connection, uint32_t producerNumber, uint64_t messageCount)
+    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount)
     {
-        IvProducer producer(connection);
+        Producer producer(connection);
         InfiniteVector::Message producerMessage;
         if(!connection.allocate(producerMessage))
         {
@@ -51,14 +51,14 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
 
     static const size_t spinCount = 0;
-    static const size_t yieldCount = IvConsumerWaitStrategy::FOREVER;
+    static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
 
-    IvConsumerWaitStrategy strategy(spinCount, yieldCount);
-    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    IvConnection connection;
+    ConsumerWaitStrategy strategy(spinCount, yieldCount);
+    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
-    IvConsumer consumer(connection);
+    Consumer consumer(connection);
     InfiniteVector::Message consumerMessage;
     BOOST_REQUIRE(connection.allocate(consumerMessage));
 

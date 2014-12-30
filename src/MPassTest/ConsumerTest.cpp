@@ -2,8 +2,8 @@
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
-#include <InfiniteVector/IvProducer.h>
-#include <InfiniteVector/IvConsumer.h>
+#include <InfiniteVector/Producer.h>
+#include <InfiniteVector/Consumer.h>
 
 using namespace MPass;
 using namespace InfiniteVector;
@@ -36,12 +36,12 @@ namespace
 #else // DISABLE DISABLE_testConsumerWithoutWaits
 BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
 {
-    IvConsumerWaitStrategy strategy;
+    ConsumerWaitStrategy strategy;
     size_t entryCount = 10;
     size_t messageSize = sizeof(TestMessage);
     size_t messageCount = 50;
-    IvCreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    IvConnection connection;
+    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    Connection connection;
     connection.createLocal("LocalIv", parameters);
 
     // We'll need these later.
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     IvResolver resolver(header);
     IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
-    IvProducer producer(connection);
+    Producer producer(connection);
     InfiniteVector::Message message;
     connection.allocate(message);
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     connection.allocate(consumerMessage);
 
     // consume the messages.
-    IvConsumer consumer(connection);
+    Consumer consumer(connection);
     for(size_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
         std::stringstream msg;

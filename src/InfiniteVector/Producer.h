@@ -1,10 +1,10 @@
-/// @file IvProducer.h
+/// @file Producer.h
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <InfiniteVector/IvConnection.h>
+#include <InfiniteVector/Connection.h>
 #include <InfiniteVector/IvResolver.h>
 #include <InfiniteVector/IvReservePosition.h>
 #include <InfiniteVector/IvEntryAccessor.h>
@@ -14,15 +14,15 @@ namespace MPass
 	namespace InfiniteVector
 	{
         /// @brief Support for publishing messages to an InfiniteVector
-        /// In addition to having the IvConnection which is used to construct
+        /// In addition to having the Connection which is used to construct
         /// this object, you will need a InfiniteVector::Message which has been initialized
-        /// by calling the IvConnection::allocate() method.
-		class IvProducer
+        /// by calling the Connection::allocate() method.
+		class Producer
 		{
         public:
             /// @brief Construct and attach to a connection
             /// @param connection provides access to the InfiniteVector
-			IvProducer(IvConnection & connection);  
+			Producer(Connection & connection);  
             
             /// @brief Publish the data contained in a message.
             ///
@@ -37,7 +37,7 @@ namespace MPass
             /// @param message contains the data to be published.         
             void publish(InfiniteVector::Message & message);
         private:
-            IvConnection & connection_;
+            Connection & connection_;
             IvHeader * header_;
             IvResolver resolver_;
             volatile Position & readPosition_;
