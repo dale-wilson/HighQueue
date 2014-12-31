@@ -173,13 +173,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\src\MPassTest\MemoryBlockAllocatorTest.cpp" />
-    <ClCompile Include="..\src\MPassTest\BufferTest.cpp" />
-    <ClCompile Include="..\src\MPassTest\ConnectionTest.cpp" />
-    <ClCompile Include="..\src\MPassTest\ConsumerTest.cpp" />
-    <ClCompile Include="..\src\MPassTest\ProducerTest.cpp" />
-    <ClCompile Include="..\src\MPassTest\SpinlockTest.cpp" />
-    <ClCompile Include="..\src\MPassTest\TestMain.cpp" />
+    <ClCompile Include="..\src\PQTest\BufferTest.cpp" />
+    <ClCompile Include="..\src\PQTest\ConnectionTest.cpp" />
+    <ClCompile Include="..\src\PQTest\ConsumerTest.cpp" />
+    <ClCompile Include="..\src\PQTest\MemoryBlockAllocatorTest.cpp" />
+    <ClCompile Include="..\src\PQTest\ProducerTest.cpp" />
+    <ClCompile Include="..\src\PQTest\SpinlockTest.cpp" />
+    <ClCompile Include="..\src\PQTest\TestMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Common\MPassPch.h" />

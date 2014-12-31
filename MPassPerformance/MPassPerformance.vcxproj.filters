@@ -15,16 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\MPassPerformance\TestMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Common\MPassPch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\MPassPerformance\BasicPerformaceTest.cpp">
+    <ClCompile Include="..\src\PQPerformance\BasicPerformaceTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\MPassPerformance\MutithreadPerformaceTest.cpp">
+    <ClCompile Include="..\src\PQPerformance\MutithreadPerformaceTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PQPerformance\TestMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,7 +32,7 @@
     <ClInclude Include="..\src\Common\Stopwatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MPassPerformance\TestMessage.h">
+    <ClInclude Include="..\src\PQPerformance\TestMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

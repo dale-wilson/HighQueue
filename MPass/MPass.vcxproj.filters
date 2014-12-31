@@ -24,49 +24,52 @@
     <ClInclude Include="..\src\Common\Spinlock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\Message.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\Connection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\Consumer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\InfiniteVector\Producer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\ConsumerWaitStrategy.h">
+    <ClInclude Include="..\src\ProntoQueue\Connection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\CreationParameters.h">
+    <ClInclude Include="..\src\ProntoQueue\Consumer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvAllocator.h">
+    <ClInclude Include="..\src\ProntoQueue\ConsumerWaitStrategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvDefinitions.h">
+    <ClInclude Include="..\src\ProntoQueue\CreationParameters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvEntry.h">
+    <ClInclude Include="..\src\ProntoQueue\Message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvEntryAccessor.h">
+    <ClInclude Include="..\src\ProntoQueue\Producer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvHeader.h">
+    <ClInclude Include="..\src\ProntoQueue\details\IvAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvReservePosition.h">
+    <ClInclude Include="..\src\ProntoQueue\details\IvDefinitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\IvResolver.h">
+    <ClInclude Include="..\src\ProntoQueue\details\IvEntry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\MemoryBlockPool.h">
+    <ClInclude Include="..\src\ProntoQueue\details\IvEntryAccessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\InfiniteVector\details\MemoryBlockPoolFwd.h">
+    <ClInclude Include="..\src\ProntoQueue\details\IvHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ProntoQueue\details\IvReservePosition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ProntoQueue\details\IvResolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ProntoQueue\details\MemoryBlockPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ProntoQueue\details\MemoryBlockPoolFwd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,22 +77,22 @@
     <ClCompile Include="..\src\Common\MPassPch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\details\IvHeader.cpp">
+    <ClCompile Include="..\src\ProntoQueue\Connection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\details\MemoryBlockPool.cpp">
+    <ClCompile Include="..\src\ProntoQueue\Consumer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\Message.cpp">
+    <ClCompile Include="..\src\ProntoQueue\Message.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\Connection.cpp">
+    <ClCompile Include="..\src\ProntoQueue\Producer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\Consumer.cpp">
+    <ClCompile Include="..\src\ProntoQueue\details\IvHeader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InfiniteVector\Producer.cpp">
+    <ClCompile Include="..\src\ProntoQueue\details\MemoryBlockPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
