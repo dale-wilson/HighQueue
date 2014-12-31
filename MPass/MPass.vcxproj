@@ -142,8 +142,8 @@
     <ClInclude Include="..\src\ProntoQueue\CreationParameters.h" />
     <ClInclude Include="..\src\ProntoQueue\details\PQAllocator.h" />
     <ClInclude Include="..\src\ProntoQueue\details\PQDefinitions.h" />
-    <ClInclude Include="..\src\ProntoQueue\details\IvEntry.h" />
-    <ClInclude Include="..\src\ProntoQueue\details\IvEntryAccessor.h" />
+    <ClInclude Include="..\src\ProntoQueue\details\PQEntry.h" />
+    <ClInclude Include="..\src\ProntoQueue\details\PQEntryAccessor.h" />
     <ClInclude Include="..\src\ProntoQueue\details\PQHeader.h" />
     <ClInclude Include="..\src\ProntoQueue\details\PQReservePosition.h" />
     <ClInclude Include="..\src\ProntoQueue\details\PQResolver.h" />

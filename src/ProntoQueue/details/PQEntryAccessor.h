@@ -1,37 +1,37 @@
-/// @file IvEntryAccessor.hpp
+/// @file PQEntryAccessor.hpp
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
 
 #include <ProntoQueue/details/PQDefinitions.h>
-#include <ProntoQueue/details/IvEntry.h>
+#include <ProntoQueue/details/PQEntry.h>
 #include <ProntoQueue/details/PQResolver.h>
 
 namespace MPass
 {
     namespace ProntoQueue
     {
-        class IvEntryAccessor
+        class PQEntryAccessor
         {
         public:
-            IvEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount);
+            PQEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount);
 
-            IvEntry & operator[](Position index)const;
+            PQEntry & operator[](Position index)const;
         private:
-            IvEntry * entries_;
+            PQEntry * entries_;
             size_t entryCount_;
         };
 
         inline
-        IvEntryAccessor::IvEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount)
-            : entries_(resolver.resolve<IvEntry>(entryOffset))
+        PQEntryAccessor::PQEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount)
+            : entries_(resolver.resolve<PQEntry>(entryOffset))
             , entryCount_(entryCount)
         {
         }
 
         inline
-        IvEntry & IvEntryAccessor::operator[](Position index)const
+        PQEntry & PQEntryAccessor::operator[](Position index)const
         {
             return entries_[index % entryCount_];
         }

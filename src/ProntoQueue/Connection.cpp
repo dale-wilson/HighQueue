@@ -2,7 +2,7 @@
 #include <Common/MPassPch.h>
 #include "Connection.h"
 #include <ProntoQueue/details/PQAllocator.h>
-#include <ProntoQueue/details/IvEntry.h>
+#include <ProntoQueue/details/PQEntry.h>
 #include <ProntoQueue/details/PQResolver.h>
 
 using namespace MPass;
@@ -53,7 +53,7 @@ void Connection::openExistingShared(const std::string & name)
 size_t Connection::spaceNeeded(const CreationParameters & parameters)
 {
     size_t headerSize = PQAllocator::align(sizeof(PQHeader), CacheLineSize);
-    size_t entriesSize = IvEntry::alignedSize() * parameters.entryCount_;
+    size_t entriesSize = PQEntry::alignedSize() * parameters.entryCount_;
     size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
     size_t messagePoolSize = ProntoQueue::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
     return headerSize + entriesSize + positionsSize + messagePoolSize;

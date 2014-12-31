@@ -4,7 +4,7 @@
 #include <ProntoQueue/CreationParameters.h>
 #include <ProntoQueue/details/PQAllocator.h>
 #include <ProntoQueue/details/PQResolver.h>
-#include <ProntoQueue/details/IvEntry.h>
+#include <ProntoQueue/details/PQEntry.h>
 #include <ProntoQueue/details/PQReservePosition.h>
 #include <ProntoQueue/details/MemoryBlockPool.h>
 
@@ -42,7 +42,7 @@ PQHeader::PQHeader(
 
     PQResolver resolver(this);
 
-    entries_ = allocator.allocate(IvEntry::alignedSize() * entryCount_, CacheLineSize);
+    entries_ = allocator.allocate(PQEntry::alignedSize() * entryCount_, CacheLineSize);
     readPosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
     auto readPosition = resolver.resolve<Position>(readPosition_);
     *readPosition = entryCount_;
@@ -70,12 +70,12 @@ void PQHeader::allocateInternalMessages()
 {
     PQResolver resolver(this);
     auto pool = resolver.resolve<ProntoQueue::MemoryBlockPool>(memoryPool_);
-    auto entryPointer = resolver.resolve<IvEntry>(entries_);
+    auto entryPointer = resolver.resolve<PQEntry>(entries_);
 
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
-        IvEntry & entry = entryPointer[nEntry];
-        new (&entry) IvEntry;
+        PQEntry & entry = entryPointer[nEntry];
+        new (&entry) PQEntry;
         ProntoQueue::Message & message = entry.message_;
         if(!pool->allocate(message))
         {
@@ -87,11 +87,11 @@ void PQHeader::allocateInternalMessages()
 void PQHeader::releaseInternalMessages()
 {
     PQResolver resolver(this);
-    auto entryPointer = resolver.resolve<IvEntry>(entries_);
+    auto entryPointer = resolver.resolve<PQEntry>(entries_);
 
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
-        IvEntry & entry = entryPointer[nEntry];
+        PQEntry & entry = entryPointer[nEntry];
         ProntoQueue::Message & message = entry.message_;
         message.release();
     }

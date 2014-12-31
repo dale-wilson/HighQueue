@@ -7,7 +7,7 @@
 #include <ProntoQueue/Connection.h>
 #include <ProntoQueue/details/PQResolver.h>
 #include <ProntoQueue/details/PQReservePosition.h>
-#include <ProntoQueue/details/IvEntryAccessor.h>
+#include <ProntoQueue/details/PQEntryAccessor.h>
 
 namespace MPass
 {
@@ -54,7 +54,7 @@ namespace MPass
             volatile Position & publishPosition_;
             volatile AtomicPosition & reservePosition_;
             volatile Position & reserveSoloPosition_;
-            IvEntryAccessor entryAccessor_;
+            PQEntryAccessor entryAccessor_;
 		};
 	}
 }

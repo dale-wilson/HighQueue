@@ -35,8 +35,8 @@ bool Consumer::tryGetNext(ProntoQueue::Message & message)
                 return false;
             }
         }
-        IvEntry & entry = entryAccessor_[readPosition];
-        if(entry.status_ == IvEntry::Status::OK)
+        PQEntry & entry = entryAccessor_[readPosition];
+        if(entry.status_ == PQEntry::Status::OK)
         {
             entry.message_.moveTo(message);
             ++readPosition_;

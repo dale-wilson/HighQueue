@@ -53,11 +53,11 @@ void Producer::publish(ProntoQueue::Message & message)
             std::_Atomic_thread_fence(std::memory_order::memory_order_consume);
             entryEnd = readPosition_ + header_->entryCount_;
         }
-        IvEntry & entry = entryAccessor_[reserved];
-        if(entry.status_ != IvEntry::Status::SKIP)
+        PQEntry & entry = entryAccessor_[reserved];
+        if(entry.status_ != PQEntry::Status::SKIP)
         {
             message.moveTo(entry.message_);
-            entry.status_ = IvEntry::Status::OK;
+            entry.status_ = PQEntry::Status::OK;
             published = true;
         }
         while(publishPosition_ < reserved)

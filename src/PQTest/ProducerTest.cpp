@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     auto readPosition = resolver.resolve<Position>(header->readPosition_);
     auto publishPosition = resolver.resolve<Position>(header->publishPosition_);
     auto reservePosition = resolver.resolve<PQReservePosition>(header->reservePosition_);
-    IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
+    PQEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
 
     ProntoQueue::Message message;
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE(testProducer)
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 
 
-    IvEntry & firstEntry = accessor[*readPosition];
-    BOOST_CHECK_EQUAL(firstEntry.status_, IvEntry::Status::OK);
+    PQEntry & firstEntry = accessor[*readPosition];
+    BOOST_CHECK_EQUAL(firstEntry.status_, PQEntry::Status::OK);
     ProntoQueue::Message & firstMessage = firstEntry.message_;
     auto publishedMessage = firstMessage.get<TestMessage>(); 
     auto publishedSize = firstMessage.getUsed();
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     producer.publish(message);
 
     // Check to be sure that overwrote the first message.
-    BOOST_CHECK_EQUAL(firstEntry.status_, IvEntry::Status::OK);
+    BOOST_CHECK_EQUAL(firstEntry.status_, PQEntry::Status::OK);
     ProntoQueue::Message & newestMessage = firstEntry.message_;
     auto newestTestMessage = newestMessage.get<TestMessage>(); 
     auto newestSize = newestMessage.getUsed();
