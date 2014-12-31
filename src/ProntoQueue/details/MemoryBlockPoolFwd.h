@@ -3,10 +3,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-namespace MPass
+namespace ProntoQueue
 {
-	namespace ProntoQueue
-	{
-        struct MemoryBlockPool;
-	}
+    struct MemoryBlockPool;
 }
+

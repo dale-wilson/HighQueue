@@ -6,8 +6,6 @@
 
 #include <ProntoQueue/details/PQDefinitions.h>
 
-namespace MPass
-{
 namespace ProntoQueue
 {
     /// @brief How should a consumer wait if no data is available?
@@ -43,5 +41,4 @@ namespace ProntoQueue
         {
         }
     };
-}
 }

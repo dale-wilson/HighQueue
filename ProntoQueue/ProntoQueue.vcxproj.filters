@@ -18,7 +18,7 @@
     <ClInclude Include="..\src\Common\CacheLIne.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Common\MPassPch.h">
+    <ClInclude Include="..\src\Common\PQPch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Common\Spinlock.h">
@@ -74,7 +74,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\Common\MPassPch.cpp">
+    <ClCompile Include="..\src\Common\PQPch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ProntoQueue\Connection.cpp">

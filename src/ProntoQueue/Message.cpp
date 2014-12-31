@@ -1,12 +1,11 @@
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Common/MPassPch.h>
+#include <Common\PQPch.h>
 
 #include "Message.h"
 #include <ProntoQueue/details/MemoryBlockPool.h>
 
-using namespace MPass;
 using namespace ProntoQueue;
 
 

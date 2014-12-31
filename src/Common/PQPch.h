@@ -31,9 +31,9 @@ const size_t CacheLineSize = 64;
 #	define POST_CACHE_ALIGN __attribute__ ((aligned (64)))
 #endif _MSC_VER
 
-// If this symbol is not defined the user included a MPass header without
+// If this symbol is not defined the user included a ProntoQueue header without
 // using one of the standard precompiled header files.
-#define MPass_HEADERS
+#define ProntoQueue_HEADERS
 
 #ifdef _WIN32
 # define WIN32_LEAN_AND_MEAN      // Exclude rarely-used stuff from Windows headers

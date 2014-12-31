@@ -1,11 +1,10 @@
-#include "Common/MPassPch.h"
+#include "Common\PQPch.h"
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
 #include <ProntoQueue/Producer.h>
 #include <ProntoQueue/Consumer.h>
 
-using namespace MPass;
 using namespace ProntoQueue;
 
 namespace

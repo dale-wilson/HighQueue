@@ -9,8 +9,6 @@
 #include <ProntoQueue/CreationParameters.h>
 #include <ProntoQueue/details/PQAllocator.h>
 
-namespace MPass
-{
 namespace ProntoQueue
 {
     struct PQHeader
@@ -36,5 +34,4 @@ namespace ProntoQueue
         void allocateInternalMessages();
         void releaseInternalMessages();
     };
-}
 }

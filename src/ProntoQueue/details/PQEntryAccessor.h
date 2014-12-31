@@ -8,33 +8,30 @@
 #include <ProntoQueue/details/PQEntry.h>
 #include <ProntoQueue/details/PQResolver.h>
 
-namespace MPass
+namespace ProntoQueue
 {
-    namespace ProntoQueue
+    class PQEntryAccessor
     {
-        class PQEntryAccessor
-        {
-        public:
-            PQEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount);
+    public:
+        PQEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount);
 
-            PQEntry & operator[](Position index)const;
-        private:
-            PQEntry * entries_;
-            size_t entryCount_;
-        };
+        PQEntry & operator[](Position index)const;
+    private:
+        PQEntry * entries_;
+        size_t entryCount_;
+    };
 
-        inline
-        PQEntryAccessor::PQEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount)
-            : entries_(resolver.resolve<PQEntry>(entryOffset))
-            , entryCount_(entryCount)
-        {
-        }
+    inline
+    PQEntryAccessor::PQEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount)
+        : entries_(resolver.resolve<PQEntry>(entryOffset))
+        , entryCount_(entryCount)
+    {
+    }
 
-        inline
-        PQEntry & PQEntryAccessor::operator[](Position index)const
-        {
-            return entries_[index % entryCount_];
-        }
+    inline
+    PQEntry & PQEntryAccessor::operator[](Position index)const
+    {
+        return entries_[index % entryCount_];
+    }
 
-    } // ProntoQueue
-} // MPass
+} // ProntoQueue

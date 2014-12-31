@@ -15,36 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\Common\MPassPch.cpp">
+    <ClCompile Include="..\src\Common\PQPch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PQTest\BufferTest.cpp">
+    <ClCompile Include="..\src\PQPerformance\BasicPerformaceTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PQTest\ConnectionTest.cpp">
+    <ClCompile Include="..\src\PQPerformance\MutithreadPerformaceTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PQTest\ConsumerTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PQTest\MemoryBlockAllocatorTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PQTest\ProducerTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PQTest\SpinlockTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PQTest\TestMain.cpp">
+    <ClCompile Include="..\src\PQPerformance\TestMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\Common\MPassPch.h">
+    <ClInclude Include="..\src\Common\Stopwatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Common\Spinlock.h">
+    <ClInclude Include="..\src\PQPerformance\TestMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

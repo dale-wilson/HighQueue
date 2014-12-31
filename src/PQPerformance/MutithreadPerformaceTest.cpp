@@ -1,4 +1,4 @@
-#include "Common/MPassPch.h"
+#include "Common\PQPch.h"
 #define BOOST_TEST_NO_MAIN MPassPerformanceTest
 #include <boost/test/unit_test.hpp>
 
@@ -7,7 +7,6 @@
 #include <Common/Stopwatch.h>
 #include <PQPerformance/TestMessage.h>
 
-using namespace MPass;
 using namespace ProntoQueue;
 
 namespace

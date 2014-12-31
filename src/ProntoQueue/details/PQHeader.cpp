@@ -1,5 +1,5 @@
 /// @file PQHeader.cpp
-#include <Common/MPassPch.h>
+#include <Common\PQPch.h>
 #include "PQHeader.h"
 #include <ProntoQueue/CreationParameters.h>
 #include <ProntoQueue/details/PQAllocator.h>
@@ -8,7 +8,6 @@
 #include <ProntoQueue/details/PQReservePosition.h>
 #include <ProntoQueue/details/MemoryBlockPool.h>
 
-using namespace MPass;
 using namespace ProntoQueue;
 
 PQHeader::PQHeader(

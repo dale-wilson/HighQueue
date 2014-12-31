@@ -5,24 +5,22 @@
 
 #include <ProntoQueue/Message.h>
 
-namespace MPass
-{
-/// @brief Infinite Vector
+/// @brief ProntoQueue
 ///
-/// An Infinite Vector is a data structure used for message passing between components of a system.  
+/// An ProntoQueue is a data structure used for message passing between components of a system.  
 ///
 /// Clients
 ///
-/// The components that use an Infinite Vector will be called clients.  
+/// The components that use an ProntoQueue will be called clients.  
 ///
 /// Clients can be multiple processes on the same machine, multiple threads within the same process, or
 /// occasionally multiple objects within a process that are serviced by the same thread.
 /// 
 /// There are two types of Clients, Producers, and Consumers.
-///   Producers create and publish data into the Infinite Vector.   
-///   Consumers accept and process data from the Infinite Vector.
+///   Producers create and publish data into the ProntoQueue.   
+///   Consumers accept and process data from the ProntoQueue.
 ///
-/// Each instance of an Infinite Vector supports multiple Producers, but only a single Consumer.
+/// Each instance of an ProntoQueue supports multiple Producers, but only a single Consumer.
 ///
 /// Client API:
 ///
@@ -48,7 +46,7 @@ namespace MPass
 /// client can always use its own Message object to find the message it should be working with.
 ///
 /// The null Message constructor will create Message for use by the client.  Before a Message is first used, it must
-/// be initialized with memory the memory pool within the Infinite Vector.   The Connection::allocate(Message &)
+/// be initialized with memory the memory pool within the ProntoQueue.   The Connection::allocate(Message &)
 /// method takes care of this.
 ///
 /// Once the Message has been populated the client may use one of the Message::get() methods to find the memory it should use.
@@ -154,4 +152,3 @@ namespace
 
 
 } // ProntoQueue
-}//MPass

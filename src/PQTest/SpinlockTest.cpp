@@ -1,9 +1,9 @@
-#include "Common/MPassPch.h"
+#include "Common\PQPch.h"
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
 #include <Common/Spinlock.h>
-using namespace MPass;
+using namespace ProntoQueue;
 
 #define DISABLE_testSpinlockx
 #ifdef DISABLE_testSpinlock

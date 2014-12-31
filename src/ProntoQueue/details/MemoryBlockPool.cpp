@@ -1,8 +1,7 @@
-#include <Common/MPassPch.h>
+#include <Common\PQPch.h>
 
 #include <ProntoQueue/details/MemoryBlockPool.h>
 
-using namespace MPass;
 using namespace ProntoQueue;
 
 MemoryBlockPool::MemoryBlockPool()

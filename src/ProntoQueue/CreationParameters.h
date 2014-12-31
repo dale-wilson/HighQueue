@@ -6,34 +6,31 @@
 
 #include <ProntoQueue/ConsumerWaitStrategy.h>
 
-namespace MPass
+namespace ProntoQueue
 {
-	namespace ProntoQueue
-	{
-        /// @brief Information needed to construct an InfiniteVectgor
-        struct CreationParameters
-        {
-            /// @brief How should a consumer wait if no data is available.
-            ConsumerWaitStrategy strategy_;
-            /// @brief How many entries in the visible window of the ProntoQueue
-            size_t entryCount_;
-            /// @brief What is the minimum size of a message (will be rounded up to the next cache line boundary)
-            size_t messageSize_;
-            /// @brief What is the minimum number of messages needed (one extra may be allocated just because...)
-            size_t messageCount_;
+    /// @brief Information needed to construct an InfiniteVectgor
+    struct CreationParameters
+    {
+        /// @brief How should a consumer wait if no data is available.
+        ConsumerWaitStrategy strategy_;
+        /// @brief How many entries in the visible window of the ProntoQueue
+        size_t entryCount_;
+        /// @brief What is the minimum size of a message (will be rounded up to the next cache line boundary)
+        size_t messageSize_;
+        /// @brief What is the minimum number of messages needed (one extra may be allocated just because...)
+        size_t messageCount_;
 
-            CreationParameters(
-                const ConsumerWaitStrategy & strategy_,
-                size_t entryCount,
-                size_t messageSize,
-                size_t messageCount
-                )
-                : strategy_(strategy_)
-                , entryCount_(entryCount)
-                , messageSize_(messageSize)
-                , messageCount_(messageCount)
-            {
-            }
-        };
-	}
+        CreationParameters(
+            const ConsumerWaitStrategy & strategy_,
+            size_t entryCount,
+            size_t messageSize,
+            size_t messageCount
+            )
+            : strategy_(strategy_)
+            , entryCount_(entryCount)
+            , messageSize_(messageSize)
+            , messageCount_(messageCount)
+        {
+        }
+    };
 }

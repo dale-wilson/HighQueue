@@ -1,8 +1,7 @@
 /// @file Connection.cpp
-#include <Common/MPassPch.h>
+#include <Common\PQPch.h>
 #include "Producer.h"
 #include <ProntoQueue/details/PQReservePosition.h>
-using namespace MPass;
 using namespace ProntoQueue;
 
 Producer::Producer(Connection & connection, bool solo)

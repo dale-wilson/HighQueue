@@ -7,15 +7,12 @@
 #include <ProntoQueue/details/PQDefinitions.h>
 #include <Common/Spinlock.h>
 
-namespace MPass
+namespace ProntoQueue
 {
-	namespace ProntoQueue
+	struct PQReservePosition
 	{
-		struct PQReservePosition
-		{
-            AtomicPosition reservePosition_;
-            Position reserveSoloPosition_;
-            Spinlock reserveSpinlock_;
-        };
-    }  
-}
+        AtomicPosition reservePosition_;
+        Position reserveSoloPosition_;
+        Spinlock reserveSpinlock_;
+    };
+}  

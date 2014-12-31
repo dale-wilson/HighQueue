@@ -6,37 +6,34 @@
 
 #include <ProntoQueue/details/PQDefinitions.h>
 
-namespace MPass
+namespace ProntoQueue
 {
-	namespace ProntoQueue
+	class PQResolver
 	{
-		class PQResolver
+	public:
+        template <typename T>
+		PQResolver(T * baseAddress)
+            : baseAddress_(reinterpret_cast<uint8_t *>(baseAddress))
+        {}
+
+		template<typename T>
+		T * resolve(Offset offset) const
 		{
-		public:
-            template <typename T>
-			PQResolver(T * baseAddress)
-                : baseAddress_(reinterpret_cast<uint8_t *>(baseAddress))
-            {}
+            return reinterpret_cast<T *>(baseAddress_ + offset);
+		}
 
-			template<typename T>
-			T * resolve(Offset offset) const
-			{
-                return reinterpret_cast<T *>(baseAddress_ + offset);
-			}
-
-            template<typename T>
-            T * resolve(Offset offset, size_t entrySize, size_t index)
-            {
-                return reinterpret_cast<T *>(baseAddress_ + offset + entrySize * index);
-            }
+        template<typename T>
+        T * resolve(Offset offset, size_t entrySize, size_t index)
+        {
+            return reinterpret_cast<T *>(baseAddress_ + offset + entrySize * index);
+        }
 			
-            template<typename T>
-			Offset toOffset(const T* target)
-			{
-                return reinterpret_cast<const uint8_t *>(target) - baseAddress_;
-			}
-		private:
-			uint8_t * baseAddress_;
-		};
-	}
+        template<typename T>
+		Offset toOffset(const T* target)
+		{
+            return reinterpret_cast<const uint8_t *>(target) - baseAddress_;
+		}
+	private:
+		uint8_t * baseAddress_;
+	};
 }

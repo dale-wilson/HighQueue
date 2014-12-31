@@ -1,11 +1,10 @@
 /// @file Connection.cpp
-#include <Common/MPassPch.h>
+#include <Common\PQPch.h>
 #include "Connection.h"
 #include <ProntoQueue/details/PQAllocator.h>
 #include <ProntoQueue/details/PQEntry.h>
 #include <ProntoQueue/details/PQResolver.h>
 
-using namespace MPass;
 using namespace ProntoQueue;
 
 Connection::Connection()

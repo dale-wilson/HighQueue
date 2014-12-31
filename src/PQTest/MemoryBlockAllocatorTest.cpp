@@ -1,11 +1,10 @@
-#include "Common/MPassPch.h"
+#include "Common\PQPch.h"
 #define BOOST_TEST_NO_MAIN MPassTest
 #include <boost/test/unit_test.hpp>
 
 #include <ProntoQueue/details/MemoryBlockPool.h>
 #include <Common/CacheLIne.h>
 
-using namespace MPass;
 using namespace ProntoQueue;
 
 #define DISABLE_testPoolAllocationx

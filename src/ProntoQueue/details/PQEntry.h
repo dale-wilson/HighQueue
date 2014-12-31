@@ -8,32 +8,29 @@
 #include <ProntoQueue/details/PQAllocator.h>
 #include <ProntoQueue/Message.h>
 
-namespace MPass
+namespace ProntoQueue
 {
-	namespace ProntoQueue
+	PRE_CACHE_ALIGN
+	struct PQEntry
 	{
-		PRE_CACHE_ALIGN
-		struct PQEntry
-		{
-            enum Status : uint8_t
-            {
-                OK,
-                EMPTY,
-                SKIP
-            };
-            ProntoQueue::Message message_;
-            Status status_;
+        enum Status : uint8_t
+        {
+            OK,
+            EMPTY,
+            SKIP
+        };
+        ProntoQueue::Message message_;
+        Status status_;
 
-            PQEntry()
-                : status_(Status::EMPTY)
-            {
-            }
+        PQEntry()
+            : status_(Status::EMPTY)
+        {
+        }
 
-            static size_t alignedSize()
-            {
-                return PQAllocator::align(sizeof(PQEntry), CacheLineSize);
-            }
+        static size_t alignedSize()
+        {
+            return PQAllocator::align(sizeof(PQEntry), CacheLineSize);
+        }
 
-		} POST_CACHE_ALIGN;
-	}
+	} POST_CACHE_ALIGN;
 }

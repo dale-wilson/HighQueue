@@ -5,7 +5,7 @@
 
 #include <atomic>
 
-namespace MPass
+namespace ProntoQueue
 {
     class Spinlock
     {
@@ -143,4 +143,4 @@ namespace MPass
             guard_.acquire();
         }
     }
-} // namespace MPass
+} // namespace ProntoQueue
