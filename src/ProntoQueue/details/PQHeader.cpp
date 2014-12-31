@@ -1,19 +1,19 @@
-/// @file IvHeader.cpp
+/// @file PQHeader.cpp
 #include <Common/MPassPch.h>
-#include "IvHeader.h"
+#include "PQHeader.h"
 #include <ProntoQueue/CreationParameters.h>
-#include <ProntoQueue/details/IvAllocator.h>
-#include <ProntoQueue/details/IvResolver.h>
+#include <ProntoQueue/details/PQAllocator.h>
+#include <ProntoQueue/details/PQResolver.h>
 #include <ProntoQueue/details/IvEntry.h>
-#include <ProntoQueue/details/IvReservePosition.h>
+#include <ProntoQueue/details/PQReservePosition.h>
 #include <ProntoQueue/details/MemoryBlockPool.h>
 
 using namespace MPass;
 using namespace ProntoQueue;
 
-IvHeader::IvHeader(
+PQHeader::PQHeader(
     const std::string & name,
-    IvAllocator & allocator,
+    PQAllocator & allocator,
     const CreationParameters & parameters)
 : signature_(InitializingSignature)
 , version_(Version)
@@ -27,9 +27,9 @@ IvHeader::IvHeader(
 , consumerWaitConditionVariable_()
 {
     uintptr_t here = reinterpret_cast<uintptr_t>(this);
-    if(IvAllocator::align(here, CacheLineSize) != here)
+    if(PQAllocator::align(here, CacheLineSize) != here)
     {
-        throw std::exception("IvHeader must be allocated on cache line boundary");
+        throw std::exception("PQHeader must be allocated on cache line boundary");
     }
 
     std::memset(name_, '\0', sizeof(name_));
@@ -40,7 +40,7 @@ IvHeader::IvHeader(
     }
     std::memcpy(name_, name.data(), bytesToCopy);
 
-    IvResolver resolver(this);
+    PQResolver resolver(this);
 
     entries_ = allocator.allocate(IvEntry::alignedSize() * entryCount_, CacheLineSize);
     readPosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
@@ -52,7 +52,7 @@ IvHeader::IvHeader(
     *publishPosition = entryCount_;
 
     reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
-    auto reservePosition = resolver.resolve<IvReservePosition>(reservePosition_);
+    auto reservePosition = resolver.resolve<PQReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
     reservePosition->reserveSoloPosition_ = entryCount_;
 
@@ -66,9 +66,9 @@ IvHeader::IvHeader(
     signature_ = LiveSignature;
 }
 
-void IvHeader::allocateInternalMessages()
+void PQHeader::allocateInternalMessages()
 {
-    IvResolver resolver(this);
+    PQResolver resolver(this);
     auto pool = resolver.resolve<ProntoQueue::MemoryBlockPool>(memoryPool_);
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
 
@@ -84,9 +84,9 @@ void IvHeader::allocateInternalMessages()
     }
 }
 
-void IvHeader::releaseInternalMessages()
+void PQHeader::releaseInternalMessages()
 {
-    IvResolver resolver(this);
+    PQResolver resolver(this);
     auto entryPointer = resolver.resolve<IvEntry>(entries_);
 
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)

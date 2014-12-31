@@ -140,13 +140,13 @@
     <ClInclude Include="..\src\ProntoQueue\Consumer.h" />
     <ClInclude Include="..\src\ProntoQueue\ConsumerWaitStrategy.h" />
     <ClInclude Include="..\src\ProntoQueue\CreationParameters.h" />
-    <ClInclude Include="..\src\ProntoQueue\details\IvAllocator.h" />
-    <ClInclude Include="..\src\ProntoQueue\details\IvDefinitions.h" />
+    <ClInclude Include="..\src\ProntoQueue\details\PQAllocator.h" />
+    <ClInclude Include="..\src\ProntoQueue\details\PQDefinitions.h" />
     <ClInclude Include="..\src\ProntoQueue\details\IvEntry.h" />
     <ClInclude Include="..\src\ProntoQueue\details\IvEntryAccessor.h" />
-    <ClInclude Include="..\src\ProntoQueue\details\IvHeader.h" />
-    <ClInclude Include="..\src\ProntoQueue\details\IvReservePosition.h" />
-    <ClInclude Include="..\src\ProntoQueue\details\IvResolver.h" />
+    <ClInclude Include="..\src\ProntoQueue\details\PQHeader.h" />
+    <ClInclude Include="..\src\ProntoQueue\details\PQReservePosition.h" />
+    <ClInclude Include="..\src\ProntoQueue\details\PQResolver.h" />
     <ClInclude Include="..\src\ProntoQueue\details\MemoryBlockPool.h" />
     <ClInclude Include="..\src\ProntoQueue\details\MemoryBlockPoolFwd.h" />
     <ClInclude Include="..\src\ProntoQueue\Message.h" />
@@ -159,7 +159,7 @@
     </ClCompile>
     <ClCompile Include="..\src\ProntoQueue\Connection.cpp" />
     <ClCompile Include="..\src\ProntoQueue\Consumer.cpp" />
-    <ClCompile Include="..\src\ProntoQueue\details\IvHeader.cpp" />
+    <ClCompile Include="..\src\ProntoQueue\details\PQHeader.cpp" />
     <ClCompile Include="..\src\ProntoQueue\details\MemoryBlockPool.cpp" />
     <ClCompile Include="..\src\ProntoQueue\Message.cpp" />
     <ClCompile Include="..\src\ProntoQueue\Producer.cpp" />

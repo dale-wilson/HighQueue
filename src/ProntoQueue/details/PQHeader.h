@@ -1,18 +1,19 @@
-/// @file IvHeader.h
+/// @file PQHeader.h
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "IvDefinitions.h"
+#include <ProntoQueue/details/PQDefinitions.h>
+//ProntoQueue/PQDefinitions.h>
 #include <ProntoQueue/CreationParameters.h>
-#include <ProntoQueue/details/IvAllocator.h>
+#include <ProntoQueue/details/PQAllocator.h>
 
 namespace MPass
 {
 namespace ProntoQueue
 {
-    struct IvHeader
+    struct PQHeader
     {
         Signature signature_;
         uint8_t version_;
@@ -28,9 +29,9 @@ namespace ProntoQueue
         std::mutex consumerWaitMutex_;
         std::condition_variable consumerWaitConditionVariable_;
 
-	    IvHeader(
+	    PQHeader(
             const std::string & name, 
-            IvAllocator & allocator, 
+            PQAllocator & allocator, 
             const CreationParameters & parameters);
         void allocateInternalMessages();
         void releaseInternalMessages();

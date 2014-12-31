@@ -1,7 +1,7 @@
 /// @file Connection.cpp
 #include <Common/MPassPch.h>
 #include "Consumer.h"
-#include <ProntoQueue/details/IvReservePosition.h>
+#include <ProntoQueue/details/PQReservePosition.h>
 using namespace MPass;
 using namespace ProntoQueue;
 

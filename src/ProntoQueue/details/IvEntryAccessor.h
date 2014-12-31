@@ -4,9 +4,9 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <ProntoQueue/details/IvDefinitions.h>
+#include <ProntoQueue/details/PQDefinitions.h>
 #include <ProntoQueue/details/IvEntry.h>
-#include <ProntoQueue/details/IvResolver.h>
+#include <ProntoQueue/details/PQResolver.h>
 
 namespace MPass
 {
@@ -15,7 +15,7 @@ namespace MPass
         class IvEntryAccessor
         {
         public:
-            IvEntryAccessor(IvResolver & resolver, Offset entryOffset, size_t entryCount);
+            IvEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount);
 
             IvEntry & operator[](Position index)const;
         private:
@@ -24,7 +24,7 @@ namespace MPass
         };
 
         inline
-        IvEntryAccessor::IvEntryAccessor(IvResolver & resolver, Offset entryOffset, size_t entryCount)
+        IvEntryAccessor::IvEntryAccessor(PQResolver & resolver, Offset entryOffset, size_t entryCount)
             : entries_(resolver.resolve<IvEntry>(entryOffset))
             , entryCount_(entryCount)
         {

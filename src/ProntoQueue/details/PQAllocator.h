@@ -1,10 +1,10 @@
-/// @file IvAllocator.h
+/// @file PQAllocator.h
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "IvDefinitions.h"
+#include <ProntoQueue/details/PQDefinitions.h>
 
 namespace MPass
 {
@@ -12,13 +12,13 @@ namespace MPass
 	{
         /// @brief A helper class to assist in memory allocation in an infinite vector.
         /// Works in offsets
-		class IvAllocator
+		class PQAllocator
 		{
 		public:
             /// @brief Construct 
             /// @param available how many bytes do we have from which to allocate?
             /// @param initialPosition where should allocation begin?
-            explicit IvAllocator(
+            explicit PQAllocator(
                 size_t available,
                 Offset initialPosition = 0)
             : available_(available)

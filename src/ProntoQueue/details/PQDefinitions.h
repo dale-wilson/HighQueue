@@ -131,7 +131,7 @@ namespace MPass
 ///
 /// This cache line alignment is a tradeoff between memory usage an speed. For this implementation, speed trumps memory size.
 ///
-/// This documentation is in IvDefinitions.h
+/// This documentation is in PQDefinitions.h
 namespace ProntoQueue
 {
 

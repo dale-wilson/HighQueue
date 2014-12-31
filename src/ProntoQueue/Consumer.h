@@ -5,8 +5,8 @@
 #pragma once
 
 #include <ProntoQueue/Connection.h>
-#include <ProntoQueue/details/IvResolver.h>
-#include <ProntoQueue/details/IvReservePosition.h>
+#include <ProntoQueue/details/PQResolver.h>
+#include <ProntoQueue/details/PQReservePosition.h>
 #include <ProntoQueue/details/IvEntryAccessor.h>
 
 namespace MPass
@@ -45,8 +45,8 @@ namespace MPass
             void getNext(ProntoQueue::Message & message);
         private:
             Connection & connection_;
-            IvHeader * header_;
-            IvResolver resolver_;
+            PQHeader * header_;
+            PQResolver resolver_;
             IvEntryAccessor entryAccessor_;
             volatile Position & readPosition_;
             volatile Position & publishPosition_;

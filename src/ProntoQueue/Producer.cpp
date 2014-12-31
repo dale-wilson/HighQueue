@@ -1,7 +1,7 @@
 /// @file Connection.cpp
 #include <Common/MPassPch.h>
 #include "Producer.h"
-#include <ProntoQueue/details/IvReservePosition.h>
+#include <ProntoQueue/details/PQReservePosition.h>
 using namespace MPass;
 using namespace ProntoQueue;
 
@@ -12,8 +12,8 @@ Producer::Producer(Connection & connection, bool solo)
 , resolver_(header_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
 , publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
-, reservePosition_(resolver_.resolve<volatile IvReservePosition>(header_->reservePosition_)->reservePosition_)
-, reserveSoloPosition_(resolver_.resolve<volatile IvReservePosition>(header_->reservePosition_)->reserveSoloPosition_)
+, reservePosition_(resolver_.resolve<volatile PQReservePosition>(header_->reservePosition_)->reservePosition_)
+, reserveSoloPosition_(resolver_.resolve<volatile PQReservePosition>(header_->reservePosition_)->reserveSoloPosition_)
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 {
     if(solo_ && reservePosition_ > reserveSoloPosition_)

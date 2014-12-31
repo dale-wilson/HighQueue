@@ -1,20 +1,20 @@
-/// @file IvResolver.h
+/// @file PQResolver.h
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "IvDefinitions.h"
+#include <ProntoQueue/details/PQDefinitions.h>
 
 namespace MPass
 {
 	namespace ProntoQueue
 	{
-		class IvResolver
+		class PQResolver
 		{
 		public:
             template <typename T>
-			IvResolver(T * baseAddress)
+			PQResolver(T * baseAddress)
                 : baseAddress_(reinterpret_cast<uint8_t *>(baseAddress))
             {}
 

@@ -4,8 +4,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "IvDefinitions.h"
-#include <ProntoQueue/details/IvAllocator.h>
+#include <ProntoQueue/details/PQDefinitions.h>
+#include <ProntoQueue/details/PQAllocator.h>
 #include <ProntoQueue/Message.h>
 
 namespace MPass
@@ -31,7 +31,7 @@ namespace MPass
 
             static size_t alignedSize()
             {
-                return IvAllocator::align(sizeof(IvEntry), CacheLineSize);
+                return PQAllocator::align(sizeof(IvEntry), CacheLineSize);
             }
 
 		} POST_CACHE_ALIGN;

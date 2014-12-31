@@ -41,10 +41,10 @@ BOOST_AUTO_TEST_CASE(testProducer)
     Producer producer(connection);
     // peek inside the IV.
     auto header = connection.getHeader();
-    IvResolver resolver(header);
+    PQResolver resolver(header);
     auto readPosition = resolver.resolve<Position>(header->readPosition_);
     auto publishPosition = resolver.resolve<Position>(header->publishPosition_);
-    auto reservePosition = resolver.resolve<IvReservePosition>(header->reservePosition_);
+    auto reservePosition = resolver.resolve<PQReservePosition>(header->reservePosition_);
     IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
 

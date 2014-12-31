@@ -4,8 +4,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <ProntoQueue/Connection.h>
-#include <ProntoQueue/details/IvResolver.h>
-#include <ProntoQueue/details/IvReservePosition.h>
+#include <ProntoQueue/details/PQResolver.h>
+#include <ProntoQueue/details/PQReservePosition.h>
 
 using namespace MPass;
 using namespace ProntoQueue;
@@ -38,10 +38,10 @@ BOOST_AUTO_TEST_CASE(testIvConnectionMessages)
 
     // peek inside
     auto header = connection.getHeader();
-    IvResolver resolver(header);
+    PQResolver resolver(header);
     auto readPosition = resolver.resolve<Position>(header->readPosition_);
     auto publishPosition = resolver.resolve<Position>(header->publishPosition_);
-    auto reservePosition = resolver.resolve<IvReservePosition>(header->reservePosition_);
+    auto reservePosition = resolver.resolve<PQReservePosition>(header->reservePosition_);
     BOOST_CHECK_EQUAL(*readPosition, *publishPosition);
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 }

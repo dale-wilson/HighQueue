@@ -4,7 +4,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "IvDefinitions.h"
+#include <ProntoQueue/details/PQDefinitions.h>
 
 namespace MPass
 {

@@ -4,7 +4,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <ProntoQueue/details/IvHeader.h>
+#include <ProntoQueue/details/PQHeader.h>
 #include <ProntoQueue/CreationParameters.h>
 #include <ProntoQueue/details/MemoryBlockPool.h>
 
@@ -60,7 +60,7 @@ namespace MPass
             bool hasMemoryAvailable() const;
 
             /// @brief Provide direct access to internal implementation details.
-            IvHeader * getHeader() const;
+            PQHeader * getHeader() const;
             
             /// @brief A helper function to determine how much space is needed in an block of memory
             /// large enough to hold an ProntoQueue
@@ -68,7 +68,7 @@ namespace MPass
 
         private:
             boost::shared_array<byte_t> localMemory_;
-            IvHeader * header_;
+            PQHeader * header_;
             ProntoQueue::MemoryBlockPool * memoryPool_;
 		};
 	}

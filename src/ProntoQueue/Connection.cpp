@@ -1,9 +1,9 @@
 /// @file Connection.cpp
 #include <Common/MPassPch.h>
 #include "Connection.h"
-#include <ProntoQueue/details/IvAllocator.h>
+#include <ProntoQueue/details/PQAllocator.h>
 #include <ProntoQueue/details/IvEntry.h>
-#include <ProntoQueue/details/IvResolver.h>
+#include <ProntoQueue/details/PQResolver.h>
 
 using namespace MPass;
 using namespace ProntoQueue;
@@ -25,19 +25,19 @@ void Connection::createLocal(const std::string & name, const CreationParameters 
     const size_t allocatedSize = spaceNeeded(parameters) + CacheLineSize;
     localMemory_.reset(new byte_t[allocatedSize]);
     byte_t * block = localMemory_.get();
-    byte_t * alignedBlock = IvAllocator::align(block, CacheLineSize);
+    byte_t * alignedBlock = PQAllocator::align(block, CacheLineSize);
     Offset headerOffset = Offset(alignedBlock - block);
     size_t availableSize = allocatedSize - headerOffset;
 
-    IvAllocator allocator(allocatedSize, sizeof(IvHeader));
+    PQAllocator allocator(allocatedSize, sizeof(PQHeader));
 
     auto header = block + headerOffset;
-    header_ = new (header) IvHeader(name, allocator, parameters);
-    IvResolver resolver(header_);
+    header_ = new (header) PQHeader(name, allocator, parameters);
+    PQResolver resolver(header_);
     memoryPool_ = resolver.resolve<ProntoQueue::MemoryBlockPool>(header_->memoryPool_);
 }
 
-IvHeader * Connection::getHeader() const
+PQHeader * Connection::getHeader() const
 {
     return header_;
 }
@@ -52,7 +52,7 @@ void Connection::openExistingShared(const std::string & name)
 
 size_t Connection::spaceNeeded(const CreationParameters & parameters)
 {
-    size_t headerSize = IvAllocator::align(sizeof(IvHeader), CacheLineSize);
+    size_t headerSize = PQAllocator::align(sizeof(PQHeader), CacheLineSize);
     size_t entriesSize = IvEntry::alignedSize() * parameters.entryCount_;
     size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
     size_t messagePoolSize = ProntoQueue::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);

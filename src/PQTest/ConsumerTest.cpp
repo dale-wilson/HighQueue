@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
 
     // We'll need these later.
     auto header = connection.getHeader();
-    IvResolver resolver(header);
+    PQResolver resolver(header);
     IvEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
     Producer producer(connection);
