@@ -14,7 +14,6 @@ Producer::Producer(Connection & connection, bool solo)
 , publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
 , reservePosition_(resolver_.resolve<volatile IvReservePosition>(header_->reservePosition_)->reservePosition_)
 , reserveSoloPosition_(resolver_.resolve<volatile IvReservePosition>(header_->reservePosition_)->reserveSoloPosition_)
-, reserveSpinLock_(resolver_.resolve<IvReservePosition>(header_->reservePosition_)->reserveSpinlock_)
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 {
     if(solo_ && reservePosition_ > reserveSoloPosition_)

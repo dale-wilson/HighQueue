@@ -54,7 +54,6 @@ namespace MPass
             volatile Position & publishPosition_;
             volatile AtomicPosition & reservePosition_;
             volatile Position & reserveSoloPosition_;
-            Spinlock & reserveSpinLock_;
             IvEntryAccessor entryAccessor_;
 		};
 	}
