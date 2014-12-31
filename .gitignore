@@ -1,9 +1,7 @@
 Debug/
 Release/
-MPass.opensdf
-MPass.sdf
-#MPass.sln
-#*.vcxproj*
+*.opensdf
+*.sdf
 *.vcxproj.user
 *.suo
 *.suo.*

@@ -1,5 +1,5 @@
 #include "Common\PQPch.h"
-#define BOOST_TEST_NO_MAIN MPassPerformanceTest
+#define BOOST_TEST_NO_MAIN ProntoQueuePerformanceTest
 #include <boost/test/unit_test.hpp>
 
 #include <ProntoQueue/Producer.h>
