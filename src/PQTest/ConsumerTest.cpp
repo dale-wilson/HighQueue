@@ -1,4 +1,4 @@
-#include "Common\PQPch.h"
+#include "Common/ProntoQueuePch.h"
 #define BOOST_TEST_NO_MAIN ProntoQueueTest
 #include <boost/test/unit_test.hpp>
 

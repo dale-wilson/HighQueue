@@ -1,0 +1,101 @@
+// Copyright (c) 2014, Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+
+//////////////////////////////
+// Build the ProntoQueue library
+project(*) {
+// : boost_base, boost_filesystem, boost_system, boost_thread {
+  sharedname = *
+//  staticname = ProntoQueue
+  dynamicflags += PRONTOQUEUE_BUILD_DLL
+  includes += $(ProntoQueue_ROOT)/src
+  pch_header = Common/ProntoQueuePch.h
+  pch_source = Common/ProntoQueuePch.cpp
+  Source_Files {
+	ProntoQueue
+	ProntoQueue/details
+	Common
+  }
+  Header_Files {
+	ProntoQueue
+	ProntoQueue/details
+	Common
+  }
+
+  specific(prop:microsoft) {
+    Release::libout = $(ProntoQueue_ROOT)/Output/Release
+    Debug::libout = $(ProntoQueue_ROOT)/Output/Debug
+  } else {
+    libout = $(ProntoQueue_ROOT)/lib
+  }
+
+  specific(make) {
+    // Enable full optimization on gcc/linux
+    Release::genflags += -O3
+  }
+}
+
+////////////////////////////
+// Build the ProntoQueue tests
+project(*test) : boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = ProntoQueueTest
+  includes += $(ProntoQueue_ROOT)/src
+
+  specific(prop:microsoft) {
+    Release::exeout = $(ProntoQueue_ROOT)/Output/Release
+    Debug::exeout = $(ProntoQueue_ROOT)/Output/Debug
+    Release::libpaths += $(ProntoQueue_ROOT)/Output/Release
+    Debug::libpaths += $(ProntoQueue_ROOT)/Output/Debug
+  } else {
+    libpaths += $(ProntoQueue_ROOT)/lib
+    exeout = $(ProntoQueue_ROOT)/bin
+  }
+  // TODO: What to do about boost 64 bit builds?
+  libpaths += $(BOOST_ROOT)/64bit/lib
+
+  libs += ProntoQueue
+  after += ProntoQueue
+  macros += BOOST_TEST_DYN_LINK
+  pch_header = Common/ProntoQueuePch.h
+  pch_source = Common/ProntoQueuePch.cpp
+  Source_Files {
+    PQTest
+  }
+  Header_Files {
+    PQTest
+	Common
+  }
+}
+
+////////////////////////////
+// Build the ProntoQueue tests
+project(*performance) : boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = ProntoQueuePerformance
+  includes += $(ProntoQueue_ROOT)/src
+
+  specific(prop:microsoft) {
+    Release::exeout = $(ProntoQueue_ROOT)/Output/Release
+    Debug::exeout = $(ProntoQueue_ROOT)/Output/Debug
+    Release::libpaths += $(ProntoQueue_ROOT)/Output/Release
+    Debug::libpaths += $(ProntoQueue_ROOT)/Output/Debug
+  } else {
+    libpaths += $(ProntoQueue_ROOT)/lib
+    exeout = $(ProntoQueue_ROOT)/bin
+  }
+  // TODO: What to do about boost 64 bit builds?
+  libpaths += $(BOOST_ROOT)/64bit/lib
+
+  libs += ProntoQueue
+  after += ProntoQueue
+  macros += BOOST_TEST_DYN_LINK
+  pch_header = Common/ProntoQueuePch.h
+  pch_source = Common/ProntoQueuePch.cpp
+  Source_Files {
+    PQPerformance
+  }
+  Header_Files {
+    PQPerformance
+	Common
+  }
+}

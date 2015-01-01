@@ -4,6 +4,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
+#include <Common/ProntoQueue_Export.h>
 #include <ProntoQueue/Connection.h>
 #include <ProntoQueue/details/PQResolver.h>
 #include <ProntoQueue/details/PQReservePosition.h>
@@ -15,7 +16,7 @@ namespace ProntoQueue
     /// In addition to having the Connection which is used to construct
     /// this object, you will need a ProntoQueue::Message which has been initialized
     /// by calling the Connection::allocate() method.
-	class Producer
+    class ProntoQueue_Export Producer
 	{
     public:
         /// @brief Construct and attach to a connection

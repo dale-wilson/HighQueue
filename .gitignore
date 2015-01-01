@@ -1,9 +1,10 @@
 Debug/
 Release/
+x64/
 *.opensdf
 *.sdf
 *.vcxproj.user
 *.suo
 *.suo.*
 ipch/
-x64/
+s.cmd

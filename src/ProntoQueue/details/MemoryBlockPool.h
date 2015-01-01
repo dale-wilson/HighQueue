@@ -3,6 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
+#include <Common/ProntoQueue_Export.h>
 #include <ProntoQueue/Message.h>
 #include <Common/Spinlock.h>
 
@@ -16,7 +17,7 @@ namespace ProntoQueue
     /// Instead offsets within the block are used to identify memory blocks.
     /// This allows a pool to reside in shared memory which might be mapped
     /// to different addresses in different processes.
-    struct MemoryBlockPool
+    struct ProntoQueue_Export MemoryBlockPool
     {
         /// A flag to mark the end of the linked list of memory blocks.
 

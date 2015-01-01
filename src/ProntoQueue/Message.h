@@ -2,11 +2,13 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
+
+#include <Common/ProntoQueue_Export.h>
 #include <ProntoQueue/details/MemoryBlockPoolFwd.h>
 namespace ProntoQueue
 {
     /// @brief A handle for a block of memory
-    class Message
+    class ProntoQueue_Export Message
     {
     public:
         enum Type

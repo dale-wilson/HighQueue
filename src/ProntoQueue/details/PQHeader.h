@@ -4,14 +4,14 @@
 // See the file license.txt for licensing information.
 #pragma once
 
+#include <Common/ProntoQueue_Export.h>
 #include <ProntoQueue/details/PQDefinitions.h>
-//ProntoQueue/PQDefinitions.h>
 #include <ProntoQueue/CreationParameters.h>
 #include <ProntoQueue/details/PQAllocator.h>
 
 namespace ProntoQueue
 {
-    struct PQHeader
+    struct ProntoQueue_Export PQHeader
     {
         Signature signature_;
         uint8_t version_;

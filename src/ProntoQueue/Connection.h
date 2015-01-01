@@ -3,7 +3,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-
+#include <Common/ProntoQueue_Export.h>
 #include <ProntoQueue/details/PQHeader.h>
 #include <ProntoQueue/CreationParameters.h>
 #include <ProntoQueue/details/MemoryBlockPool.h>
@@ -20,7 +20,7 @@ namespace ProntoQueue
     /// access to the memory pool to be used by the messages.
     /// @see Producer
     /// @see Consumer
-	class Connection
+    class ProntoQueue_Export Connection
 	{
 	public:
         /// @brief Construct.
@@ -65,7 +65,11 @@ namespace ProntoQueue
         static size_t spaceNeeded(const CreationParameters & parameters);
 
     private:
+    #if 0
         boost::shared_array<byte_t> localMemory_;
+    #else
+        std::shared_ptr<byte_t> localMemory_;
+    #endif
         PQHeader * header_;
         ProntoQueue::MemoryBlockPool * memoryPool_;
 	};

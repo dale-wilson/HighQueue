@@ -69,8 +69,8 @@ const size_t CacheLineSize = 64;
 #include <vector>
 
 
-#include <boost/shared_array.hpp>
 #ifdef NEED_BOOST_YET
+#include <boost/shared_array.hpp>
 #include <boost/chrono.hpp>
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>

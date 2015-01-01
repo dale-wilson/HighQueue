@@ -1,7 +1,7 @@
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Common\PQPch.h>
+#include <Common/ProntoQueuePch.h>
 
 #include "Message.h"
 #include <ProntoQueue/details/MemoryBlockPool.h>
