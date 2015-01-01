@@ -1,8 +1,11 @@
 Debug/
 Release/
 x64/
+*.sln
 *.opensdf
 *.sdf
+*.vcxproj
+*.vcxproj.filters
 *.vcxproj.user
 *.suo
 *.suo.*
