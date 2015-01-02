@@ -66,7 +66,7 @@ void Message::release()
     }
 }
 
-inline void Message::reset()
+void Message::reset()
 {
     container_ = 0;
     capacity_ = 0;

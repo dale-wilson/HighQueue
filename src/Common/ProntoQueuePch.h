@@ -17,6 +17,18 @@
 #pragma warning(disable:4100)  // Disable: unreferenced formal parameter (/W4 warning: common case for virtual methods)
 #endif
 
+// If this symbol is not defined the user included a ProntoQueue header without
+// using one of the standard precompiled header files.
+#define ProntoQueue_HEADERS
+
+#ifdef _WIN32
+# define WIN32_LEAN_AND_MEAN      // Exclude rarely-used stuff from Windows headers
+# define NOMINMAX                 // Do not define min & max a macros: l'histoire anciene
+# include <windows.h>
+#else
+#include <unistd.h>
+#endif // _WIN32
+
 // Define compiler-specific macros to cache-align structures
 // Usage:
 //     PRE_CACHE_ALIGN
@@ -26,22 +38,11 @@ const size_t CacheLineSize = 64;
 #if defined(_MSC_VER)
 #	define PRE_CACHE_ALIGN __declspec(align(64))
 #   define POST_CACHE_ALIGN
-#elif // gcc?
+#else // gcc?
 #   define PRE_CACHE_ALIGN
 #	define POST_CACHE_ALIGN __attribute__ ((aligned (64)))
-#endif _MSC_VER
+#endif // _MSC_VER
 
-// If this symbol is not defined the user included a ProntoQueue header without
-// using one of the standard precompiled header files.
-#define ProntoQueue_HEADERS
-
-#ifdef _WIN32
-# define WIN32_LEAN_AND_MEAN      // Exclude rarely-used stuff from Windows headers
-# define NOMINMAX                 // Do not define min & max a macros: l'histoire anciene
-# include <windows.h>
-// If building for .NET, must link boost threads dynamically
-#define BOOST_THREAD_USE_DLL
-#endif // _WIN32
 // This reports at compile time which boost libraries will be used
 // #define BOOST_LIB_DIAGNOSTIC
 
@@ -54,6 +55,7 @@ const size_t CacheLineSize = 64;
 #include <chrono>
 #include <cstdlib>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <iomanip>

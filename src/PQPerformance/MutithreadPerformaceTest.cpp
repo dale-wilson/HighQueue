@@ -11,7 +11,7 @@ using namespace ProntoQueue;
 
 namespace
 {
-    volatile std::atomic<uint32_t> producersWaiting = 0;
+    volatile std::atomic<uint32_t> producersWaiting;
     volatile bool producersGo = false;
 
     void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
@@ -114,11 +114,14 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             producerThreads[nTh].join();
         }
 
+        auto messageBytes = sizeof(TestMessage);
         auto messageBits = sizeof(TestMessage) * 8;
-        std::cout << " Passed " << actualMessageCount << ' ' << messageBits << " bit messages in " 
+        std::cout << " Passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
             << lapse / actualMessageCount << " nsec./message "
-            << std::setprecision(2) << double(actualMessageCount * messageBits) / double(lapse) << " GBits/second."
+            << std::setprecision(3) << double(actualMessageCount) / double(lapse) << " GMsg/second "
+            << std::setprecision(3) << double(actualMessageCount * messageBytes) / double(lapse) << " GByte/second "
+            << std::setprecision(3) << double(actualMessageCount * messageBits) / double(lapse) << " GBit/second."
             << std::endl;
     }
 }

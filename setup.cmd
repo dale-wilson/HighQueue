@@ -20,7 +20,7 @@ REM ============================================================================
 if "a" == "a%MPC_ROOT%" set MPC_ROOT=c:\MPC
 if "a" == "a%BOOST_VERSION%" set BOOST_VERSION=boost_1_57_0
 if "a" == "a%BOOST_ROOT%" set BOOST_ROOT=c:\boost\%BOOST_VERSION%
-if "a" == "a%BOOST_LIB_DIRECTORY%" set BOOST_LIB_DIRECTORY=64bit\lib
+if "a" == "a%BOOST_LIB_DIRECTORY%" set BOOST_LIB_DIRECTORY=x64\lib
 if "a" == "a%BOOST_LIB_PATH%" set BOOST_LIB_PATH=%BOOST_ROOT%\%BOOST_LIB_DIRECTORY%
 REM END OF VALUES TO BE SET
 REM =====================================================================================
@@ -86,10 +86,10 @@ REM: This avoids growing PATH and INCLUDE every time setup is run
 if "a" == "a%BASE_PATH%" set BASE_PATH=%PATH%
 if "a" == "a%BASE_INCLUDE%" set BASE_INCLUDE=%INCLUDE%
 
-set RELEASE64_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\64bit\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
-set DEBUG64_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\64bit\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
-set RELEASE32_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\32bit\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
-set DEBUG32_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\32bit\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
+set RELEASE64_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\x64\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
+set DEBUG64_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\x64\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
+set RELEASE32_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\x86\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
+set DEBUG32_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\x86\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
 set PATH=%RELEASE64_PATH%
 set INCLUDE=%BOOST_ROOT%;%BASE_INCLUDE%
 

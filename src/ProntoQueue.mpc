@@ -51,8 +51,8 @@ project(*test) : boost_unit_test_framework, boost_base, boost_filesystem, boost_
     libpaths += $(ProntoQueue_ROOT)/lib
     exeout = $(ProntoQueue_ROOT)/bin
   }
-  // TODO: What to do about boost 64 bit builds?
-  libpaths += $(BOOST_ROOT)/64bit/lib
+  // TODO: What to do about boost 32 bit builds?
+  libpaths += $(BOOST_ROOT)/x64/lib
 
   libs += ProntoQueue
   after += ProntoQueue
@@ -83,8 +83,8 @@ project(*performance) : boost_unit_test_framework, boost_base, boost_filesystem,
     libpaths += $(ProntoQueue_ROOT)/lib
     exeout = $(ProntoQueue_ROOT)/bin
   }
-  // TODO: What to do about boost 64 bit builds?
-  libpaths += $(BOOST_ROOT)/64bit/lib
+  // TODO: What to do about boost 32 bit builds?
+  libpaths += $(BOOST_ROOT)/x64/lib
 
   libs += ProntoQueue
   after += ProntoQueue

@@ -21,19 +21,26 @@ Connection::~Connection()
 
 void Connection::createLocal(const std::string & name, const CreationParameters & parameters)
 {
-    const size_t allocatedSize = spaceNeeded(parameters) + CacheLineSize;
+    const size_t allocatedSize = spaceNeeded(parameters);
     localMemory_.reset(new byte_t[allocatedSize]);
-    byte_t * block = localMemory_.get();
-    byte_t * alignedBlock = PQAllocator::align(block, CacheLineSize);
-    Offset headerOffset = Offset(alignedBlock - block);
-    size_t availableSize = allocatedSize - headerOffset;
+    try
+    {
+        byte_t * block = localMemory_.get();
+        byte_t * alignedBlock = PQAllocator::align(block, CacheLineSize);
+        size_t availableSize = allocatedSize - (alignedBlock - block);
 
-    PQAllocator allocator(allocatedSize, sizeof(PQHeader));
-
-    auto header = block + headerOffset;
-    header_ = new (header) PQHeader(name, allocator, parameters);
-    PQResolver resolver(header_);
-    memoryPool_ = resolver.resolve<ProntoQueue::MemoryBlockPool>(header_->memoryPool_);
+        PQAllocator allocator(availableSize, sizeof(PQHeader));
+        header_ = new (alignedBlock)PQHeader(name, allocator, parameters);
+        PQResolver resolver(header_);
+        memoryPool_ = resolver.resolve<ProntoQueue::MemoryBlockPool>(header_->memoryPool_);
+    }
+    catch(...)
+    {
+        localMemory_.reset();
+        header_ = 0;
+        memoryPool_ = 0;
+        throw;
+    }
 }
 
 PQHeader * Connection::getHeader() const
@@ -43,10 +50,12 @@ PQHeader * Connection::getHeader() const
             
 void Connection::openOrCreateShared(const std::string & name, const CreationParameters & parameters)
 {
+// todo
 }
 
 void Connection::openExistingShared(const std::string & name)
 {
+// todo
 }
 
 size_t Connection::spaceNeeded(const CreationParameters & parameters)
@@ -55,7 +64,8 @@ size_t Connection::spaceNeeded(const CreationParameters & parameters)
     size_t entriesSize = PQEntry::alignedSize() * parameters.entryCount_;
     size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
     size_t messagePoolSize = ProntoQueue::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
-    return headerSize + entriesSize + positionsSize + messagePoolSize;
+    size_t cacheAlignmentSize = CacheLineSize;
+    return headerSize + entriesSize + positionsSize + messagePoolSize + cacheAlignmentSize;
 }
 
 bool Connection::allocate(ProntoQueue::Message & message)

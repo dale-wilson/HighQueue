@@ -25,12 +25,6 @@ PQHeader::PQHeader(
 , consumerWaitMutex_()
 , consumerWaitConditionVariable_()
 {
-    uintptr_t here = reinterpret_cast<uintptr_t>(this);
-    if(PQAllocator::align(here, CacheLineSize) != here)
-    {
-        throw std::exception("PQHeader must be allocated on cache line boundary");
-    }
-
     std::memset(name_, '\0', sizeof(name_));
     size_t bytesToCopy = name.size();
     if(bytesToCopy >= sizeof(name_) - 1)

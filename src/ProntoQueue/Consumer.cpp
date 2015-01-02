@@ -26,7 +26,7 @@ bool Consumer::tryGetNext(ProntoQueue::Message & message)
         Position readPosition = readPosition_;
         if(readPosition >= cachedPublishPosition_)
         {
-            std::_Atomic_thread_fence(std::memory_order::memory_order_consume);
+            std::atomic_thread_fence(std::memory_order::memory_order_consume);
             readPosition = readPosition_;
             cachedPublishPosition_ = publishPosition_;
             if(readPosition >= cachedPublishPosition_)
@@ -94,7 +94,8 @@ void Consumer::getNext(ProntoQueue::Message & message)
                 {
                     return;
                 }
-                throw std::exception("Consumer wait timeout.");
+                // todo: define a better exception
+                throw std::runtime_error("Consumer wait timeout.");
             }
         }
     }

@@ -49,7 +49,7 @@ void Producer::publish(ProntoQueue::Message & message)
         auto entryEnd = readPosition_ + header_->entryCount_;
         while(entryEnd <= reserved)
         {
-            std::_Atomic_thread_fence(std::memory_order::memory_order_consume);
+            std::atomic_thread_fence(std::memory_order::memory_order_consume);
             entryEnd = readPosition_ + header_->entryCount_;
         }
         PQEntry & entry = entryAccessor_[reserved];
