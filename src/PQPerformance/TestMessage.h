@@ -6,7 +6,7 @@ namespace ProntoQueue
     {
         uint32_t producerNumber_;
         uint64_t messageNumber_;
-        static const size_t ExtraCount = 10;
+        static const size_t ExtraCount = 6;
         uint64_t extra_[ExtraCount];
         TestMessage(uint32_t producerNumber, uint64_t messageNumber)
             : producerNumber_(producerNumber)

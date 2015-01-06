@@ -33,19 +33,22 @@ namespace
         for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
         {
             auto testMessage = producerMessage.construct<TestMessage>(producerNumber, messageNumber);
-            testMessage->touch();
             producer.publish(producerMessage);
         }
     }
 }
 
+#define DISABLE_MultithreadMessagePassingPerformancex
+#ifdef DISABLE_MultithreadMessagePassingPerformance
+#pragma message ("DISABLE_MultithreadMessagePassingPerformance")
+#else // DISABLE_MultithreadMessagePassingPerformance 
 BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 {
     static const size_t entryCount = 100000;
     static const size_t messageSize = sizeof(TestMessage);
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
-    static const size_t producerLimit = 10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
+    static const size_t producerLimit = 2;//10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
     static const size_t consumerLimit = 1;  // Just for documentation
     static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
 
@@ -125,3 +128,4 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             << std::endl;
     }
 }
+#endif // DISABLE_MultithreadMessagePassingPerformance

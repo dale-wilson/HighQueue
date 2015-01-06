@@ -39,6 +39,8 @@ namespace ProntoQueue
             const std::string & name, 
             const CreationParameters & parameters); 
 
+        void close();
+
         /// @brief Connect to an existing ProntoQueue in shared memory.
         void openExistingShared(const std::string & name);
 
@@ -65,11 +67,7 @@ namespace ProntoQueue
         static size_t spaceNeeded(const CreationParameters & parameters);
 
     private:
-    #if 0
-        boost::shared_array<byte_t> localMemory_;
-    #else
         std::shared_ptr<byte_t> localMemory_;
-    #endif
         PQHeader * header_;
         ProntoQueue::MemoryBlockPool * memoryPool_;
 	};

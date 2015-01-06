@@ -19,6 +19,15 @@ Connection::~Connection()
     }
 }
 
+void Connection::close()
+{
+    if(localMemory_ && header_)
+    {
+        header_->releaseInternalMessages();
+    }
+}
+
+
 void Connection::createLocal(const std::string & name, const CreationParameters & parameters)
 {
     const size_t allocatedSize = spaceNeeded(parameters);
