@@ -2,16 +2,16 @@
 @REM All rights reserved.
 @REM See the file license.txt for licensing information.
 
-REM Setting up ProntoQueue environment
+REM Setting up HSQueue environment
 
-@REM ProntoQueue depends on MPC V 3.6 or later. (http://www.ociweb.com/products/mpc)
-@REM ProntoQueue depends on BOOST V 1.36.0 or later. (http://www.boost.org/)
+@REM HSQueue depends on MPC V 3.6 or later. (http://www.ociweb.com/products/mpc)
+@REM HSQueue depends on BOOST V 1.36.0 or later. (http://www.boost.org/)
 @REM           Visual Studio 2010 requires BOOST V 1.43.0 or later
-@REM ProntoQueue depends on Xerces V3.0 or later. (http://xerces.apache.org/xerces-c/)
+@REM HSQueue depends on Xerces V3.0 or later. (http://xerces.apache.org/xerces-c/)
 @REM Assumes Visual Studio installed in the default location (see VC_ROOT below) and VC..COMNTOOLS is set.
 
 @REM Customize this file by setting variables to suit your environment
-@REM Also you should customize ProntoQueue.features to enable particular features on your system.
+@REM Also you should customize HSQueue.features to enable particular features on your system.
 @REM Delete the following line when you finishing customizing this file.
 @echo See remarks in %0 for information about setting your build environment
 @echo off
@@ -65,7 +65,7 @@ goto end
 :setup_is_ok
 set SETUP_CHECKING=
 
-set ProntoQueue_ROOT=%CD%
+set HSQueue_ROOT=%CD%
 
 rem must be outside the if because of the parens in the directory name [what was microsoft thinking?]
 if %VCVER%==12 goto isVC12
@@ -86,14 +86,14 @@ REM: This avoids growing PATH and INCLUDE every time setup is run
 if "a" == "a%BASE_PATH%" set BASE_PATH=%PATH%
 if "a" == "a%BASE_INCLUDE%" set BASE_INCLUDE=%INCLUDE%
 
-set RELEASE64_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\x64\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
-set DEBUG64_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\x64\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
-set RELEASE32_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\x86\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
-set DEBUG32_PATH=%ProntoQueue_ROOT%\bin;%ProntoQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\x86\lib;%ProntoQueue_ROOT%\lib;%BASE_PATH%
+set RELEASE64_PATH=%HSQueue_ROOT%\bin;%HSQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\x64\lib;%HSQueue_ROOT%\lib;%BASE_PATH%
+set DEBUG64_PATH=%HSQueue_ROOT%\bin;%HSQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\x64\lib;%HSQueue_ROOT%\lib;%BASE_PATH%
+set RELEASE32_PATH=%HSQueue_ROOT%\bin;%HSQueue_ROOT%\Output\Release;%MPC_ROOT%;%BOOST_ROOT%\x86\lib;%HSQueue_ROOT%\lib;%BASE_PATH%
+set DEBUG32_PATH=%HSQueue_ROOT%\bin;%HSQueue_ROOT%\Output\Debug;%MPC_ROOT%;%BOOST_ROOT%\x86\lib;%HSQueue_ROOT%\lib;%BASE_PATH%
 set PATH=%RELEASE64_PATH%
 set INCLUDE=%BOOST_ROOT%;%BASE_INCLUDE%
 
-title ProntoQueue
+title HSQueue
 :end
 
 

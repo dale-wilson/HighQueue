@@ -5,7 +5,7 @@
 
 #include <atomic>
 
-namespace ProntoQueue
+namespace HSQueue
 {
     class Spinlock
     {
@@ -143,4 +143,4 @@ namespace ProntoQueue
             guard_.acquire();
         }
     }
-} // namespace ProntoQueue
+} // namespace HSQueue

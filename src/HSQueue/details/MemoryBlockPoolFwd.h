@@ -5,10 +5,6 @@
 
 namespace HSQueue
 {
-    /// @brief A cache aligned array of bytes.
-    PRE_CACHE_ALIGN
-    struct CacheLine
-    {
-        byte_t bytes_[CacheLineSize];
-    }POST_CACHE_ALIGN;
+    struct MemoryBlockPool;
 }
+

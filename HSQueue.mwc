@@ -1,0 +1,9 @@
+workspace(*) {
+  cmdline += -feature_file HSQueue.features
+  src/HSQueue.mpc
+
+  specific(make) {
+    cmdline += -value_template "configurations=Release Debug"
+  }
+
+}

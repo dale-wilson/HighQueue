@@ -1,9 +1,0 @@
-workspace(*) {
-  cmdline += -feature_file ProntoQueue.features
-  src/ProntoQueue.mpc
-
-  specific(make) {
-    cmdline += -value_template "configurations=Release Debug"
-  }
-
-}
