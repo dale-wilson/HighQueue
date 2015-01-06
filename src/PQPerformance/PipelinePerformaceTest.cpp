@@ -8,7 +8,7 @@
 #include <PQPerformance/TestMessage.h>
 
 using namespace ProntoQueue;
-#define MATCH_PRONGHORN
+#define MATCH_PRONGHORNx
 namespace
 {
     byte_t testArray[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";// this is Pronghorn's test message
@@ -169,14 +169,12 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 #else // MATCH_PRONGHORN
         auto testMessage = consumerMessage.get<TestMessage>();
         testMessage->touch();
-        auto producerNumber = testMessage->producerNumber_;
-        auto & msgNumber = nextMessage[producerNumber];
-        if(msgNumber != testMessage->messageNumber_)
+        if(nextMessage != testMessage->messageNumber_)
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber_);
+            BOOST_CHECK_EQUAL(nextMessage, testMessage->messageNumber_);
         }
-        ++ msgNumber; 
+        ++ nextMessage;
 #endif // MATCH_PRONGHORN
     }
 
