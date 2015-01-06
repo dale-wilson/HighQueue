@@ -8,7 +8,7 @@
 #include <HSQPerformance/TestMessage.h>
 
 using namespace HSQueue;
-#define MATCH_PRONGHORNx
+#define MATCH_PRONGHORN
 namespace
 {
     byte_t testArray[] = "0123456789ABCDEFGHIJKLMNOHSQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";// this is Pronghorn's test message
@@ -19,7 +19,7 @@ namespace
     void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount)
     {
         Producer producer(connection, true);
-        HSQueue::Message producerMessage;
+        Message producerMessage;
         if(!connection.allocate(producerMessage))
         {
             std::cerr << "Failed to allocate message for producer Number " << producerNumber << std::endl;
@@ -49,7 +49,7 @@ namespace
     void copyFunction(Connection & inConnection, Connection & outConnection, bool passThru)
     {
         Consumer consumer(inConnection);
-        HSQueue::Message consumerMessage;
+        Message consumerMessage;
         if(!inConnection.allocate(consumerMessage))
         {
             std::cerr << "Failed to allocate consumer message for copy thread." << std::endl;
@@ -57,7 +57,7 @@ namespace
         }
 
         Producer producer(outConnection, true);
-        HSQueue::Message producerMessage;
+        Message producerMessage;
         if(!outConnection.allocate(producerMessage))
         {
             std::cerr << "Failed to allocate producer message for copy thread." << std::endl;
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     static const size_t spinCount = 10000;
     static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
-    bool passThru = true;
+    bool passThru = false;
 
     std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << (passThru?"+":"") << " stage: ";
 
@@ -132,14 +132,16 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         connection->createLocal(name.str(), parameters);
     }
 
+    // The consumer listens to the last connection
     Consumer consumer(*connections.back());
-    HSQueue::Message consumerMessage;
+    Message consumerMessage;
     BOOST_REQUIRE(connections.back()->allocate(consumerMessage));
 
     producerGo = false;
     threadsReady = 0;
     uint64_t nextMessage = 0u;
 
+    // Each copy thread listens to connection N-1 and sends to thread N
     std::vector<std::thread> threads;
     for(size_t nCopy = connections.size() - 1; nCopy > 0; --nCopy)
     {
@@ -149,6 +151,8 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
             passThru)
             );
     }
+
+    // The producer sends targetMessageCount messages to connection 0
     threads.emplace_back(
         std::bind(producerFunction, std::ref(*connections[0]), 1, targetMessageCount));
  
@@ -180,9 +184,9 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     auto lapse = timer.nanoseconds();
     
-    for(auto pThread = threads.begin(); pThread != threads.end(); ++pThread)
+    for(auto & thread: threads)
     {
-        pThread->join();
+        thread.join();
     }
 
 #ifdef MATCH_PRONGHORN
@@ -200,9 +204,10 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
         << std::endl;
 
-    // for connections that may share buffers, close them all before any go out of scope.
-    for(auto pConn = connections.begin(); pConn != connections.end(); ++pConn)
+    // for connections that may share messages (i.e. passThru), close them all before any go out of scope
+    // to avoid releasing buffers into pools that have been deleted.
+    for (const auto & connection : connections)
     {
-        (*pConn)->close();
+        connection->close();
     }
 }
