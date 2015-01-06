@@ -11,14 +11,14 @@ using namespace ProntoQueue;
 #define MATCH_PRONGHORN
 namespace
 {
-    byte_t testArray[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";//, this is a reasonable test message.".getBytes();
+    byte_t testArray[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";// this is Pronghorn's test message
 
-    volatile std::atomic<uint32_t> producersWaiting;
-    volatile bool producersGo = false;
+    volatile std::atomic<uint32_t> threadsReady;
+    volatile bool producerGo = false;
 
-    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
+    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount)
     {
-        Producer producer(connection, solo);
+        Producer producer(connection, true);
         ProntoQueue::Message producerMessage;
         if(!connection.allocate(producerMessage))
         {
@@ -26,8 +26,8 @@ namespace
             return;
         }
 
-        ++producersWaiting;
-        while(!producersGo)
+        ++threadsReady;
+        while(!producerGo)
         {
             std::this_thread::yield();
         }
@@ -63,6 +63,7 @@ namespace
             std::cerr << "Failed to allocate producer message for copy thread." << std::endl;
             return;
         }
+        ++threadsReady;
         if(passThru)
         {
             while(true)
@@ -114,57 +115,53 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     static const size_t spinCount = 10000;
     static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
-    bool passThru = false;
+    bool passThru = true;
 
-    std::cerr << "Pipeline (3" << (passThru?"+":"") << "): ";
+    std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << (passThru?"+":"") << " stage: ";
 
     ConsumerWaitStrategy strategy(spinCount, yieldCount);
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    Connection producerConnection;
-    producerConnection.createLocal("Producer", parameters);
 
-    Connection consumerConnection;
-    consumerConnection.createLocal("Consuemr", parameters);
-
-    Consumer consumer(consumerConnection);
-    ProntoQueue::Message consumerMessage;
-    BOOST_REQUIRE(consumerConnection.allocate(consumerMessage));
-
-
-    auto copyThread = std::thread(std::bind(copyFunction,
-        std::ref(producerConnection),
-        std::ref(consumerConnection),
-        passThru)
-        );
-
-    std::vector<std::thread> producerThreads;
-    std::vector<uint64_t> nextMessage;
-
-    producersWaiting = 0;
-    producersGo = false;
-
-    size_t producerCount = 1; // elsewhere this is a loop index
-    size_t perProducer = targetMessageCount / producerCount;
-    size_t actualMessageCount = perProducer * producerCount;
-
-    for(uint32_t nTh = 0; nTh < producerCount; ++nTh)
+    std::vector<std::shared_ptr<Connection> > connections;
+    for(size_t nConn = 0; nConn < copyLimit + consumerLimit; ++nConn)
     {
-        nextMessage.emplace_back(0u);
-        producerThreads.emplace_back(
-            std::bind(producerFunction, std::ref(producerConnection), nTh, perProducer, producerCount == 1));
+        std::shared_ptr<Connection> connection(new Connection);
+        connections.push_back(connection);
+        std::stringstream name;
+        name << "Connection " << nConn;
+        connection->createLocal(name.str(), parameters);
     }
 
-    // All wired up, ready to go.  Wait for the producers to initialize.
-    // note the assumption that the copy thread is ready.
-    while(producersWaiting < producerCount)
+    Consumer consumer(*connections.back());
+    ProntoQueue::Message consumerMessage;
+    BOOST_REQUIRE(connections.back()->allocate(consumerMessage));
+
+    producerGo = false;
+    threadsReady = 0;
+    uint64_t nextMessage = 0u;
+
+    std::vector<std::thread> threads;
+    for(size_t nCopy = connections.size() - 1; nCopy > 0; --nCopy)
+    {
+        threads.emplace_back(std::bind(copyFunction,
+            std::ref(*connections[nCopy - 1]),
+            std::ref(*connections[nCopy]),
+            passThru)
+            );
+    }
+    threads.emplace_back(
+        std::bind(producerFunction, std::ref(*connections[0]), 1, targetMessageCount));
+ 
+    // All wired up, ready to go.  Wait for the threads to initialize.
+    while(threadsReady < threads.size())
     {
         std::this_thread::yield();
     }
 
     Stopwatch timer;
-    producersGo = true;
+    producerGo = true;
 
-    for(uint64_t messageNumber = 0; messageNumber < actualMessageCount; ++messageNumber)
+    for(uint64_t messageNumber = 0; messageNumber < targetMessageCount; ++messageNumber)
     {
         consumer.getNext(consumerMessage);
 #ifdef MATCH_PRONGHORN 
@@ -184,15 +181,11 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     }
 
     auto lapse = timer.nanoseconds();
-
-    // sometimes we synchronize thread shut down.
-    producersGo = false;
-
-    for(size_t nTh = 0; nTh < producerCount; ++nTh)
+    
+    for(auto pThread = threads.begin(); pThread != threads.end(); ++pThread)
     {
-        producerThreads[nTh].join();
+        pThread->join();
     }
-    copyThread.join();
 
 #ifdef MATCH_PRONGHORN
     auto messageBytes = sizeof(testArray);
@@ -201,15 +194,17 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 #endif // MATCH_PRONGHORN
     auto messageBits = messageBytes * 8;
 
-    std::cout << " Passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
+    std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
-        << lapse / actualMessageCount << " nsec./message "
-        << std::setprecision(3) << double(actualMessageCount) / double(lapse) << " GMsg/second "
-        << std::setprecision(3) << double(actualMessageCount * messageBytes) / double(lapse) << " GByte/second "
-        << std::setprecision(3) << double(actualMessageCount * messageBits) / double(lapse) << " GBit/second."
+        << lapse / targetMessageCount << " nsec./message "
+        << std::setprecision(3) << double(targetMessageCount) / double(lapse) << " GMsg/second "
+        << std::setprecision(3) << double(targetMessageCount * messageBytes) / double(lapse) << " GByte/second "
+        << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
         << std::endl;
 
-    // for connections that may share buffers, close them before they go out of scope.
-    consumerConnection.close();
-    producerConnection.close();
+    // for connections that may share buffers, close them all before any go out of scope.
+    for(auto pConn = connections.begin(); pConn != connections.end(); ++pConn)
+    {
+        (*pConn)->close();
+    }
 }

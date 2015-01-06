@@ -11,8 +11,8 @@ using namespace ProntoQueue;
 
 namespace
 {
-    volatile std::atomic<uint32_t> producersWaiting;
-    volatile bool producersGo = false;
+    volatile std::atomic<uint32_t> threadsReady;
+    volatile bool producerGo = false;
 
     void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
     {
@@ -24,8 +24,8 @@ namespace
             return;
         }
 
-        ++producersWaiting;
-        while(!producersGo)
+        ++threadsReady;
+        while(!producerGo)
         {
             std::this_thread::yield();
         }
@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         std::vector<std::thread> producerThreads;
         std::vector<uint64_t> nextMessage;
 
-        producersWaiting = 0;
-        producersGo = false;
+        threadsReady = 0;
+        producerGo = false;
         size_t perProducer = targetMessageCount / producerCount;
         size_t actualMessageCount = perProducer * producerCount;
 
@@ -84,13 +84,13 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         }
         std::this_thread::yield();
 
-        while(producersWaiting < producerCount)
+        while(threadsReady < producerCount)
         {
             std::this_thread::yield();
         }
 
         Stopwatch timer;
-        producersGo = true;
+        producerGo = true;
 
         for(uint64_t messageNumber = 0; messageNumber < actualMessageCount; ++messageNumber)
         {
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         auto lapse = timer.nanoseconds();
 
         // sometimes we synchronize thread shut down.
-        producersGo = false;
+        producerGo = false;
 
         for(size_t nTh = 0; nTh < producerCount; ++nTh)
         {
