@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     HighQEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
 
-    HighQueue::Message message;
+    Message message;
     connection.allocate(message);
     auto testMessage = message.get<TestMessage>();
     new (testMessage) TestMessage("Hello world");
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
 
     HighQEntry & firstEntry = accessor[*readPosition];
     BOOST_CHECK_EQUAL(firstEntry.status_, HighQEntry::Status::OK);
-    HighQueue::Message & firstMessage = firstEntry.message_;
+    Message & firstMessage = firstEntry.message_;
     auto publishedMessage = firstMessage.get<TestMessage>(); 
     auto publishedSize = firstMessage.getUsed();
     BOOST_CHECK_EQUAL(publishedMessage, testMessage);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
 
     // Check to be sure that overwrote the first message.
     BOOST_CHECK_EQUAL(firstEntry.status_, HighQEntry::Status::OK);
-    HighQueue::Message & newestMessage = firstEntry.message_;
+    Message & newestMessage = firstEntry.message_;
     auto newestTestMessage = newestMessage.get<TestMessage>(); 
     auto newestSize = newestMessage.getUsed();
     BOOST_CHECK_EQUAL(newestTestMessage, fromTheTopMessage);

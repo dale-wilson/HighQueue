@@ -19,7 +19,7 @@ Consumer::Consumer(Connection & connection)
 {
 }
 
-bool Consumer::tryGetNext(HighQueue::Message & message)
+bool Consumer::tryGetNext(Message & message)
 {
     while(true)
     {
@@ -46,7 +46,7 @@ bool Consumer::tryGetNext(HighQueue::Message & message)
 
 }
 
-void Consumer::getNext(HighQueue::Message & message)
+void Consumer::getNext(Message & message)
 {
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;

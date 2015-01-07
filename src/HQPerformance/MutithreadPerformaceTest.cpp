@@ -18,7 +18,7 @@ namespace
     void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
     {
         Producer producer(connection, solo);
-        HighQueue::Message producerMessage;
+        Message producerMessage;
         if(!connection.allocate(producerMessage))
         {
             std::cerr << "Failed to allocate message for producer Number " << producerNumber << std::endl;
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     connection.createLocal("LocalIv", parameters);
 
     Consumer consumer(connection);
-    HighQueue::Message consumerMessage;
+    Message consumerMessage;
     BOOST_REQUIRE(connection.allocate(consumerMessage));
 
     for(size_t producerCount = 1; producerCount <= producerLimit; ++producerCount)

@@ -19,7 +19,7 @@ namespace HighQueue
             EMPTY,
             SKIP
         };
-        HighQueue::Message message_;
+        Message message_;
         Status status_;
 
         HighQEntry()

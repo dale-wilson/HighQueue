@@ -41,7 +41,7 @@ void Connection::createLocal(const std::string & name, const CreationParameters 
         HighQAllocator allocator(availableSize, sizeof(HQHeader));
         header_ = new (alignedBlock)HQHeader(name, allocator, parameters);
         HighQResolver resolver(header_);
-        memoryPool_ = resolver.resolve<HighQueue::MemoryBlockPool>(header_->memoryPool_);
+        memoryPool_ = resolver.resolve<HQMemoryBLockPool>(header_->memoryPool_);
     }
     catch(...)
     {
@@ -72,12 +72,12 @@ size_t Connection::spaceNeeded(const CreationParameters & parameters)
     size_t headerSize = HighQAllocator::align(sizeof(HQHeader), CacheLineSize);
     size_t entriesSize = HighQEntry::alignedSize() * parameters.entryCount_;
     size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
-    size_t messagePoolSize = HighQueue::MemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
+    size_t messagePoolSize = HQMemoryBLockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
     size_t cacheAlignmentSize = CacheLineSize;
     return headerSize + entriesSize + positionsSize + messagePoolSize + cacheAlignmentSize;
 }
 
-bool Connection::allocate(HighQueue::Message & message)
+bool Connection::allocate(Message & message)
 {
     return memoryPool_->allocate(message);
 }
