@@ -8,6 +8,7 @@
 #include <HSQPerformance/TestMessage.h>
 
 using namespace HSQueue;
+typedef TestMessage<10> ActualMessage;
 
 namespace
 {
@@ -30,9 +31,9 @@ namespace
             std::this_thread::yield();
         }
 
-        for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
+        for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
         {
-            auto testMessage = producerMessage.construct<TestMessage>(producerNumber, messageNumber);
+            auto testMessage = producerMessage.construct<ActualMessage>(producerNumber, messageNumber);
             producer.publish(producerMessage);
         }
     }
@@ -45,7 +46,7 @@ namespace
 BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 {
     static const size_t entryCount = 100000;
-    static const size_t messageSize = sizeof(TestMessage);
+    static const size_t messageSize = sizeof(ActualMessage);
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
     static const size_t producerLimit = 2;//10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
@@ -95,14 +96,13 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         for(uint64_t messageNumber = 0; messageNumber < actualMessageCount; ++messageNumber)
         {
             consumer.getNext(consumerMessage);
-            auto testMessage = consumerMessage.get<TestMessage>();
+            auto testMessage = consumerMessage.get<ActualMessage>();
             testMessage->touch();
-            auto producerNumber = testMessage->producerNumber_;
-            auto & msgNumber = nextMessage[producerNumber];
-            if(msgNumber != testMessage->messageNumber_)
+            auto & msgNumber = nextMessage[testMessage->producerNumber()];
+            if(msgNumber != testMessage->messageNumber())
             {
                 // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-                BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber_);
+                BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber());
             }
             ++ msgNumber; 
         }
@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             producerThreads[nTh].join();
         }
 
-        auto messageBytes = sizeof(TestMessage);
-        auto messageBits = sizeof(TestMessage) * 8;
+        auto messageBytes = sizeof(ActualMessage);
+        auto messageBits = sizeof(ActualMessage) * 8;
         std::cout << " Passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
             << lapse / actualMessageCount << " nsec./message "

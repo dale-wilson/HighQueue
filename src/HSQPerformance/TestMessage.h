@@ -2,28 +2,47 @@
 
 namespace HSQueue
 {
+    template<size_t ExtraCount = 0>
     struct TestMessage
     {
-        uint32_t producerNumber_;
-        uint64_t messageNumber_;
-        static const size_t ExtraCount = 6;
-        uint64_t extra_[ExtraCount];
-        TestMessage(uint32_t producerNumber, uint64_t messageNumber)
-            : producerNumber_(producerNumber)
-            , messageNumber_(messageNumber)
+        enum Indexes : uint32_t
         {
-            for(size_t nExtra = 0; nExtra < ExtraCount; ++nExtra)
+            MessageNumber = 0,
+            ProducerNumber,
+            ExtraStart
+        };
+
+        uint32_t message_[ExtraCount + ExtraStart];
+        inline
+        TestMessage(uint32_t producerNumber, uint32_t messageNumber)
+        {
+            message_[MessageNumber] = messageNumber;
+            message_[ProducerNumber] = producerNumber;
+            for(uint32_t nExtra = ExtraStart; nExtra < ExtraStart + ExtraCount; ++nExtra)
             {
-                extra_[nExtra] = nExtra;
+                message_[nExtra] = nExtra;
             }
         }
 
-        uint64_t touch() const
+        inline
+        uint32_t messageNumber() const
         {
-            uint64_t value = messageNumber_;
-            for(size_t nExtra = 0; nExtra < ExtraCount; ++nExtra)
+            return message_[MessageNumber];
+        }
+
+        inline
+        uint32_t producerNumber() const
+        {
+            return message_[ProducerNumber];
+        }
+
+        inline
+        uint32_t touch() const
+        {
+            uint32_t value = 0;
+            for(uint32_t nExtra = 0; nExtra < ExtraStart + ExtraCount; ++nExtra)
             {
-                value += extra_[nExtra];
+                value += message_[nExtra];
             }
             return value;
         }

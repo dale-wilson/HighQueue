@@ -7,16 +7,30 @@
 #include <Common/Stopwatch.h>
 #include <HSQPerformance/TestMessage.h>
 
+
 using namespace HSQueue;
-#define MATCH_PRONGHORN
+#define MATCH_PRONGHORN 0
 namespace
 {
-    byte_t testArray[] = "0123456789ABCDEFGHIJKLMNOHSQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";// this is Pronghorn's test message
+    typedef TestMessage<13> ActualMessage;
+#if MATCH_PRONGHORN
+    byte_t testArray[] = 
+#if 1
+    "0123456789ABCDEFGHIJKLMNOHSQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@";// this is Pronghorn's test message
+#elif 0
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";
+#else
+    "";
+#endif
+    auto messageBytes = sizeof(testArray);
+#else // MATCH_PRONGHORN
+    auto messageBytes = sizeof(ActualMessage);
+#endif // MATCH_PRONGHORN
 
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
 
-    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount)
+    void producerFunction(Connection & connection, uint32_t producerNumber, uint32_t messageCount)
     {
         Producer producer(connection, true);
         Message producerMessage;
@@ -32,12 +46,12 @@ namespace
             std::this_thread::yield();
         }
 
-        for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
+        for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
         {
-#ifdef MATCH_PRONGHORN
+#if MATCH_PRONGHORN
             producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
 #else // MATCH_PRONGHORN
-            auto testMessage = producerMessage.construct<TestMessage>(producerNumber, messageNumber);
+            auto testMessage = producerMessage.construct<ActualMessage>(producerNumber, messageNumber);
 #endif //MATCH_PRONGHORN
             producer.publish(producerMessage);
         }
@@ -89,10 +103,10 @@ namespace
                     producer.publish(producerMessage);
                     return;
                 }
-#ifdef MATCH_PRONGHORN
+#if MATCH_PRONGHORN
                 producerMessage.appendBinaryCopy(consumerMessage.get(), used);
 #else // MATCH_PRONGHORN
-                producerMessage.construct<TestMessage>(*consumerMessage.get<TestMessage>());
+                producerMessage.construct<ActualMessage>(*consumerMessage.get<ActualMessage>());
 #endif // MATCH_PRONGHORN
                 producer.publish(producerMessage);
             }
@@ -102,13 +116,13 @@ namespace
 
 BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 {
-    static const size_t consumerLimit = 1;
-    static const size_t copyLimit = 1;
-    static const size_t producerLimit = 1;
+    static const size_t consumerLimit = 1;   // Don't change this
+    static const size_t producerLimit = 1;   // Don't change this
 
-    static const size_t entryCount = 10000;
-    static const size_t messageSize = sizeof(TestMessage);
-    static const uint64_t targetMessageCount = 3000000; 
+    static const size_t copyLimit = 1;       // This you can change.
+
+    static const size_t entryCount = 40000;
+    static const uint32_t targetMessageCount = 3000000; 
 
     // how many buffers do we need?
     static const size_t messageCount = entryCount + consumerLimit + copyLimit + producerLimit;
@@ -120,7 +134,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << (passThru?"+":"") << " stage: ";
 
     ConsumerWaitStrategy strategy(spinCount, yieldCount);
-    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    CreationParameters parameters(strategy, entryCount, messageBytes, messageCount);
 
     std::vector<std::shared_ptr<Connection> > connections;
     for(size_t nConn = 0; nConn < copyLimit + consumerLimit; ++nConn)
@@ -168,15 +182,15 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     for(uint64_t messageNumber = 0; messageNumber < targetMessageCount; ++messageNumber)
     {
         consumer.getNext(consumerMessage);
-#ifdef MATCH_PRONGHORN 
+#if MATCH_PRONGHORN 
         // Pronghorn final stage ignores incoming data.
 #else // MATCH_PRONGHORN
-        auto testMessage = consumerMessage.get<TestMessage>();
+        auto testMessage = consumerMessage.get<ActualMessage>();
         testMessage->touch();
-        if(nextMessage != testMessage->messageNumber_)
+        if(nextMessage != testMessage->messageNumber())
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(nextMessage, testMessage->messageNumber_);
+            BOOST_CHECK_EQUAL(nextMessage, testMessage->messageNumber());
         }
         ++ nextMessage;
 #endif // MATCH_PRONGHORN
@@ -189,11 +203,6 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         thread.join();
     }
 
-#ifdef MATCH_PRONGHORN
-    auto messageBytes = sizeof(testArray);
-#else // MATCH_PRONGHORN
-    auto messageBytes = sizeof(TestMessage);
-#endif // MATCH_PRONGHORN
     auto messageBits = messageBytes * 8;
 
     std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in "

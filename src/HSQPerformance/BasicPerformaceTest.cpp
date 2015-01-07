@@ -8,6 +8,7 @@
 #include <Common/Stopwatch.h>
 
 using namespace HSQueue;
+typedef TestMessage<10> ActualMessage;
 
 #define DISABLE_CONSUME_SEPARATELYx
 #ifndef DISABLE_CONSUME_SEPARATELY
@@ -15,7 +16,7 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
     ConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
-    size_t messageSize = sizeof(TestMessage);
+    size_t messageSize = sizeof(ActualMessage);
     size_t messageCount = entryCount + 10;
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
     Connection connection;
@@ -30,9 +31,9 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 
     Stopwatch timer;
 
-    for(uint64_t nMessage = 0; nMessage < entryCount; ++nMessage)
+    for(uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
-        producerMessage.construct<TestMessage>(1, nMessage);
+        producerMessage.construct<ActualMessage>(1, nMessage);
         producer.publish(producerMessage);
     }
     auto publishTime = timer.microseconds();
@@ -44,11 +45,11 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     for(uint64_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
         consumer.getNext(producerMessage);
-        auto testMessage = producerMessage.get<TestMessage>();
-        if(nMessage != testMessage->messageNumber_)
+        auto testMessage = producerMessage.get<ActualMessage>();
+        if(nMessage != testMessage->messageNumber())
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(nMessage, testMessage->messageNumber_);
+            BOOST_CHECK_EQUAL(nMessage, testMessage->messageNumber());
         }
     }
     auto consumeTime = timer.microseconds();
@@ -66,7 +67,7 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     ConsumerWaitStrategy strategy;
     size_t entryCount = 100000;
-    size_t messageSize = sizeof(TestMessage);
+    size_t messageSize = sizeof(ActualMessage);
     size_t messagesNeeded = entryCount + 10;
     uint64_t messageCount = 1000000 * 100;
 
@@ -84,21 +85,21 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     Stopwatch timer;
 
-    for(uint64_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
+    for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        producerMessage.construct<TestMessage>(1, messageNumber);
+        producerMessage.construct<ActualMessage>(1, messageNumber);
         producer.publish(producerMessage);
         consumer.getNext(consumerMessage);
-        auto testMessage = consumerMessage.get<TestMessage>();
-        if(messageNumber != testMessage->messageNumber_)
+        auto testMessage = consumerMessage.get<ActualMessage>();
+        if(messageNumber != testMessage->messageNumber())
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber_);
+            BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber());
         }
     }
     auto lapse = timer.nanoseconds();
-    auto messageBytes = sizeof(TestMessage);
-    auto messageBits = sizeof(TestMessage) * 8;
+    auto messageBytes = sizeof(ActualMessage);
+    auto messageBits = sizeof(ActualMessage) * 8;
     std::cout << "Single threaded: Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "
