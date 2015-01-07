@@ -1,0 +1,12 @@
+// Copyright (c) 2014,2015, Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+// This file defines MPC features used to enable and disable portions of the build
+HighQueue=1
+boost=1
+
+// This is a "feature" used to temporarily disable parts of the build.
+// by making the depend on the "obsolete" feature.  It should always be
+// assigned a 0.
+obsolete=0
+

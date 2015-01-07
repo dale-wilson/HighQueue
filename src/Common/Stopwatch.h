@@ -4,7 +4,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-namespace HSQueue
+namespace HighQueue
 {
     /// @brief Stopwatch measures time intervals
     /// It begins running when it is constructed.
@@ -71,4 +71,4 @@ namespace HSQueue
         uint64_t start_;
     };
 
-} // namespace HSQueue
+} // namespace HighQueue

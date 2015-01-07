@@ -1,0 +1,9 @@
+workspace(*) {
+  cmdline += -feature_file HighQueue.features
+  src/HighQueue.mpc
+
+  specific(make) {
+    cmdline += -value_template "configurations=Release Debug"
+  }
+
+}
