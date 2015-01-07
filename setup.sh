@@ -1,11 +1,10 @@
-# Command file to set HSQueue environment
-# HSQueue depends on MPC V 3.6 or later. (http://www.ociweb.com/products/mpc)
-# HSQueue depends on BOOST V 1.36.0 or later. (http://www.boost.org/)
-# HSQueue depends on Xerces V3.0 or later. (http://xerces.apache.org/xerces-c/)
+# Command file to set HighQueue environment
+# HighQueue depends on MPC V 4.1 or later. (http://www.ociweb.com/products/mpc)
+# HQTest and HQPerformance depend on BOOST Test.  Tested with 1.57.0. (http://www.boost.org/)
 # Customize this file by setting variables to suit your environment
 SOURCE="${BASH_SOURCE[0]}"
 SOURCE_DIR=`dirname $SOURCE`
-export HSQueue_ROOT=`readlink -f $SOURCE_DIR`
+export HighQueue_ROOT=`readlink -f $SOURCE_DIR`
 
 if test "$MPC_ROOT" = ""
 then
@@ -27,6 +26,6 @@ then
   export BOOST_VERSION=boost-1_57
 fi
 
-export PATH=$HSQueue_ROOT/bin:$MPC_ROOT:$PATH
-export LD_LIBRARY_PATH=$HSQueue_ROOT/lib:$BOOST_ROOT_LIB:$LD_LIBRARY_PATH
+export PATH=$HighQueue_ROOT/bin:$MPC_ROOT:$PATH
+export LD_LIBRARY_PATH=$HighQueue_ROOT/lib:$BOOST_ROOT_LIB:$LD_LIBRARY_PATH
 

@@ -1,0 +1,101 @@
+// Copyright (c) 2014, 2015 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+
+//////////////////////////////
+// Build the HighQueue library
+project(*) {
+  sharedname = *
+  dynamicflags += HIGHQUEUE_BUILD_DLL
+  includes += $(HighQueue_ROOT)/src
+  pch_header = Common/HighQueuePch.h
+  pch_source = Common/HighQueuePch.cpp
+  Source_Files {
+	HighQueue
+	HighQueue/details
+	Common
+  }
+  Header_Files {
+	HighQueue
+	HighQueue/details
+	Common
+  }
+
+  specific(prop:microsoft) {
+    Release::libout = $(HighQueue_ROOT)/Output/Release
+    Debug::libout = $(HighQueue_ROOT)/Output/Debug
+  } else {
+    libout = $(HighQueue_ROOT)/lib
+  }
+
+  specific(make) {
+    // Enable full optimization on gcc/linux
+    Release::genflags += -O3
+  }
+}
+
+////////////////////////////
+// Build the HighQueue tests
+project(*test) : boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = HighQueueTest
+  includes += $(HighQueue_ROOT)/src
+
+  specific(prop:microsoft) {
+    Release::exeout = $(HighQueue_ROOT)/Output/Release
+    Debug::exeout = $(HighQueue_ROOT)/Output/Debug
+    Release::libpaths += $(HighQueue_ROOT)/Output/Release
+    Debug::libpaths += $(HighQueue_ROOT)/Output/Debug
+  } else {
+    libpaths += $(HighQueue_ROOT)/lib
+    exeout = $(HighQueue_ROOT)/bin
+  }
+  // TODO: What to do about boost 32 bit builds?
+  libpaths -= $(BOOST_ROOT)/lib
+  libpaths += $(BOOST_LIB_PATH)
+
+  libs += HighQueue
+  after += HighQueue
+  macros += BOOST_TEST_DYN_LINK
+  pch_header = Common/HighQueuePch.h
+  pch_source = Common/HighQueuePch.cpp
+  Source_Files {
+    HQTest
+  }
+  Header_Files {
+    HQTest
+	Common
+  }
+}
+
+////////////////////////////
+// Build the HighQueue performance tests
+project(*performance) : boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = HighQueuePerformance
+  includes += $(HighQueue_ROOT)/src
+
+  specific(prop:microsoft) {
+    Release::exeout = $(HighQueue_ROOT)/Output/Release
+    Debug::exeout = $(HighQueue_ROOT)/Output/Debug
+    Release::libpaths += $(HighQueue_ROOT)/Output/Release
+    Debug::libpaths += $(HighQueue_ROOT)/Output/Debug
+  } else {
+    libpaths += $(HighQueue_ROOT)/lib
+    exeout = $(HighQueue_ROOT)/bin
+  }
+  // TODO: What to do about boost 32 bit builds?
+  libpaths -= $(BOOST_ROOT)/lib
+  libpaths += $(BOOST_LIB_PATH)
+  
+  libs += HighQueue
+  after += HighQueue
+  macros += BOOST_TEST_DYN_LINK
+  pch_header = Common/HighQueuePch.h
+  pch_source = Common/HighQueuePch.cpp
+  Source_Files {
+    HQPerformance
+  }
+  Header_Files {
+    HQPerformance
+	Common
+  }
+}

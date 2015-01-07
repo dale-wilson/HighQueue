@@ -1,1 +1,3 @@
-Running out of buffers in Multithread test.   Looks like memory not being returned to the pool.  This calls for a unit test.
+Rename to HighQueue
+Write the HighQueue Haiku
+Update the document page with the new name
