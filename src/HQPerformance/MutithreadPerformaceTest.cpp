@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t messageSize = sizeof(ActualMessage);
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
-    static const size_t producerLimit = 2;//10; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
+    static const size_t producerLimit = 8; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
     static const size_t consumerLimit = 1;  // Just for documentation
     static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
 
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     HighQueue::Message consumerMessage;
     BOOST_REQUIRE(connection.allocate(consumerMessage));
 
-    for(size_t producerCount = 1; producerCount < producerLimit; ++producerCount)
+    for(size_t producerCount = 1; producerCount <= producerLimit; ++producerCount)
     {
         std::cerr << "Test " << producerCount << " producer";
 
