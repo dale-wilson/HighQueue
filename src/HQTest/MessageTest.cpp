@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <HighQueue/Message.h>
-#include <HighQueue/details/MemoryBlockPool.h>
+#include <HighQueue/details/HQMemoryBLockPool.h>
 
 using namespace HighQueue;
 
@@ -23,9 +23,9 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     static const size_t messageSize = sizeof(alphabet);
     static const size_t messageCount = 2;
  
-    auto bytesNeeded = MemoryBlockPool::spaceNeeded(messageSize, messageCount);
+    auto bytesNeeded = HQMemoryBLockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
-    auto pool = new (block.get()) MemoryBlockPool(bytesNeeded, messageSize);
+    auto pool = new (block.get()) HQMemoryBLockPool(bytesNeeded, messageSize);
 
     Message message1;
 
@@ -151,9 +151,9 @@ BOOST_AUTO_TEST_CASE(testBorrowedMessages)
 {
     static const size_t messageSize = alphabet.size();
     static const size_t messageCount = 2;
-    auto bytesNeeded = MemoryBlockPool::spaceNeeded(messageSize, messageCount);
+    auto bytesNeeded = HQMemoryBLockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
-    auto pool = new (block.get()) MemoryBlockPool(bytesNeeded, messageSize);
+    auto pool = new (block.get()) HQMemoryBLockPool(bytesNeeded, messageSize);
 
     Message message1;
     auto data = reinterpret_cast<const byte_t *>(alphabet.data());
@@ -204,9 +204,9 @@ BOOST_AUTO_TEST_CASE(testMessageAppend)
 {
     static const size_t messageSize = alphabet.size();
     static const size_t messageCount = 2;
-    auto bytesNeeded = MemoryBlockPool::spaceNeeded(messageSize, messageCount);
+    auto bytesNeeded = HQMemoryBLockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
-    auto pool = new (block.get()) MemoryBlockPool(bytesNeeded, messageSize);
+    auto pool = new (block.get()) HQMemoryBLockPool(bytesNeeded, messageSize);
 
     Message message;
     pool->allocate(message);

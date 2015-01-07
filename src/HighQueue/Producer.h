@@ -14,7 +14,7 @@ namespace HighQueue
 {
     /// @brief Support for publishing messages to an HighQueue
     /// In addition to having the Connection which is used to construct
-    /// this object, you will need a HighQueue::Message which has been initialized
+    /// this object, you will need a Message which has been initialized
     /// by calling the Connection::allocate() method.
     class HighQueue_Export Producer
 	{
@@ -40,7 +40,7 @@ namespace HighQueue
         /// this call invalidates previous get() results.
         ///
         /// @param message contains the data to be published.         
-        void publish(HighQueue::Message & message);
+        void publish(Message & message);
 
     private:
         uint64_t reserve();

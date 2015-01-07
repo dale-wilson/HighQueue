@@ -40,7 +40,7 @@ uint64_t Producer::reserve()
     return reservePosition_++;
 }
 
-void Producer::publish(HighQueue::Message & message)
+void Producer::publish(Message & message)
 {
     bool published = false;
     while(!published)

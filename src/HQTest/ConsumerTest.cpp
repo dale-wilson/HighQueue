@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     HighQEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
     Producer producer(connection);
-    HighQueue::Message message;
+    Message message;
     connection.allocate(message);
 
     for(size_t nMessage = 0; nMessage < entryCount; ++nMessage)
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     // if we published another message now, it would hang.
     // todo: think of some way around that.
 
-    HighQueue::Message consumerMessage;
+    Message consumerMessage;
     connection.allocate(consumerMessage);
 
     // consume the messages.

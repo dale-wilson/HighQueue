@@ -6,7 +6,7 @@
 #include <Common/HighQueue_Export.h>
 #include <HighQueue/details/HQHeader.h>
 #include <HighQueue/CreationParameters.h>
-#include <HighQueue/details/MemoryBlockPool.h>
+#include <HighQueue/details/HQMemoryBLockPool.h>
 
 namespace HighQueue
 {
@@ -47,7 +47,7 @@ namespace HighQueue
         /// @brief Populate a message with data from the HighQueue's memory pool
         /// @param the message to be populated.
         /// @returns true if there was memory available.
-        bool allocate(HighQueue::Message & message);
+        bool allocate(Message & message);
 
         /// @brief Get the capacity of all messages used with this HighQueue
         size_t getMessageCapacity()const;
@@ -69,6 +69,6 @@ namespace HighQueue
     private:
         std::shared_ptr<byte_t> localMemory_;
         HQHeader * header_;
-        HighQueue::MemoryBlockPool * memoryPool_;
+        HQMemoryBLockPool * memoryPool_;
 	};
 }

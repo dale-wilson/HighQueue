@@ -11,13 +11,13 @@ namespace HighQueue
 {
     /// @brief A pool of memory blocks of the same size. 
     ///
-    /// The MemoryBlockPool stores the parameters need to manage a pool of memory blocks.
+    /// The HQMemoryBLockPool stores the parameters need to manage a pool of memory blocks.
     /// The pool is pointed to by a base address, but that address is not stored in the 
-    /// MemoryBlockPool, nor is it stored in the memory managed by the MemoryBlockPool.
+    /// HQMemoryBLockPool, nor is it stored in the memory managed by the HQMemoryBLockPool.
     /// Instead offsets within the block are used to identify memory blocks.
     /// This allows a pool to reside in shared memory which might be mapped
     /// to different addresses in different processes.
-    struct HighQueue_Export MemoryBlockPool
+    struct HighQueue_Export HQMemoryBLockPool
     {
         /// A flag to mark the end of the linked list of memory blocks.
 
@@ -42,16 +42,16 @@ namespace HighQueue
         ///
         /// This is mostly useless, but there are occasions where it is needed to
         /// allocate a pool to be initialized "by hand" later.
-        MemoryBlockPool();
+        HQMemoryBLockPool();
 
-        /// @brief Construct and initialize a MemoryBlockPool
-        MemoryBlockPool(size_t blockSize, size_t messageSize);
+        /// @brief Construct and initialize a HQMemoryBLockPool
+        HQMemoryBLockPool(size_t blockSize, size_t messageSize);
 
         /// @brief Do not allow copies
-        MemoryBlockPool(const MemoryBlockPool &) = delete;
+        HQMemoryBLockPool(const HQMemoryBLockPool &) = delete;
 
         /// @brief Do not allow assignment
-        MemoryBlockPool & operator=(const MemoryBlockPool &) = delete;
+        HQMemoryBLockPool & operator=(const HQMemoryBLockPool &) = delete;
 
         /// @brief Allocate a block of memory into a message.  
         /// @param baseAddress is the address used to resolve the offsets into actual addresses.
@@ -83,7 +83,7 @@ namespace HighQueue
         /// for internal use (and testing)
         size_t preAllocate(size_t messageSize, size_t blockSize);
 
-        static MemoryBlockPool * makeNew(size_t messageSize, size_t messageCount);
+        static HQMemoryBLockPool * makeNew(size_t messageSize, size_t messageCount);
 
         /// @brief Helper function to round a message size up to the next cache-line boundary.
         static size_t cacheAlignedMessageSize(size_t messageSize);

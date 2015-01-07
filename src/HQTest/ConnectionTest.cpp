@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(testIvConnectionMessages)
     BOOST_CHECK_LE(messageSize, connection.getMessageCapacity());
     BOOST_CHECK_LE(messageCount, connection.getMessageCount());
 
-    HighQueue::Message message;
+    Message message;
     for(size_t nMessage = 0; nMessage < (messageCount - entryCount); ++nMessage)
     {
         BOOST_CHECK(connection.hasMemoryAvailable());

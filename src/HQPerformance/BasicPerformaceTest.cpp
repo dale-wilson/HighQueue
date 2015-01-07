@@ -24,9 +24,9 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 
     Producer producer(connection);
     Consumer consumer(connection);
-    HighQueue::Message producerMessage;
+    Message producerMessage;
     connection.allocate(producerMessage);
-    HighQueue::Message consumerMessage;
+    Message consumerMessage;
     connection.allocate(consumerMessage);
 
     Stopwatch timer;
@@ -78,9 +78,9 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     Producer producer(connection);
     Consumer consumer(connection);
-    HighQueue::Message producerMessage;
+    Message producerMessage;
     connection.allocate(producerMessage);
-    HighQueue::Message consumerMessage;
+    Message consumerMessage;
     connection.allocate(consumerMessage);
 
     Stopwatch timer;

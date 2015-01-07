@@ -1,10 +1,10 @@
 #include <Common/HighQueuePch.h>
 
-#include <HighQueue/details/MemoryBlockPool.h>
+#include <HighQueue/details/HQMemoryBLockPool.h>
 
 using namespace HighQueue;
 
-MemoryBlockPool::MemoryBlockPool()
+HQMemoryBLockPool::HQMemoryBLockPool()
 : blockSize_(0)
 , messageSize_(0)
 , messageCount_(0)
@@ -12,7 +12,7 @@ MemoryBlockPool::MemoryBlockPool()
 {
 }
 
-MemoryBlockPool::MemoryBlockPool(
+HQMemoryBLockPool::HQMemoryBLockPool(
     size_t blockSize, 
     size_t messageSize)
 : blockSize_(blockSize)
@@ -23,16 +23,16 @@ MemoryBlockPool::MemoryBlockPool(
     preAllocate(messageSize_, blockSize_);
 }
 
-size_t MemoryBlockPool::preAllocate(size_t messageSize, size_t blockSize)
+size_t HQMemoryBLockPool::preAllocate(size_t messageSize, size_t blockSize)
 {
-    auto sizeofthis = sizeof(MemoryBlockPool);
+    auto sizeofthis = sizeof(HQMemoryBLockPool);
     auto intThis = uintptr_t(this);
     auto endThis = intThis + sizeofthis + CacheLineSize - 1;
     endThis -= endThis % CacheLineSize;
     size_t current = endThis - intThis;
     if(current + messageSize_ > blockSize)
     {
-        throw std::invalid_argument("MemoryBlockPool: aligned offset + message size exceeds pool size."); 
+        throw std::invalid_argument("HQMemoryBLockPool: aligned offset + message size exceeds pool size."); 
     }
     blockSize_ = blockSize;
     messageSize_ = messageSize;
@@ -57,7 +57,7 @@ size_t MemoryBlockPool::preAllocate(size_t messageSize, size_t blockSize)
     return messageCount_;
 }
 
-bool MemoryBlockPool::allocate(Message & message)
+bool HQMemoryBLockPool::allocate(Message & message)
 {
     Spinlock::Guard guard(lock_);
     auto offset = rootOffset_;
@@ -72,7 +72,7 @@ bool MemoryBlockPool::allocate(Message & message)
     return ok;
 }
 
-void MemoryBlockPool::release(Message & message)
+void HQMemoryBLockPool::release(Message & message)
 {
     auto baseAddress = reinterpret_cast<byte_t *>(this);
     if(message.getContainer() != baseAddress)
@@ -87,18 +87,18 @@ void MemoryBlockPool::release(Message & message)
     message.reset();
 }
 
-bool MemoryBlockPool::isEmpty() const
+bool HQMemoryBLockPool::isEmpty() const
 {
     return rootOffset_ == NULL_OFFSET;
 }
 
 
-size_t MemoryBlockPool::cacheAlignedMessageSize(size_t messageSize)
+size_t HQMemoryBLockPool::cacheAlignedMessageSize(size_t messageSize)
 {
     return ((messageSize + CacheLineSize - 1) / CacheLineSize) * CacheLineSize;
 }
 
-size_t MemoryBlockPool::spaceNeeded(size_t messageSize, size_t messageCount)
+size_t HQMemoryBLockPool::spaceNeeded(size_t messageSize, size_t messageCount)
 {
-    return sizeof(MemoryBlockPool) + cacheAlignedMessageSize(messageSize) * messageCount + CacheLineSize;
+    return sizeof(HQMemoryBLockPool) + cacheAlignedMessageSize(messageSize) * messageCount + CacheLineSize;
 }
