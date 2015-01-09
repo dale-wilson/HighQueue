@@ -20,17 +20,17 @@ namespace HighQueue
     struct HighQueue_Export HQMemoryBLockPool
     {
         /// A flag to mark the end of the linked list of memory blocks.
-
         const size_t NULL_OFFSET = ~(size_t(0));
+
         /// @brief The size of the entire pool of memory
-        size_t blockSize_;
+        size_t poolSize_;
 
         /// @brief The size of each block of memory in the pool. 
-        size_t messageSize_;
+        size_t blockSize_;
             
         /// @brief The total number of block in the pool
         /// constant: does not change as memory is allocated or freed)
-        size_t messageCount_;
+        size_t blockCount_;
             
         /// @brief The root of a linked list.  This is an offset to the pool base address
         size_t rootOffset_;
@@ -70,13 +70,13 @@ namespace HighQueue
         /// (this is here mostly for unit testing.)
         bool isEmpty() const;
 
-        size_t getMessageCapacity()const
+        size_t getBlockCapacity()const
         {
-            return messageSize_;
+            return blockSize_;
         }
-        size_t getMessageCount()const
+        size_t getBlockCount()const
         {
-            return messageCount_;
+            return blockCount_;
         }
 
         /// @brief Initialize a block.

@@ -1,4 +1,4 @@
-/// @file Connection.cpp
+/// @file Consumer.cpp
 #include <Common/HighQueuePch.h>
 #include "Consumer.h"
 #include <HighQueue/details/HQReservePosition.h>

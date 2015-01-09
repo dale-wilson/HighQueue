@@ -13,7 +13,7 @@ Connection::Connection()
 
 Connection::~Connection()
 {
-    if(localMemory_ && header_)
+    if(memoryPool_ && header_)
     {
         header_->releaseInternalMessages();
     }
@@ -21,33 +21,39 @@ Connection::~Connection()
 
 void Connection::close()
 {
-    if(localMemory_ && header_)
+    if(memoryPool_ && header_)
     {
         header_->releaseInternalMessages();
     }
 }
 
-
-void Connection::createLocal(const std::string & name, const CreationParameters & parameters)
+void Connection::createLocal(
+      const std::string & name, 
+      const CreationParameters & parameters, 
+      const MemoryPoolPtr & pool)
 {
-    const size_t allocatedSize = spaceNeeded(parameters);
-    localMemory_.reset(new byte_t[allocatedSize]);
+    memoryPool_ = pool;
+    if(!memoryPool_)
+    {
+        memoryPool_.reset(new MemoryPool(parameters.messageSize_, parameters.messageCount_));
+    }
+
+    const size_t allocatedSize = spaceNeededForHeader(parameters);
+    queueMemory_.reset(new byte_t[allocatedSize]);
     try
     {
-        byte_t * block = localMemory_.get();
-        byte_t * alignedBlock = HighQAllocator::align(block, CacheLineSize);
+        byte_t * block = queueMemory_.get();
+        byte_t * alignedBlock = HQAllocator::align(block, CacheLineSize);
         size_t availableSize = allocatedSize - (alignedBlock - block);
 
-        HighQAllocator allocator(availableSize, sizeof(HQHeader));
-        header_ = new (alignedBlock)HQHeader(name, allocator, parameters);
-        HighQResolver resolver(header_);
-        memoryPool_ = resolver.resolve<HQMemoryBLockPool>(header_->memoryPool_);
+        HQAllocator allocator(availableSize, sizeof(HQHeader));
+        header_ = new (alignedBlock)HQHeader(name, allocator, parameters, &memoryPool_->getPool());
     }
     catch(...)
     {
-        localMemory_.reset();
+        memoryPool_.reset();
+        queueMemory_.reset();
         header_ = 0;
-        memoryPool_ = 0;
         throw;
     }
 }
@@ -67,14 +73,13 @@ void Connection::openExistingShared(const std::string & name)
 // todo
 }
 
-size_t Connection::spaceNeeded(const CreationParameters & parameters)
+size_t Connection::spaceNeededForHeader(const CreationParameters & parameters)
 {
-    size_t headerSize = HighQAllocator::align(sizeof(HQHeader), CacheLineSize);
+    size_t headerSize = HQAllocator::align(sizeof(HQHeader), CacheLineSize);
     size_t entriesSize = HighQEntry::alignedSize() * parameters.entryCount_;
-    size_t positionsSize = CacheLineSize * 3; // note the assumption that positions fit in a single cache line
-    size_t messagePoolSize = HQMemoryBLockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
+    size_t positionsSize = CacheLineSize * 3; // note the assumption that each position fitx in a single cache line
     size_t cacheAlignmentSize = CacheLineSize;
-    return headerSize + entriesSize + positionsSize + messagePoolSize + cacheAlignmentSize;
+    return headerSize + entriesSize + positionsSize + CacheLineSize;
 }
 
 bool Connection::allocate(Message & message)
@@ -84,13 +89,5 @@ bool Connection::allocate(Message & message)
 
 size_t Connection::getMessageCapacity()const
 {
-    return memoryPool_->getMessageCapacity();
-}
-size_t Connection::getMessageCount()const
-{
-    return memoryPool_->getMessageCount();
-}
-bool Connection::hasMemoryAvailable() const
-{
-    return !memoryPool_->isEmpty();
+    return memoryPool_->getBlockCapacity();
 }

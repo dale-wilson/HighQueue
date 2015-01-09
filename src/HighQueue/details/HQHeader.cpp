@@ -12,8 +12,9 @@ using namespace HighQueue;
 
 HQHeader::HQHeader(
     const std::string & name,
-    HighQAllocator & allocator,
-    const CreationParameters & parameters)
+    HQAllocator & allocator,
+    const CreationParameters & parameters,
+    HQMemoryBLockPool * pool)
 : signature_(InitializingSignature)
 , version_(Version)
 , entryCount_(parameters.entryCount_)
@@ -48,21 +49,22 @@ HQHeader::HQHeader(
     auto reservePosition = resolver.resolve<HighQReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
     reservePosition->reserveSoloPosition_ = entryCount_;
+    if(pool == 0)
+    {
+        auto messagePoolSize = HQMemoryBLockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
+        memoryPool_ = allocator.allocate(messagePoolSize, CacheLineSize);
+        pool = new (resolver.resolve<HQMemoryBLockPool>(memoryPool_))
+            HQMemoryBLockPool(messagePoolSize, parameters.messageSize_);
+    }
 
-    auto messagePoolSize = HQMemoryBLockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);
-    memoryPool_ = allocator.allocate(messagePoolSize, CacheLineSize);
-    auto pool = new (resolver.resolve<HQMemoryBLockPool>(memoryPool_)) 
-        HQMemoryBLockPool(messagePoolSize, parameters.messageSize_);
-
-    allocateInternalMessages();
+    allocateInternalMessages(pool);
 
     signature_ = LiveSignature;
 }
 
-void HQHeader::allocateInternalMessages()
+void HQHeader::allocateInternalMessages(HQMemoryBLockPool * pool)
 {
     HighQResolver resolver(this);
-    auto pool = resolver.resolve<HQMemoryBLockPool>(memoryPool_);
     auto entryPointer = resolver.resolve<HighQEntry>(entries_);
 
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
