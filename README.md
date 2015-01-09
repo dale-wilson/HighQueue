@@ -138,7 +138,8 @@ pointer is acceptable, as long as it points to a contiguous block of memory cont
 be sent.
 
 For example, suppose you have an std::string and you don't wish to copy construct it into the Message
-You could be used to populate the message like this:
+because even a placement new of a string can cause an expensive memory allocation.
+You could populate the message like this:
 
 <pre>
    while(! stopping)
@@ -152,7 +153,7 @@ You could be used to populate the message like this:
 ###Sending data from buffer(s) where the message boundaries do not match the buffer boundaries.
 i.e. data read from a TCP/IP socket or random-sized messages read from a file.
 
-TODO: Describe the use of the borrow method to send non-contiguous messages from external buffers.
+When the data is split, call appendBinaryCopy twice.
 
 ###Et cetera
 
@@ -191,7 +192,7 @@ Example:
         auto size = message.getUsed();
         doSomethingInteresting(bytePointer, size);
         // no need to delete binary data, just be sure it is no longer needed
-        // before the next call to message.getNext();
+        // before the next call to consumer.getNext();
     }
 </pre>
 
