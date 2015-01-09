@@ -23,7 +23,7 @@ Each HighQueue instance supports multiple Producers, but only a single Consumer.
 Absolute performance numbers are notoriously difficult to measure accurately. The results vary widely from machine to machine.
 
 That being said, tests on an Intel(R) Core(TM) i7-4790 CPU @3.60GHz [8 cores] with one producer and one consumer
-show sustained throughput is around 18 million messages/second.  This translates to between 50 and 60 nanoseconds 
+show sustained throughput is around 16.6 million messages/second.  This translates to around 60 nanoseconds 
 per message delivery.  It can sustain this rate up to 6 producers and one consumer.  Beyond that the threads start
 competing with the operating system (Win7) and with each other for the available cores and throughput starts to drop.
 [With 8 producers + 1 consumer + Windows a message is delivered to the consumer thread every 145 nanoseconds.]
@@ -51,8 +51,7 @@ This Connection object may now be used to create a Consumer and one or more Prod
 
 ###To Add a Consumer
   *	Construct a Consumer passing the Connection as an argument.
-  *	Construct a Message with no construction arguments.
-  *	Use the Connection::allocate(Message) to initialize the Message.
+  *	Construct a Message passing the Connection as an argument.
     *	Most consumers will need only one Message which should be created at the time the consumer is being initialized.  This Message will be reused for each message received.
     *	Accept a message from the HighQueue by calling either:
       *	Consumer::tryGetNext(Message &), or
@@ -67,21 +66,12 @@ This Connection object may now be used to create a Consumer and one or more Prod
 
 ###To Add One or More Producers
   *	Construct a Producer passing the Connection as the contruction argument.
-  *	Construct a Message with no construction arguments.
+  *	Construct a Message passing the Connection as an argument.
     *	Most producers will need only one Message object which should be created at the time the producer is being initialized.  This Message object will be reused for each message being sent.
-  *	Call Connection::allocate(Message &) to initialize the message.
   *	Populate the Message with the information to be passed to the consumer.
     *	Several methods on the Message make this easy and type-safe.  These methods will be described later.
   *	Publish the message by calling the Producer::publish(Message &); method.
     *	When the publish() method returns, the Message will be empty, ready to be populated with the next message.
-
-###API Notes
-  *	The producer may take as long as it needs to construct a message directly in the Message.  If there are other producers using the same HighQueue they will be unaffected by the time it takes a particular producer to prepare its message for publication. (See the example below.)
-  *	Clients lose access to information in a message once they use the Message object in a publish() or getNext() call.  In particular pointers to the data contained in a message are invalided when the Message object is reused.
-  *	When a client is ready to exit, it simply lets the Message and Producer or Consumer objects go out of scope (or otherwise be deleted.)  This cleans up the resources used by the client.
-    *	The Connection will still be ready to service additional clients.
-  *	The Connection object MUST live longer than all clients and Messages that use it.  
-    *	This requirement is not currently enforced.
 
 ##Populating a Message Before Publishing it
 At any particular time a Message object owns a block of memory.  The Producer client should populate
@@ -198,3 +188,11 @@ Example:
 
 ###Et cetera
 Again other techniques are available.  See Message::get() for ideas.
+
+###API Notes
+  *	The producer may take as long as it needs to construct a message directly in the Message.  If there are other producers using the same HighQueue they will be unaffected by the time it takes a particular producer to prepare its message for publication. (See the example below.)
+  *	Clients lose access to information in a message once they use the Message object in a publish() or getNext() call.  In particular pointers to the data contained in a message are invalided when the Message object is reused.
+  *	When a client is ready to exit, it simply lets the Message and Producer or Consumer objects go out of scope (or otherwise be deleted.)  This cleans up the resources used by the client.
+    *	The Connection will still be ready to service additional clients.
+  *	The Connection object MUST live longer than all clients and Messages that use it.  
+    *	This requirement is not currently enforced.

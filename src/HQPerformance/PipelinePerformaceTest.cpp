@@ -32,85 +32,84 @@ namespace
 
     void producerFunction(Connection & connection, uint32_t producerNumber, uint32_t messageCount)
     {
-        Producer producer(connection, true);
-        Message producerMessage;
-        if(!connection.allocate(producerMessage))
+        try
         {
-            std::cerr << "Failed to allocate message for producer Number " << producerNumber << std::endl;
-            return;
-        }
+            Producer producer(connection, true);
+            Message producerMessage(connection);
 
-        ++threadsReady;
-        while(!producerGo)
-        {
-            std::this_thread::yield();
-        }
+            ++threadsReady;
+            while(!producerGo)
+            {
+                std::this_thread::yield();
+            }
 
-        for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
-        {
+            for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
+            {
 #if MATCH_PRONGHORN
-            producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
+                producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
 #else // MATCH_PRONGHORN
-            auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
+                auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
 #endif //MATCH_PRONGHORN
+                producer.publish(producerMessage);
+            }
+            // send an empty message
+            producerMessage.setUsed(0);
             producer.publish(producerMessage);
         }
-        // send an empty message
-        producerMessage.setUsed(0);
-        producer.publish(producerMessage);
+        catch(const std::exception & ex)
+        {
+            std::cerr << "Producer Number " << producerNumber << "Failed " << ex.what() << std::endl;
+        }
     }
 
     void copyFunction(Connection & inConnection, Connection & outConnection, bool passThru)
     {
-        Consumer consumer(inConnection);
-        Message consumerMessage;
-        if(!inConnection.allocate(consumerMessage))
+        try
         {
-            std::cerr << "Failed to allocate consumer message for copy thread." << std::endl;
-            return;
-        }
-
-        Producer producer(outConnection, true);
-        Message producerMessage;
-        if(!outConnection.allocate(producerMessage))
-        {
-            std::cerr << "Failed to allocate producer message for copy thread." << std::endl;
-            return;
-        }
-        ++threadsReady;
-        if(passThru)
-        {
-            while(true)
+            Consumer consumer(inConnection);
+            Message consumerMessage(inConnection);
+ 
+            Producer producer(outConnection, true);
+            Message producerMessage(outConnection);
+            ++threadsReady;
+            if(passThru)
             {
-                consumer.getNext(consumerMessage);
-                auto used = consumerMessage.getUsed();
-                producer.publish(consumerMessage);
-                if(used == 0)
+                while(true)
                 {
-                    return;
+                    consumer.getNext(consumerMessage);
+                    auto used = consumerMessage.getUsed();
+                    producer.publish(consumerMessage);
+                    if(used == 0)
+                    {
+                        return;
+                    }
                 }
             }
-        }
-        else
-        {
-            while(true)
+            else
             {
-                consumer.getNext(consumerMessage);
-                auto used = consumerMessage.getUsed();
-                if(used == 0)
+                while(true)
                 {
-                    producerMessage.setUsed(0);
-                    producer.publish(producerMessage);
-                    return;
-                }
+                    consumer.getNext(consumerMessage);
+                    auto used = consumerMessage.getUsed();
+                    if(used == 0)
+                    {
+                        producerMessage.setUsed(0);
+                        producer.publish(producerMessage);
+                        return;
+                    }
 #if MATCH_PRONGHORN
-                producerMessage.appendBinaryCopy(consumerMessage.get(), used);
+                    producerMessage.appendBinaryCopy(consumerMessage.get(), used);
 #else // MATCH_PRONGHORN
-                producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
+                    producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
 #endif // MATCH_PRONGHORN
-                producer.publish(producerMessage);
-                consumerMessage.destroy<ActualMessage>();
+                    producer.publish(producerMessage);
+                    consumerMessage.destroy<ActualMessage>();
+                }
             }
+        }
+        catch(const std::exception & ex)
+        {
+            std::cerr << "Copy thread failed. " << ex.what() << std::endl;
         }
     }
 }
@@ -149,9 +148,8 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     // The consumer listens to the last connection
     Consumer consumer(*connections.back());
-    Message consumerMessage;
-    BOOST_REQUIRE(connections.back()->allocate(consumerMessage));
-
+    Message consumerMessage(*connections.back());
+    
     producerGo = false;
     threadsReady = 0;
     uint64_t nextMessage = 0u;

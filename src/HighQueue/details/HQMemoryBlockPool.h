@@ -56,7 +56,14 @@ namespace HighQueue
         /// @brief Allocate a block of memory into a message.  
         /// @param baseAddress is the address used to resolve the offsets into actual addresses.
         /// @param message is the Message to receive the block of memory.
-        bool allocate(Message & message);
+        /// @returns true if allocation successful
+        bool tryAllocate(Message & message);
+
+        /// @brief Allocate a block of memory into a message.  
+        /// @param baseAddress is the address used to resolve the offsets into actual addresses.
+        /// @param message is the Message to receive the block of memory.
+        /// @throws runtime_error if allocation fails.
+        void allocate(Message & message);
 
         /// @brief Free the block of memory from a message.
         /// @param baseAddress is the address used to resolve the offsets into actual addresses.

@@ -42,7 +42,6 @@ size_t HQMemoryBLockPool::preAllocate(size_t blockSize, size_t poolSize)
     rootOffset_ = current;
     while(current != NULL_OFFSET)
     {
-//        std::cerr << "Create " << current << std::endl;
         auto next = current + blockSize_;
         if(next + blockSize_ > poolSize_)
         {
@@ -53,23 +52,29 @@ size_t HQMemoryBLockPool::preAllocate(size_t blockSize, size_t poolSize)
         current = next;
         blockCount_ += 1;
     }
-//    std::cerr << "Preallocate " << blockCount_ << " Messages. " << rootOffset_ << std::endl;
     return blockCount_;
 }
 
-bool HQMemoryBLockPool::allocate(Message & message)
+bool HQMemoryBLockPool::tryAllocate(Message & message)
 {
     Spinlock::Guard guard(lock_);
     auto offset = rootOffset_;
     auto ok = offset != NULL_OFFSET;
     if(ok)
     {
-//        std::cout << "Allocate " << offset << std::endl;
         auto baseAddress = reinterpret_cast<byte_t *>(this);
         rootOffset_ = reinterpret_cast<size_t &>(baseAddress[offset]);
         message.set(this, blockSize_, offset, 0);
     }
     return ok;
+}
+
+void HQMemoryBLockPool::allocate(Message & message)
+{
+    if(!tryAllocate(message))
+    {
+        throw std::runtime_error("Memory allocation for message failed");
+    }
 }
 
 void HQMemoryBLockPool::release(Message & message)

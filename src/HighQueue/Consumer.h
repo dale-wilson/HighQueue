@@ -40,8 +40,9 @@ namespace HighQueue
         /// from a previous Message::get() call.  It will be invalidated by this call.
         ///
         /// @param message The message will be populated from the HighQueue entry.
+        /// @returns true unless shutting down.
         /// Note: uses the ConsumerWaitStrategy to wait.
-        void getNext(Message & message);
+        bool getNext(Message & message);
     private:
         Connection & connection_;
         HQHeader * header_;

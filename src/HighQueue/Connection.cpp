@@ -82,9 +82,14 @@ size_t Connection::spaceNeededForHeader(const CreationParameters & parameters)
     return headerSize + entriesSize + positionsSize + CacheLineSize;
 }
 
-bool Connection::allocate(Message & message)
+void Connection::allocate(Message & message)
 {
-    return memoryPool_->allocate(message);
+    memoryPool_->allocate(message);
+}
+
+bool Connection::tryAllocate(Message & message)
+{
+    return memoryPool_->tryAllocate(message);
 }
 
 size_t Connection::getMessageCapacity()const

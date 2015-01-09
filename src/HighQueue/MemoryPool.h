@@ -20,7 +20,12 @@ namespace HighQueue
         /// @brief Populate a message with a block from the HighQueue's memory pool
         /// @param the message to be populated.
         /// @returns true if there was memory available.
-        bool allocate(Message & message);
+        bool tryAllocate(Message & message);
+
+        /// @brief Populate a message with a block from the HighQueue's memory pool
+        /// @param the message to be populated.
+        /// @throws runtime_error if no memory was available
+        void allocate(Message & message);
 
         /// @brief Get the capacity of each block in this pool
         size_t getBlockCapacity()const;

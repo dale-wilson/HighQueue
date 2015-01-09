@@ -8,17 +8,6 @@
 
 using namespace HighQueue;
 
-Message::Message()
-: container_(0)
-, capacity_(0)
-, offset_(0)
-, used_(0)
-, offsetSplit_(0)
-, usedSplit_(0)
-, type_(Invalid)
-{
-}
-
 Message::~Message()
 {
     try{
@@ -36,14 +25,10 @@ void Message::set(HQMemoryBLockPool * container, size_t capacity, size_t offset,
     capacity_ = (capacity == 0) ? used : capacity;
     offset_ = offset;
     used_ = used;
-    offsetSplit_ = 0;
-    usedSplit_ = 0;
-    type_ = Normal;
 }
 
 byte_t * Message::getContainer()const
 {
-    mustBeValid();
     return container_;
 }
 
@@ -54,14 +39,10 @@ size_t Message::getOffset()const
 
 void Message::release()
 {
-    if(type_ == Normal)
+    if(container_ != 0)
     {
         auto pool = reinterpret_cast<HQMemoryBLockPool *>(container_);
         pool->release(*this);
-    }
-    else
-    {
-        reset();
     }
 }
 
@@ -71,7 +52,4 @@ void Message::reset()
     capacity_ = 0;
     offset_ = 0;
     used_ = 0;
-    offsetSplit_ = 0;
-    usedSplit_ = 0;
-    type_ = Invalid;
 }

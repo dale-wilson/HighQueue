@@ -17,24 +17,27 @@ namespace
 
     void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
     {
-        Producer producer(connection, solo);
-        Message producerMessage;
-        if(!connection.allocate(producerMessage))
+        try
         {
-            std::cerr << "Failed to allocate message for producer Number " << producerNumber << std::endl;
+            Producer producer(connection, solo);
+            Message producerMessage(connection);
+        
+            ++threadsReady;
+            while(!producerGo)
+            {
+                std::this_thread::yield();
+            }
+
+            for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
+            {
+                auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
+                producer.publish(producerMessage);
+            }
+        }
+        catch(const std::exception & ex)
+        {
+            std::cerr << "Producer Number " << producerNumber << " failed. " << ex.what() << std::endl;
             return;
-        }
-
-        ++threadsReady;
-        while(!producerGo)
-        {
-            std::this_thread::yield();
-        }
-
-        for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
-        {
-            auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
-            producer.publish(producerMessage);
         }
     }
 }
@@ -62,8 +65,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     connection.createLocal("LocalIv", parameters);
 
     Consumer consumer(connection);
-    Message consumerMessage;
-    BOOST_REQUIRE(connection.allocate(consumerMessage));
+    Message consumerMessage(connection);
 
     for(size_t producerCount = 1; producerCount <= producerLimit; ++producerCount)
     {

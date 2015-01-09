@@ -25,12 +25,11 @@ BOOST_AUTO_TEST_CASE(testIvMemoryPoolMessages)
 
     BOOST_CHECK_LE(messageSize, connection.getMessageCapacity());
 
-    Message message;
+    std::vector<Message> messages;
     for(size_t nMessage = 0; nMessage < (messageCount - entryCount); ++nMessage)
     {
-        BOOST_CHECK(connection.allocate(message));
+        messages.emplace_back(connection);
     }
-    BOOST_CHECK(!connection.allocate(message));
 
     // peek inside
     auto header = connection.getHeader();

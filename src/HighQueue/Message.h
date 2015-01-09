@@ -12,16 +12,15 @@ namespace HighQueue
     class HighQueue_Export Message
     {
     public:
-        enum Type
-        {
-            Normal,
-            Borrowed,
-            Invalid
-        };
         const static size_t NO_POOL = ~size_t(0);
 
-        /// @brief construct an empty (Invalid) message.
-        Message();
+        /// @brief construct an empty Message
+        /// @tparam allocator attaches memory to the Message
+        /// concept Allocator {
+        ///    void allocate(Message & message);
+        /// };
+        template <typename Allocator>
+        Message(Allocator & allocator);
 
         ~Message();
 
@@ -90,7 +89,7 @@ namespace HighQueue
         /// @param object is the object to be copied.
         /// @returns a pointer to the newly copy-constructed object in the message.
         template <typename T = byte_t>
-        T* appendNewCopy(const T & object);
+        T& appendEmplace(const T & object);
 
         /// @brief Use a binary copy to initialize the next available location in the message.
         /// @tparam T is the type of object
@@ -149,22 +148,6 @@ namespace HighQueue
         /// @throws runtime_exception if the target message is not suitable.
         void moveTo(Message & target);
 
-        /// @brief Is this message normal or borrowed?
-        bool isValid() const;
-        /// @brief Is this message borrowed?
-        bool isBorrowed() const;
-        /// @brief Is this message contiguous (not split?)
-        bool isContiguous() const;
-
-        /// @brief Throw a runtime_exception if this is not a normal message
-        /// For internal use, but you can use it if you feel the need.
-        /// @param message to appear in the exception.
-        void mustBeNormal(const char * message = "Operation cannot be applied to an immutable message.") const;
-
-        /// @brief Throw a runtime_exception if this is not a valid message
-        /// For internal use, but you can use it if you feel the need.
-        void mustBeValid(const char * message = "Operation requires a valid message.") const;
-
         /// @brief Get the base address of the block of memory containing this message's memory.
         /// NOTE: this is not an interesting function.  Do not use it.
         byte_t * getContainer()const;
@@ -172,9 +155,6 @@ namespace HighQueue
         /// @brief Get the offset from the container's base address
         /// NOTE: this is not an interesting function.  Do not use it.
         size_t getOffset()const;
-
-        /// @brief How is this message associated with its memory?
-        Type getType() const;
 
         /// @brief Prepare a message for reuse -- make it Invalid.
         /// Warning:  This is not the method you want.  Call release() instead, or simply delete the Message. 
@@ -185,33 +165,17 @@ namespace HighQueue
         size_t capacity_;
         size_t offset_;
         size_t used_;
-        size_t offsetSplit_;
-        size_t usedSplit_;
-        Type type_;
     };
 
-    inline
-    void Message::borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit, size_t usedSplit)
+    template <typename Allocator>
+    Message::Message(Allocator & allocator)
     {
-        if(type_ == Normal)
-        {
-            throw std::runtime_error("Message: Can't borrow a normal buffer.");
-        }
-
-        // setting type=Borrowed enforces the constness.
-        container_ = const_cast<byte_t *>(container);
-        capacity_ = used;
-        offset_ = offset;
-        used_ = used;
-        offsetSplit_ = offsetSplit;
-        usedSplit_ = usedSplit;
-        type_ = Borrowed;
+        allocator.allocate(*this);
     }
 
     inline
     size_t Message::setUsed(size_t used)
     {
-        mustBeNormal("Message::setUsed: Invalid operation on message.");
         if(used > capacity_)
         {
             throw std::runtime_error("Message used > capacity");
@@ -224,115 +188,45 @@ namespace HighQueue
     void Message::setEmpty()
     {
         used_ = 0;
-        usedSplit_ = 0;
     }
 
     inline
     size_t Message::getUsed() const
     {
-        return used_ + usedSplit_;
+        return used_;
     }
 
     inline
     bool Message::isEmpty()const
     {
-        return used_ + usedSplit_ == 0;
-    }
-
-    inline
-    Message::Type Message::getType() const
-    {
-        return type_;
-    }
-
-    inline
-    bool Message::isValid() const
-    {
-        return type_ != Invalid;
-    }
-
-    inline
-    bool Message::isBorrowed() const
-    {
-        return type_ == Borrowed;
-    }
-
-    inline
-    bool Message::isContiguous() const
-    {
-        return usedSplit_ == 0;
-    }
-
-    inline
-    void Message::mustBeNormal(const char * message) const
-    {
-        if(type_ != Normal)
-        {
-            throw std::runtime_error(message);
-        }
-    }
-
-    inline
-    void Message::mustBeValid(const char * message) const
-    {
-        if(type_ == Invalid)
-        {
-            throw std::runtime_error(message);
-        }
+        return used_ == 0;
     }
 
     inline
     void Message::swap(Message & rhs)
     {
-        if(type_ == Borrowed || rhs.type_ == Borrowed)
-        {
-            throw std::runtime_error("Message::swap: Invalid operation on Borrowed message.");
-        }
         std::swap(container_, rhs.container_);
         std::swap(capacity_, rhs.capacity_);
         std::swap(offset_, rhs.offset_);
         std::swap(used_, rhs.used_);
-        std::swap(type_, rhs.type_);
-        // no need to swap the split offset and used.  Normal messages cannot be split.
     }
 
     inline
     void Message::moveTo(Message & rhs)
     {
-        mustBeValid("Message::moveTo: source message is invalid.");
-        rhs.mustBeNormal("Message::moveTo: target message not suitable for operation." );
-        if(type_ == Borrowed)
-        {
-            if(used_ + usedSplit_ > rhs.capacity_)
-            {
-                throw std::runtime_error("Move to: target message too small");
-            }
-            auto rhsMessage = rhs.get();
-            memcpy(rhsMessage, getConst(), used_);
-            if(usedSplit_ != 0)
-            {
-                rhsMessage += used_;
-                memcpy(rhsMessage, container_ + offsetSplit_, usedSplit_);
-            }
-        }
-        else
-        {
-            swap(rhs);
-        }
+        swap(rhs);
         used_ = 0;
     }
 
     template <typename T>
     T* Message::get()const
     {
-        mustBeNormal("Message::get: Invalid access to message");
         return reinterpret_cast<T *>(container_ + offset_);
     }
 
     template <typename T>
     const T* Message::getConst()const
     {
-        mustBeValid();
         return reinterpret_cast<T *>(container_ + offset_);
     }
 
@@ -365,24 +259,22 @@ namespace HighQueue
     template <typename T>
     size_t Message::addUsed(size_t count)
     {
-        mustBeNormal("Message::addUsed: Invalid access to message.");
         return setUsed(used_ + count * sizeof(T));
     }
 
     template <typename T>
     T* Message::getWritePosition()const
     {
-        mustBeNormal("Message::getWritePosition: Invalid access to message.");
         return reinterpret_cast<T *>(container_ + offset_ + used_);
     }
 
     template <typename T>
-    T * Message::appendNewCopy(const T & data)
+    T & Message::appendEmplace(const T & data)
     {
         auto position = getWritePosition(); 
         // add used before writing to the message to catch overruns first.
         addUsed<T>(1);
-        return new (position) T(data);
+        return * new (position) T(data);
     }
 
     template <typename T>

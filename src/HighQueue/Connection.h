@@ -45,10 +45,15 @@ namespace HighQueue
         /// @brief Connect to an existing HighQueue in shared memory.
         void openExistingShared(const std::string & name);
 
-        /// @brief Populate a message with data from the HighQueue's memory pool
+        /// @brief Populate a message with a block from the HighQueue's memory pool
         /// @param the message to be populated.
         /// @returns true if there was memory available.
-        bool allocate(Message & message);
+        bool tryAllocate(Message & message);
+
+        /// @brief Populate a message with a block from the HighQueue's memory pool
+        /// @param the message to be populated.
+        /// @throws runtime_error if no memory was available
+        void allocate(Message & message);
 
         /// @brief Get the capacity of all messages used with this HighQueue
         size_t getMessageCapacity()const;

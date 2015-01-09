@@ -49,8 +49,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     HighQEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
     Producer producer(connection);
-    Message message;
-    connection.allocate(message);
+    Message message(connection);
 
     for(size_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
@@ -63,8 +62,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     // if we published another message now, it would hang.
     // todo: think of some way around that.
 
-    Message consumerMessage;
-    connection.allocate(consumerMessage);
+    Message consumerMessage(connection);
 
     // consume the messages.
     Consumer consumer(connection);
@@ -73,7 +71,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
         std::stringstream msg;
         msg << nMessage << std::ends;
 
-        consumer.getNext(message);
+        BOOST_REQUIRE(consumer.getNext(message));
         BOOST_CHECK_EQUAL(sizeof(TestMessage), message.getUsed());
         auto testMessage = message.get<TestMessage>();
         BOOST_CHECK_EQUAL(msg.str(), testMessage->getString());                

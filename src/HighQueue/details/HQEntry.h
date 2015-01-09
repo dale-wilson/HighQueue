@@ -22,8 +22,10 @@ namespace HighQueue
         Message message_;
         Status status_;
 
-        HighQEntry()
-            : status_(Status::EMPTY)
+        template <typename Allocator>
+        HighQEntry(Allocator & allocator)
+            : message_(allocator)
+            , status_(Status::EMPTY)
         {
         }
 

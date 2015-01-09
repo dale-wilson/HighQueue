@@ -16,9 +16,14 @@ MemoryPool::~MemoryPool()
 {
 }
 
-bool MemoryPool::allocate(Message & message)
+bool MemoryPool::tryAllocate(Message & message)
 {
-    return pool_.allocate(message);
+    return pool_.tryAllocate(message);
+}
+
+void MemoryPool::allocate(Message & message)
+{
+    pool_.allocate(message);
 }
 
 size_t MemoryPool::getBlockCapacity()const

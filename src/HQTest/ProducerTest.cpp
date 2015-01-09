@@ -47,8 +47,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     HighQEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 
 
-    Message message;
-    connection.allocate(message);
+    Message message(connection);
     auto testMessage = message.get<TestMessage>();
     new (testMessage) TestMessage("Hello world");
     message.setUsed(sizeof(TestMessage));
@@ -56,7 +55,6 @@ BOOST_AUTO_TEST_CASE(testProducer)
 
     producer.publish(message);
     BOOST_CHECK(message.isEmpty());
-    BOOST_CHECK(message.isValid());
 
     BOOST_CHECK_EQUAL(*readPosition + 1, *publishPosition);
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);

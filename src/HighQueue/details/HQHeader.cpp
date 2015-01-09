@@ -70,12 +70,7 @@ void HQHeader::allocateInternalMessages(HQMemoryBLockPool * pool)
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
         HighQEntry & entry = entryPointer[nEntry];
-        new (&entry) HighQEntry;
-        Message & message = entry.message_;
-        if(!pool->allocate(message))
-        {
-            throw std::runtime_error("Not enough messages for entries.");
-        }
+        new (&entry) HighQEntry(*pool);
     }
 }
 
