@@ -1,13 +1,13 @@
 # HighQueue
 A Queue for High Speed message passing between threads, processes, or other components.
 
-<pre>
+```C++
   The HighQueue Haiku
 
   To send messages
   So quickly you must use a
   Good algorithm.
-</pre>
+```
 
 ##Introduction
 A High Performance Queue (HighQueue) is a mechanism for message passing between components of a system.  It is most often used to pass messages between two or more threads in the same process, but it can also be used for intra-process communication by putting the HighQueue in shared memory. 
@@ -87,14 +87,14 @@ way to populate the Message is to use the emplace method.  This uses a placement
 construct the object in place.   [This is similar to the emplace_back() operaton on a std::vector, hence the name emplace]
 
 A typical use might look like:
-<pre>
+```C++
    while(! stopping)
    {
         auto myObject = message.emplace<MyClass>(construction arguments go here);
         myObject.addAdditionalInformationAsNecessary(additional info);
         producer.publish(message);
    }
-</pre>
+```
 
 For local (in-process) HighQueues, there are no restrictions on the type of object that can be passed using this technique.
 Shared memory HighQueues impose some restrictions ---todo: document the restrictions [PODS]
@@ -110,7 +110,7 @@ into a caller-supplied buffer, you can have the source operate directly into the
 buffer by calling Message::get() and Message::available().
 
 For example:
-<pre>
+```C++
     while(! stopping)
     {
         auto buffer = message.get();
@@ -119,7 +119,7 @@ For example:
         message.setUsed(bytesRead);
         producer.publish(message);
     }
-</pre>
+```
 
 ###Sending binary copyable data
 If the data to be sent is not in a suitable object for emplacing, but it can be safely copied via 
@@ -131,14 +131,14 @@ For example, suppose you have an std::string and you don't wish to copy construc
 because even a placement new of a string can cause an expensive memory allocation.
 You could populate the message like this:
 
-<pre>
+```C++
    while(! stopping)
    {
         const std::string & msg = getSomeDataToSend();
         message.appendBinaryCopy(msg.data(), msg.size());
         producer.publish(message);
    }
-</pre>
+```
 
 ###Sending data from buffer(s) where the message boundaries do not match the buffer boundaries.
 i.e. data read from a TCP/IP socket or random-sized messages read from a file.
@@ -164,7 +164,7 @@ The Message::cast&lt;Type&gt;() method will return a reference to an object of t
 residing in the buffer.  This is the most effective way to access incoming data.
 
 Example:
-<pre>
+```C++
    while(consumer.getNext(message))
    {
         auto myObject = message.cast&lt;MyClass&gt>();
@@ -172,10 +172,10 @@ Example:
         doSomethingInteresting(myObject);
         message.delete&lt;myObject&gt;(); // optional: calls the objects destructor if necessary.
    }
-</pre>
+```
 
 ###Accessing binary data
-<pre>
+```C++
     while(consumer.getNext(message))
     {
         auto bytePointer = message.get();
@@ -184,14 +184,17 @@ Example:
         // no need to delete binary data, just be sure it is no longer needed
         // before the next call to consumer.getNext();
     }
-</pre>
+```
 
 ###Et cetera
 Again other techniques are available.  See Message::get() for ideas.
 
+##Sharing a pool of memory between multiple HighQueues.
+TODO: Explain how to do it and why you might want to.
+
 ###API Notes
-  *	The producer may take as long as it needs to construct a message directly in the Message.  If there are other producers using the same HighQueue they will be unaffected by the time it takes a particular producer to prepare its message for publication. (See the example below.)
-  *	Clients lose access to information in a message once they use the Message object in a publish() or getNext() call.  In particular pointers to the data contained in a message are invalided when the Message object is reused.
+  *	The producer may take as long as it needs to construct a message directly in the Message. If there are other producers using the same HighQueue they will be unaffected by the time it takes a particular producer to prepare its message for publication.
+  *	Clients lose access to information in a message once they use the Message object in a publish() or getNext() call.  In particular pointers and references to the data contained in a message are invalided when the Message object is reused.
   *	When a client is ready to exit, it simply lets the Message and Producer or Consumer objects go out of scope (or otherwise be deleted.)  This cleans up the resources used by the client.
     *	The Connection will still be ready to service additional clients.
   *	The Connection object MUST live longer than all clients and Messages that use it.  
