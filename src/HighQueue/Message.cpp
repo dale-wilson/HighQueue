@@ -8,7 +8,6 @@
 
 using namespace HighQueue;
 
-
 Message::Message()
 : container_(0)
 , capacity_(0)

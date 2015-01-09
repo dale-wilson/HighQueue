@@ -1,5 +1,7 @@
 Support external memory pool (allowing one memory pool to service multiple HighQueues)
 
+Return reference from Message::construct, et al.
+
 ?? Rename method s/construct/emplace/ for std: naming compatibility (C++ idiom) ??
 Is it possible to call the destructor on an object emplaced in a Message?
 Do we want/need appendConstruct or appendEmplace?

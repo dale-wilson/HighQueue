@@ -29,7 +29,7 @@ namespace HighQueue
 
         static size_t alignedSize()
         {
-            return HighQAllocator::align(sizeof(HighQEntry), CacheLineSize);
+            return HQAllocator::align(sizeof(HighQEntry), CacheLineSize);
         }
 
 	} POST_CACHE_ALIGN;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <Common/HighQueue_Export.h>
+#include "MessageFwd.h"
 #include <HighQueue/details/HQMemoryBLockPoolFwd.h>
 namespace HighQueue
 {

@@ -5,56 +5,56 @@
 using namespace HighQueue;
 
 HQMemoryBLockPool::HQMemoryBLockPool()
-: blockSize_(0)
-, messageSize_(0)
-, messageCount_(0)
+: poolSize_(0)
+, blockSize_(0)
+, blockCount_(0)
 , rootOffset_(NULL_OFFSET)
 {
 }
 
 HQMemoryBLockPool::HQMemoryBLockPool(
-    size_t blockSize, 
-    size_t messageSize)
-: blockSize_(blockSize)
-, messageSize_(cacheAlignedMessageSize(messageSize))
-, messageCount_(0)
+    size_t poolSize, 
+    size_t blockSize)
+: poolSize_(poolSize)
+, blockSize_(cacheAlignedMessageSize(blockSize))
+, blockCount_(0)
 , rootOffset_(NULL_OFFSET)
 {
-    preAllocate(messageSize_, blockSize_);
+    preAllocate(blockSize_, poolSize_);
 }
 
-size_t HQMemoryBLockPool::preAllocate(size_t messageSize, size_t blockSize)
+size_t HQMemoryBLockPool::preAllocate(size_t blockSize, size_t poolSize)
 {
     auto sizeofthis = sizeof(HQMemoryBLockPool);
     auto intThis = uintptr_t(this);
     auto endThis = intThis + sizeofthis + CacheLineSize - 1;
     endThis -= endThis % CacheLineSize;
     size_t current = endThis - intThis;
-    if(current + messageSize_ > blockSize)
+    if(current + blockSize_ > poolSize)
     {
         throw std::invalid_argument("HQMemoryBLockPool: aligned offset + message size exceeds pool size."); 
     }
+    poolSize_ = poolSize;
     blockSize_ = blockSize;
-    messageSize_ = messageSize;
-    messageCount_ = 0;
+    blockCount_ = 0;
 
     auto baseAddress = reinterpret_cast<byte_t *>(this);
     rootOffset_ = current;
     while(current != NULL_OFFSET)
     {
 //        std::cerr << "Create " << current << std::endl;
-        auto next = current + messageSize_;
-        if(next + messageSize_ > blockSize_)
+        auto next = current + blockSize_;
+        if(next + blockSize_ > poolSize_)
         {
             next = NULL_OFFSET;
         }
 
         reinterpret_cast<size_t &>(baseAddress[current]) = next;
         current = next;
-        messageCount_ += 1;
+        blockCount_ += 1;
     }
-//    std::cerr << "Preallocate " << messageCount_ << " Messages. " << rootOffset_ << std::endl;
-    return messageCount_;
+//    std::cerr << "Preallocate " << blockCount_ << " Messages. " << rootOffset_ << std::endl;
+    return blockCount_;
 }
 
 bool HQMemoryBLockPool::allocate(Message & message)
@@ -67,7 +67,7 @@ bool HQMemoryBLockPool::allocate(Message & message)
 //        std::cout << "Allocate " << offset << std::endl;
         auto baseAddress = reinterpret_cast<byte_t *>(this);
         rootOffset_ = reinterpret_cast<size_t &>(baseAddress[offset]);
-        message.set(this, messageSize_, offset, 0);
+        message.set(this, blockSize_, offset, 0);
     }
     return ok;
 }
@@ -93,12 +93,12 @@ bool HQMemoryBLockPool::isEmpty() const
 }
 
 
-size_t HQMemoryBLockPool::cacheAlignedMessageSize(size_t messageSize)
+size_t HQMemoryBLockPool::cacheAlignedMessageSize(size_t blockSize)
 {
-    return ((messageSize + CacheLineSize - 1) / CacheLineSize) * CacheLineSize;
+    return ((blockSize + CacheLineSize - 1) / CacheLineSize) * CacheLineSize;
 }
 
-size_t HQMemoryBLockPool::spaceNeeded(size_t messageSize, size_t messageCount)
+size_t HQMemoryBLockPool::spaceNeeded(size_t blockSize, size_t messageCount)
 {
-    return sizeof(HQMemoryBLockPool) + cacheAlignedMessageSize(messageSize) * messageCount + CacheLineSize;
+    return sizeof(HQMemoryBLockPool) + cacheAlignedMessageSize(blockSize) * messageCount + CacheLineSize;
 }

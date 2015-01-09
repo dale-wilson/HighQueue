@@ -6,7 +6,7 @@
 #include <Common/HighQueue_Export.h>
 #include <HighQueue/details/HQHeader.h>
 #include <HighQueue/CreationParameters.h>
-#include <HighQueue/details/HQMemoryBLockPool.h>
+#include <HighQueue/MemoryPool.h>
 
 namespace HighQueue
 {
@@ -31,7 +31,8 @@ namespace HighQueue
         /// @brief Allocate a block of local memory and create an HighQueue in that block. 
         void createLocal(
             const std::string & name, 
-            const CreationParameters & parameters);
+            const CreationParameters & parameters,
+            const MemoryPoolPtr & pool = MemoryPoolPtr());
             
         /// @brief Attempt to attach to an existing HighQueue in shared memory.  If none
         /// is found, then create a new one.
@@ -52,23 +53,16 @@ namespace HighQueue
         /// @brief Get the capacity of all messages used with this HighQueue
         size_t getMessageCapacity()const;
             
-        /// @brief How many messages can this HighQueue support?
-        /// Note this is a constant.  It does not change as memory is allocated or freed.
-        size_t getMessageCount()const;
-            
-        /// @brief Is there enough memory available to populate a message?
-        bool hasMemoryAvailable() const;
-
         /// @brief Provide direct access to internal implementation details.
         HQHeader * getHeader() const;
             
         /// @brief A helper function to determine how much space is needed in an block of memory
         /// large enough to hold an HighQueue
-        static size_t spaceNeeded(const CreationParameters & parameters);
+        static size_t spaceNeededForHeader(const CreationParameters & parameters);
 
     private:
-        std::shared_ptr<byte_t> localMemory_;
+        MemoryPoolPtr memoryPool_;
+        std::unique_ptr<byte_t[]> queueMemory_; 
         HQHeader * header_;
-        HQMemoryBLockPool * memoryPool_;
-	};
+    };
 }

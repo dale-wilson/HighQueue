@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(testPoolAllocation)
     size_t blockSize = HQMemoryBLockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[blockSize]);
     auto pool = new (block.get()) HQMemoryBLockPool(blockSize, messageSize);
-    BOOST_REQUIRE_GE(pool->getMessageCount(), messageCount);
+    BOOST_REQUIRE_GE(pool->getBlockCount(), messageCount);
 
     for(size_t nLoop = 0; nLoop < messageCount * 10; ++nLoop)
     {
