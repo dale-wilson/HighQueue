@@ -1,7 +1,7 @@
 # HighQueue
 A Queue for High Speed message passing between threads, processes, or other components.
 
-```C++
+```
   The HighQueue Haiku
 
   To send messages
