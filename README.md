@@ -78,9 +78,8 @@ data is being sent and where the Producer gets the data.
 ###Using Emplace (placement construction) to send an object.
 
 If the data to be delivered is actually an object that the Producer will construct, the most effective
-what to populate the Message is to use the emplace method.  
-This uses a placement new operatation to construct the object in place.  
-[This is similar to the emplace_back() operaton on a std::vector, hence the name emplace]
+way to populate the Message is to use the emplace method.  This uses a placement new operatation to 
+construct the object in place.   [This is similar to the emplace_back() operaton on a std::vector, hence the name emplace]
 
 A typical use might look like:
 <pre>
@@ -96,30 +95,14 @@ For local (in-process) HighQueues, there are no restrictions on the type of obje
 Shared memory HighQueues impose some restrictions ---todo: document the restrictions [PODS]
 
 Note that if the object to be sent is already present in memory not controlled by the Message, this
-technique still works.  Just use the object's copy or move constructor to emplace the data in the Message.
-
-###Sending binary copyable data
-If the data to be sent is not in a suitable object, but it can be safely copied via a binary copy
-the Message:appendBinaryCopy(pointer, size) operation can be used.  Note any type of pointer is acceptable, as long
-as it points to a contiguous block of memory containing the data to be sent.
-
-For example, suppose the MyClass::getStringMessage() method returns a const std::string reference.
-This could be used to populate the message like this:
-
-<pre>
-   while(! stopping)
-   {
-        auto myObject = acquire_the_data();
-        const std::string & msg = myObject.getStringMessage();
-        message.appendBinaryCopy(msg.data(), msg.size());
-        producer.publish(message);
-   }
-</pre>
+technique still works.  Just use the object's copy or move constructor to emplace the data into the 
+Message.
 
 ###Reading complete messages directly into the Message's buffer.
 
-If the data to be sent comes from a source that can read or compose a data into a caller-supplied buffer,
-you can have it read directly into the Message's buffer by calling Message::get();
+If the data to be sent comes from a source that can read or compose a data 
+into a caller-supplied buffer, you can have the source operate directly into the Message's 
+buffer by calling Message::get() and Message::available().
 
 For example:
 <pre>
@@ -131,18 +114,71 @@ For example:
         message.setUsed(bytesRead);
         producer.publish(message);
     }
-</pre>   
-###Sending data from buffer(s) where the message boundaries do not match the buffer boundaries.
-i.e. TCP IP or reading random-sized messages from a file.
+</pre>
 
-TODO: Describe the use of the borrow method to send non-contiguous messages.
+###Sending binary copyable data
+If the data to be sent is not in a suitable object for emplacing, but it can be safely copied via 
+a binary copy the Message:appendBinaryCopy(pointer, size) operation can be used.  Note any type of 
+pointer is acceptable, as long as it points to a contiguous block of memory containing the data to 
+be sent.
+
+For example, suppose you have an std::string and you don't wish to copy construct it into the Message
+You could be used to populate the message like this:
+
+<pre>
+   while(! stopping)
+   {
+        const std::string & msg = getSomeDataToSend();
+        message.appendBinaryCopy(msg.data(), msg.size());
+        producer.publish(message);
+   }
+</pre>
+
+###Sending data from buffer(s) where the message boundaries do not match the buffer boundaries.
+i.e. data read from a TCP/IP socket or random-sized messages read from a file.
+
+TODO: Describe the use of the borrow method to send non-contiguous messages from external buffers.
 
 ###Et cetera
+
 Other techniques can be used to populate the Message.  
 For example fields can be appended to the buffer one-at-a-time in a (relatively) safe manner.
 See the append* methods for details.
 
 ## Access Data From a Received Message.
+The Message used by the Consumer in the tryGetNext() or getNext() method will have access to the
+same memory that was used by the Producer to publish the message (note: the Publisher no longer has
+access to this memory.)
 
-To Be done
+Several techniques are available to allow the Consumer to safely access this data.
 
+###Accessing data in an application defined object.
+
+The Message::cast<Type>() method will return a reference to an object of the specified type 
+residing in the buffer.  This is the most effective way to access incoming data.
+
+Example:
+<pre>
+   while(consumer.getNext(message))
+   {
+        auto myObject = message.cast<MyClass>();
+        myObject.doSomethingInteresting(); // or
+        doSomethingInteresting(myObject);
+        message.delete<myObject>(); // optional: calls the objects destructor if necessary.
+   }
+</pre>
+
+###Accessing binary data
+<pre>
+    while(consumer.getNext(message))
+    {
+        auto bytePointer = message.get();
+        auto size = message.getUsed();
+        doSomethingInteresting(bytePointer, size);
+        // no need to delete binary data, just be sure it is no longer needed
+        // before the next call to message.getNext();
+    }
+</pre>
+
+###Et cetera
+Again other techniques are available.  See Message::get() for ideas.
