@@ -154,17 +154,17 @@ Several techniques are available to allow the Consumer to safely access this dat
 
 ###Accessing data in an application defined object.
 
-The Message::cast<Type>() method will return a reference to an object of the specified type 
+The Message::cast&lt;Type&gt;() method will return a reference to an object of the specified type 
 residing in the buffer.  This is the most effective way to access incoming data.
 
 Example:
 <pre>
    while(consumer.getNext(message))
    {
-        auto myObject = message.cast<MyClass>();
+        auto myObject = message.cast&lt;MyClass&gt>();
         myObject.doSomethingInteresting(); // or
         doSomethingInteresting(myObject);
-        message.delete<myObject>(); // optional: calls the objects destructor if necessary.
+        message.delete&lt;myObject&gt;(); // optional: calls the objects destructor if necessary.
    }
 </pre>
 
