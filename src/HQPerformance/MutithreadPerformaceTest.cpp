@@ -33,7 +33,7 @@ namespace
 
         for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
         {
-            auto testMessage = producerMessage.construct<ActualMessage>(producerNumber, messageNumber);
+            auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
             producer.publish(producerMessage);
         }
     }

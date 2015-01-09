@@ -59,11 +59,10 @@ namespace HighQueue
         /// @tparam ArgTypes are the types arguments to pass to the constructor.
         /// @param args are the actual arguments.
         template <typename T, typename... ArgTypes>
-        T* construct(ArgTypes&&... args)
-        {
-            setUsed(sizeof(T));
-            return new (get<T>()) T(std::forward<ArgTypes>(args)...);
-        }
+        T & emplace(ArgTypes&&... args);
+
+        template <typename T>
+        void destroy() const;
 
         /// @brief How many objects of type T can be added to the message.
         /// @tparam T is the type of object
@@ -335,6 +334,20 @@ namespace HighQueue
     {
         mustBeValid();
         return reinterpret_cast<T *>(container_ + offset_);
+    }
+
+    template <typename T, typename... ArgTypes>
+    T & Message::emplace(ArgTypes&&... args)
+    {
+        setUsed(sizeof(T));
+        return * new (get<T>()) T(std::forward<ArgTypes>(args)...);
+    }
+
+    template <typename T>
+    void Message::destroy() const
+    {
+        auto pT = get<T>();
+        pT->~T();
     }
 
     template <typename T>
