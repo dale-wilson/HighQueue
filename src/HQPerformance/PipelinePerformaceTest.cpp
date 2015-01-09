@@ -51,7 +51,7 @@ namespace
 #if MATCH_PRONGHORN
             producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
 #else // MATCH_PRONGHORN
-            auto testMessage = producerMessage.construct<ActualMessage>(producerNumber, messageNumber);
+            auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
 #endif //MATCH_PRONGHORN
             producer.publish(producerMessage);
         }
@@ -106,9 +106,10 @@ namespace
 #if MATCH_PRONGHORN
                 producerMessage.appendBinaryCopy(consumerMessage.get(), used);
 #else // MATCH_PRONGHORN
-                producerMessage.construct<ActualMessage>(*consumerMessage.get<ActualMessage>());
+                producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
 #endif // MATCH_PRONGHORN
                 producer.publish(producerMessage);
+                consumerMessage.destroy<ActualMessage>();
             }
         }
     }
@@ -192,6 +193,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
             BOOST_CHECK_EQUAL(nextMessage, testMessage->messageNumber());
         }
+        consumerMessage.destroy<ActualMessage>();
         ++ nextMessage;
 #endif // MATCH_PRONGHORN
     }
