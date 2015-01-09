@@ -69,7 +69,6 @@ This Connection object may now be used to create a Consumer and one or more Prod
     *	This requirement is not currently enforced.
 
 ##Populating a Message Before Publishing it
-<<<<<<< HEAD
 At any particular time a Message object owns a block of memory.  The Producer client should populate
 its Message with the data to be sent, then call Producer::publish() to actually send the message.
 
@@ -183,10 +182,3 @@ Example:
 
 ###Et cetera
 Again other techniques are available.  See Message::get() for ideas.
-=======
-To be done
-
-## Access Data From a Received Message.
-To Be done
-
->>>>>>> 8a4485c87b24635fecd838cddd0adf5be0a532c3
