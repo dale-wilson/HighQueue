@@ -4,21 +4,9 @@
 #include <Common/HighQueuePch.h>
 
 #include "Message.h"
-#include <HighQueue/details/MemoryBlockPool.h>
+#include <HighQueue/details/HQMemoryBLockPool.h>
 
 using namespace HighQueue;
-
-
-Message::Message()
-: container_(0)
-, capacity_(0)
-, offset_(0)
-, used_(0)
-, offsetSplit_(0)
-, usedSplit_(0)
-, type_(Invalid)
-{
-}
 
 Message::~Message()
 {
@@ -31,20 +19,16 @@ Message::~Message()
     }
 }
 
-void Message::set(MemoryBlockPool * container, size_t capacity, size_t offset, size_t used)
+void Message::set(HQMemoryBLockPool * container, size_t capacity, size_t offset, size_t used)
 {
     container_ = reinterpret_cast<byte_t *>(container);
     capacity_ = (capacity == 0) ? used : capacity;
     offset_ = offset;
     used_ = used;
-    offsetSplit_ = 0;
-    usedSplit_ = 0;
-    type_ = Normal;
 }
 
 byte_t * Message::getContainer()const
 {
-    mustBeValid();
     return container_;
 }
 
@@ -55,14 +39,10 @@ size_t Message::getOffset()const
 
 void Message::release()
 {
-    if(type_ == Normal)
+    if(container_ != 0)
     {
-        auto pool = reinterpret_cast<MemoryBlockPool *>(container_);
+        auto pool = reinterpret_cast<HQMemoryBLockPool *>(container_);
         pool->release(*this);
-    }
-    else
-    {
-        reset();
     }
 }
 
@@ -72,7 +52,4 @@ void Message::reset()
     capacity_ = 0;
     offset_ = 0;
     used_ = 0;
-    offsetSplit_ = 0;
-    usedSplit_ = 0;
-    type_ = Invalid;
 }

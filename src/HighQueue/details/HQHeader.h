@@ -29,9 +29,10 @@ namespace HighQueue
 
 	    HQHeader(
             const std::string & name, 
-            HighQAllocator & allocator, 
-            const CreationParameters & parameters);
-        void allocateInternalMessages();
+            HQAllocator & allocator, 
+            const CreationParameters & parameters,
+            HQMemoryBLockPool * pool = 0);
+        void allocateInternalMessages(HQMemoryBLockPool * pool);
         void releaseInternalMessages();
     };
 }

@@ -19,17 +19,19 @@ namespace HighQueue
             EMPTY,
             SKIP
         };
-        HighQueue::Message message_;
+        Message message_;
         Status status_;
 
-        HighQEntry()
-            : status_(Status::EMPTY)
+        template <typename Allocator>
+        HighQEntry(Allocator & allocator)
+            : message_(allocator)
+            , status_(Status::EMPTY)
         {
         }
 
         static size_t alignedSize()
         {
-            return HighQAllocator::align(sizeof(HighQEntry), CacheLineSize);
+            return HQAllocator::align(sizeof(HighQEntry), CacheLineSize);
         }
 
 	} POST_CACHE_ALIGN;

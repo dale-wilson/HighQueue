@@ -14,7 +14,7 @@ namespace HighQueue
 {
     /// @brief Support for consuming messages from an HighQueue
     /// In addition to having the Connection which is used to construct
-    /// this object, you will need a HighQueue::Message which has been initialized
+    /// this object, you will need a Message which has been initialized
     /// by calling the Connection::allocate() method.
     class HighQueue_Export Consumer
 	{
@@ -31,7 +31,7 @@ namespace HighQueue
         ///
         /// @param message The message will be populated from the HighQueue entry.
         /// @returns immediately.  true if the message now contains data; false if no data is available.
-        bool tryGetNext(HighQueue::Message & message);
+        bool tryGetNext(Message & message);
 
         /// @brief Get the next message-full of data.  Wait if none is available
         ///
@@ -40,8 +40,9 @@ namespace HighQueue
         /// from a previous Message::get() call.  It will be invalidated by this call.
         ///
         /// @param message The message will be populated from the HighQueue entry.
+        /// @returns true unless shutting down.
         /// Note: uses the ConsumerWaitStrategy to wait.
-        void getNext(HighQueue::Message & message);
+        bool getNext(Message & message);
     private:
         Connection & connection_;
         HQHeader * header_;

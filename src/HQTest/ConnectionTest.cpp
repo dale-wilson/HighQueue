@@ -9,11 +9,11 @@
 
 using namespace HighQueue;
 
-#define DISABLE_testIvConnectionMessagesx
-#ifdef DISABLE_testIvConnectionMessages
-#pragma message ("DISABLE_testIvConnectionMessages " __FILE__)
-#else // DISABLE DISABLE_testIvConnectionMessages
-BOOST_AUTO_TEST_CASE(testIvConnectionMessages)
+#define DISABLE_testIvMemoryPoolMessagesx
+#ifdef DISABLE_testIvMemoryPoolMessages
+#pragma message ("DISABLE_testIvMemoryPoolMessages " __FILE__)
+#else // DISABLE DISABLE_testIvMemoryPoolMessages
+BOOST_AUTO_TEST_CASE(testIvMemoryPoolMessages)
 {
     ConsumerWaitStrategy strategy;
     size_t entryCount = 100;
@@ -24,16 +24,12 @@ BOOST_AUTO_TEST_CASE(testIvConnectionMessages)
     connection.createLocal("LocalIv", parameters);
 
     BOOST_CHECK_LE(messageSize, connection.getMessageCapacity());
-    BOOST_CHECK_LE(messageCount, connection.getMessageCount());
 
-    HighQueue::Message message;
+    std::vector<Message> messages;
     for(size_t nMessage = 0; nMessage < (messageCount - entryCount); ++nMessage)
     {
-        BOOST_CHECK(connection.hasMemoryAvailable());
-        BOOST_CHECK(connection.allocate(message));
+        messages.emplace_back(connection);
     }
-    BOOST_CHECK(! connection.hasMemoryAvailable());
-    BOOST_CHECK(!connection.allocate(message));
 
     // peek inside
     auto header = connection.getHeader();
@@ -44,5 +40,5 @@ BOOST_AUTO_TEST_CASE(testIvConnectionMessages)
     BOOST_CHECK_EQUAL(*readPosition, *publishPosition);
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 }
-#endif //  DISABLE_testIvConnectionMessages
+#endif //  DISABLE_testIvMemoryPoolMessages
 

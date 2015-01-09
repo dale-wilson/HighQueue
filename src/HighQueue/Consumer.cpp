@@ -1,4 +1,4 @@
-/// @file Connection.cpp
+/// @file Consumer.cpp
 #include <Common/HighQueuePch.h>
 #include "Consumer.h"
 #include <HighQueue/details/HQReservePosition.h>
@@ -19,7 +19,7 @@ Consumer::Consumer(Connection & connection)
 {
 }
 
-bool Consumer::tryGetNext(HighQueue::Message & message)
+bool Consumer::tryGetNext(Message & message)
 {
     while(true)
     {
@@ -46,16 +46,17 @@ bool Consumer::tryGetNext(HighQueue::Message & message)
 
 }
 
-void Consumer::getNext(HighQueue::Message & message)
+bool Consumer::getNext(Message & message)
 {
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;
     size_t remainingSleeps = sleeps_;
+    // todo: check for shutting down and return false
     while(true)
     {
         if(tryGetNext(message))
         {
-            return;
+            return true;
         }
         if(remainingSpins > 0)
         {
@@ -85,14 +86,14 @@ void Consumer::getNext(HighQueue::Message & message)
             std::unique_lock<std::mutex> guard(header_->consumerWaitMutex_);
             if(tryGetNext(message))
             {
-                return;
+                return true;
             }
             if(header_->consumerWaitConditionVariable_.wait_for(guard, waitStrategy_.mutexWaitTimeout_)
                 == std::cv_status::timeout)
             {
                 if(tryGetNext(message))
                 {
-                    return;
+                    return true;
                 }
                 // todo: define a better exception
                 throw std::runtime_error("Consumer wait timeout.");

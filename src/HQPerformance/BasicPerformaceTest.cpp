@@ -24,16 +24,14 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 
     Producer producer(connection);
     Consumer consumer(connection);
-    HighQueue::Message producerMessage;
-    connection.allocate(producerMessage);
-    HighQueue::Message consumerMessage;
-    connection.allocate(consumerMessage);
+    Message producerMessage(connection);
+    Message consumerMessage(connection);
 
     Stopwatch timer;
 
     for(uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
-        producerMessage.construct<ActualMessage>(1, nMessage);
+        producerMessage.emplace<ActualMessage>(1, nMessage);
         producer.publish(producerMessage);
     }
     auto publishTime = timer.microseconds();
@@ -78,16 +76,14 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     Producer producer(connection);
     Consumer consumer(connection);
-    HighQueue::Message producerMessage;
-    connection.allocate(producerMessage);
-    HighQueue::Message consumerMessage;
-    connection.allocate(consumerMessage);
+    Message producerMessage(connection);
+    Message consumerMessage(connection);
 
     Stopwatch timer;
 
     for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        producerMessage.construct<ActualMessage>(1, messageNumber);
+        producerMessage.emplace<ActualMessage>(1, messageNumber);
         producer.publish(producerMessage);
         consumer.getNext(consumerMessage);
         auto testMessage = consumerMessage.get<ActualMessage>();
