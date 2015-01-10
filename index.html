@@ -65,10 +65,17 @@ Each HSQueue instance supports multiple Producers, but only a single Consumer.</
 <p>Absolute performance numbers are notoriously difficult to measure accurately. The results vary widely from machine to machine.</p>
 
 <p>That being said, tests on an Intel(R) Core(TM) i7-4790 CPU @3.60GHz [8 cores] with one producer and one consumer
-show sustained throughput is around 16.6 million messages/second.  This translates to around 60 nanoseconds 
-per message delivery.  It can sustain this rate up to 6 producers and one consumer.  Beyond that the threads start
+show sustained throughput is around 16.6 million messages/second.  This translates to around 60 nanoseconds per message delivery.  </p>
+
+<p>In addition to message delivery time, these measurements include the time to acquire the memory space needed to compose the next message, the time to compose the simple 88 byte message, and the time for the consumer to access the entire message after receiving it.  Many benchmarks omit these factors even though they can easily cut the delivery rate in half.</p>
+
+<p>HighQueue can sustain this delivery rate up to 6 producers and one consumer on this machine.  Beyond that the threads start
 competing with the operating system (Win7) and with each other for the available cores and throughput starts to drop.
 [With 8 producers + 1 consumer + Windows a message is delivered to the consumer thread every 145 nanoseconds.]</p>
+
+<p>As a point of comparison 60 nsec per message with an 88 byte message translates to around 11 Ghz.  Thus messages arriving over a 10 Ghz network can be easily distribute to processing threads much faster than they arrive through the network -- especially taking into account the network overhead that means a 10 Ghz network will never reach its theoretical maximum delivery speed.  </p>
+
+<p>Of course measuring this performance in Ghz can be misleading because most of the time is incurred on a per-message basis rather than per-byte or per-bit, so increasing the message size increases the GHz measurement almost linearly.  With an 800 byte message the measured bit throughput rate is 55 Ghz.</p>
 
 <p>You can generate equivalent numbers for your machine by running the MultithreadPerformanceTest which is included in the HQPerformance executable.</p>
 
