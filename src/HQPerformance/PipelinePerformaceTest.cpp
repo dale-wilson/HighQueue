@@ -9,14 +9,14 @@
 
 
 using namespace HighQueue;
-#define MATCH_PRONGHORN 0
+#define MATCH_PRONGHORN 1
 namespace
 {
     typedef TestMessage<13> ActualMessage;
 #if MATCH_PRONGHORN
     byte_t testArray[] = 
 #if 1
-    "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@";// this is Pronghorn's test message
+    "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@";// this is Pronghorn's test message
 #elif 0
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";
 #else
@@ -62,7 +62,15 @@ namespace
         }
     }
 
-    void copyFunction(Connection & inConnection, Connection & outConnection, bool passThru)
+    enum CopyType
+    {
+        PassThru,
+        BufferSwap,
+        BinaryCopy,
+        CopyConstruct
+    };
+
+    void copyFunction(Connection & inConnection, Connection & outConnection, CopyType copyType)
     {
         try
         {
@@ -72,39 +80,69 @@ namespace
             Producer producer(outConnection, true);
             Message producerMessage(outConnection);
             ++threadsReady;
-            if(passThru)
+            switch(copyType)
             {
-                while(true)
+                case PassThru:
                 {
-                    consumer.getNext(consumerMessage);
-                    auto used = consumerMessage.getUsed();
-                    producer.publish(consumerMessage);
-                    if(used == 0)
+                    while(consumer.getNext(consumerMessage))
                     {
-                        return;
+                        auto used = consumerMessage.getUsed();
+                        producer.publish(consumerMessage);
+                        if(used == 0)
+                        {
+                            return;
+                        }
                     }
+                    break;
                 }
-            }
-            else
-            {
-                while(true)
-                {
-                    consumer.getNext(consumerMessage);
-                    auto used = consumerMessage.getUsed();
-                    if(used == 0)
+                case BufferSwap:
+                    while(consumer.getNext(consumerMessage))
                     {
-                        producerMessage.setUsed(0);
+                        auto used = consumerMessage.getUsed();
+                        consumerMessage.moveTo(producerMessage);
                         producer.publish(producerMessage);
-                        return;
+                        consumerMessage.destroy<ActualMessage>();
+                        if(used == 0)
+                        {
+                            return;
+                        }
                     }
-#if MATCH_PRONGHORN
-                    producerMessage.appendBinaryCopy(consumerMessage.get(), used);
-#else // MATCH_PRONGHORN
-                    producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
-#endif // MATCH_PRONGHORN
-                    producer.publish(producerMessage);
-                    consumerMessage.destroy<ActualMessage>();
+                    break;
+                case BinaryCopy:
+                {
+                    while(consumer.getNext(consumerMessage))
+                    {
+                        auto used = consumerMessage.getUsed();
+                        producerMessage.appendBinaryCopy(consumerMessage.get(), used);
+                        producer.publish(producerMessage);
+                        consumerMessage.destroy<ActualMessage>();
+                        if(used == 0)
+                        {
+                            return;
+                        }
+                    }
+                    break;
                 }
+                case CopyConstruct:
+                {
+                    {
+                        while(consumer.getNext(consumerMessage))
+                        {
+                            auto used = consumerMessage.getUsed();
+                            if(used == 0)
+                            {
+                                producerMessage.setUsed(0);
+                                producer.publish(producerMessage);
+                                return;
+                            }
+                            producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
+                            producer.publish(producerMessage);
+                            consumerMessage.destroy<ActualMessage>();
+                        }
+                        break;
+                    }
+                }
+
             }
         }
         catch(const std::exception & ex)
@@ -122,16 +160,16 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     static const size_t copyLimit = 1;       // This you can change.
 
     static const size_t entryCount = 40000;
-    static const uint32_t targetMessageCount = 3000000; 
+    static const uint32_t targetMessageCount = 9000000; //3000000;
 
     // how many buffers do we need?
     static const size_t messageCount = entryCount + consumerLimit + copyLimit + producerLimit;
 
     static const size_t spinCount = 10000;
     static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
-    bool passThru = false;
+    CopyType copyType = BinaryCopy;
 
-    std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << (passThru?"+":"") << " stage: ";
+    std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << " stage. Copy type: " << copyType << ": ";
 
     ConsumerWaitStrategy strategy(spinCount, yieldCount);
     CreationParameters parameters(strategy, entryCount, messageBytes, messageCount);
@@ -161,7 +199,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         threads.emplace_back(std::bind(copyFunction,
             std::ref(*connections[nCopy - 1]),
             std::ref(*connections[nCopy]),
-            passThru)
+            copyType)
             );
     }
 
