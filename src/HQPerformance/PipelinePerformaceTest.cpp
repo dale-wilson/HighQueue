@@ -9,11 +9,12 @@
 
 
 using namespace HighQueue;
-#define MATCH_PRONGHORN 1
+#define USE_PRONGHORN_MESSAGE 1
+#define VALIDATE_OUTPUT 0
 namespace
 {
     typedef TestMessage<13> ActualMessage;
-#if MATCH_PRONGHORN
+#if USE_PRONGHORN_MESSAGE
     byte_t testArray[] = 
 #if 1
     "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@";// this is Pronghorn's test message
@@ -23,9 +24,9 @@ namespace
     "";
 #endif
     auto messageBytes = sizeof(testArray);
-#else // MATCH_PRONGHORN
+#else // USE_PRONGHORN_MESSAGE
     auto messageBytes = sizeof(ActualMessage);
-#endif // MATCH_PRONGHORN
+#endif // USE_PRONGHORN_MESSAGE
 
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
@@ -45,11 +46,11 @@ namespace
 
             for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
             {
-#if MATCH_PRONGHORN
+#if USE_PRONGHORN_MESSAGE
                 producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
-#else // MATCH_PRONGHORN
+#else // USE_PRONGHORN_MESSAGE
                 auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
-#endif //MATCH_PRONGHORN
+#endif //USE_PRONGHORN_MESSAGE
                 producer.publish(producerMessage);
             }
             // send an empty message
@@ -115,7 +116,6 @@ namespace
                         auto used = consumerMessage.getUsed();
                         producerMessage.appendBinaryCopy(consumerMessage.get(), used);
                         producer.publish(producerMessage);
-                        consumerMessage.destroy<ActualMessage>();
                         if(used == 0)
                         {
                             return;
@@ -159,20 +159,25 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     static const size_t copyLimit = 1;       // This you can change.
 
-    static const size_t entryCount = 40000;
-    static const uint32_t targetMessageCount = 9000000; //3000000;
+    static const size_t entryCount = 1000;
+    static const uint32_t targetMessageCount = 100000000; //3000000;
+
+    static const size_t queueCount = copyLimit + consumerLimit; // need a pool for each object that can receive messages
 
     // how many buffers do we need?
-    static const size_t messageCount = entryCount + consumerLimit + copyLimit + producerLimit;
+    static const size_t messageCount = entryCount * queueCount + consumerLimit + 2 * copyLimit + producerLimit;
 
     static const size_t spinCount = 10000;
     static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
-    CopyType copyType = BinaryCopy;
+    CopyType copyType = PassThru;
+                      // BufferSwap;
+                      // BinaryCopy;
 
     std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << " stage. Copy type: " << copyType << ": ";
 
     ConsumerWaitStrategy strategy(spinCount, yieldCount);
-    CreationParameters parameters(strategy, entryCount, messageBytes, messageCount);
+    CreationParameters parameters(strategy, entryCount, messageBytes);
+    MemoryPoolPtr memoryPool(new MemoryPool(messageBytes, messageCount));
 
     std::vector<std::shared_ptr<Connection> > connections;
     for(size_t nConn = 0; nConn < copyLimit + consumerLimit; ++nConn)
@@ -181,7 +186,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         connections.push_back(connection);
         std::stringstream name;
         name << "Connection " << nConn;
-        connection->createLocal(name.str(), parameters);
+        connection->createLocal(name.str(), parameters, memoryPool);
     }
 
     // The consumer listens to the last connection
@@ -219,9 +224,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     for(uint64_t messageNumber = 0; messageNumber < targetMessageCount; ++messageNumber)
     {
         consumer.getNext(consumerMessage);
-#if MATCH_PRONGHORN 
-        // Pronghorn final stage ignores incoming data.
-#else // MATCH_PRONGHORN
+#if VALIDATE_OUTPUT 
         auto testMessage = consumerMessage.get<ActualMessage>();
         testMessage->touch();
         if(nextMessage != testMessage->messageNumber())
@@ -231,7 +234,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         }
         consumerMessage.destroy<ActualMessage>();
         ++ nextMessage;
-#endif // MATCH_PRONGHORN
+#endif // VALIDATE_OUTPUT
     }
 
     auto lapse = timer.nanoseconds();
@@ -251,10 +254,12 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
         << std::endl;
 
+#ifdef THIS_IS_NOT_NECESSARY_WHEN_USING_AN_EXTERNAL_MEMORY_POOL
     // for connections that may share messages (i.e. passThru), close them all before any go out of scope
     // to avoid releasing buffers into pools that have been deleted.
     for (const auto & connection : connections)
     {
         connection->close();
     }
+#endif // external memory pool
 }

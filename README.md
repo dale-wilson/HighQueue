@@ -33,7 +33,8 @@ You can generate equivalent numbers for your machine by running the MultithreadP
 <em>Your Mileage Will Vary!</em>
 
 ##Client API
-The HighQueue API consists of the public interfaces of four primary classes:   Message, Connection, Consumer, and Producer.  Two additional classes, CreationParameters and ConsumerWaitStrategy are used to initialize the HighQueue.
+The HighQueue API consists of the public interfaces of four primary classes:   Message, Connection, Consumer, and Producer.  
+Three additional classes, CreationParameters, ConsumerWaitStrategy, and MemoryPool, are used to initialize the HighQueue.
 ###Start with a Connection
 A Connection provides access to a HighQueue.  A Connection may be used to create an initialize a new HighQueue, or it may be used to attach to an existing HighQueue (presumably in shared memory.)  Once the HighQueue is created or located, the Connection can be used to initialize Producer and Consumer clients.
 
@@ -42,11 +43,22 @@ A Connection provides access to a HighQueue.  A Connection may be used to create
   *	If the Connection will be used to create a new HighQueue:
     *	Construct a ConsumerWaitStrategy which specifies how Consumers wait for messages
     *	Construct a CreationParameters object containing the ConsumerWaitStrategy and other configuration information such as the number of messages that can be queued, the maximum size of a message, etc.
-      *	Note that for performance reasons HighQueue does not do any dynamic memory allocation.  Thus it must be configured properly at initialization time to achieve the best performance.
-    *	Call Connection::createLocal() or Connection::createOrOpenShared().
+		* Note that for performance reasons HighQueue does not do any dynamic memory allocation.  Thus it must be configured properly at initialization time to achieve the best performance.
+	*   Optionally create a MemoryPool to manage the memory used by Messages.
+    *	Call Connection::createLocal() or Connection::createOrOpenShared() passing in the CreationParameters and the optional MemoryPool.
+		* If you don't supply a MemoryPool, the Connection will create one based on values from the CreationParameters.  
+		* The reasons for explicitly creating a MemoryPool rather than letting the Connection create one will be described below. 
   *	If the Connection will be used only to locate an existing HighQueue in shared memory
     *	Call Connection::openExistingShared();
 
+```C++
+    ConsumerWaitStrategy strategy(spinCount, yieldCount); 
+    CreationParameters parameters(strategy, entryCount, messageBytes);
+    MemoryPoolPtr memoryPool(new MemoryPool(messageBytes, messageCount));
+    Connection connection;
+	connection->createLocal("HighQueue Name", parameters, memoryPool);   
+```
+	
 This Connection object may now be used to create a Consumer and one or more Producers.
 
 ###To Add a Consumer
@@ -64,6 +76,11 @@ This Connection object may now be used to create a Consumer and one or more Prod
   *	Use methods on the Message to access the information from the message.
   *	When the consumer no longer needs the contents of a message, it can simply reuse the message for the next tryGetNext() or getNext() call.
 
+```C++
+    Consumer consumer(connection);
+    Message consumerMessage(connection);
+```  
+  
 ###To Add One or More Producers
   *	Construct a Producer passing the Connection as the contruction argument.
   *	Construct a Message passing the Connection as an argument.
@@ -72,6 +89,11 @@ This Connection object may now be used to create a Consumer and one or more Prod
     *	Several methods on the Message make this easy and type-safe.  These methods will be described later.
   *	Publish the message by calling the Producer::publish(Message &); method.
     *	When the publish() method returns, the Message will be empty, ready to be populated with the next message.
+
+```C++
+    Producer producer(connection);
+    Message producerMessage(connection);
+```  
 
 ##Populating a Message Before Publishing it
 At any particular time a Message object owns a block of memory.  The Producer client should populate
@@ -88,11 +110,11 @@ construct the object in place.   [This is similar to the emplace_back() operaton
 
 A typical use might look like:
 ```C++
-   while(! stopping)
+	while(! stopping)
    {
-        auto myObject = message.emplace<MyClass>(construction arguments go here);
+        auto myObject = producerMessage.emplace<MyClass>(construction arguments go here);
         myObject.addAdditionalInformationAsNecessary(additional info);
-        producer.publish(message);
+        producer.publish(producerMessage);
    }
 ```
 
@@ -113,11 +135,11 @@ For example:
 ```C++
     while(! stopping)
     {
-        auto buffer = message.get();
-        auto size = message.available();
+        auto buffer = producerMessage.get();
+        auto size = producerMessage.available();
         auto bytesRead = DataSource::read(buffer, size);
-        message.setUsed(bytesRead);
-        producer.publish(message);
+        producerMessage.setUsed(bytesRead);
+        producer.publish(producerMessage);
     }
 ```
 
@@ -135,8 +157,8 @@ You could populate the message like this:
    while(! stopping)
    {
         const std::string & msg = getSomeDataToSend();
-        message.appendBinaryCopy(msg.data(), msg.size());
-        producer.publish(message);
+        producerMessage.appendBinaryCopy(msg.data(), msg.size());
+        producer.publish(producerMessage);
    }
 ```
 
@@ -165,21 +187,21 @@ residing in the buffer.  This is the most effective way to access incoming data.
 
 Example:
 ```C++
-   while(consumer.getNext(message))
+   while(consumer.getNext(consumerMessage))
    {
-        auto myObject = message.cast&lt;MyClass&gt>();
+        auto myObject = consumerMessage.cast&lt;MyClass&gt>();
         myObject.doSomethingInteresting(); // or
         doSomethingInteresting(myObject);
-        message.delete&lt;myObject&gt;(); // optional: calls the objects destructor if necessary.
+        consumerMessage.delete&lt;myObject&gt;(); // optional: calls the objects destructor if necessary.
    }
 ```
 
 ###Accessing binary data
 ```C++
-    while(consumer.getNext(message))
+    while(consumer.getNext(consumerMessage))
     {
-        auto bytePointer = message.get();
-        auto size = message.getUsed();
+        auto bytePointer = consumerMessage.get();
+        auto size = consumerMessage.getUsed();
         doSomethingInteresting(bytePointer, size);
         // no need to delete binary data, just be sure it is no longer needed
         // before the next call to consumer.getNext();

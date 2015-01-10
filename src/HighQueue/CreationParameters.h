@@ -18,13 +18,14 @@ namespace HighQueue
         /// @brief What is the minimum size of a message (will be rounded up to the next cache line boundary)
         size_t messageSize_;
         /// @brief What is the minimum number of messages needed (one extra may be allocated just because...)
+        /// Not needed when an external memory pool will be used.
         size_t messageCount_;
 
         CreationParameters(
             const ConsumerWaitStrategy & strategy_,
             size_t entryCount,
             size_t messageSize,
-            size_t messageCount
+            size_t messageCount = 0
             )
             : strategy_(strategy_)
             , entryCount_(entryCount)

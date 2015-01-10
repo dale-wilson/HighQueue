@@ -8,7 +8,7 @@
 #include <HQPerformance/TestMessage.h>
 
 using namespace HighQueue;
-typedef TestMessage<20> ActualMessage;
+typedef TestMessage<13> ActualMessage;
 
 namespace
 {
@@ -41,6 +41,57 @@ namespace
         }
     }
 }
+
+
+#define DISABLE_ST_PERFORMANCEx
+#ifndef DISABLE_ST_PERFORMANCE
+BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
+{
+    ConsumerWaitStrategy strategy;
+    size_t entryCount = 262144 / 2; // <- thats the number of messages in the primaryRingBuffer in the pronghorn test //100000;
+    size_t messageSize = sizeof(ActualMessage);
+    size_t messagesNeeded = entryCount + 10;
+    uint64_t messageCount = 1000000 * 100;
+
+    CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
+    Connection connection;
+    connection.createLocal("LocalIv", parameters);
+
+
+    Producer producer(connection);
+    Consumer consumer(connection);
+    Message producerMessage(connection);
+    Message consumerMessage(connection);
+
+    std::cout << "Single threaded: ";
+
+    Stopwatch timer;
+
+    for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
+    {
+        producerMessage.emplace<ActualMessage>(1, messageNumber);
+        producer.publish(producerMessage);
+        consumer.getNext(consumerMessage);
+        auto testMessage = consumerMessage.get<ActualMessage>();
+        if(messageNumber != testMessage->messageNumber())
+        {
+            // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
+            BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber());
+        }
+    }
+    auto lapse = timer.nanoseconds();
+    auto messageBytes = sizeof(ActualMessage);
+    auto messageBits = sizeof(ActualMessage) * 8;
+    std::cout << "Passed " << messageCount << ' ' << messageBytes << " byte messages in "
+        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
+        << lapse / messageCount << " nsec./message "
+        << std::setprecision(3) << double(messageCount) / double(lapse) << " GMsg/second "
+        << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
+        << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
+        << std::endl;
+}
+#endif // DISABLE_ST_PERFORMANCE
+
 
 #define DISABLE_MultithreadMessagePassingPerformancex
 #ifdef DISABLE_MultithreadMessagePassingPerformance
