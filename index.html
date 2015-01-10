@@ -19,7 +19,7 @@
 
         <header>
           <h1>HighQueue</h1>
-          <h2>A Queue for High Speed message passing between threads, processes, or other components.</h2>
+          <h2>A Queue for High Performance message passing between threads, processes, or other components.</h2>
         </header>
 
         <section id="downloads" class="clearfix">
@@ -35,10 +35,10 @@
 <a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h1>
 
 <blockquote>
-<p>IMPORTANT: This is under construction.  It works but it is not ready for critical applications, yet.</p>
+<p>IMPORTANT: This is beta. Please test it, but remember it is not ready for critical applications, yet.</p>
 </blockquote>
 
-<p>A High Speed Queue (HSQ) is a mechanism for message passing between components of a system.  It is most often used to pass messages between two or more threads in the same process, but it can also be used for intra-process communication by putting the HSQueue in shared memory. </p>
+<p>A High Performance Queue (HighQueue) is a mechanism for message passing between components of a system.  It is most often used to pass messages between two or more threads in the same process, but it can also be used for intra-process communication by putting the HighQueue in shared memory. </p>
 
 <pre><code>  The HighQueue Haiku
 
@@ -50,13 +50,13 @@
 <h2>
 <a id="clients" class="anchor" href="#clients" aria-hidden="true"><span class="octicon octicon-link"></span></a>Clients</h2>
 
-<p>HSQueue clients can be either a Publisher or a Consumer.</p>
+<p>HighQueue clients can be either a Publisher or a Consumer.</p>
 
 <ul>
-<li>Producers create and publish data into the HSQueue.<br>
+<li>Producers create and publish data into the HighQueue.<br>
 </li>
-<li>Consumers accept and process data from the HSQueue.
-Each HSQueue instance supports multiple Producers, but only a single Consumer.</li>
+<li>Consumers accept and process data from the HighQueue.
+Each HighQueue instance supports multiple Producers, but only a single Consumer.</li>
 </ul>
 
 <h2>
