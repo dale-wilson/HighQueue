@@ -29,8 +29,8 @@ project(*) {
   }
 
   specific(make) {
-    // Enable full optimization on gcc/linux
-    Release::genflags += -O3  -std=c++11 
+    // Enable full optimization  w/ debug symbols and C++11 support on gcc/linux
+    Release::genflags += -O3 -g -std=c++11 
   }
 }
 
@@ -51,7 +51,7 @@ project(*test) : boost_unit_test_framework, boost_base, boost_filesystem, boost_
   }
   specific(make) {
     // Enable full optimization on gcc/linux
-    Release::genflags += -O3 -std=c++11
+    Release::genflags += -O3 -g -std=c++11
   }
 
   // TODO: What to do about boost 32 bit builds?
@@ -89,7 +89,7 @@ project(*performance) : boost_unit_test_framework, boost_base, boost_filesystem,
   }
    specific(make) {
     // Enable full optimization on gcc/linux
-    Release::genflags += -O3 -std=c++11
+    Release::genflags += -O3 -g -std=c++11
   }
 
   // TODO: What to do about boost 32 bit builds?
