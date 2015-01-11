@@ -1,6 +1,6 @@
 workspace(*) {
   cmdline += -feature_file HighQueue.features
-  cmdline += -expand_vars
+  // cmdline += -expand_vars
   src/HighQueue.mpc
 
   specific(make) {

@@ -30,7 +30,7 @@ project(*) {
 
   specific(make) {
     // Enable full optimization on gcc/linux
-    Release::genflags += -O3
+    Release::genflags += -O3  -std=c++11 
   }
 }
 
@@ -49,6 +49,11 @@ project(*test) : boost_unit_test_framework, boost_base, boost_filesystem, boost_
     libpaths += $(HighQueue_ROOT)/lib
     exeout = $(HighQueue_ROOT)/bin
   }
+  specific(make) {
+    // Enable full optimization on gcc/linux
+    Release::genflags += -O3 -std=c++11
+  }
+
   // TODO: What to do about boost 32 bit builds?
   libpaths -= $(BOOST_ROOT)/lib
   libpaths += $(BOOST_LIB_PATH)
@@ -82,6 +87,11 @@ project(*performance) : boost_unit_test_framework, boost_base, boost_filesystem,
     libpaths += $(HighQueue_ROOT)/lib
     exeout = $(HighQueue_ROOT)/bin
   }
+   specific(make) {
+    // Enable full optimization on gcc/linux
+    Release::genflags += -O3 -std=c++11
+  }
+
   // TODO: What to do about boost 32 bit builds?
   libpaths -= $(BOOST_ROOT)/lib
   libpaths += $(BOOST_LIB_PATH)
