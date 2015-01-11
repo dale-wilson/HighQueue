@@ -1,6 +1,10 @@
+#linux
 Makefile*
 *.o
 *.gch
+/bin
+/lib
+#Windows
 Debug/
 Release/
 x64/
