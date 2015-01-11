@@ -4,7 +4,7 @@
 #include <Common/HighQueuePch.h>
 
 #include "Message.h"
-#include <HighQueue/details/HQMemoryBLockPool.h>
+#include <HighQueue/details/HQMemoryBlockPool.h>
 
 using namespace HighQueue;
 
@@ -19,7 +19,7 @@ Message::~Message()
     }
 }
 
-void Message::set(HQMemoryBLockPool * container, size_t capacity, size_t offset, size_t used)
+void Message::set(HQMemoryBlockPool * container, size_t capacity, size_t offset, size_t used)
 {
     container_ = reinterpret_cast<byte_t *>(container);
     capacity_ = (capacity == 0) ? used : capacity;
@@ -41,7 +41,7 @@ void Message::release()
 {
     if(container_ != 0)
     {
-        auto pool = reinterpret_cast<HQMemoryBLockPool *>(container_);
+        auto pool = reinterpret_cast<HQMemoryBlockPool *>(container_);
         pool->release(*this);
     }
 }

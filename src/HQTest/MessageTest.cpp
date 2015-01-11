@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <HighQueue/Message.h>
-#include <HighQueue/details/HQMemoryBLockPool.h>
+#include <HighQueue/details/HQMemoryBlockPool.h>
 
 using namespace HighQueue;
 
@@ -23,9 +23,9 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     static const size_t messageSize = sizeof(alphabet);
     static const size_t messageCount = 2;
  
-    auto bytesNeeded = HQMemoryBLockPool::spaceNeeded(messageSize, messageCount);
+    auto bytesNeeded = HQMemoryBlockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
-    auto pool = new (block.get()) HQMemoryBLockPool(bytesNeeded, messageSize);
+    auto pool = new (block.get()) HQMemoryBlockPool(bytesNeeded, messageSize);
 
     Message message1(*pool);
     BOOST_CHECK_EQUAL(message1.getUsed(), 0u);
@@ -97,9 +97,9 @@ BOOST_AUTO_TEST_CASE(testMessageAppend)
 {
     static const size_t messageSize = alphabet.size();
     static const size_t messageCount = 2;
-    auto bytesNeeded = HQMemoryBLockPool::spaceNeeded(messageSize, messageCount);
+    auto bytesNeeded = HQMemoryBlockPool::spaceNeeded(messageSize, messageCount);
     std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
-    auto pool = new (block.get()) HQMemoryBLockPool(bytesNeeded, messageSize);
+    auto pool = new (block.get()) HQMemoryBlockPool(bytesNeeded, messageSize);
 
     Message message(*pool);
 

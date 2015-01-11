@@ -6,9 +6,9 @@
 using namespace HighQueue;
 
 MemoryPool::MemoryPool(size_t blockSize, size_t count)
-    : allocatedSize_(HQMemoryBLockPool::spaceNeeded(blockSize, count) + CacheLineSize)
+    : allocatedSize_(HQMemoryBlockPool::spaceNeeded(blockSize, count) + CacheLineSize)
     , memory_(new byte_t[allocatedSize_])
-    , pool_(*new (memory_.get()) HQMemoryBLockPool(allocatedSize_, blockSize))
+    , pool_(*new (memory_.get()) HQMemoryBlockPool(allocatedSize_, blockSize))
 {
 }
 

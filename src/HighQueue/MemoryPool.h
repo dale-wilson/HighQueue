@@ -4,7 +4,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include "MemoryPoolFwd.h"
-#include <HighQueue/details/HQMemoryBLockPool.h>
+#include <HighQueue/details/HQMemoryBlockPool.h>
 #include <HighQueue/MessageFwd.h>
 
 namespace HighQueue
@@ -30,7 +30,7 @@ namespace HighQueue
         /// @brief Get the capacity of each block in this pool
         size_t getBlockCapacity()const;
 
-        HQMemoryBLockPool & getPool()
+        HQMemoryBlockPool & getPool()
         {
             return pool_;
         }
@@ -38,7 +38,7 @@ namespace HighQueue
     private:
         size_t allocatedSize_;
         std::shared_ptr<byte_t> memory_;
-        HQMemoryBLockPool & pool_;
+        HQMemoryBlockPool & pool_;
 
 
     };

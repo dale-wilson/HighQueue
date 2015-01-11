@@ -31,8 +31,8 @@ namespace HighQueue
             const std::string & name, 
             HQAllocator & allocator, 
             const CreationParameters & parameters,
-            HQMemoryBLockPool * pool = 0);
-        void allocateInternalMessages(HQMemoryBLockPool * pool);
+            HQMemoryBlockPool * pool = 0);
+        void allocateInternalMessages(HQMemoryBlockPool * pool);
         void releaseInternalMessages();
     };
 }

@@ -5,7 +5,7 @@
 
 #include <Common/HighQueue_Export.h>
 #include "MessageFwd.h"
-#include <HighQueue/details/HQMemoryBLockPoolFwd.h>
+#include <HighQueue/details/HQMemoryBlockPoolFwd.h>
 namespace HighQueue
 {
     /// @brief A handle for a block of memory
@@ -99,7 +99,7 @@ namespace HighQueue
         template <typename T = byte_t>
         T* appendBinaryCopy(const T * data, size_t count);
 
-        /// @brief Associate a memory block from a HQMemoryBLockPool with this message.
+        /// @brief Associate a memory block from a HQMemoryBlockPool with this message.
         /// The block of data is general purpose.  It can be written to and reused as necessary.
         /// Normally this is only called once per message.  The message continues to use the same memory for its
         /// entire lifetime.  This is a typical use, not a requirement.
@@ -107,7 +107,7 @@ namespace HighQueue
         /// @param capacity  The capacity of this message
         /// @param offset The offset to this message within the pool
         /// @param used The number of bytes used
-        void set(HQMemoryBLockPool * pool, size_t capacity, size_t offset, size_t used = 0);
+        void set(HQMemoryBlockPool * pool, size_t capacity, size_t offset, size_t used = 0);
 
         /// @brief Undo a set.  Return the memory to the pool (if any), and make the message Invalid.
         void release();

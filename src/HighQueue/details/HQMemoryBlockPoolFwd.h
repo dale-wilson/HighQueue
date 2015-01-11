@@ -5,6 +5,6 @@
 
 namespace HighQueue
 {
-    struct HQMemoryBLockPool;
+    struct HQMemoryBlockPool;
 }
 
