@@ -45,7 +45,7 @@ namespace HighQueue
         template<typename IntegerType>
         static IntegerType align(IntegerType offset, size_t alignment = CacheLineSize)
         {
-            return (alignment <=  1) ? offset : Offset(((offset + alignment - 1) / alignment) * alignment);
+            return (alignment <= 1) ? offset : IntegerType(((offset + alignment - 1) / alignment) * alignment);
         }
 
         /// @brief A helper method to align a pointer.
