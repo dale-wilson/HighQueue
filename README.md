@@ -5,7 +5,7 @@ A Queue for High Speed message passing between threads, processes, or other comp
   The HighQueue Haiku
 
   To send messages
-  Quickly use clean code and a
+  So quickly you must use a
   Good algorithm.
 ```
 
