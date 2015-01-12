@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     static const size_t copyLimit = 1;       // This you can change.
 
-    static const size_t entryCount = 1000;
+    static const size_t entryCount = 10000;
     static const uint32_t targetMessageCount = 100000000; //3000000;
 
     static const size_t queueCount = copyLimit + consumerLimit; // need a pool for each object that can receive messages
@@ -167,15 +167,17 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     // how many buffers do we need?
     static const size_t messageCount = entryCount * queueCount + consumerLimit + 2 * copyLimit + producerLimit;
 
-    static const size_t spinCount = 10000;
-    static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
-    CopyType copyType = PassThru;
+    static const size_t spinCount = 0;
+    static const size_t yieldCount = 0;//1;//100;
+    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    static const std::chrono::nanoseconds sleepPeriod(2);
+    CopyType copyType = BinaryCopy;
                       // BufferSwap;
                       // BinaryCopy;
 
     std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << " stage. Copy type: " << copyType << ": ";
 
-    ConsumerWaitStrategy strategy(spinCount, yieldCount);
+    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
     CreationParameters parameters(strategy, entryCount, messageBytes);
     MemoryPoolPtr memoryPool(new MemoryPool(messageBytes, messageCount));
 
@@ -254,6 +256,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
         << std::endl;
 
+    consumer.writeStats(std::cerr);
 #ifdef THIS_IS_NOT_NECESSARY_WHEN_USING_AN_EXTERNAL_MEMORY_POOL
     // for connections that may share messages (i.e. passThru), close them all before any go out of scope
     // to avoid releasing buffers into pools that have been deleted.

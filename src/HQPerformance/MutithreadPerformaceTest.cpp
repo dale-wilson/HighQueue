@@ -15,7 +15,7 @@ namespace
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
 
-    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo)
+    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo, std::ostream & stats)
     {
         try
         {
@@ -33,6 +33,7 @@ namespace
                 auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
                 producer.publish(producerMessage);
             }
+            producer.writeStats(stats);
         }
         catch(const std::exception & ex)
         {
@@ -103,14 +104,19 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t messageSize = sizeof(ActualMessage);
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
-    static const size_t producerLimit = 8; // running on 8 core system.  Once we go over 7 producers it slows down.  That's one thing we want to see.
+    static const size_t coreCount = std::thread::hardware_concurrency();
+    static const size_t producerLimit = coreCount == 1 ? coreCount : coreCount -1; // Performance drops off severely when competing for cores.
+                                                                                   // This is worth measauring, but not everytime.
+                                                                                   // You can see the beginning of the effect using this number because
+                                                                                   // the threads start competing with Windows itself for the last core.
     static const size_t consumerLimit = 1;  // Just for documentation
     static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
 
     static const size_t spinCount = 0;
-    static const size_t yieldCount = ConsumerWaitStrategy::FOREVER;
-
-    ConsumerWaitStrategy strategy(spinCount, yieldCount);
+    static const size_t yieldCount = 199;
+    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    
+    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount);
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
     Connection connection;
     connection.createLocal("LocalIv", parameters);
@@ -120,10 +126,9 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     for(size_t producerCount = 1; producerCount <= producerLimit; ++producerCount)
     {
-        std::cerr << "Test " << producerCount << " producer";
-
         std::vector<std::thread> producerThreads;
-        std::vector<uint64_t> nextMessage;
+        std::vector<uint64_t> nextMessage(producerCount, 0ULL);
+        std::vector<std::stringstream> stats(producerCount);
 
         threadsReady = 0;
         producerGo = false;
@@ -132,9 +137,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
         for(uint32_t nTh = 0; nTh < producerCount; ++nTh)
         {
-            nextMessage.emplace_back(0u);
             producerThreads.emplace_back(
-                std::bind(producerFunction, std::ref(connection), nTh, perProducer, producerCount == 1));
+                std::bind(producerFunction, std::ref(connection), nTh, perProducer, producerCount == 1, std::ref(stats[nTh])));
         }
         std::this_thread::yield();
 
@@ -172,6 +176,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
         auto messageBytes = sizeof(ActualMessage);
         auto messageBits = sizeof(ActualMessage) * 8;
+        std::cerr << "Test " << producerCount << " producer";
         std::cout << " Passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
             << lapse / actualMessageCount << " nsec./message "
@@ -179,6 +184,12 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             << std::setprecision(3) << double(actualMessageCount * messageBytes) / double(lapse) << " GByte/second "
             << std::setprecision(3) << double(actualMessageCount * messageBits) / double(lapse) << " GBit/second."
             << std::endl;
+        for(auto & out : stats)
+        {
+            std::cerr << "Producer: " << out.str();
+        }
+        std::cerr << "Consumer: ";
+        consumer.writeStats(std::cerr);
     }
 }
 #endif // DISABLE_MultithreadMessagePassingPerformance

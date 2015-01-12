@@ -43,6 +43,10 @@ namespace HighQueue
         /// @returns true unless shutting down.
         /// Note: uses the ConsumerWaitStrategy to wait.
         bool getNext(Message & message);
+
+        /// @brief for diagnosing and performance measurements, dump statistics
+        std::ostream & writeStats(std::ostream & out)const;
+
     private:
         Connection & connection_;
         HQHeader * header_;
@@ -55,5 +59,11 @@ namespace HighQueue
         size_t spins_;
         size_t yields_;
         size_t sleeps_;
+        uint64_t statGets_;
+        uint64_t statTrys_;
+        uint64_t statSpins_;
+        uint64_t statYields_;
+        uint64_t statSleeps_;
+        uint64_t statWaits_;
 	};
 }

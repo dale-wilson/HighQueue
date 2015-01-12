@@ -16,11 +16,18 @@ Consumer::Consumer(Connection & connection)
 , spins_(waitStrategy_.spinCount_)
 , yields_(waitStrategy_.yieldCount_)
 , sleeps_(waitStrategy_.sleepCount_)
+, statGets_(0)
+, statTrys_(0)
+, statSpins_(0)
+, statYields_(0)
+, statSleeps_(0)
+, statWaits_(0)
 {
 }
 
 bool Consumer::tryGetNext(Message & message)
 {
+    ++statTrys_;
     while(true)
     {
         Position readPosition = readPosition_;
@@ -46,8 +53,14 @@ bool Consumer::tryGetNext(Message & message)
 
 }
 
+std::ostream & Consumer::writeStats(std::ostream & out)const
+{
+    return out << "Get: " << statGets_ << " Try: " << statTrys_ << " Spin: " << statSpins_ << " Yield: " << statYields_ << " Sleep: " << statSleeps_ << " Wait: " << statWaits_ << std::endl;
+}
+
 bool Consumer::getNext(Message & message)
 {
+    ++statGets_;
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;
     size_t remainingSleeps = sleeps_;
@@ -60,6 +73,7 @@ bool Consumer::getNext(Message & message)
         }
         if(remainingSpins > 0)
         {
+            ++statSpins_;
             if(remainingSpins != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingSpins;
@@ -67,6 +81,7 @@ bool Consumer::getNext(Message & message)
         }
         else if(remainingYields > 0)
         {
+            ++statYields_;
             if(remainingYields != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingYields;
@@ -75,6 +90,7 @@ bool Consumer::getNext(Message & message)
         }
         else if(remainingSleeps > 0)
         {
+            ++statSleeps_;
             if(remainingSleeps != ConsumerWaitStrategy::FOREVER)
             {
                 --remainingSleeps;
@@ -83,6 +99,7 @@ bool Consumer::getNext(Message & message)
         }
         else
         {
+            ++statWaits_;
             std::unique_lock<std::mutex> guard(header_->consumerWaitMutex_);
             if(tryGetNext(message))
             {

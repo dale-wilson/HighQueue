@@ -42,6 +42,8 @@ namespace HighQueue
         /// @param message contains the data to be published.         
         void publish(Message & message);
 
+        /// @brief for diagnosing and performance measurements, dump statistics
+        std::ostream & writeStats(std::ostream & out)const;
     private:
         uint64_t reserve();
     private:
@@ -54,5 +56,11 @@ namespace HighQueue
         volatile AtomicPosition & reservePosition_;
         volatile Position & reserveSoloPosition_;
         HighQEntryAccessor entryAccessor_;
+
+        uint64_t statFulls_;
+        uint64_t statSkips_;
+        uint64_t statWaits_;
+        uint64_t statPublishes_;
+
 	};
 }
