@@ -1,0 +1,81 @@
+// Copyright (c) 2014, 2015 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+
+//////////////////////////////
+// Build the HighQueue library
+project(MCastReceiver) {
+  sharedname = *
+  dynamicflags += MCASTRECEIVER_BUILD_DLL
+  includes += $(HighQueue_ROOT)/src $(HighQueue_ROOT)/src/Components
+  pch_header = MCastReceiver/MCastReceiverPch.h
+  pch_source = MCastReceiver/MCastReceiverPch.cpp
+
+  libs += HighQueue
+  after += HighQueue
+
+  specific(prop:microsoft) {
+    Release::libout = $(HighQueue_ROOT)/Output/Release
+    Debug::libout = $(HighQueue_ROOT)/Output/Debug
+    Release::libpaths += $(HighQueue_ROOT)/Output/Release
+    Debug::libpaths += $(HighQueue_ROOT)/Output/Debug
+  } else {
+    libpaths += $(HighQueue_ROOT)/lib
+    libout = $(HighQueue_ROOT)/lib
+  }
+
+  specific(make) {
+    // Enable full optimization  w/ debug symbols and C++11 support on gcc/linux
+    Release::genflags += -O3 -g -std=c++11 
+	Debug::genflags += g -std=c++11
+  }
+
+  Source_Files {
+	MCastReceiver
+  }
+  Header_Files {
+	MCastReceiver
+	../Common
+  }
+}
+
+////////////////////////////
+// Build the MCastReceiver tests
+project(MCastReceiverTest) : boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = MCastReceiverTest
+  includes += $(HighQueue_ROOT)/src $(HighQueue_ROOT)/src/Components
+
+  specific(prop:microsoft) {
+    Release::exeout = $(HighQueue_ROOT)/Output/Release
+    Debug::exeout = $(HighQueue_ROOT)/Output/Debug
+    Release::libpaths += $(HighQueue_ROOT)/Output/Release
+    Debug::libpaths += $(HighQueue_ROOT)/Output/Debug
+  } else {
+    libpaths += $(HighQueue_ROOT)/lib
+    exeout = $(HighQueue_ROOT)/bin
+  }
+  specific(make) {
+    // Enable full optimization on gcc/linux
+    Release::genflags += -O3 -g -std=c++11
+  }
+
+  // TODO: What to do about boost 32 bit builds?
+  libpaths -= $(BOOST_ROOT)/lib
+  libpaths += $(BOOST_LIB_PATH)
+
+  libs += HighQueue MCastReceiver
+  after += HighQueue MCastReceiver
+  
+  macros += BOOST_TEST_DYN_LINK
+  pch_header = MCastReceiver/MCastReceiverPch.h
+  pch_source = MCastReceiver/MCastReceiverPch.cpp
+	
+  Source_Files {
+	MCastReceiverTest/*.cpp
+  }
+  Header_Files {
+    MCastReceiverTest/*.h
+	../Common
+  }
+}
+
