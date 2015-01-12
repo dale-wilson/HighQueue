@@ -1,4 +1,2 @@
-Add License info to the home page.
-Test and document the shared memory pool support.
 
 Create an example application (for example: A/B-Mcast->arbitration)
