@@ -36,12 +36,11 @@ namespace HighQueue
         public:
             MulticastReceiver(
                 AsioServicePtr & ioService,
-                ConnectionPtr & connection,
-                const MulticastConfiguration & configuration
+                ConnectionPtr & connection
                 );
             ~MulticastReceiver();
 
-            bool initialize();
+            bool configure(const MulticastConfiguration & configuration);
             void start();
             void stop();
             void pause();
@@ -62,42 +61,51 @@ namespace HighQueue
 
         private:
             HeaderGenerator headerGenerator_;
+            
             AsioServicePtr ioService_;
+            boost::asio::ip::udp::socket socket_;
             ConnectionPtr connection_;
             Producer producer_;
             Message message_;
-            boost::asio::ip::address listenInterface_;
-            unsigned short portNumber_;
-            boost::asio::ip::address multicastGroup_;
-            boost::asio::ip::address bindAddress_;
-            boost::asio::ip::udp::endpoint endpoint_;
-            boost::asio::ip::udp::endpoint senderEndpoint_;
-            boost::asio::ip::udp::socket socket_;
-
-            std::shared_ptr<MulticastReceiver<HeaderGenerator> > me_;
             bool joined_;
             bool stopping_;
+
+            struct MCastInfo
+            {
+                boost::asio::ip::address listenInterface_;
+                unsigned short portNumber_;
+                boost::asio::ip::address multicastGroup_;
+                boost::asio::ip::address bindAddress_;
+                boost::asio::ip::udp::endpoint endpoint_;
+                boost::asio::ip::udp::endpoint senderEndpoint_;
+
+                MCastInfo(const MulticastConfiguration & configuration)
+                    : listenInterface_(boost::asio::ip::address::from_string(configuration.listenInterfaceIP_))
+                    , portNumber_(configuration.portNumber_)
+                    , multicastGroup_(boost::asio::ip::address::from_string(configuration.multicastGroupIP_))
+                    , bindAddress_(boost::asio::ip::address::from_string(configuration.bindIP_))
+                    , endpoint_(listenInterface_, configuration.portNumber_)
+                {
+                }
+            };
+            std::unique_ptr<MCastInfo> mcast_;
+            std::shared_ptr<MulticastReceiver<HeaderGenerator> > me_;
+
         };
 
         template<typename HeaderGenerator>
         MulticastReceiver<HeaderGenerator>::MulticastReceiver(
             AsioServicePtr & ioService,
-            ConnectionPtr & connection,
-            const MulticastConfiguration & configuration
-            )
+            ConnectionPtr & connection)
             : ioService_(ioService)
+            , socket_(*ioService_)
             , connection_(connection)
             , producer_(connection)
             , message_(connection)
-            , listenInterface_(boost::asio::ip::address::from_string(configuration.listenInterfaceIP_))
-            , portNumber_(configuration.portNumber_)
-            , multicastGroup_(boost::asio::ip::address::from_string(configuration.multicastGroupIP_))
-            , bindAddress_(boost::asio::ip::address::from_string(configuration.bindIP_))
-            , endpoint_(listenInterface_, configuration.portNumber_)
-            , socket_(*ioService_)
             , joined_(false)
             , stopping_(false)
-        {}
+        {
+        }
 
         template<typename HeaderGenerator>
         MulticastReceiver<HeaderGenerator>::~MulticastReceiver()
@@ -106,23 +114,30 @@ namespace HighQueue
         }
 
         template<typename HeaderGenerator>
-        bool MulticastReceiver<HeaderGenerator>::initialize()
+        bool MulticastReceiver<HeaderGenerator>::configure(const MulticastConfiguration & configuration)
         {
-            me_ = shared_from_this();
-            if(!joined_ && !stopping_)
+            try
             {
-                socket_.open(endpoint_.protocol());
+                 mcast_.reset(new MCastInfo(configuration));
+                socket_.open(mcast_->endpoint_.protocol());
                 socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-                boost::asio::ip::udp::endpoint bindpoint(bindAddress_, portNumber_);
+                boost::asio::ip::udp::endpoint bindpoint(mcast_->bindAddress_, mcast_->portNumber_);
                 socket_.bind(bindpoint);
 
                 // Join the multicast group
                 boost::asio::ip::multicast::join_group joinRequest(
-                    multicastGroup_.to_v4(),
-                    listenInterface_.to_v4());
+                    mcast_->multicastGroup_.to_v4(),
+                    mcast_->listenInterface_.to_v4());
                 socket_.set_option(joinRequest);
-                joined_ = true;
             }
+            catch(const std::exception & ex)
+            {
+                // todo logging
+                std::cerr << "Failed to initialize Multicast group: " << ex.what() << std::endl;
+                return false;
+            }
+            me_ = shared_from_this();
+            joined_ = true;
             return true;
         }
 
@@ -190,8 +205,8 @@ namespace HighQueue
             if(joined_)
             {
                 boost::asio::ip::multicast::leave_group leaveRequest(
-                    multicastGroup_.to_v4(),
-                    listenInterface_.to_v4());
+                    mcast_->multicastGroup_.to_v4(),
+                    mcast_->listenInterface_.to_v4());
                 socket_.set_option(leaveRequest);
                 joined_ = false;
             }
@@ -204,8 +219,8 @@ namespace HighQueue
             {
                 // rejoin the multicast group
                 boost::asio::ip::multicast::join_group joinRequest(
-                    multicastGroup_.to_v4(),
-                    listenInterface_.to_v4());
+                    mcast_->multicastGroup_.to_v4(),
+                    mcast_->listenInterface_.to_v4());
                 socket_.set_option(joinRequest);
                 joined_ = true;
             }
