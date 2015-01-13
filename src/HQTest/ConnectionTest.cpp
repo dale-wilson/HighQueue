@@ -20,10 +20,10 @@ BOOST_AUTO_TEST_CASE(testIvMemoryPoolMessages)
     size_t messageSize = 1234;
     size_t messageCount = 150;
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    Connection connection;
-    connection.createLocal("LocalIv", parameters);
+    ConnectionPtr connection = std::make_shared<Connection>();
+    connection->createLocal("LocalIv", parameters);
 
-    BOOST_CHECK_LE(messageSize, connection.getMessageCapacity());
+    BOOST_CHECK_LE(messageSize, connection->getMessageCapacity());
 
     std::vector<Message> messages;
     for(size_t nMessage = 0; nMessage < (messageCount - entryCount); ++nMessage)
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(testIvMemoryPoolMessages)
     }
 
     // peek inside
-    auto header = connection.getHeader();
+    auto header = connection->getHeader();
     HighQResolver resolver(header);
     auto readPosition = resolver.resolve<Position>(header->readPosition_);
     auto publishPosition = resolver.resolve<Position>(header->publishPosition_);

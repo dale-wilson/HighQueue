@@ -1,13 +1,12 @@
-/// @file Connection.cpp
 #include <Common/HighQueuePch.h>
 #include "Producer.h"
 #include <HighQueue/details/HQReservePosition.h>
 using namespace HighQueue;
 
-Producer::Producer(Connection & connection, bool solo)
+Producer::Producer(ConnectionPtr & connection, bool solo)
 : solo_(solo)
 , connection_(connection)
-, header_(connection.getHeader())
+, header_(connection_->getHeader())
 , entryCount_(header_->entryCount_)
 , resolver_(header_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))

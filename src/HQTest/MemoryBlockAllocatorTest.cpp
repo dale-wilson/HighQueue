@@ -22,11 +22,11 @@ BOOST_AUTO_TEST_CASE(testPoolAllocation)
 
     for(size_t nLoop = 0; nLoop < messageCount * 10; ++nLoop)
     {
-        Message message1(*pool);
-        Message message2(*pool);
-        Message message3(*pool);
-        Message message4(*pool);
-        Message message5(*pool);
+        Message message1(pool);
+        Message message2(pool);
+        Message message3(pool);
+        Message message4(pool);
+        Message message5(pool);
         (void)message5.get();
         message1.release();
         message5.release();
@@ -51,11 +51,11 @@ BOOST_AUTO_TEST_CASE(testPoolAllocator)
     auto pool = new (block.get()) HQMemoryBlockPool(blockSize, messageSize);
     for(size_t nLoop = 0; nLoop < messageCount * 10; ++nLoop)
     {
-        Message message1(*pool);
-        Message message2(*pool);
-        Message message3(*pool);
-        Message message4(*pool);
-        Message message5(*pool);
+        Message message1(pool);
+        Message message2(pool);
+        Message message3(pool);
+        Message message4(pool);
+        Message message5(pool);
         (void)message5.get();
     }
 }

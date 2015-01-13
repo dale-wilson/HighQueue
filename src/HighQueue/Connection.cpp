@@ -60,7 +60,11 @@ void Connection::createLocal(
 
 HQHeader * Connection::getHeader() const
 {
-    return header_;
+    if(header_)
+    {
+        return header_;
+    }
+    throw std::runtime_error("Using uninitialized Connection");
 }
             
 void Connection::openOrCreateShared(const std::string & name, const CreationParameters & parameters)
@@ -84,15 +88,27 @@ size_t Connection::spaceNeededForHeader(const CreationParameters & parameters)
 
 void Connection::allocate(Message & message)
 {
+    if(!memoryPool_)
+    {
+        throw std::runtime_error("Using uninitialized Connection");
+    }
     memoryPool_->allocate(message);
 }
 
 bool Connection::tryAllocate(Message & message)
 {
+    if(!memoryPool_)
+    {
+        throw std::runtime_error("Using uninitialized Connection");
+    }
     return memoryPool_->tryAllocate(message);
 }
 
 size_t Connection::getMessageCapacity()const
 {
+    if(!memoryPool_)
+    {
+        throw std::runtime_error("Using uninitialized Connection");
+    }
     return memoryPool_->getBlockCapacity();
 }

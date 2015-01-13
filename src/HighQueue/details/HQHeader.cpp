@@ -70,7 +70,7 @@ void HQHeader::allocateInternalMessages(HQMemoryBlockPool * pool)
     for(size_t nEntry = 0; nEntry < entryCount_; ++nEntry)
     {
         HighQEntry & entry = entryPointer[nEntry];
-        new (&entry) HighQEntry(*pool);
+        new (&entry) HighQEntry(pool);
     }
 }
 
