@@ -1,0 +1,11 @@
+project {
+  includes += $(HighQueue_ROOT)/src
+
+  specific(make) {
+    // Enable full optimization on gcc/linux
+    Release::genflags += -O3 -g -std=c++11
+	Debug::genflags += -g -std=c++11
+  }
+  
+
+}

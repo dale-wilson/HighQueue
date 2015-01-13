@@ -1,0 +1,14 @@
+project : boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  macros += BOOST_TEST_DYN_LINK
+
+  specific(prop:microsoft) {
+    Release::exeout = $(HighQueue_ROOT)/Output/Release
+    Debug::exeout = $(HighQueue_ROOT)/Output/Debug
+  } else {
+    exeout = $(HighQueue_ROOT)/bin
+  }
+
+ // TODO: What to do about boost 32 bit builds?
+  libpaths -= $(BOOST_ROOT)/lib
+  libpaths += $(BOOST_LIB_PATH)
+}

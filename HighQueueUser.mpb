@@ -1,0 +1,14 @@
+project :HighQueueBase{
+  specific(prop:microsoft) {
+    Release::exeout = $(HighQueue_ROOT)/Output/Release
+    Debug::exeout = $(HighQueue_ROOT)/Output/Debug
+    Release::libpaths += $(HighQueue_ROOT)/Output/Release
+    Debug::libpaths += $(HighQueue_ROOT)/Output/Debug
+  } else {
+    libpaths += $(HighQueue_ROOT)/lib
+    exeout = $(HighQueue_ROOT)/bin
+  }
+  includes += $(HighQueue_ROOT)/src/Components
+  libs += HighQueue
+  after += HighQueue
+}
