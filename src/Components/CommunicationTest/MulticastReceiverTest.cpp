@@ -8,9 +8,11 @@
 #include <Communication/MulticastReceiver.h>
 #include <Communication/AsioService.h>
 #include <HighQueue/Connection.h>
+#include <HQPerformance/TestMessage.h>
 
 using namespace HighQueue;
 using namespace Communication;
+typedef TestMessage</*13*/80> ActualMessage;
 
 namespace
 {
@@ -25,10 +27,17 @@ BOOST_AUTO_TEST_CASE(MulticastReceiverTest)
 {
     auto ioservice = std::make_shared<AsioService>();
     auto connection = std::make_shared<Connection>();
-    MulticastConfiguration configuration("multicastGroupIP", "listenInterfaceIP", "bindIP", 10000);
-    auto receiver = std::make_shared<MulticastReceiver<NullHeaderGenerator> >(ioservice, connection, configuration);
-    BOOST_CHECK(false);
+    ConsumerWaitStrategy strategy;
+    size_t entryCount = 262144 / 2; // <- thats the number of messages in the primaryRingBuffer in the pronghorn test //100000;
+    size_t messageSize = sizeof(ActualMessage);
+    size_t messagesNeeded = entryCount + 10;
+    uint64_t messageCount = 1000000 * 100;
+    CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
+    connection->createLocal("LocalIv", parameters);
 
+    MulticastConfiguration configuration("multicastGroupIP", "listenInterfaceIP", "bindIP", 10000);
+    auto receiver = std::make_shared<MulticastReceiver<NullHeaderGenerator> >(ioservice, connection);
+    BOOST_CHECK(receiver->configure(configuration));
 };
 
 #endif // ENABLE_MULTICASTRECEIVERTEST
