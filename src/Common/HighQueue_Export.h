@@ -1,11 +1,7 @@
-// Copyright (c) 2009, Object Computing, Inc.
+// Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#ifdef _MSC_VER
 # pragma once
-#endif
-#ifndef HIGHQUEUE_EXPORT_H
-#define HIGHQUEUE_EXPORT_H
 
 // Compile time controls for library generation.  Define with /D or #define
 // To produce or use a static library: #define HIGHQUEUE_HAS_DLL=0
@@ -35,5 +31,3 @@
 
 #    define HighQueue_Export
 #  endif /* _WIN32 */
-#endif /* HIGHQUEUE_EXPORT_H */
-

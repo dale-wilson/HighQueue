@@ -8,7 +8,7 @@
 #include <HQPerformance/TestMessage.h>
 
 using namespace HighQueue;
-typedef TestMessage<13> ActualMessage;
+typedef TestMessage</*13*/80> ActualMessage;
 
 namespace
 {
@@ -44,8 +44,8 @@ namespace
 }
 
 
-#define DISABLE_ST_PERFORMANCEx
-#ifndef DISABLE_ST_PERFORMANCE
+#define ENABLE_ST_PERFORMANCE 1
+#if ENABLE_ST_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 {
     ConsumerWaitStrategy strategy;
@@ -91,13 +91,13 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
         << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
         << std::endl;
 }
-#endif // DISABLE_ST_PERFORMANCE
+#endif // ENABLEST_PERFORMANCE
 
 
-#define DISABLE_MultithreadMessagePassingPerformancex
-#ifdef DISABLE_MultithreadMessagePassingPerformance
-#pragma message ("DISABLE_MultithreadMessagePassingPerformance")
-#else // DISABLE_MultithreadMessagePassingPerformance 
+#define ENABLE_MultithreadMessagePassingPerformance 1
+#if ! ENABLE_MultithreadMessagePassingPerformance
+#pragma message ("ENABLE_MultithreadMessagePassingPerformance")
+#else // ENABLE_MultithreadMessagePassingPerformance 
 BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 {
     static const size_t entryCount = 100000;
@@ -113,10 +113,11 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
 
     static const size_t spinCount = 0;
-    static const size_t yieldCount = 199;
+    static const size_t yieldCount = 0;
     static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    static const auto sleepTime = std::chrono::nanoseconds(10);
     
-    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount);
+    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
     Connection connection;
     connection.createLocal("LocalIv", parameters);
@@ -192,4 +193,4 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         consumer.writeStats(std::cerr);
     }
 }
-#endif // DISABLE_MultithreadMessagePassingPerformance
+#endif // ENABLE_MultithreadMessagePassingPerformance

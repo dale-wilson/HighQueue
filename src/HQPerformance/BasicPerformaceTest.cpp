@@ -10,8 +10,8 @@
 using namespace HighQueue;
 typedef TestMessage<20> ActualMessage;
 
-#define DISABLE_CONSUME_SEPARATELYx
-#ifndef DISABLE_CONSUME_SEPARATELY
+#define ENABLE_CONSUME_SEPARATELY 1
+#if ENABLE_CONSUME_SEPARATELY
 BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
     ConsumerWaitStrategy strategy;
@@ -55,5 +55,5 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     std::cout << entryCount << " messages.  Publish " << publishTime * 1000 / entryCount << " nsec.  Consume " << consumeTime * 1000 / entryCount << " nsec." << std::endl;
 
 }
-#endif // DISABLE_CONSUME_SEPARATELY
+#endif // ENABLECONSUME_SEPARATELY
 

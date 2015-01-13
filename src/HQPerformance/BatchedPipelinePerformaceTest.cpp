@@ -7,26 +7,46 @@
 #include <Common/Stopwatch.h>
 #include <HQPerformance/TestMessage.h>
 
-
 using namespace HighQueue;
-#define USE_PRONGHORN_MESSAGE 1
-#define VALIDATE_OUTPUT 0
 namespace
 {
-    typedef TestMessage<13> ActualMessage;
-#if USE_PRONGHORN_MESSAGE
     byte_t testArray[] = 
-#if 1
     "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@";// this is Pronghorn's test message
-#elif 0
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";
-#else
-    "";
-#endif
     auto messageBytes = sizeof(testArray);
-#else // USE_PRONGHORN_MESSAGE
-    auto messageBytes = sizeof(ActualMessage);
-#endif // USE_PRONGHORN_MESSAGE
+    static const size_t consumerLimit = 1;   // Don't change this
+    static const size_t producerLimit = 1;   // Don't change this
+
+    static const size_t copyLimit = 1;       // This you can change.
+
+    static const size_t messagesInQueue = 100000;
+    static const uint32_t targetMessageCount = 90000000;
+    static const uint32_t batchSize = 4096;
+    static const uint32_t entryCount = (messagesInQueue + batchSize - 1) / batchSize;
+
+    static const uint32_t batchMessageSize = sizeof(testArray) * batchSize;
+
+    static const size_t queueCount = copyLimit + consumerLimit; // need a pool for each object that can receive messages
+
+    // how many buffers do we need?
+    static const size_t messageCount = entryCount * queueCount + consumerLimit + 2 * copyLimit + producerLimit;
+
+    static const size_t spinCount = 0;
+    static const size_t yieldCount = 10000;
+    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    static const std::chrono::nanoseconds sleepPeriod(2);
+
+    enum CopyType
+    {
+        PassThru,
+        BufferSwap,
+        BinaryCopy,
+        CopyConstruct
+    };
+
+    CopyType copyType = PassThru;
+    // BufferSwap;
+    // BinaryCopy;
+
 
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
@@ -46,11 +66,14 @@ namespace
 
             for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
             {
-#if USE_PRONGHORN_MESSAGE
+                if(producerMessage.available() < sizeof(testArray))
+                {
+                    producer.publish(producerMessage);
+                }
                 producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
-#else // USE_PRONGHORN_MESSAGE
-                auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
-#endif //USE_PRONGHORN_MESSAGE
+            }
+            if(producerMessage.getUsed() > 0)
+            {
                 producer.publish(producerMessage);
             }
             // send an empty message
@@ -62,14 +85,6 @@ namespace
             std::cerr << "Producer Number " << producerNumber << "Failed " << ex.what() << std::endl;
         }
     }
-
-    enum CopyType
-    {
-        PassThru,
-        BufferSwap,
-        BinaryCopy,
-        CopyConstruct
-    };
 
     void copyFunction(Connection & inConnection, Connection & outConnection, CopyType copyType)
     {
@@ -102,7 +117,6 @@ namespace
                         auto used = consumerMessage.getUsed();
                         consumerMessage.moveTo(producerMessage);
                         producer.publish(producerMessage);
-                        consumerMessage.destroy<ActualMessage>();
                         if(used == 0)
                         {
                             return;
@@ -123,26 +137,6 @@ namespace
                     }
                     break;
                 }
-                case CopyConstruct:
-                {
-                    {
-                        while(consumer.getNext(consumerMessage))
-                        {
-                            auto used = consumerMessage.getUsed();
-                            if(used == 0)
-                            {
-                                producerMessage.setUsed(0);
-                                producer.publish(producerMessage);
-                                return;
-                            }
-                            producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
-                            producer.publish(producerMessage);
-                            consumerMessage.destroy<ActualMessage>();
-                        }
-                        break;
-                    }
-                }
-
             }
         }
         catch(const std::exception & ex)
@@ -152,36 +146,15 @@ namespace
     }
 }
 
-#define ENABLE_PIPELINEPERFORMANCE 1
-#if ENABLE_PIPELINEPERFORMANCE
-BOOST_AUTO_TEST_CASE(testPipelinePerformance)
+#define ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST 1
+#if ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST
+BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
 {
-    static const size_t consumerLimit = 1;   // Don't change this
-    static const size_t producerLimit = 1;   // Don't change this
-
-    static const size_t copyLimit = 1;       // This you can change.
-
-    static const size_t entryCount = 10000;
-    static const uint32_t targetMessageCount = 100000000; //3000000;
-
-    static const size_t queueCount = copyLimit + consumerLimit; // need a pool for each object that can receive messages
-
-    // how many buffers do we need?
-    static const size_t messageCount = entryCount * queueCount + consumerLimit + 2 * copyLimit + producerLimit;
-
-    static const size_t spinCount = 0;
-    static const size_t yieldCount = 0;//1;//100;
-    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
-    static const std::chrono::nanoseconds sleepPeriod(2);
-    CopyType copyType = BinaryCopy;
-                      // BufferSwap;
-                      // BinaryCopy;
-
     std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << " stage. Copy type: " << copyType << ": ";
 
     ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
     CreationParameters parameters(strategy, entryCount, messageBytes);
-    MemoryPoolPtr memoryPool(new MemoryPool(messageBytes, messageCount));
+    MemoryPoolPtr memoryPool(new MemoryPool(batchMessageSize, messageCount));
 
     std::vector<std::shared_ptr<Connection> > connections;
     for(size_t nConn = 0; nConn < copyLimit + consumerLimit; ++nConn)
@@ -225,20 +198,12 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     Stopwatch timer;
     producerGo = true;
 
-    for(uint64_t messageNumber = 0; messageNumber < targetMessageCount; ++messageNumber)
+    bool more = true;
+
+    while(more)
     {
         consumer.getNext(consumerMessage);
-#if VALIDATE_OUTPUT 
-        auto testMessage = consumerMessage.get<ActualMessage>();
-        testMessage->touch();
-        if(nextMessage != testMessage->messageNumber())
-        {
-            // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(nextMessage, testMessage->messageNumber());
-        }
-        consumerMessage.destroy<ActualMessage>();
-        ++ nextMessage;
-#endif // VALIDATE_OUTPUT
+        more = consumerMessage.getUsed() != 0;
     }
 
     auto lapse = timer.nanoseconds();
@@ -250,7 +215,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     auto messageBits = messageBytes * 8;
 
-    std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in "
+    std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in batches of " << batchSize << " in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
         << lapse / targetMessageCount << " nsec./message "
         << std::setprecision(3) << double(targetMessageCount) / double(lapse) << " GMsg/second "
@@ -260,4 +225,4 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     consumer.writeStats(std::cerr);
 }
-#endif // ENABLEPIPELINEPERFORMANCE
+#endif // ENABLEBATCHED_PIPELINE_PERFORMANCE_TEST
