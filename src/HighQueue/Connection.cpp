@@ -8,6 +8,7 @@
 using namespace HighQueue;
 
 Connection::Connection()
+: header_(0)
 {
 }
 
