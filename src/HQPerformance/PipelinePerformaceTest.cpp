@@ -31,7 +31,7 @@ namespace
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
 
-    void producerFunction(Connection & connection, uint32_t producerNumber, uint32_t messageCount)
+    void producerFunction(ConnectionPtr & connection, uint32_t producerNumber, uint32_t messageCount)
     {
         try
         {
@@ -71,7 +71,7 @@ namespace
         CopyConstruct
     };
 
-    void copyFunction(Connection & inConnection, Connection & outConnection, CopyType copyType)
+    void copyFunction(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType)
     {
         try
         {
@@ -194,8 +194,8 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     }
 
     // The consumer listens to the last connection
-    Consumer consumer(*connections.back());
-    Message consumerMessage(*connections.back());
+    Consumer consumer(connections.back());
+    Message consumerMessage(connections.back());
     
     producerGo = false;
     threadsReady = 0;
@@ -206,15 +206,15 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     for(size_t nCopy = connections.size() - 1; nCopy > 0; --nCopy)
     {
         threads.emplace_back(std::bind(copyFunction,
-            std::ref(*connections[nCopy - 1]),
-            std::ref(*connections[nCopy]),
+            connections[nCopy - 1],
+            connections[nCopy],
             copyType)
             );
     }
 
     // The producer sends targetMessageCount messages to connection 0
     threads.emplace_back(
-        std::bind(producerFunction, std::ref(*connections[0]), 1, targetMessageCount));
+        std::bind(producerFunction, connections[0], 1, targetMessageCount));
  
     // All wired up, ready to go.  Wait for the threads to initialize.
     while(threadsReady < threads.size())

@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
     auto pool = new (block.get()) HQMemoryBlockPool(bytesNeeded, messageSize);
 
-    Message message1(*pool);
+    Message message1(pool);
     BOOST_CHECK_EQUAL(message1.getUsed(), 0u);
     BOOST_CHECK(message1.isEmpty());
 
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     std::string value1(message1.get<char>(), message1.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(0, letterCount), value1);
 
-    Message message2(*pool);
+    Message message2(pool);
     message2.appendBinaryCopy(alphabet.data() + letterCount, letterCount);
 
     BOOST_CHECK_EQUAL(message2.getUsed(), letterCount);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(testMessageAppend)
     std::unique_ptr<byte_t> block(new byte_t[bytesNeeded]);
     auto pool = new (block.get()) HQMemoryBlockPool(bytesNeeded, messageSize);
 
-    Message message(*pool);
+    Message message(pool);
 
     message.appendBinaryCopy(alphabet.data(), letterCount);
     message.appendBinaryCopy(alphabet.data() + letterCount, letterCount);

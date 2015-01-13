@@ -1,4 +1,3 @@
-/// @file Producer.h
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
@@ -24,7 +23,7 @@ namespace HighQueue
         /// @param solo indicates that this is the only producer.
         ///        solo producers run faster using techniques that would be 
         ///        unsafe with multiple producers.
-		explicit Producer(Connection & connection, bool solo = false);  
+		explicit Producer(ConnectionPtr & connection, bool solo = false);  
 
         /// @brief Destructor
         ~Producer();
@@ -48,7 +47,7 @@ namespace HighQueue
         uint64_t reserve();
     private:
         bool solo_;
-        Connection & connection_;
+        ConnectionPtr connection_;
         HQHeader * header_;
         size_t entryCount_;
         HighQResolver resolver_;

@@ -19,8 +19,8 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     size_t messageSize = sizeof(ActualMessage);
     size_t messageCount = entryCount + 10;
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    Connection connection;
-    connection.createLocal("LocalIv", parameters);
+    ConnectionPtr connection = std::make_shared<Connection>();
+    connection->createLocal("LocalIv", parameters);
 
     Producer producer(connection);
     Consumer consumer(connection);

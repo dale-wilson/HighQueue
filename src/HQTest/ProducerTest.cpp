@@ -35,11 +35,11 @@ BOOST_AUTO_TEST_CASE(testProducer)
     size_t messageSize = sizeof(TestMessage);
     size_t messageCount = 50;
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    Connection connection;
-    connection.createLocal("LocalIv", parameters);
+    ConnectionPtr connection = std::make_shared<Connection>();
+    connection->createLocal("LocalIv", parameters);
     Producer producer(connection);
     // peek inside the IV.
-    auto header = connection.getHeader();
+    auto header = connection->getHeader();
     HighQResolver resolver(header);
     auto readPosition = resolver.resolve<Position>(header->readPosition_);
     auto publishPosition = resolver.resolve<Position>(header->publishPosition_);

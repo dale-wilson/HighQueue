@@ -40,11 +40,11 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     size_t messageSize = sizeof(TestMessage);
     size_t messageCount = 50;
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    Connection connection;
-    connection.createLocal("LocalIv", parameters);
+    ConnectionPtr connection = std::make_shared<Connection>();
+    connection->createLocal("LocalIv", parameters);
 
     // We'll need these later.
-    auto header = connection.getHeader();
+    auto header = connection->getHeader();
     HighQResolver resolver(header);
     HighQEntryAccessor accessor(resolver, header->entries_, header->entryCount_);
 

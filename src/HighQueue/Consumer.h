@@ -21,7 +21,7 @@ namespace HighQueue
 	public:
         /// @brief Construct and attach to a connection
         /// @param connection provides access to the HighQueue
-		Consumer(Connection & connection);
+		Consumer(ConnectionPtr & connection);
 
         /// @brief Get the next message-full of data if it is available
         ///
@@ -48,7 +48,7 @@ namespace HighQueue
         std::ostream & writeStats(std::ostream & out)const;
 
     private:
-        Connection & connection_;
+        ConnectionPtr connection_;
         HQHeader * header_;
         HighQResolver resolver_;
         HighQEntryAccessor entryAccessor_;

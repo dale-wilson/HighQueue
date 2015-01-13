@@ -15,7 +15,7 @@ namespace
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
 
-    void producerFunction(Connection & connection, uint32_t producerNumber, uint64_t messageCount, bool solo, std::ostream & stats)
+    void producerFunction(ConnectionPtr & connection, uint32_t producerNumber, uint64_t messageCount, bool solo, std::ostream & stats)
     {
         try
         {
@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
     uint64_t messageCount = 1000000 * 100;
 
     CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
-    Connection connection;
-    connection.createLocal("LocalIv", parameters);
+    ConnectionPtr connection = std::make_shared<Connection>();
+    connection->createLocal("LocalIv", parameters);
 
 
     Producer producer(connection);
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     
     ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
     CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
-    Connection connection;
-    connection.createLocal("LocalIv", parameters);
+    ConnectionPtr connection = std::make_shared<Connection>();
+    connection->createLocal("LocalIv", parameters);
 
     Consumer consumer(connection);
     Message consumerMessage(connection);
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         for(uint32_t nTh = 0; nTh < producerCount; ++nTh)
         {
             producerThreads.emplace_back(
-                std::bind(producerFunction, std::ref(connection), nTh, perProducer, producerCount == 1, std::ref(stats[nTh])));
+                std::bind(producerFunction, connection, nTh, perProducer, producerCount == 1, std::ref(stats[nTh])));
         }
         std::this_thread::yield();
 

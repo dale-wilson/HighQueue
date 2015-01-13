@@ -15,12 +15,12 @@ namespace HighQueue
         const static size_t NO_POOL = ~size_t(0);
 
         /// @brief construct an empty Message
-        /// @tparam allocator attaches memory to the Message
+        /// @tparam AllocatorPtr points to an Allocator that attaches memory to the Message
         /// concept Allocator {
         ///    void allocate(Message & message);
         /// };
-        template <typename Allocator>
-        Message(Allocator & allocator);
+        template <typename AllocatorPtr>
+        Message(AllocatorPtr & allocator);
 
         ~Message();
 
@@ -167,10 +167,10 @@ namespace HighQueue
         size_t used_;
     };
 
-    template <typename Allocator>
-    Message::Message(Allocator & allocator)
+    template <typename AllocatorPtr>
+    Message::Message(AllocatorPtr & allocator)
     {
-        allocator.allocate(*this);
+        allocator->allocate(*this);
     }
 
     inline

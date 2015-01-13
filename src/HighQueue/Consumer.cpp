@@ -4,9 +4,9 @@
 #include <HighQueue/details/HQReservePosition.h>
 using namespace HighQueue;
 
-Consumer::Consumer(Connection & connection)
+Consumer::Consumer(ConnectionPtr & connection)
 : connection_(connection)
-, header_(connection.getHeader())
+, header_(connection_->getHeader())
 , resolver_(header_)
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
