@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #include "Communication/CommunicationPch.h"
-#define BOOST_TEST_NO_MAIN MCastReceiver
+#define BOOST_TEST_NO_MAIN MulticastReceiver
 #include <boost/test/unit_test.hpp>
 
 #include <HighQueue/Message.h>

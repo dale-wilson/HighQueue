@@ -1,8 +1,8 @@
-/// @file Connection.h
-// Copyright (c) 2014 Object Computing, Inc.
+// Copyright (c) 2014, 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
+#include "ConnectionFwd.h"
 #include <Common/HighQueue_Export.h>
 #include <HighQueue/details/HQHeader.h>
 #include <HighQueue/CreationParameters.h>

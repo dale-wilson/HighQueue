@@ -22,7 +22,6 @@ void
 AsioService::stopService()
 {
   stopping_ = true;
-//  std::cout << "AsioService stop.\n" << std::flush;
   ioService_.stop();
 }
 

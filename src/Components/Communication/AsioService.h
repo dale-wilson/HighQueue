@@ -3,7 +3,6 @@
 // See the file license.txt for licensing information.
 //
 # pragma once
-
 #include "AsioServiceFwd.h"
 #include <Communication/Communication_Export.h>
 
@@ -82,7 +81,17 @@ namespace HighQueue
         return ioService_;
       }
 
-      ///@brief Post a completion handler for later processing (usually in a different thread)
+      ///@brief Dispatch to a completion handler
+      /// If this is an ASIO thread, the handler might be called directly out of this method.
+      /// @param handler is the handler to be posted
+      template<typename CompletionHandler>
+      void dispatch(CompletionHandler handler)
+      {
+          ioService_.dispatch(handler);
+      }
+
+      ///@brief Post a completion handler for later processing 
+      /// Asio guarantees it won't be called directly out of this method.
       /// @param handler is the handler to be posted
       template<typename CompletionHandler>
       void post(CompletionHandler handler)

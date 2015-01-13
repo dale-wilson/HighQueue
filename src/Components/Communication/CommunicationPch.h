@@ -3,3 +3,5 @@
 // See the file license.txt for licensing information.
 #include <Common/HighQueuePch.h>
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
+
