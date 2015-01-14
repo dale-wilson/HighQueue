@@ -5,7 +5,7 @@
 #include <HighQueue/Producer.h>
 #include <HighQueue/Consumer.h>
 #include <Common/Stopwatch.h>
-#include <HQPerformance/TestMessage.h>
+#include <Mocks/TestMessage.h>
 
 using namespace HighQueue;
 typedef TestMessage</*13*/80> ActualMessage;
@@ -30,7 +30,7 @@ namespace
 
             for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
             {
-                auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
+                auto testMessage = producerMessage.appendEmplace<ActualMessage>(producerNumber, messageNumber);
                 producer.publish(producerMessage);
             }
             producer.writeStats(stats);
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        producerMessage.emplace<ActualMessage>(1, messageNumber);
+        producerMessage.appendEmplace<ActualMessage>(1, messageNumber);
         producer.publish(producerMessage);
         consumer.getNext(consumerMessage);
         auto testMessage = consumerMessage.get<ActualMessage>();

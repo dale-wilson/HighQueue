@@ -43,22 +43,37 @@ namespace HighQueue
         template <typename T = byte_t>
         const T* getConst()const;
 
+        /// @brief read the next T and update the read position.
+        /// @returns a reference to the in-place T
+        template <typename T>
+        T & read()const;
+
+        /// @brief read the next T and update the read position.
+        /// @returns a reference to the in-place T
+        template <typename T>
+        const T & readConst()const;
+            
         /// @brief Set the number of bytes in the message that contain valid data.
         /// @param used is the total number of bytes used in the message.
         /// @returns its argument for convenience.
         /// @throws runtime_error if used exceeds the message capacity.
-
         size_t setUsed(size_t used);
+
         /// @brief How many bytes in this message contain valid data?
         /// @param returns the number of bytes used.
         size_t getUsed() const;
+
+        size_t setRead(size_t read);
+        size_t getRead(size_t read);
+        template <typename T = byte_t>
+        size_t addRead(size_t count);
 
         /// @brief construct a new object of type T in the message using placement new.
         /// @tparam T is the type of object to be constructed.
         /// @tparam ArgTypes are the types arguments to pass to the constructor.
         /// @param args are the actual arguments.
         template <typename T, typename... ArgTypes>
-        T & emplace(ArgTypes&&... args);
+        T & appendEmplace(ArgTypes&&... args);
 
         template <typename T>
         void destroy() const;
@@ -68,10 +83,18 @@ namespace HighQueue
         template <typename T = byte_t>
         size_t available() const;
 
+        template <typename T>
+        size_t unread() const;
+
         /// @brief Is there room for count additional objects of type T in the message?
         /// @tparam T is the type of object
         template <typename T = byte_t>
-        bool needSpace(size_t count) const;
+        bool needAvailable(size_t count = 1) const;
+
+        /// @brief Are there count additional objects of type T in the message?
+        /// @tparam T is the type of object
+        template <typename T = byte_t>
+        bool needUnread(size_t count = 1) const;
 
         /// @brief Increase the amount of space used inthe message.
         /// @tparam T is the type of object
@@ -84,12 +107,17 @@ namespace HighQueue
         template <typename T = byte_t>
         T* getWritePosition()const;
 
+        /// @brief Return the next available location in the message as a pointer to T.
+        /// @tparam T is the type of object
+        template <typename T = byte_t>
+        T* getReadPosition()const;
+
         /// @brief Use the copy constructor to construct a new object of type T in the next available location in the message.
         /// @tparam T is the type of object
         /// @param object is the object to be copied.
         /// @returns a pointer to the newly copy-constructed object in the message.
         template <typename T = byte_t>
-        T& appendEmplace(const T & object);
+        T& appendCopy(const T & object);
 
         /// @brief Use a binary copy to initialize the next available location in the message.
         /// @tparam T is the type of object
@@ -165,6 +193,7 @@ namespace HighQueue
         size_t capacity_;
         size_t offset_;
         size_t used_;
+        size_t read_;
     };
 
     template <typename AllocatorPtr>
@@ -184,16 +213,58 @@ namespace HighQueue
         return used_;
     }
 
-    inline
-    void Message::setEmpty()
+    template <typename T>
+    size_t Message::addUsed(size_t count)
     {
-        used_ = 0;
+        return setUsed(used_ + count * sizeof(T));
     }
 
     inline
     size_t Message::getUsed() const
     {
         return used_;
+    }
+
+    template <typename T>
+    T* Message::getWritePosition()const
+    {
+        return reinterpret_cast<T *>(container_ + offset_ + used_);
+    }
+
+    inline
+    size_t Message::setRead(size_t read)
+    {
+        if(read > used_)
+        {
+            throw std::runtime_error("Message read > used");
+        }
+        read_ = read;
+        return read;
+    }
+
+    inline
+    size_t Message::getRead(size_t read)
+    {
+        return read_;
+    }
+
+    template <typename T>
+    size_t Message::addRead(size_t count)
+    {
+        return setRead(read_ + sizeof(T) * count);
+    }
+
+    template <typename T>
+    T* Message::getReadPosition()const
+    {
+        return reinterpret_cast<T *>(container_ + offset_ + read_);
+    }
+
+    inline
+    void Message::setEmpty()
+    {
+        used_ = 0;
+        read_ = 0;
     }
 
     inline
@@ -209,13 +280,19 @@ namespace HighQueue
         std::swap(capacity_, rhs.capacity_);
         std::swap(offset_, rhs.offset_);
         std::swap(used_, rhs.used_);
+        std::swap(read_, rhs.read_);
     }
 
     inline
     void Message::moveTo(Message & rhs)
     {
-        swap(rhs);
+        std::swap(container_, rhs.container_);
+        std::swap(capacity_, rhs.capacity_);
+        std::swap(offset_, rhs.offset_);
+        rhs.used_ = used_;
+        rhs.read_ = read_;
         used_ = 0;
+        read_ = 0;
     }
 
     template <typename T>
@@ -230,11 +307,28 @@ namespace HighQueue
         return reinterpret_cast<T *>(container_ + offset_);
     }
 
-    template <typename T, typename... ArgTypes>
-    T & Message::emplace(ArgTypes&&... args)
+    template <typename T>
+    T & Message::read()const
     {
-        setUsed(sizeof(T));
-        return * new (get<T>()) T(std::forward<ArgTypes>(args)...);
+        auto result = reinterpret_cast<T *>(container_ + offset_ + read_);
+        addRead(sizeof(T));
+        return * result;
+    }
+
+    template <typename T>
+    const T & Message::readConst()const
+    {
+        auto result = reinterpret_cast<const T *>(container_ + offset_ + read_);
+        addRead(sizeof(T));
+        return & result;
+    }
+
+    template <typename T, typename... ArgTypes>
+    T & Message::appendEmplace(ArgTypes&&... args)
+    {
+        auto position = getWritePosition<T>();
+        addUsed(sizeof(T));
+        return * new (position) T(std::forward<ArgTypes>(args)...);
     }
 
     template <typename T>
@@ -251,25 +345,25 @@ namespace HighQueue
     }
 
     template <typename T>
-    bool Message::needSpace(size_t count) const
+    size_t Message::unread() const
+    {
+        return (used_ - read_) / sizeof(T);
+    }
+
+    template <typename T>
+    bool Message::needAvailable(size_t count) const
     {
         return available<T>() >= count;
     }
 
     template <typename T>
-    size_t Message::addUsed(size_t count)
+    bool Message::needUnread(size_t count) const
     {
-        return setUsed(used_ + count * sizeof(T));
+        return unread<T>() >= count;
     }
 
     template <typename T>
-    T* Message::getWritePosition()const
-    {
-        return reinterpret_cast<T *>(container_ + offset_ + used_);
-    }
-
-    template <typename T>
-    T & Message::appendEmplace(const T & data)
+    T & Message::appendCopy(const T & data)
     {
         auto position = getWritePosition(); 
         // add used before writing to the message to catch overruns first.

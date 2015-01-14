@@ -4,7 +4,7 @@
 
 #include <HighQueue/Producer.h>
 #include <HighQueue/Consumer.h>
-#include <HQPerformance/TestMessage.h>
+#include <Mocks/TestMessage.h>
 #include <Common/Stopwatch.h>
 
 using namespace HighQueue;
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 
     for(uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
-        producerMessage.emplace<ActualMessage>(1, nMessage);
+        producerMessage.appendEmplace<ActualMessage>(1, nMessage);
         producer.publish(producerMessage);
     }
     auto publishTime = timer.microseconds();
