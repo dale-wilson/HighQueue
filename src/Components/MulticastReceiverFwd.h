@@ -4,7 +4,7 @@
 #pragma once
 namespace HighQueue
 {
-    namespace Communication
+    namespace Components
     {
         template<typename HeaderGenerator>
         class MulticastReceiver;

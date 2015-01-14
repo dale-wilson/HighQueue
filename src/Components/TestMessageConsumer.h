@@ -2,13 +2,20 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Communication/HeaderGenerator.h>
+#include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Consumer.h>
 #include <Mocks/TestMessage.h>
 
+#define USE_DEBUG_MESSAGE 0
+#if USE_DEBUG_MESSAGE
+#define DEBUG_MESSAGE(TEXT) do{std::stringstream msg;msg << TEXT; std::cerr << msg.str();}while(false)
+#else // USE_DEBUG_MESSAGE
+#define DEBUG_MESSAGE(TEXT) do{;}while(false)
+#endif // USE_DEBUG_MESSAGE
+
 namespace HighQueue
 {
-    namespace Communication
+    namespace Components
     {
         template<size_t Extra = 0, typename HeaderGenerator = NullHeaderGenerator>
         class TestMessageConsumer : public std::enable_shared_from_this<TestMessageConsumer<Extra, HeaderGenerator> >
@@ -99,6 +106,7 @@ namespace HighQueue
         template<size_t Extra, typename HeaderGenerator>
         void TestMessageConsumer<Extra, HeaderGenerator>::run()
         {
+            DEBUG_MESSAGE("Consumer start.\n");
             uint32_t messageCount = 0; 
             uint32_t nextSequence = 0;
             while(!stopping_)
@@ -124,6 +132,7 @@ namespace HighQueue
                     stopping_ = !(messageCount_ == 0 || messageCount < messageCount_);
                 }
             }
+            DEBUG_MESSAGE("Consumer received " << messageCount << " messages with " << sequenceError_ << " errors" << std::endl);
         }
    }
 }

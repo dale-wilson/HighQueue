@@ -1,0 +1,49 @@
+// Copyright (c) 2014, 2015 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+
+//////////////////////////////
+// Build the HighQueue Components
+project(*) : HighQueueComponent, boost_base, boost_filesystem, boost_system, boost_thread {
+  sharedname = *
+  dynamicflags += COMPONENT_BUILD_DLL
+
+  pch_header = ComponentCommon/ComponentPch.h
+  pch_source = ComponentCommon/ComponentPch.cpp
+
+ // TODO: What to do about boost 32 bit builds?
+  libpaths -= $(BOOST_ROOT)/lib
+  libpaths += $(BOOST_LIB_PATH)
+
+  Source_Files {
+    Components
+	ComponentCommon
+  }
+  Header_Files {
+    Components
+	ComponentCommon
+	Common
+  }
+}
+
+////////////////////////////
+// Build the Component tests
+project(*Test) : HighQueueComponent, HighQueueAddTest, boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = *
+
+  libs += Components
+  after += Components
+  
+  pch_header = ComponentCommon/ComponentPch.h
+  pch_source = ComponentCommon/ComponentPch.cpp
+	
+  Source_Files {
+	ComponentsTest
+  }
+  Header_Files {
+    ComponentsTest
+	ComponentCommon
+	Common
+  }
+}
+
