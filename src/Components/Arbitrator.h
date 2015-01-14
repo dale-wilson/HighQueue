@@ -4,7 +4,6 @@
 #pragma once
 #include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Consumer.h>
-#include <Mocks/TestMessage.h>
 
 #define USE_DEBUG_MESSAGE 0
 #include <ComponentCommon/DebugMessage.h>
@@ -13,13 +12,12 @@ namespace HighQueue
 {
     namespace Components
     {
-        template<size_t Extra = 0, typename HeaderGenerator = NullHeaderGenerator>
-        class TestMessageConsumer : public std::enable_shared_from_this<TestMessageConsumer<Extra, HeaderGenerator> >
+        template<typename CargoClass>
+        class Arbitrator : public std::enable_shared_from_this<Arbitrator>
         {
         public:
-            typedef TestMessage<Extra> ActualMessage;
-            TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount = 0, bool quitOnEmptyMessage = true);
-            ~TestMessageConsumer();
+            Arbitrator(ConnectionPtr & connection, uint32_t messageCount = 0, bool quitOnEmptyMessage = true);
+            ~Arbitrator();
 
             void start();
             void stop();
@@ -102,13 +100,13 @@ namespace HighQueue
         template<size_t Extra, typename HeaderGenerator>
         void TestMessageConsumer<Extra, HeaderGenerator>::run()
         {
-            DebugMessage("Consumer start. " << connection_->getHeader()->name_ << std::endl);
+            DebugMessage("Consumer start.\n");
             uint32_t messageCount = 0; 
             uint32_t nextSequence = 0;
             while(!stopping_)
             {
                 stopping_ = !consumer_.getNext(message_);
-                if(!stopping_ && quitOnEmptyMessage_ && message_.isEmpty())
+                if(!stopping_ && quitOnEmptyMessage_ && message_.getUsed() == 0)
                 {
                     stopping_ = true;
                 }

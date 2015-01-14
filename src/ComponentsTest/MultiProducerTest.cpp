@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #include <ComponentCommon/ComponentPch.h>
-#define BOOST_TEST_NO_MAIN TestMessageProducer
+#define BOOST_TEST_NO_MAIN ComponentsTest
 #include <boost/test/unit_test.hpp>
 
 #include <Components/TestMessageProducer.h>
@@ -23,12 +23,12 @@ namespace
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 }
 
-#define ENABLE_TESTMESSAGEGENERATORTEST 1
-#if ! ENABLE_TESTMESSAGEGENERATORTEST
-#pragma message ("ENABLE_TESTMESSAGEGENERATORTEST " __FILE__)
-#else // ENABLE_TESTMESSAGEGENERATORTEST
+#define ENABLE_MULTIPRODUCER_TEST 0
+#if ! ENABLE_MULTIPRODUCER_TEST
+#pragma message ("ENABLE_MULTIPRODUCER_TEST " __FILE__)
+#else // ENABLE_MULTIPRODUCER_TEST
 
-BOOST_AUTO_TEST_CASE(TestMessagePublisherTest)
+BOOST_AUTO_TEST_CASE(TestMultiProducers)
 {
     size_t entryCount = 100000;
     
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(TestMessagePublisherTest)
         std::vector<ProducerPtr> producers;
         for(uint32_t producerNumber = 0; producerNumber < producerCount; ++producerNumber)
         {
-            producers.emplace_back(new ProducerType(connection, perProducer, producerNumber));
+            producers.emplace_back(new ProducerType(connection, perProducer, producerNumber, false));
         }
 
         auto consumer = std::make_shared<ConsumerType>(connection, perConsumer, true);
@@ -80,7 +80,6 @@ BOOST_AUTO_TEST_CASE(TestMessagePublisherTest)
 
         Stopwatch timer;
         startSignal = true;
-
         consumer->run();
         auto lapse = timer.nanoseconds();
         for(auto producer : producers)
@@ -103,4 +102,4 @@ BOOST_AUTO_TEST_CASE(TestMessagePublisherTest)
 
 };
 
-#endif // ENABLE_TESTMESSAGEGENERATORTEST
+#endif // ENABLE_MULTIPRODUCER_TEST
