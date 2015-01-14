@@ -50,12 +50,15 @@ namespace HighQueue
         bool solo_;
         Connection & connection_;
         HQHeader * header_;
+        size_t entryCount_;
         HighQResolver resolver_;
         volatile Position & readPosition_;
         volatile Position & publishPosition_;
         volatile AtomicPosition & reservePosition_;
         volatile Position & reserveSoloPosition_;
         HighQEntryAccessor entryAccessor_;
+
+        Position publishable_;
 
         uint64_t statFulls_;
         uint64_t statSkips_;

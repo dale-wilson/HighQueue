@@ -8,12 +8,14 @@ Producer::Producer(Connection & connection, bool solo)
 : solo_(solo)
 , connection_(connection)
 , header_(connection.getHeader())
+, entryCount_(header_->entryCount_)
 , resolver_(header_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
 , publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
 , reservePosition_(resolver_.resolve<volatile HighQReservePosition>(header_->reservePosition_)->reservePosition_)
 , reserveSoloPosition_(resolver_.resolve<volatile HighQReservePosition>(header_->reservePosition_)->reserveSoloPosition_)
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
+, publishable_(0)
 , statFulls_(0)
 , statSkips_(0)
 , statWaits_(0)
@@ -50,13 +52,16 @@ void Producer::publish(Message & message)
     while(!published)
     {
         auto reserved = reserve();
-        auto entryEnd = readPosition_ + header_->entryCount_;
-        while(entryEnd <= reserved)
+        if(publishable_ <= reserved)
         {
-            ++statFulls_;
-            std::this_thread::yield();
-            std::atomic_thread_fence(std::memory_order::memory_order_consume);
-            entryEnd = readPosition_ + header_->entryCount_;
+            publishable_ = readPosition_ + entryCount_;
+            while(publishable_ <= reserved)
+            {
+                ++statFulls_;
+                std::this_thread::yield();
+                std::atomic_thread_fence(std::memory_order::memory_order_consume);
+                publishable_ = readPosition_ + header_->entryCount_;
+            }
         }
         HighQEntry & entry = entryAccessor_[reserved];
         if(entry.status_ != HighQEntry::Status::SKIP)
