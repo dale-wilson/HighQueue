@@ -5,13 +5,8 @@
 #include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Producer.h>
 #include <Mocks/TestMessage.h>
-
 #define USE_DEBUG_MESSAGE 0
-#if USE_DEBUG_MESSAGE
-#define DEBUG_MESSAGE(TEXT) do{std::stringstream msg;msg << TEXT; std::cerr << msg.str();}while(false)
-#else // USE_DEBUG_MESSAGE
-#define DEBUG_MESSAGE(TEXT) do{;}while(false)
-#endif // USE_DEBUG_MESSAGE
+#include <ComponentCommon/DebugMessage.h>
 
 namespace HighQueue
 {
@@ -22,7 +17,7 @@ namespace HighQueue
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
-            TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount = 0, uint32_t producerNumber = 0);
+            TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount = 0, uint32_t producerNumber = 0, bool sendEmptyMessageOnQuit = true);
             ~TestMessageProducer();
 
             bool configure();
@@ -40,6 +35,7 @@ namespace HighQueue
             Message message_;
             uint32_t messageCount_;
             uint32_t producerNumber_;
+            bool sendEmptyMessageOnQuit_;
             bool paused_;
             bool stopping_;
 
@@ -48,12 +44,13 @@ namespace HighQueue
         };
 
         template<size_t Extra, typename HeaderGenerator>
-        TestMessageProducer<Extra, HeaderGenerator>::TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount, uint32_t producerNumber)
+        TestMessageProducer<Extra, HeaderGenerator>::TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount, uint32_t producerNumber, bool sendEmptyMessageOnQuit)
             : connection_(connection)
             , producer_(connection)
             , message_(connection)
             , messageCount_(messageCount)
             , producerNumber_(producerNumber)
+            , sendEmptyMessageOnQuit_(sendEmptyMessageOnQuit)
             , paused_(false)
             , stopping_(false)
         {
@@ -109,17 +106,21 @@ namespace HighQueue
             {
                 std::this_thread::yield();
             }
-            DEBUG_MESSAGE("Producer Start" << std::endl);
+            DebugMessage("Producer Start " << connection_->getHeader()->name_ << std::endl);
             uint32_t messageNumber = 0;
             while( messageCount_ == 0 || messageNumber < messageCount_)
             {
-                // DEBUG_MESSAGE("Publish " << messageNumber << '/' << messageCount_ << std::endl);
+                // DebugMessage("Publish " << messageNumber << '/' << messageCount_ << std::endl);
                 headerGenerator_.addHeader(message_);
                 auto testMessage = message_.appendEmplace<ActualMessage>(producerNumber_, messageNumber);
                 producer_.publish(message_);
                 ++messageNumber;
             }
-            DEBUG_MESSAGE("Producer " << producerNumber_ << " published " << messageNumber << " messages." << std::endl);
+            if(sendEmptyMessageOnQuit_)
+            {
+                producer_.publish(message_);
+            }
+            DebugMessage("Producer " << producerNumber_ << " published " << messageNumber << " messages." << std::endl);
         }
    }
 }

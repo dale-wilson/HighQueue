@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #include "ComponentCommon/ComponentPch.h"
-#define BOOST_TEST_NO_MAIN MulticastReceiver
+#define BOOST_TEST_NO_MAIN ComponentsTest
 #include <boost/test/unit_test.hpp>
 
 #include <Components/MulticastReceiver.h>
