@@ -1,17 +1,17 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include "Communication/CommunicationPch.h"
+#include "ComponentCommon/ComponentPch.h"
 #define BOOST_TEST_NO_MAIN MulticastReceiver
 #include <boost/test/unit_test.hpp>
 
-#include <Communication/MulticastReceiver.h>
-#include <Communication/AsioService.h>
+#include <Components/MulticastReceiver.h>
+#include <ComponentCommon/AsioService.h>
 #include <HighQueue/Connection.h>
 #include <Mocks/TestMessage.h>
 
 using namespace HighQueue;
-using namespace Communication;
+using namespace Components;
 typedef TestMessage</*13*/80> ActualMessage;
 
 namespace

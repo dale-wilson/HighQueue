@@ -3,11 +3,11 @@ workspace(*) {
   specific(prop:microsoft) {
     cmdline += -expand_vars
   }
-  src/HighQueue.mpc
-  src/Components/Components.mpc
-
   specific(make) {
     cmdline += -value_template "configurations=Release Debug"
   }
+  
+  src/HighQueue.mpc
+  src/Components.mpc
 
 }

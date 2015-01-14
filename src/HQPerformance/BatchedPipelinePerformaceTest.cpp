@@ -13,8 +13,8 @@ namespace
     byte_t testArray[] = 
     "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@";// this is Pronghorn's test message
     auto messageBytes = sizeof(testArray);
-    static const size_t consumerLimit = 1;   // Don't change this
-    static const size_t producerLimit = 1;   // Don't change this
+    static const size_t numberOfConsumers = 1;   // Don't change this
+    static const size_t maxNumberOfProducers = 1;   // Don't change this
 
     static const size_t copyLimit = 1;       // This you can change.
 
@@ -25,10 +25,10 @@ namespace
 
     static const uint32_t batchMessageSize = sizeof(testArray) * batchSize;
 
-    static const size_t queueCount = copyLimit + consumerLimit; // need a pool for each object that can receive messages
+    static const size_t queueCount = copyLimit + numberOfConsumers; // need a pool for each object that can receive messages
 
     // how many buffers do we need?
-    static const size_t messageCount = entryCount * queueCount + consumerLimit + 2 * copyLimit + producerLimit;
+    static const size_t messageCount = entryCount * queueCount + numberOfConsumers + 2 * copyLimit + maxNumberOfProducers;
 
     static const size_t spinCount = 0;
     static const size_t yieldCount = 10000;
@@ -150,14 +150,14 @@ namespace
 #if ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST
 BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
 {
-    std::cerr << "Pipeline " << (producerLimit + copyLimit + consumerLimit) << " stage. Copy type: " << copyType << ": ";
+    std::cerr << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 
     ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
     CreationParameters parameters(strategy, entryCount, messageBytes);
     MemoryPoolPtr memoryPool(new MemoryPool(batchMessageSize, messageCount));
 
     std::vector<std::shared_ptr<Connection> > connections;
-    for(size_t nConn = 0; nConn < copyLimit + consumerLimit; ++nConn)
+    for(size_t nConn = 0; nConn < copyLimit + numberOfConsumers; ++nConn)
     {
         std::shared_ptr<Connection> connection(new Connection);
         connections.push_back(connection);

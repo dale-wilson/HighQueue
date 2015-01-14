@@ -2,13 +2,20 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Communication/HeaderGenerator.h>
+#include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Producer.h>
 #include <Mocks/TestMessage.h>
 
+#define USE_DEBUG_MESSAGE 0
+#if USE_DEBUG_MESSAGE
+#define DEBUG_MESSAGE(TEXT) do{std::stringstream msg;msg << TEXT; std::cerr << msg.str();}while(false)
+#else // USE_DEBUG_MESSAGE
+#define DEBUG_MESSAGE(TEXT) do{;}while(false)
+#endif // USE_DEBUG_MESSAGE
+
 namespace HighQueue
 {
-    namespace Communication
+    namespace Components
     {
         template<size_t Extra=0, typename HeaderGenerator = NullHeaderGenerator>
         class TestMessageProducer : public std::enable_shared_from_this<TestMessageProducer<Extra, HeaderGenerator> >
@@ -102,14 +109,17 @@ namespace HighQueue
             {
                 std::this_thread::yield();
             }
-            uint32_t messageNumber = 0; 
+            DEBUG_MESSAGE("Producer Start" << std::endl);
+            uint32_t messageNumber = 0;
             while( messageCount_ == 0 || messageNumber < messageCount_)
             {
+                // DEBUG_MESSAGE("Publish " << messageNumber << '/' << messageCount_ << std::endl);
                 headerGenerator_.addHeader(message_);
                 auto testMessage = message_.appendEmplace<ActualMessage>(producerNumber_, messageNumber);
                 producer_.publish(message_);
                 ++messageNumber;
             }
+            DEBUG_MESSAGE("Producer " << producerNumber_ << " published " << messageNumber << " messages." << std::endl);
         }
    }
 }

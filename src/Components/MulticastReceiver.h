@@ -3,13 +3,13 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include "MulticastReceiverFwd.h"
-#include <Communication/AsioService.h>
-#include <Communication/HeaderGenerator.h>
+#include <ComponentCommon/AsioService.h>
+#include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Producer.h>
 
 namespace HighQueue
 {
-    namespace Communication
+    namespace Components
     {
         struct MulticastConfiguration
         {

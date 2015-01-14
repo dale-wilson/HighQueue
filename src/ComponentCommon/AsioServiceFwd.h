@@ -6,7 +6,7 @@
 
 namespace HighQueue
 {
-  namespace Communication
+  namespace Components
   {
     class AsioService;
     typedef std::shared_ptr<AsioService> AsioServicePtr;

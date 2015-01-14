@@ -105,12 +105,12 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     static const uint64_t targetMessageCount = 1000000 * 100; // runs about 5 to 10 seconds in release/optimized build
     static const size_t coreCount = std::thread::hardware_concurrency();
-    static const size_t producerLimit = coreCount == 1 ? coreCount : coreCount -1; // Performance drops off severely when competing for cores.
+    static const size_t maxNumberOfProducers = coreCount == 1 ? coreCount : coreCount -1; // Performance drops off severely when competing for cores.
                                                                                    // This is worth measauring, but not everytime.
                                                                                    // You can see the beginning of the effect using this number because
                                                                                    // the threads start competing with Windows itself for the last core.
-    static const size_t consumerLimit = 1;  // Just for documentation
-    static const size_t messageCount = entryCount + consumerLimit +  producerLimit;
+    static const size_t numberOfConsumers = 1;  // Just for documentation
+    static const size_t messageCount = entryCount + numberOfConsumers +  maxNumberOfProducers;
 
     static const size_t spinCount = 0;
     static const size_t yieldCount = 0;
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     Consumer consumer(connection);
     Message consumerMessage(connection);
 
-    for(size_t producerCount = 1; producerCount <= producerLimit; ++producerCount)
+    for(size_t producerCount = 1; producerCount <= maxNumberOfProducers; ++producerCount)
     {
         std::vector<std::thread> producerThreads;
         std::vector<uint64_t> nextMessage(producerCount, 0ULL);

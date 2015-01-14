@@ -5,7 +5,7 @@
 #include <HighQueue/Message.h>
 namespace HighQueue
 {
-    namespace Communication
+    namespace Components
     {
         class NullHeaderGenerator
         {
