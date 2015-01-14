@@ -18,11 +18,10 @@ namespace
 {
 }
 
-#define ENABLE_MULTICASTRECEIVERTEST 1
+#define ENABLE_MULTICASTRECEIVERTEST 0
 #if ! ENABLE_MULTICASTRECEIVERTEST
 #pragma message ("ENABLE_MULTICASTRECEIVERTEST " __FILE__)
 #else // ENABLE_MULTICASTRECEIVERTEST
-
 BOOST_AUTO_TEST_CASE(MulticastReceiverTest)
 {
     auto ioservice = std::make_shared<AsioService>();

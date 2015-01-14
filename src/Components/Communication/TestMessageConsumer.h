@@ -10,12 +10,12 @@ namespace HighQueue
 {
     namespace Communication
     {
-        template<size_t Extra=0, typename HeaderGenerator = NullHeaderGenerator>
+        template<size_t Extra = 0, typename HeaderGenerator = NullHeaderGenerator>
         class TestMessageConsumer : public std::enable_shared_from_this<TestMessageConsumer<Extra, HeaderGenerator> >
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
-            TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount = 0, bool quitOnEmptyMessage);
+            TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount = 0, bool quitOnEmptyMessage = true);
             ~TestMessageConsumer();
 
             void start();
@@ -23,8 +23,12 @@ namespace HighQueue
             void pause();
             void resume();
 
-        private:
-            void runThread(volatile bool & startSignal);
+            uint32_t errors()const
+            {
+                return sequenceError_;
+            }
+
+            void run();
         private:
             HeaderGenerator headerGenerator_;
             ConnectionPtr connection_;
@@ -34,6 +38,8 @@ namespace HighQueue
             bool quitOnEmptyMessage_;
             bool paused_;
             bool stopping_;
+
+            uint32_t sequenceError_;
             
             std::shared_ptr<TestMessageConsumer> me_;
             std::thread thread_;
@@ -44,10 +50,11 @@ namespace HighQueue
             : connection_(connection)
             , consumer_(connection)
             , message_(connection)
-            , messageCount_(0)
-            , quitOnEmptyMessage_(quitonEmptyMessage)
+            , messageCount_(messageCount)
+            , quitOnEmptyMessage_(quitOnEmptyMessage)
             , paused_(false)
             , stopping_(false)
+            , sequenceError_(0)
         {
         }
 
@@ -62,7 +69,7 @@ namespace HighQueue
         {
             me_ = shared_from_this();
             thread_ = std::thread(std::bind(
-                TestMessageConsumer<Extra, HeaderGenerator>::runThread,
+                TestMessageConsumer<Extra, HeaderGenerator>::run,
                 this));
         }
 
@@ -70,32 +77,52 @@ namespace HighQueue
         void TestMessageConsumer<Extra, HeaderGenerator>::stop()
         {
             stopping_ = true;
-            thread_.join();
-            me_.reset();
+            if(me_)
+            { 
+                thread_.join();
+                me_.reset();
+            }
         }
 
         template<size_t Extra, typename HeaderGenerator>
         void TestMessageConsumer<Extra, HeaderGenerator>::pause()
         {
-            // todo
+            paused_ = true;
         }
 
         template<size_t Extra, typename HeaderGenerator>
         void TestMessageConsumer<Extra, HeaderGenerator>::resume()
         {
-            // todo
+            paused_ = false;
         }
 
         template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::runThread()
+        void TestMessageConsumer<Extra, HeaderGenerator>::run()
         {
-            uint32_t messageNumber = 0; 
-            while( messageCount_ > 0 && messageNumber < messageCount_
+            uint32_t messageCount = 0; 
+            uint32_t nextSequence = 0;
+            while(!stopping_)
             {
-                messageHeaderGenerator_.addHeader(message_);
-                auto testMessage = producerMessage.appendEmplace<ActualMessage>(producerNumber_, messageNumber);
-                producer.publish(producerMessage);
-                ++messageNumber)
+                stopping_ = !consumer_.getNext(message_);
+                if(!stopping_ && quitOnEmptyMessage_ && message_.getUsed() == 0)
+                {
+                    stopping_ = true;
+                }
+                if(!stopping_)
+                { 
+                    headerGenerator_.consumeHeader(message_);
+                    auto testMessage = message_.get<ActualMessage>();
+                    testMessage->touch();
+                    if(nextSequence != testMessage->messageNumber())
+                    {
+                        ++sequenceError_;
+                        nextSequence = testMessage->messageNumber();
+                    }
+                    ++nextSequence;
+                    message_.destroy<ActualMessage>();
+                    ++messageCount;
+                    stopping_ = !(messageCount_ == 0 || messageCount < messageCount_);
+                }
             }
         }
    }
