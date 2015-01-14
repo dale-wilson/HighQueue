@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     {
         consumer.getNext(consumerMessage);
 #if VALIDATE_OUTPUT 
-        auto testMessage = consumerMessage.get<ActualMessage>();
+        auto testMessage = consumerMessage.read<ActualMessage>();
         testMessage->touch();
         if(nextMessage != testMessage->messageNumber())
         {
