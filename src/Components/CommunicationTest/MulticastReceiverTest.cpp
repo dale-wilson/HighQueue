@@ -8,7 +8,7 @@
 #include <Communication/MulticastReceiver.h>
 #include <Communication/AsioService.h>
 #include <HighQueue/Connection.h>
-#include <HQPerformance/TestMessage.h>
+#include <Mocks/TestMessage.h>
 
 using namespace HighQueue;
 using namespace Communication;

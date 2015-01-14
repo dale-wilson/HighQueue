@@ -5,7 +5,7 @@
 #include <HighQueue/Producer.h>
 #include <HighQueue/Consumer.h>
 #include <Common/Stopwatch.h>
-#include <HQPerformance/TestMessage.h>
+#include <Mocks/TestMessage.h>
 
 using namespace HighQueue;
 namespace

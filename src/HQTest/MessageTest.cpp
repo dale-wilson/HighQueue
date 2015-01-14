@@ -36,8 +36,8 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     BOOST_CHECK(!message1.isEmpty());
 
     BOOST_CHECK_EQUAL(message1.get(), message1.getConst());
-    BOOST_CHECK(message1.needSpace(letterCount));
-    BOOST_CHECK(!message1.needSpace(message1.available() + 1));
+    BOOST_CHECK(message1.needAvailable(letterCount));
+    BOOST_CHECK(!message1.needAvailable(message1.available() + 1));
 
     std::string value1(message1.get<char>(), message1.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(0, letterCount), value1);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     BOOST_CHECK_EQUAL(message2.getUsed(), letterCount);
     BOOST_CHECK(!message2.isEmpty());
     BOOST_CHECK_GE(message2.available(), letterCount);
-    BOOST_CHECK(message2.needSpace(letterCount));
+    BOOST_CHECK(message2.needAvailable(letterCount));
 
     std::string value2a(message2.get<char>(), message2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(0, letterCount), value2a);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
 
     BOOST_CHECK_EQUAL(message1.getUsed(), 0U);
     BOOST_CHECK(message1.isEmpty());
-    BOOST_CHECK(message1.needSpace(2 * letterCount));
+    BOOST_CHECK(message1.needAvailable(2 * letterCount));
 
     BOOST_CHECK_EQUAL(message2.getUsed(), letterCount);
     BOOST_CHECK(!message2.isEmpty());
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     BOOST_CHECK(message1.isEmpty());
     BOOST_CHECK(! message1.getContainer());
     BOOST_CHECK_EQUAL(message1.available(), 0U);
-    BOOST_CHECK(!message1.needSpace(1));
+    BOOST_CHECK(!message1.needAvailable(1));
 }
 #endif // DISABLE_testNormalMessages
 
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(testMessageAppend)
     };
     MonoCase lowerCase(alphabet.data());
     MonoCase upperCase(alphabet.data() + letterCount);
-    message.appendEmplace(lowerCase);
-    message.appendEmplace(upperCase);
+    message.appendCopy(lowerCase);
+    message.appendCopy(upperCase);
     std::string value2(message.get<char>(), message.getUsed());
     BOOST_CHECK_EQUAL(alphabet, value2);
 }

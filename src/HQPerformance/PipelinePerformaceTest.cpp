@@ -5,7 +5,7 @@
 #include <HighQueue/Producer.h>
 #include <HighQueue/Consumer.h>
 #include <Common/Stopwatch.h>
-#include <HQPerformance/TestMessage.h>
+#include <Mocks/TestMessage.h>
 
 
 using namespace HighQueue;
@@ -49,7 +49,7 @@ namespace
 #if USE_PRONGHORN_MESSAGE
                 producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
 #else // USE_PRONGHORN_MESSAGE
-                auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
+                auto testMessage = producerMessage.appendEmplace<ActualMessage>(producerNumber, messageNumber);
 #endif //USE_PRONGHORN_MESSAGE
                 producer.publish(producerMessage);
             }
@@ -135,7 +135,7 @@ namespace
                                 producer.publish(producerMessage);
                                 return;
                             }
-                            producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
+                            producerMessage.appendEmplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
                             producer.publish(producerMessage);
                             consumerMessage.destroy<ActualMessage>();
                         }
