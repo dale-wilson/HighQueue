@@ -102,6 +102,7 @@ namespace HighQueue
             , joined_(false)
             , stopping_(false)
         {
+            message_.meta().type_ = Message::Meta::MulticastPacket;
         }
 
         inline
@@ -172,6 +173,7 @@ namespace HighQueue
             }
             else
             {
+                message_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
                 message_.addUsed(bytesReceived);
                 producer_.publish(message_);
                 startRead();

@@ -25,6 +25,12 @@ namespace HighQueue
 
             void run();
         private:
+            void handleEmptyMessage(Message & message);
+            void handleMessageType(Message::Meta::MessageType type, Message & message);
+            void handleHeartbeat(Message & message);
+            void handleDataMessage(Message & message);
+
+        private:
             ConnectionPtr inConnection_;
             ConnectionPtr outConnection_;
             Consumer consumer_;
@@ -106,80 +112,111 @@ namespace HighQueue
             while(!stopping_)
             {
                 stopping_ = !consumer_.getNext(message_);
-                if(!stopping_ && quitOnEmptyMessage_ && message_.getUsed() == 0)
+                if(!stopping_ && message_.isEmpty())
                 {
-                    DebugMessage("Arbitrator receive empty message"<< std::endl);
-                    // in theory we should flush here:
-                    producer_.publish(message_);
-                    stopping_ = true;
+                    handleEmptyMessage(message_);
                 }
                 if(!stopping_)
-                { 
-                // todo add support for timer message.
-                    auto testMessage = message_.get<CargoMessage>();
-                    auto sequence = testMessage->getSequence();
-                    if(expectedSequenceNumber_ == 0)
-                    {
-                        expectedSequenceNumber_ = sequence;
-                    }
-                    DebugMessage("Arbitrator sequence :" << sequence << " expected " << expectedSequenceNumber_ << std::endl);
-                    if(sequence == expectedSequenceNumber_)
-                    {
-                        DebugMessage("Publish " << std::endl);
-                        producer_.publish(message_);
-                        ++expectedSequenceNumber_;
-                    }
-                    else if(sequence < expectedSequenceNumber_)
-                    {
-                        DebugMessage("Ancient" << std::endl);
-                        // ignore this one.  We've already seen it.
-                    }
-                    else if(sequence - expectedSequenceNumber_ < lookAhead_)
-                    {
-                        auto index = sequence % lookAhead_;
-                        if(messages_[index].isEmpty())
-                        {
-                            DebugMessage("Stash" << std::endl);
-                            message_.moveTo(messages_[index]);
-                        }
-                        else
-                        {
-                            DebugMessage("Duplicate" << std::endl);
-                            // ignore this one we are already holding a copy.
-                        }
-                    }
-                    else // Sequence number is beyond the look-ahead window size
-                    {
-                        while(sequence - expectedSequenceNumber_ < lookAhead_)
-                        {
-                            auto index = expectedSequenceNumber_ % lookAhead_;
-                            if(messages_[index].isEmpty())
-                            {
-                                DebugMessage("Gap " << expectedSequenceNumber_ << std::endl);
-                                messages_[index].appendEmplace<GapMessage>(expectedSequenceNumber_);
-                            }
-                            else
-                            { 
-                                DebugMessage("publish Future " << expectedSequenceNumber_ << std::endl);
-                            }
-                            producer_.publish(messages_[index]);
-                            ++expectedSequenceNumber_;
-                        }
-                        DebugMessage("Stash future" << std::endl);
-                        auto index = sequence % lookAhead_;
-                        message_.moveTo(messages_[index]);
-                    }
-                    // flush any additional messages
-                    auto index = expectedSequenceNumber_ % lookAhead_;
-                    while(!messages_[index].isEmpty())
-                    {
-                        DebugMessage("Also publish " << expectedSequenceNumber_ << std::endl);
-                        producer_.publish(messages_[index]);
-                        ++expectedSequenceNumber_;
-                        index = expectedSequenceNumber_ % lookAhead_;
-                    }
+                {
+                    handleMessageType(message_.meta().type_, message_);
                 }
             }
         }
+
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::handleEmptyMessage(Message & message)
+        {
+            DebugMessage("Arbitrator received empty message" << std::endl);
+            producer_.publish(message);
+            stopping_ = quitOnEmptyMessage_;
+        }
+
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
+        {
+            if(type == Message::Meta::Heartbeat)
+            {
+                handleHeartbeat(message);
+            }
+            else
+            {
+                handleDataMessage(message);
+            }
+        }
+
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::handleHeartbeat(Message & message)
+        {
+            // todo:
+        }
+
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::handleDataMessage(Message & message)
+        {
+            auto testMessage = message.get<CargoMessage>();
+            auto sequence = testMessage->getSequence();
+            if(expectedSequenceNumber_ == 0)
+            {
+                expectedSequenceNumber_ = sequence;
+            }
+            DebugMessage("Arbitrator sequence :" << sequence << " expected " << expectedSequenceNumber_ << std::endl);
+            if(sequence == expectedSequenceNumber_)
+            {
+                DebugMessage("Publish " << std::endl);
+                producer_.publish(message);
+                ++expectedSequenceNumber_;
+            }
+            else if(sequence < expectedSequenceNumber_)
+            {
+                DebugMessage("Ancient" << std::endl);
+                // ignore this one.  We've already seen it.
+            }
+            else if(sequence - expectedSequenceNumber_ < lookAhead_)
+            {
+                auto index = sequence % lookAhead_;
+                if(messages_[index].isEmpty())
+                {
+                    DebugMessage("Stash" << std::endl);
+                    message.moveTo(messages_[index]);
+                }
+                else
+                {
+                    DebugMessage("Duplicate" << std::endl);
+                    // ignore this one we are already holding a copy.
+                }
+            }
+            else // Sequence number is beyond the look-ahead window size
+            {
+                while(sequence - expectedSequenceNumber_ < lookAhead_)
+                {
+                    auto index = expectedSequenceNumber_ % lookAhead_;
+                    if(messages_[index].isEmpty())
+                    {
+                        DebugMessage("Gap " << expectedSequenceNumber_ << std::endl);
+                        messages_[index].appendEmplace<GapMessage>(expectedSequenceNumber_);
+                    }
+                    else
+                    {
+                        DebugMessage("publish Future " << expectedSequenceNumber_ << std::endl);
+                    }
+                    producer_.publish(messages_[index]);
+                    ++expectedSequenceNumber_;
+                }
+                DebugMessage("Stash future" << std::endl);
+                auto index = sequence % lookAhead_;
+                message.moveTo(messages_[index]);
+            }
+            // flush any additional messages
+            auto index = expectedSequenceNumber_ % lookAhead_;
+            while(!messages_[index].isEmpty())
+            {
+                DebugMessage("Also publish " << expectedSequenceNumber_ << std::endl);
+                producer_.publish(messages_[index]);
+                ++expectedSequenceNumber_;
+                index = expectedSequenceNumber_ % lookAhead_;
+            }
+
+        }
+
    }
 }

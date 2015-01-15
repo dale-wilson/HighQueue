@@ -125,6 +125,7 @@ namespace HighQueue
                         {
                             DebugMessage("PassThru  copy binary.\n");
                             outputMessage_.appendBinaryCopy(message_.get(), message_.getUsed());
+                            outputMessage_.meta() = message_.meta();
                             producer_.publish(outputMessage_);
                             break;
                         }
@@ -132,6 +133,7 @@ namespace HighQueue
                         {
                             DebugMessage("PassThru  copy construct.\n");
                             outputMessage_.appendEmplace<CargoMessage>(*message_.get<CargoMessage>());
+                            outputMessage_.meta() = message_.meta();
                             producer_.publish(outputMessage_);
                             break;
                         }
