@@ -2,21 +2,21 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
+
 #include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Consumer.h>
 
-#define USE_DEBUG_MESSAGE 0
 #include <ComponentCommon/DebugMessage.h>
 
 namespace HighQueue
 {
     namespace Components
     {
-        template<typename CargoClass>
-        class Arbitrator : public std::enable_shared_from_this<Arbitrator>
+        template<typename CargoMessage, typename GapMessage>
+        class Arbitrator : public std::enable_shared_from_this<Arbitrator<CargoMessage, GapMessage> >
         {
         public:
-            Arbitrator(ConnectionPtr & connection, uint32_t messageCount = 0, bool quitOnEmptyMessage = true);
+            Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, bool quitOnEmptyMessage = true);
             ~Arbitrator();
 
             void start();
@@ -24,58 +24,61 @@ namespace HighQueue
             void pause();
             void resume();
 
-            uint32_t errors()const
-            {
-                return sequenceError_;
-            }
-
             void run();
         private:
-            HeaderGenerator headerGenerator_;
-            ConnectionPtr connection_;
+            ConnectionPtr inConnection_;
+            ConnectionPtr outConnection_;
             Consumer consumer_;
+            Producer producer_;
             Message message_;
-            uint32_t messageCount_;
+            size_t lookAhead_;
             bool quitOnEmptyMessage_;
             bool paused_;
             bool stopping_;
 
-            uint32_t sequenceError_;
+            uint32_t expectedSequenceNumber_;
+            std::vector<Message> messages_;
             
-            std::shared_ptr<TestMessageConsumer> me_;
+            std::shared_ptr<Arbitrator> me_;
             std::thread thread_;
         };
 
-        template<size_t Extra, typename HeaderGenerator>
-        TestMessageConsumer<Extra, HeaderGenerator>::TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount, bool quitOnEmptyMessage)
-            : connection_(connection)
-            , consumer_(connection)
-            , message_(connection)
-            , messageCount_(messageCount)
+        template<typename CargoMessage, typename GapMessage>
+        Arbitrator<CargoMessage, GapMessage>::Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, bool quitOnEmptyMessage)
+            : inConnection_(inConnection)
+            , outConnection_(outConnection)
+            , consumer_(inConnection_)
+            , producer_(outConnection_)
+            , message_(inConnection)
+            , lookAhead_(lookAhead)
             , quitOnEmptyMessage_(quitOnEmptyMessage)
             , paused_(false)
             , stopping_(false)
-            , sequenceError_(0)
+            , expectedSequenceNumber_(0)
         {
+            for(auto nMessage = 0; nMessage < lookAhead; ++nMessage)
+            {
+                messages_.emplace_back(outConnection_);
+            }
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        TestMessageConsumer<Extra, HeaderGenerator>::~TestMessageConsumer()
+        template<typename CargoMessage, typename GapMessage>
+        Arbitrator<CargoMessage, GapMessage>::~Arbitrator()
         {
             stop();
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::start()
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::start()
         {
             me_ = shared_from_this();
             thread_ = std::thread(std::bind(
-                TestMessageConsumer<Extra, HeaderGenerator>::run,
+                &Arbitrator<CargoMessage, GapMessage>::run,
                 this));
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::stop()
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::stop()
         {
             stopping_ = true;
             if(me_)
@@ -85,48 +88,99 @@ namespace HighQueue
             }
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::pause()
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::pause()
         {
             paused_ = true;
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::resume()
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::resume()
         {
             paused_ = false;
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::run()
+        template<typename CargoMessage, typename GapMessage>
+        void Arbitrator<CargoMessage, GapMessage>::run()
         {
-            DebugMessage("Consumer start.\n");
-            uint32_t messageCount = 0; 
-            uint32_t nextSequence = 0;
+            DebugMessage("Arbitrator start.\n");
             while(!stopping_)
             {
                 stopping_ = !consumer_.getNext(message_);
                 if(!stopping_ && quitOnEmptyMessage_ && message_.getUsed() == 0)
                 {
+                    DebugMessage("Arbitrator receive empty message"<< std::endl);
+                    // in theory we should flush here:
+                    producer_.publish(message_);
                     stopping_ = true;
                 }
                 if(!stopping_)
                 { 
-                    headerGenerator_.consumeHeader(message_);
-                    auto testMessage = message_.get<ActualMessage>();
-                    testMessage->touch();
-                    if(nextSequence != testMessage->messageNumber())
+                // todo add support for timer message.
+                    auto testMessage = message_.get<CargoMessage>();
+                    auto sequence = testMessage->getSequence();
+                    if(expectedSequenceNumber_ == 0)
                     {
-                        ++sequenceError_;
-                        nextSequence = testMessage->messageNumber();
+                        expectedSequenceNumber_ = sequence;
                     }
-                    ++nextSequence;
-                    message_.destroy<ActualMessage>();
-                    ++messageCount;
-                    stopping_ = !(messageCount_ == 0 || messageCount < messageCount_);
+                    DebugMessage("Arbitrator sequence :" << sequence << " expected " << expectedSequenceNumber_ << std::endl);
+                    if(sequence == expectedSequenceNumber_)
+                    {
+                        DebugMessage("Publish " << std::endl);
+                        producer_.publish(message_);
+                        ++expectedSequenceNumber_;
+                    }
+                    else if(sequence < expectedSequenceNumber_)
+                    {
+                        DebugMessage("Ancient" << std::endl);
+                        // ignore this one.  We've already seen it.
+                    }
+                    else if(sequence - expectedSequenceNumber_ < lookAhead_)
+                    {
+                        auto index = sequence % lookAhead_;
+                        if(messages_[index].isEmpty())
+                        {
+                            DebugMessage("Stash" << std::endl);
+                            message_.moveTo(messages_[index]);
+                        }
+                        else
+                        {
+                            DebugMessage("Duplicate" << std::endl);
+                            // ignore this one we are already holding a copy.
+                        }
+                    }
+                    else // Sequence number is beyond the look-ahead window size
+                    {
+                        while(sequence - expectedSequenceNumber_ < lookAhead_)
+                        {
+                            auto index = expectedSequenceNumber_ % lookAhead_;
+                            if(messages_[index].isEmpty())
+                            {
+                                DebugMessage("Gap " << expectedSequenceNumber_ << std::endl);
+                                messages_[index].appendEmplace<GapMessage>(expectedSequenceNumber_);
+                            }
+                            else
+                            { 
+                                DebugMessage("publish Future " << expectedSequenceNumber_ << std::endl);
+                            }
+                            producer_.publish(messages_[index]);
+                            ++expectedSequenceNumber_;
+                        }
+                        DebugMessage("Stash future" << std::endl);
+                        auto index = sequence % lookAhead_;
+                        message_.moveTo(messages_[index]);
+                    }
+                    // flush any additional messages
+                    auto index = expectedSequenceNumber_ % lookAhead_;
+                    while(!messages_[index].isEmpty())
+                    {
+                        DebugMessage("Also publish " << expectedSequenceNumber_ << std::endl);
+                        producer_.publish(messages_[index]);
+                        ++expectedSequenceNumber_;
+                        index = expectedSequenceNumber_ % lookAhead_;
+                    }
                 }
             }
-            DebugMessage("Consumer received " << messageCount << " messages with " << sequenceError_ << " errors" << std::endl);
         }
    }
 }

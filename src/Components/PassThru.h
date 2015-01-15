@@ -5,15 +5,14 @@
 #include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Consumer.h>
 
-#define USE_DEBUG_MESSAGE 0
 #include <ComponentCommon/DebugMessage.h>
 
 namespace HighQueue
 {
     namespace Components
     {
-        template<typename CargoType>
-        class PassThru : public std::enable_shared_from_this<PassThru<CargoType> >
+        template<typename CargoMessage>
+        class PassThru : public std::enable_shared_from_this<PassThru<CargoMessage> >
         {
         public:
             enum CopyType
@@ -37,7 +36,7 @@ namespace HighQueue
             ConnectionPtr outConnection_;
             Consumer consumer_;
             Producer producer_;
-            Message inputMessage_;
+            Message message_;
             Message outputMessage_;
             CopyType copyType_;
             uint32_t messageCount_;
@@ -49,13 +48,13 @@ namespace HighQueue
             std::thread thread_;
         };
 
-        template<typename CargoType>
-        PassThru<CargoType>::PassThru(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType, uint32_t messageCount, bool quitOnEmptyMessage)
+        template<typename CargoMessage>
+        PassThru<CargoMessage>::PassThru(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType, uint32_t messageCount, bool quitOnEmptyMessage)
             : inConnection_(inConnection)
             , outConnection_(outConnection)
             , consumer_(inConnection_)
             , producer_(outConnection_)
-            , inputMessage_(inConnection)
+            , message_(inConnection)
             , outputMessage_(outConnection)
             , copyType_(copyType)
             , messageCount_(messageCount)
@@ -65,23 +64,23 @@ namespace HighQueue
         {
         }
 
-        template<typename CargoType>
-        PassThru<CargoType>::~PassThru()
+        template<typename CargoMessage>
+        PassThru<CargoMessage>::~PassThru()
         {
             stop();
         }
 
-        template<typename CargoType>
-        void PassThru<CargoType>::start()
+        template<typename CargoMessage>
+        void PassThru<CargoMessage>::start()
         {
             me_ = shared_from_this();
             thread_ = std::thread(std::bind(
-                &PassThru<CargoType>::run,
+                &PassThru<CargoMessage>::run,
                 this));
         }
 
-        template<typename CargoType>
-        void PassThru<CargoType>::stop()
+        template<typename CargoMessage>
+        void PassThru<CargoMessage>::stop()
         {
             stopping_ = true;
             if(me_)
@@ -91,29 +90,29 @@ namespace HighQueue
             }
         }
 
-        template<typename CargoType>
-        void PassThru<CargoType>::pause()
+        template<typename CargoMessage>
+        void PassThru<CargoMessage>::pause()
         {
             paused_ = true;
         }
 
-        template<typename CargoType>
-        void PassThru<CargoType>::resume()
+        template<typename CargoMessage>
+        void PassThru<CargoMessage>::resume()
         {
             paused_ = false;
         }
 
-        template<typename CargoType>
-        void PassThru<CargoType>::run()
+        template<typename CargoMessage>
+        void PassThru<CargoMessage>::run()
         {
             DebugMessage("PassThru  start. " << inConnection_->getHeader()->name_ << "->" << outConnection_->getHeader()->name_ << std::endl);
             uint32_t messageCount = 0; 
             while(!stopping_)
             {
-                stopping_ = !consumer_.getNext(inputMessage_);
-                size_t used = inputMessage_.getUsed();
+                stopping_ = !consumer_.getNext(message_);
+                size_t used = message_.getUsed();
 
-                if(!stopping_ && quitOnEmptyMessage_ && inputMessage_.isEmpty())
+                if(!stopping_ && quitOnEmptyMessage_ && message_.isEmpty())
                 {
                     producer_.publish(outputMessage_);
                     stopping_ = true;                   
@@ -126,28 +125,28 @@ namespace HighQueue
                         case CopyBinary:
                         {
                             DebugMessage("PassThru  copy binary.\n");
-                            outputMessage_.appendBinaryCopy(inputMessage_.get(), inputMessage_.getUsed());
+                            outputMessage_.appendBinaryCopy(message_.get(), message_.getUsed());
                             producer_.publish(outputMessage_);
                             break;
                         }
                         case CopyConstruct:
                         {
                             DebugMessage("PassThru  copy construct.\n");
-                            outputMessage_.appendEmplace<CargoType>(*inputMessage_.get<CargoType>());
+                            outputMessage_.appendEmplace<CargoMessage>(*message_.get<CargoMessage>());
                             producer_.publish(outputMessage_);
                             break;
                         }
                         case CopyMove:
                         {
                             DebugMessage("PassThru  copy move.\n");
-                            inputMessage_.moveTo(outputMessage_);
+                            message_.moveTo(outputMessage_);
                             producer_.publish(outputMessage_);
                             break;
                         }
                         case CopyForward:
                         {
                             DebugMessage("PassThru  copy Forward.\n");
-                            producer_.publish(inputMessage_);
+                            producer_.publish(message_);
                             break;
                         }
                     }

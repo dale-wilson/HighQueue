@@ -6,7 +6,6 @@
 #include <HighQueue/Consumer.h>
 #include <Mocks/TestMessage.h>
 
-#define USE_DEBUG_MESSAGE 0
 #include <ComponentCommon/DebugMessage.h>
 
 namespace HighQueue
@@ -116,11 +115,11 @@ namespace HighQueue
                 { 
                     headerGenerator_.consumeHeader(message_);
                     auto testMessage = message_.get<ActualMessage>();
-                    testMessage->touch();
-                    if(nextSequence != testMessage->messageNumber())
+                    DebugMessage("Consumer: " << testMessage->getSequence() << std::endl);
+                    if(nextSequence != testMessage->getSequence())
                     {
                         ++sequenceError_;
-                        nextSequence = testMessage->messageNumber();
+                        nextSequence = testMessage->getSequence();
                     }
                     ++nextSequence;
                     message_.destroy<ActualMessage>();

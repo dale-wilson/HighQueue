@@ -44,10 +44,10 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     {
         consumer.getNext(producerMessage);
         auto testMessage = producerMessage.get<ActualMessage>();
-        if(nMessage != testMessage->messageNumber())
+        if(nMessage != testMessage->getSequence())
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(nMessage, testMessage->messageNumber());
+            BOOST_CHECK_EQUAL(nMessage, testMessage->getSequence());
         }
     }
     auto consumeTime = timer.microseconds();

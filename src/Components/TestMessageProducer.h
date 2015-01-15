@@ -5,7 +5,7 @@
 #include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Producer.h>
 #include <Mocks/TestMessage.h>
-#define USE_DEBUG_MESSAGE 0
+
 #include <ComponentCommon/DebugMessage.h>
 
 namespace HighQueue
@@ -118,6 +118,7 @@ namespace HighQueue
             }
             if(sendEmptyMessageOnQuit_)
             {
+                DebugMessage("Producer "<< producerNumber_ <<"publish empty message" << std::endl);
                 producer_.publish(message_);
             }
             DebugMessage("Producer " << producerNumber_ << " published " << messageNumber << " messages." << std::endl);
