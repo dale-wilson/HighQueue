@@ -49,7 +49,7 @@ namespace
 #if USE_PRONGHORN_MESSAGE
                 producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
 #else // USE_PRONGHORN_MESSAGE
-                auto testMessage = producerMessage.appendEmplace<ActualMessage>(producerNumber, messageNumber);
+                auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
 #endif //USE_PRONGHORN_MESSAGE
                 producer.publish(producerMessage);
             }
@@ -135,7 +135,7 @@ namespace
                                 producer.publish(producerMessage);
                                 return;
                             }
-                            producerMessage.appendEmplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
+                            producerMessage.emplace<ActualMessage>(*consumerMessage.get<ActualMessage>());
                             producer.publish(producerMessage);
                             consumerMessage.destroy<ActualMessage>();
                         }

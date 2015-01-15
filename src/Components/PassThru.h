@@ -30,6 +30,23 @@ namespace HighQueue
             void resume();
 
             void run();
+
+            static const char * copyTypeName(CopyType type)
+            {
+                switch(type)
+                {
+                    case CopyBinary:
+                        return "Binary";
+                    case CopyConstruct:
+                        return "Construct";
+                    case CopyMove:
+                        return "Move";
+                    case CopyForward:
+                        return "Forward";
+                    default:
+                        return "Invalid";
+                }
+            }
         private:
             ConnectionPtr inConnection_;
             ConnectionPtr outConnection_;
@@ -132,7 +149,7 @@ namespace HighQueue
                         case CopyConstruct:
                         {
                             DebugMessage("PassThru  copy construct.\n");
-                            outputMessage_.appendEmplace<CargoMessage>(*message_.get<CargoMessage>());
+                            outputMessage_.emplace<CargoMessage>(*message_.get<CargoMessage>());
                             outputMessage_.meta() = message_.meta();
                             producer_.publish(outputMessage_);
                             break;

@@ -193,7 +193,7 @@ namespace HighQueue
                     if(messages_[index].isEmpty())
                     {
                         DebugMessage("Gap " << expectedSequenceNumber_ << std::endl);
-                        messages_[index].appendEmplace<GapMessage>(expectedSequenceNumber_);
+                        messages_[index].emplace<GapMessage>(expectedSequenceNumber_);
                     }
                     else
                     {

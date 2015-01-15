@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <HighQueue/Producer.h>
+#include <ComponentCommon/ComponentSource.h>
 #include <Mocks/TestMessage.h>
 
 #include <ComponentCommon/DebugMessage.h>
@@ -12,52 +12,41 @@ namespace HighQueue
     namespace Components
     {
         template<size_t Extra=0>
-        class TestMessageProducer : public std::enable_shared_from_this<TestMessageProducer<Extra> >
+        class TestMessageProducer : public ComponentSource
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
-            TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount = 0, uint32_t producerNumber = 0, bool sendEmptyMessageOnQuit = true);
-            ~TestMessageProducer();
+            TestMessageProducer(
+                ConnectionPtr & connection, 
+                volatile bool & startSignal, 
+                uint32_t messageCount = 0, 
+                uint32_t producerNumber = 0, 
+                bool sendEmptyMessageOnQuit = true);
 
             bool configure();
-            void start(volatile bool & startSignal);
-            void stop();
-            void pause();
-            void resume();
+            virtual void run();
 
         private:
-            void runThread(volatile bool & startSignal);
-        private:
-            ConnectionPtr connection_;
-            Producer producer_;
-            Message message_;
             uint32_t messageCount_;
             uint32_t producerNumber_;
             bool sendEmptyMessageOnQuit_;
-            bool paused_;
-            bool stopping_;
 
-            std::shared_ptr<TestMessageProducer> me_;
-            std::thread thread_;
+            volatile bool & startSignal_;
         };
 
         template<size_t Extra>
-        TestMessageProducer<Extra>::TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount, uint32_t producerNumber, bool sendEmptyMessageOnQuit)
-            : connection_(connection)
-            , producer_(connection)
-            , message_(connection)
+        TestMessageProducer<Extra>::TestMessageProducer(
+            ConnectionPtr & connection, 
+            volatile bool & startSignal, 
+            uint32_t messageCount, 
+            uint32_t producerNumber, 
+            bool sendEmptyMessageOnQuit)
+            : ComponentSource(connection)
+            , startSignal_(startSignal)
             , messageCount_(messageCount)
             , producerNumber_(producerNumber)
             , sendEmptyMessageOnQuit_(sendEmptyMessageOnQuit)
-            , paused_(false)
-            , stopping_(false)
         {
-        }
-
-        template<size_t Extra>
-        TestMessageProducer<Extra>::~TestMessageProducer()
-        {
-            stop();
         }
 
         template<size_t Extra>
@@ -68,39 +57,9 @@ namespace HighQueue
         }
 
         template<size_t Extra>
-        void TestMessageProducer<Extra>::start(volatile bool & startSignal)
+        void TestMessageProducer<Extra>::run()
         {
-            me_ = shared_from_this();
-            thread_ = std::thread(std::bind(
-                &TestMessageProducer<Extra>::runThread,
-                this, std::ref(startSignal)));
-        }
-
-        template<size_t Extra>
-        void TestMessageProducer<Extra>::stop()
-        {
-            stopping_ = true;
-            if(me_)
-            {
-                thread_.join();
-                me_.reset();
-            }
-        }
-
-        template<size_t Extra>
-        void TestMessageProducer<Extra>::pause()
-        {
-        }
-
-        template<size_t Extra>
-        void TestMessageProducer<Extra>::resume()
-        {
-        }
-
-        template<size_t Extra>
-        void TestMessageProducer<Extra>::runThread(volatile bool & startSignal)
-        {
-            while(!startSignal)
+            while(!startSignal_)
             {
                 std::this_thread::yield();
             }
@@ -109,14 +68,14 @@ namespace HighQueue
             while( messageCount_ == 0 || messageNumber < messageCount_)
             {
                 // DebugMessage("Publish " << messageNumber << '/' << messageCount_ << std::endl);
-                auto testMessage = message_.appendEmplace<ActualMessage>(producerNumber_, messageNumber);
-                producer_.publish(message_);
+                auto testMessage = outMessage_.emplace<ActualMessage>(producerNumber_, messageNumber);
+                producer_.publish(outMessage_);
                 ++messageNumber;
             }
             if(sendEmptyMessageOnQuit_)
             {
                 DebugMessage("Producer "<< producerNumber_ <<"publish empty message" << std::endl);
-                producer_.publish(message_);
+                producer_.publish(outMessage_);
             }
             DebugMessage("Producer " << producerNumber_ << " published " << messageNumber << " messages." << std::endl);
         }

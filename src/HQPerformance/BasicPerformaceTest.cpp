@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 
     for(uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
-        producerMessage.appendEmplace<ActualMessage>(1, nMessage);
+        producerMessage.emplace<ActualMessage>(1, nMessage);
         producer.publish(producerMessage);
     }
     auto publishTime = timer.microseconds();

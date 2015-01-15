@@ -43,7 +43,7 @@ namespace
         CopyConstruct
     };
 
-    CopyType copyType = PassThru;
+    CopyType copyType = BinaryCopy;
     // BufferSwap;
     // BinaryCopy;
 
