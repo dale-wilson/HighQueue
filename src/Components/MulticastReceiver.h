@@ -4,7 +4,6 @@
 #pragma once
 #include "MulticastReceiverFwd.h"
 #include <ComponentCommon/AsioService.h>
-#include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Producer.h>
 
 namespace HighQueue
@@ -30,8 +29,7 @@ namespace HighQueue
             {}
         };
 
-        template<typename HeaderGenerator = NullHeaderGenerator>
-        class MulticastReceiver: public std::enable_shared_from_this<MulticastReceiver<HeaderGenerator> >
+        class MulticastReceiver: public std::enable_shared_from_this<MulticastReceiver >
         {
         public:
             MulticastReceiver(
@@ -60,7 +58,6 @@ namespace HighQueue
             void handleReceive(const boost::system::error_code& error, size_t bytesReceived);
 
         private:
-            HeaderGenerator headerGenerator_;
             
             AsioServicePtr ioService_;
             boost::asio::ip::udp::socket socket_;
@@ -89,12 +86,12 @@ namespace HighQueue
                 }
             };
             std::unique_ptr<MCastInfo> mcast_;
-            std::shared_ptr<MulticastReceiver<HeaderGenerator> > me_;
+            std::shared_ptr<MulticastReceiver> me_;
 
         };
 
-        template<typename HeaderGenerator>
-        MulticastReceiver<HeaderGenerator>::MulticastReceiver(
+        inline
+        MulticastReceiver::MulticastReceiver(
             AsioServicePtr & ioService,
             ConnectionPtr & connection)
             : ioService_(ioService)
@@ -107,14 +104,14 @@ namespace HighQueue
         {
         }
 
-        template<typename HeaderGenerator>
-        MulticastReceiver<HeaderGenerator>::~MulticastReceiver()
+        inline
+        MulticastReceiver::~MulticastReceiver()
         {
             stop();
         }
 
-        template<typename HeaderGenerator>
-        bool MulticastReceiver<HeaderGenerator>::configure(const MulticastConfiguration & configuration)
+        inline
+        bool MulticastReceiver::configure(const MulticastConfiguration & configuration)
         {
             try
             {
@@ -141,21 +138,20 @@ namespace HighQueue
             return true;
         }
 
-        template<typename HeaderGenerator>
-        void MulticastReceiver<HeaderGenerator>::start()
+        inline
+        void MulticastReceiver::start()
         {
             startRead();
         }
 
-        template<typename HeaderGenerator>
-        void MulticastReceiver<HeaderGenerator>::startRead()
+        inline
+        void MulticastReceiver::startRead()
         {
-            if(!stopping)
+            if(!stopping_)
             {
-                messageHeaderGenerator_.addHeader(message_);
                 socket_.async_receive_from(
                     boost::asio::buffer(message_.getWritePosition(), message_.available()),
-                    senderEndpoint_,
+                    mcast_->senderEndpoint_,
                     boost::bind(&MulticastReceiver::handleReceive,
                     this,
                     boost::asio::placeholders::error,
@@ -164,8 +160,8 @@ namespace HighQueue
             }
         }
 
-        template<typename HeaderGenerator>
-        void MulticastReceiver<HeaderGenerator>::handleReceive(
+        inline
+        void MulticastReceiver::handleReceive(
             const boost::system::error_code& error,
             size_t bytesReceived)
         {
@@ -182,8 +178,8 @@ namespace HighQueue
             }
         }
 
-        template<typename HeaderGenerator>
-        void MulticastReceiver<HeaderGenerator>::stop()
+        inline
+        void MulticastReceiver::stop()
         {
             stopping_ = true;
             try
@@ -198,8 +194,8 @@ namespace HighQueue
             me_.reset();
         }
 
-        template<typename HeaderGenerator>
-        void MulticastReceiver<HeaderGenerator>::pause()
+        inline
+        void MulticastReceiver::pause()
         {
             // Temporarily leave the group
             if(joined_)
@@ -212,8 +208,8 @@ namespace HighQueue
             }
         }
 
-        template<typename HeaderGenerator>
-        void MulticastReceiver<HeaderGenerator>::resume()
+        inline
+        void MulticastReceiver::resume()
         {
             if(!joined_)
             {
@@ -226,50 +222,50 @@ namespace HighQueue
             }
         }
 
-        template<typename HeaderGenerator>
-        boost::asio::ip::address MulticastReceiver<HeaderGenerator>::listenInterface()const
+        inline
+        boost::asio::ip::address MulticastReceiver::listenInterface()const
         {
-            return listenInterface_;
+            return mcast_->listenInterface_;
         }
 
-        template<typename HeaderGenerator>
-        unsigned short MulticastReceiver<HeaderGenerator>::portNumber()const
+        inline
+        unsigned short MulticastReceiver::portNumber()const
         {
-            return portNumber_;
+            return mcast_->portNumber_;
         }
 
-        template<typename HeaderGenerator>
-        boost::asio::ip::address MulticastReceiver<HeaderGenerator>::multicastGroup()const
+        inline
+        boost::asio::ip::address MulticastReceiver::multicastGroup()const
         {
-            return multicastGroup_;
+            return mcast_->multicastGroup_;
         }
 
-        template<typename HeaderGenerator>
-        boost::asio::ip::address MulticastReceiver<HeaderGenerator>::bindAddress()const
+        inline
+        boost::asio::ip::address MulticastReceiver::bindAddress()const
         {
-            return bindAddress_;
+            return mcast_->bindAddress_;
         }
 
-        template<typename HeaderGenerator>
-        boost::asio::ip::udp::endpoint MulticastReceiver<HeaderGenerator>::endpoint()const
+        inline
+        boost::asio::ip::udp::endpoint MulticastReceiver::endpoint()const
         {
-            return endpoint_;
+            return mcast_->endpoint_;
         }
 
-        template<typename HeaderGenerator>
-        boost::asio::ip::udp::endpoint MulticastReceiver<HeaderGenerator>::senderEndpoint()const
+        inline
+        boost::asio::ip::udp::endpoint MulticastReceiver::senderEndpoint()const
         {
-            return senderEndpoint_;
+            return mcast_->senderEndpoint_;
         }
 
-        template<typename HeaderGenerator>
-        boost::asio::ip::udp::socket & MulticastReceiver<HeaderGenerator>::socket()
+        inline
+        boost::asio::ip::udp::socket & MulticastReceiver::socket()
         {
             return socket_;
         }
 
-        template<typename HeaderGenerator>
-        bool MulticastReceiver<HeaderGenerator>::joined()const
+        inline
+        bool MulticastReceiver::joined()const
         {
             return joined_;
         }

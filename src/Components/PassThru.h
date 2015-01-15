@@ -2,7 +2,6 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Consumer.h>
 
 #include <ComponentCommon/DebugMessage.h>

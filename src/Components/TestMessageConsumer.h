@@ -2,7 +2,6 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Consumer.h>
 #include <Mocks/TestMessage.h>
 
@@ -12,8 +11,8 @@ namespace HighQueue
 {
     namespace Components
     {
-        template<size_t Extra = 0, typename HeaderGenerator = NullHeaderGenerator>
-        class TestMessageConsumer : public std::enable_shared_from_this<TestMessageConsumer<Extra, HeaderGenerator> >
+        template<size_t Extra = 0>
+        class TestMessageConsumer : public std::enable_shared_from_this<TestMessageConsumer<Extra> >
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
@@ -32,7 +31,6 @@ namespace HighQueue
 
             void run();
         private:
-            HeaderGenerator headerGenerator_;
             ConnectionPtr connection_;
             Consumer consumer_;
             Message message_;
@@ -47,8 +45,8 @@ namespace HighQueue
             std::thread thread_;
         };
 
-        template<size_t Extra, typename HeaderGenerator>
-        TestMessageConsumer<Extra, HeaderGenerator>::TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount, bool quitOnEmptyMessage)
+        template<size_t Extra>
+        TestMessageConsumer<Extra>::TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount, bool quitOnEmptyMessage)
             : connection_(connection)
             , consumer_(connection)
             , message_(connection)
@@ -60,23 +58,23 @@ namespace HighQueue
         {
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        TestMessageConsumer<Extra, HeaderGenerator>::~TestMessageConsumer()
+        template<size_t Extra>
+        TestMessageConsumer<Extra>::~TestMessageConsumer()
         {
             stop();
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::start()
+        template<size_t Extra>
+        void TestMessageConsumer<Extra>::start()
         {
             me_ = shared_from_this();
             thread_ = std::thread(std::bind(
-                TestMessageConsumer<Extra, HeaderGenerator>::run,
+                TestMessageConsumer<Extra>::run,
                 this));
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::stop()
+        template<size_t Extra>
+        void TestMessageConsumer<Extra>::stop()
         {
             stopping_ = true;
             if(me_)
@@ -86,20 +84,20 @@ namespace HighQueue
             }
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::pause()
+        template<size_t Extra>
+        void TestMessageConsumer<Extra>::pause()
         {
             paused_ = true;
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::resume()
+        template<size_t Extra>
+        void TestMessageConsumer<Extra>::resume()
         {
             paused_ = false;
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageConsumer<Extra, HeaderGenerator>::run()
+        template<size_t Extra>
+        void TestMessageConsumer<Extra>::run()
         {
             DebugMessage("Consumer start. " << connection_->getHeader()->name_ << std::endl);
             uint32_t messageCount = 0; 
@@ -113,7 +111,6 @@ namespace HighQueue
                 }
                 if(!stopping_)
                 { 
-                    headerGenerator_.consumeHeader(message_);
                     auto testMessage = message_.get<ActualMessage>();
                     DebugMessage("Consumer: " << testMessage->getSequence() << std::endl);
                     if(nextSequence != testMessage->getSequence())

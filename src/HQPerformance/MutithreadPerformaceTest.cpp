@@ -8,7 +8,7 @@
 #include <Mocks/TestMessage.h>
 
 using namespace HighQueue;
-typedef TestMessage</*13*/80> ActualMessage;
+typedef TestMessage<13> ActualMessage;
 
 namespace
 {

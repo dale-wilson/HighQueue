@@ -6,8 +6,7 @@ namespace HighQueue
 {
     namespace Components
     {
-        template<typename HeaderGenerator>
         class MulticastReceiver;
-        // can't figure out how to declare MulticastReceiverPtr;
+        typedef std::shared_ptr<MulticastReceiver> MulticastReceiverPtr;
     }
 }

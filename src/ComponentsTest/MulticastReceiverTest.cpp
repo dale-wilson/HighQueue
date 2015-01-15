@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(MulticastReceiverTest)
     connection->createLocal("LocalIv", parameters);
 
     MulticastConfiguration configuration("multicastGroupIP", "listenInterfaceIP", "bindIP", 10000);
-    auto receiver = std::make_shared<MulticastReceiver<NullHeaderGenerator> >(ioservice, connection);
+    auto receiver = std::make_shared<MulticastReceiver>(ioservice, connection);
     BOOST_CHECK(receiver->configure(configuration));
 };
 

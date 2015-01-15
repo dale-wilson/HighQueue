@@ -21,17 +21,17 @@ namespace
     typedef TestMessage<testMessageExtras> ActualMessage;
     auto messageBytes = sizeof(ActualMessage);
 
-    typedef TestMessageProducer<testMessageExtras, NullHeaderGenerator> ProducerType;
+    typedef TestMessageProducer<testMessageExtras> ProducerType;
     typedef std::shared_ptr<ProducerType> ProducerPtr;
 
-    typedef TestMessageConsumer<testMessageExtras, NullHeaderGenerator> ConsumerType;
+    typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
     typedef PassThru<ActualMessage> CopierType;
     typedef std::shared_ptr<CopierType> CopierPtr;
 }
 
-#define ENABLE_PIPELINE_TEST 0
+#define ENABLE_PIPELINE_TEST 01
 #if ENABLE_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testPipeline)
 {

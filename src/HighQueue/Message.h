@@ -14,6 +14,32 @@ namespace HighQueue
     public:
         const static size_t NO_POOL = ~size_t(0);
 
+        /// @brief Information describing the contents of the message
+        /// Note this is one way--it gets copied, not moved or swapped by a moveTo operator.
+        /// Thus the original source of data can set the type and forget it.
+        /// Developer note: The entire Message object must fit in a single cache line (64 bytes)
+        /// be cautious about adding additional Meta information.
+        struct Meta
+        {
+            enum MessageType: uint16_t
+            {
+                Unused,
+                Heartbeat,
+                TestMessage,
+                MulticastBlock, // Generic.  Could be specialized based on source
+                LocalType0, LocalType1, LocalType2, LocalType3,   // for locally private purpose to avoid redefining this class. 
+                LocalType4, LocalType5, LocalType6, LocalType7,   // for locally private purpose to avoid redefining this class. 
+                ExtraTypeBase
+            };
+            MessageType type_;
+            uint64_t timestamp_; // todo define units
+            Meta()
+                : type_(Unused)
+                , timestamp_(0)
+            {}
+        };
+    public:
+
         /// @brief construct an empty Message
         /// @tparam AllocatorPtr points to an Allocator that attaches memory to the Message
         /// concept Allocator {
@@ -22,7 +48,14 @@ namespace HighQueue
         template <typename AllocatorPtr>
         Message(AllocatorPtr & allocator);
 
+        /// @brief destruct, returning the memory to the pool.
         ~Message();
+
+        /// @brief Access meta info about this message
+        Meta & meta();
+
+        /// @brief Access constant meta info about this message
+        const Meta & meta()const;
 
         /// @brief return a pointer to the block of memory cast to the requested type.  
         ///
@@ -140,38 +173,17 @@ namespace HighQueue
         /// @brief Undo a set.  Return the memory to the pool (if any), and make the message Invalid.
         void release();
 
-        /// @brief Associate this memory block with one or two segments of memory contained in some other object.
-        /// Note: "borrow" is a useful concept borrowed from Rust.
-        ///
-        /// Normally this method will be used when the data appears inside an external buffeR used for some other purpose 
-        /// for example a buffeR read from a TCP stream or a file stream.  Because the message boundaries don't
-        /// necessarily match buffeR boundaries in this use case, borrow allows the data to appear in two separate
-        /// chunks within the same buffeR.
-        ///
-        /// @param container The base address for the external buffeR containing the memory.
-        /// @param offset The offset to this buffeR within the container
-        /// @param used The number of bytes used
-        /// @param offsetSplit The offset to the second chunk data in the external buffeR.
-        /// @param usedSplit The number of bytes used in the second chunk.
-        void borrow(const byte_t * container, size_t offset, size_t used, size_t offsetSplit = 0, size_t usedSplit = 0);
-
         /// @brief Mark the message empty.
         void setEmpty();
+
+        /// @brief Mark the message unread.
+        void rewind();
 
         /// @brief Is the message empty?
         bool isEmpty()const;
 
-        /// @brief Swap the contents of two messages.
-        /// Fast
-        /// @param rhs is the message that will be swapped with *this
-        /// @throws runtime_exception if either message is unsuitable for swapping.
-        void swap(Message & rhs);
-
-        /// @brief Move the data from one message to another, leaving the original message empty.
-        /// Fast if both messages are normal.
-        /// Fast enough if the source message is borrowed.
-        /// The target message must not be borrowed.
-        /// After the move, the target message will be normal.
+        /// @brief Move the data from one message to another, leaving the source message empty.
+        /// Note meta information is copied, but remains intact in the source message.
         /// @param target is the message to receive the data
         /// @throws runtime_exception if the target message is not suitable.
         void moveTo(Message & target);
@@ -194,12 +206,19 @@ namespace HighQueue
         size_t offset_;
         size_t used_;
         size_t read_;
+        Meta meta_;
     };
 
     template <typename AllocatorPtr>
     Message::Message(AllocatorPtr & allocator)
     {
         allocator->allocate(*this);
+    }
+
+    inline
+    Message::Meta & Message::meta()
+    {
+        return meta_;
     }
 
     inline
@@ -268,19 +287,15 @@ namespace HighQueue
     }
 
     inline
-    bool Message::isEmpty()const
+    void Message::rewind()
     {
-        return used_ == 0;
+        read_ = 0;
     }
 
     inline
-    void Message::swap(Message & rhs)
+    bool Message::isEmpty()const
     {
-        std::swap(container_, rhs.container_);
-        std::swap(capacity_, rhs.capacity_);
-        std::swap(offset_, rhs.offset_);
-        std::swap(used_, rhs.used_);
-        std::swap(read_, rhs.read_);
+        return used_ == 0;
     }
 
     inline
@@ -291,6 +306,7 @@ namespace HighQueue
         std::swap(offset_, rhs.offset_);
         rhs.used_ = used_;
         rhs.read_ = read_;
+        rhs.meta_ = meta_;
         used_ = 0;
         read_ = 0;
     }

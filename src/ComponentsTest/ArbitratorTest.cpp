@@ -31,10 +31,10 @@ namespace
     typedef TestMessage<testMessageExtras> ActualMessage;
     auto messageBytes = sizeof(ActualMessage);
 
-    typedef TestMessageProducer<testMessageExtras, NullHeaderGenerator> ProducerType;
+    typedef TestMessageProducer<testMessageExtras> ProducerType;
     typedef std::shared_ptr<ProducerType> ProducerPtr;
 
-    typedef TestMessageConsumer<testMessageExtras, NullHeaderGenerator> ConsumerType;
+    typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
     typedef Arbitrator<ActualMessage, GapMessage> ArbitratorType;
