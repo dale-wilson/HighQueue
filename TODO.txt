@@ -1,6 +1,5 @@
-Add message meta information
-Dispatch on meta.
-Create timer Component
+
+Create timer/heartbeat Component
 Extract common base class(es) for Components.
 Consider the pipeline framework that runs the components.
 
