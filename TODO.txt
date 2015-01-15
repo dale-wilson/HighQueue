@@ -1,6 +1,5 @@
 
 Create timer/heartbeat Component
-
 Consider the pipeline framework that runs the components.
 
 Create an example application (for example: A/B-Mcast->arbitration)
