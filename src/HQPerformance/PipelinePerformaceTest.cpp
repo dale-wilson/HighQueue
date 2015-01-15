@@ -152,8 +152,8 @@ namespace
     }
 }
 
-#define ENABLE_PIPELINEPERFORMANCE 1
-#if ENABLE_PIPELINEPERFORMANCE
+#define ENABLE_ARBITRATORPERFORMANCE 1
+#if ENABLE_ARBITRATORPERFORMANCE
 BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 {
     static const size_t numberOfConsumers = 1;   // Don't change this
@@ -231,10 +231,10 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 #if VALIDATE_OUTPUT 
         auto testMessage = consumerMessage.read<ActualMessage>();
         testMessage->touch();
-        if(nextMessage != testMessage->messageNumber())
+        if(nextMessage != testMessage->getSequence())
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(nextMessage, testMessage->messageNumber());
+            BOOST_CHECK_EQUAL(nextMessage, testMessage->getSequence());
         }
         consumerMessage.destroy<ActualMessage>();
         ++ nextMessage;
@@ -260,4 +260,4 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     consumer.writeStats(std::cerr);
 }
-#endif // ENABLEPIPELINEPERFORMANCE
+#endif // ENABLEARBITRATORPERFORMANCE

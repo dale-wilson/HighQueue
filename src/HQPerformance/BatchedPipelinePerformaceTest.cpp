@@ -146,8 +146,8 @@ namespace
     }
 }
 
-#define ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST 1
-#if ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST
+#define ENABLE_BATCHED_ARBITRATOR_PERFORMANCE_TEST 1
+#if ENABLE_BATCHED_ARBITRATOR_PERFORMANCE_TEST
 BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
 {
     std::cerr << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
@@ -225,4 +225,4 @@ BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
 
     consumer.writeStats(std::cerr);
 }
-#endif // ENABLEBATCHED_PIPELINE_PERFORMANCE_TEST
+#endif // ENABLEBATCHED_ARBITRATOR_PERFORMANCE_TEST

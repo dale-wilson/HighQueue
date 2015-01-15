@@ -7,16 +7,16 @@ namespace HighQueue
     {
         enum Indexes : uint32_t
         {
-            MessageNumber = 0,
+            SequenceNumber = 0,
             ProducerNumber,
             ExtraStart
         };
 
         uint32_t message_[ExtraCount + ExtraStart];
         inline
-        TestMessage(uint32_t producerNumber, uint32_t messageNumber)
+        TestMessage(uint32_t producerNumber, uint32_t sequenceNumber)
         {
-            message_[MessageNumber] = messageNumber;
+            message_[SequenceNumber] = sequenceNumber;
             message_[ProducerNumber] = producerNumber;
             for(uint32_t nExtra = ExtraStart; nExtra < ExtraStart + ExtraCount; ++nExtra)
             {
@@ -25,9 +25,9 @@ namespace HighQueue
         }
 
         inline
-        uint32_t messageNumber() const
+        uint32_t getSequence() const
         {
-            return message_[MessageNumber];
+            return message_[SequenceNumber];
         }
 
         inline

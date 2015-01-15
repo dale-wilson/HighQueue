@@ -74,10 +74,10 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
         producer.publish(producerMessage);
         consumer.getNext(consumerMessage);
         auto testMessage = consumerMessage.get<ActualMessage>();
-        if(messageNumber != testMessage->messageNumber())
+        if(messageNumber != testMessage->getSequence())
         {
             // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-            BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber());
+            BOOST_CHECK_EQUAL(messageNumber, testMessage->getSequence());
         }
     }
     auto lapse = timer.nanoseconds();
@@ -157,10 +157,10 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             auto testMessage = consumerMessage.get<ActualMessage>();
             testMessage->touch();
             auto & msgNumber = nextMessage[testMessage->producerNumber()];
-            if(msgNumber != testMessage->messageNumber())
+            if(msgNumber != testMessage->getSequence())
             {
                 // the if avoids the performance hit of BOOST_CHECK_EQUAL unless it's needed.
-                BOOST_CHECK_EQUAL(messageNumber, testMessage->messageNumber());
+                BOOST_CHECK_EQUAL(messageNumber, testMessage->getSequence());
             }
             ++ msgNumber; 
         }
