@@ -57,6 +57,9 @@ namespace HighQueue
         /// @brief Access constant meta info about this message
         const Meta & meta()const;
 
+        //////////////////////////////////////
+        // Support 'raw' access to the buffer
+
         /// @brief return a pointer to the block of memory cast to the requested type.  
         ///
         /// This should be used when the message already contains an object of the appropriate type.
@@ -76,76 +79,60 @@ namespace HighQueue
         template <typename T = byte_t>
         const T* getConst()const;
 
-        /// @brief read the next T and update the read position.
-        /// @returns a reference to the in-place T
-        template <typename T>
-        T & read()const;
-
-        /// @brief read the next T and update the read position.
-        /// @returns a reference to the in-place T
-        template <typename T>
-        const T & readConst()const;
-            
         /// @brief Set the number of bytes in the message that contain valid data.
         /// @param used is the total number of bytes used in the message.
         /// @returns its argument for convenience.
         /// @throws runtime_error if used exceeds the message capacity.
         size_t setUsed(size_t used);
 
+        /// @brief Increase the amount of space used in the message.
+        /// @tparam T is the type of object
+        /// @param count is the number of T's to be added to the message.
+        template <typename T = byte_t>
+        size_t addUsed(size_t count);
+
         /// @brief How many bytes in this message contain valid data?
         /// @param returns the number of bytes used.
         size_t getUsed() const;
-
-        size_t setRead(size_t read);
-        size_t getRead(size_t read);
-        template <typename T = byte_t>
-        size_t addRead(size_t count);
-
-        /// @brief construct a new object of type T in the message using placement new.
-        /// @tparam T is the type of object to be constructed.
-        /// @tparam ArgTypes are the types arguments to pass to the constructor.
-        /// @param args are the actual arguments.
-        template <typename T, typename... ArgTypes>
-        T & appendEmplace(ArgTypes&&... args);
-
-        template <typename T>
-        void destroy() const;
 
         /// @brief How many objects of type T can be added to the message.
         /// @tparam T is the type of object
         template <typename T = byte_t>
         size_t available() const;
 
-        template <typename T>
-        size_t unread() const;
-
         /// @brief Is there room for count additional objects of type T in the message?
         /// @tparam T is the type of object
         template <typename T = byte_t>
         bool needAvailable(size_t count = 1) const;
 
-        /// @brief Are there count additional objects of type T in the message?
-        /// @tparam T is the type of object
-        template <typename T = byte_t>
-        bool needUnread(size_t count = 1) const;
-
-        /// @brief Increase the amount of space used inthe message.
-        /// @tparam T is the type of object
-        /// @param count is the number of T's to be added to the message.
-        template <typename T = byte_t>
-        size_t addUsed(size_t count);
+        //////////////////////////////
+        // Support writing the message
 
         /// @brief Return the next available location in the message as a pointer to T.
         /// @tparam T is the type of object
         template <typename T = byte_t>
         T* getWritePosition()const;
 
-        /// @brief Return the next available location in the message as a pointer to T.
-        /// @tparam T is the type of object
-        template <typename T = byte_t>
-        T* getReadPosition()const;
+        /// @brief construct a new object of type T in the message using placement new.
+        /// @tparam T is the type of object to be constructed.
+        /// @tparam ArgTypes are the types arguments to pass to the constructor.
+        /// @param args are the actual arguments.
+        /// @returns a reference to the newly created object.
+        template <typename T, typename... ArgTypes>
+        T & emplace(ArgTypes&&... args);
+
+        /// @brief construct a new object of type T at the current end of the message using placement new.
+        /// @tparam T is the type of object to be constructed.
+        /// @tparam ArgTypes are the types arguments to pass to the constructor.
+        /// @param args are the actual arguments.
+        /// @returns a reference to the newly created object.
+        template <typename T, typename... ArgTypes>
+        T & emplaceBack(ArgTypes&&... args);
 
         /// @brief Use the copy constructor to construct a new object of type T in the next available location in the message.
+        ///
+        /// @todo This might duplicate the functionality of emplaceBack().  Consider merging them
+        ///
         /// @tparam T is the type of object
         /// @param object is the object to be copied.
         /// @returns a pointer to the newly copy-constructed object in the message.
@@ -160,6 +147,84 @@ namespace HighQueue
         template <typename T = byte_t>
         T* appendBinaryCopy(const T * data, size_t count);
 
+        /// @brief Mark the message empty.
+        void setEmpty();
+
+        /// @brief Is the message empty?
+        bool isEmpty()const;
+
+        ////////////////////////////////
+        // Support reading the message
+
+        /// @brief Return the next available location in the message as a pointer to T.
+        /// @tparam T is the type of object
+        template <typename T = byte_t>
+        T* getReadPosition()const;
+
+        /// @brief Set the number of bytes in the message that have been read.
+        /// @param read is the total number of bytes that have been read in the message.
+        /// @returns its argument for convenience.
+        /// @throws runtime_error if read exceeds used.
+        size_t setRead(size_t read);
+
+        /// @brief Mark the entire message unread.
+        /// A shorthand for setRead(0);  
+        void rewind();
+
+        /// @brief Increase the amount of space read from the message.
+        /// @tparam T is the type of object
+        /// @param count is the number of T's that have been read.
+        template <typename T = byte_t>
+        size_t addRead(size_t count);
+
+        /// @brief How many bytes in this message have been read?
+        /// @param returns the number of bytes read.
+        size_t getRead(size_t read);
+
+        /// @brief read the next T and update the read position.
+        /// @returns a reference to the in-place T
+        template <typename T>
+        T & read()const;
+
+        /// @brief read the next T and update the read position.
+        /// @returns a reference to the in-place T
+        template <typename T>
+        const T & readConst()const;
+
+        /// @brief How many obects of type T remain unread in the message
+        template <typename T>
+        size_t getUnread() const;
+
+        /// @brief Are there count additional objects of type T in the message?
+        /// @tparam T is the type of object
+        template <typename T = byte_t>
+        bool needUnread(size_t count = 1) const;
+
+        /// @brief Calls the in-place destructor on the object at the front of the message
+        /// This is a companion for emplace<T>() and/or get<T>()
+        /// read position and used position will be set to zero.
+        template <typename T>
+        void destroy() const;
+
+        /// @brief Calls the in-place destructor on the object at the end of the currently-read portion of the message
+        /// This is a companion for emplaceBack<T>() and/or read<T>()
+        template <typename T>
+        void destroyBack() const;
+
+        /////////////////////////////////////
+        // Support for publishing the message
+
+        /// @brief Move the data from one message to another, leaving the source message empty.
+        /// Note meta information is copied, but remains intact in the source message.
+        /// @param target is the message to receive the data
+        /// @throws runtime_exception if the target message is not suitable.
+        void moveTo(Message & target);
+
+        ////////////////////////////////////////
+        // Initialization and memory management
+        // Not for general use
+
+
         /// @brief Associate a memory block from a HQMemoryBlockPool with this message.
         /// The block of data is general purpose.  It can be written to and reused as necessary.
         /// Normally this is only called once per message.  The message continues to use the same memory for its
@@ -173,21 +238,6 @@ namespace HighQueue
         /// @brief Undo a set.  Return the memory to the pool (if any), and make the message Invalid.
         void release();
 
-        /// @brief Mark the message empty.
-        void setEmpty();
-
-        /// @brief Mark the message unread.
-        void rewind();
-
-        /// @brief Is the message empty?
-        bool isEmpty()const;
-
-        /// @brief Move the data from one message to another, leaving the source message empty.
-        /// Note meta information is copied, but remains intact in the source message.
-        /// @param target is the message to receive the data
-        /// @throws runtime_exception if the target message is not suitable.
-        void moveTo(Message & target);
-
         /// @brief Get the base address of the block of memory containing this message's memory.
         /// NOTE: this is not an interesting function.  Do not use it.
         byte_t * getContainer()const;
@@ -197,7 +247,8 @@ namespace HighQueue
         size_t getOffset()const;
 
         /// @brief Prepare a message for reuse -- make it Invalid.
-        /// Warning:  This is not the method you want.  Call release() instead, or simply delete the Message. 
+        /// Warning:  This is not the method you want.  
+        /// Call release() instead, or simply delete the Message. 
         void reset();
 
     private:
@@ -340,11 +391,19 @@ namespace HighQueue
     }
 
     template <typename T, typename... ArgTypes>
-    T & Message::appendEmplace(ArgTypes&&... args)
+    T & Message::emplace(ArgTypes&&... args)
+    {
+        auto position = get();
+        setUsed(sizeof(T)); // set this first to check for overruns
+        return * new (position) T(std::forward<ArgTypes>(args)...);
+    }
+
+    template <typename T, typename... ArgTypes>
+    T & Message::emplaceBack(ArgTypes&&... args)
     {
         auto position = getWritePosition<T>();
-        addUsed(sizeof(T));
-        return * new (position) T(std::forward<ArgTypes>(args)...);
+        addUsed(sizeof(T)); // set this first to check for overruns
+        return * new (position)T(std::forward<ArgTypes>(args)...);
     }
 
     template <typename T>
@@ -355,13 +414,27 @@ namespace HighQueue
     }
 
     template <typename T>
+    void Message::destroyBack() const
+    {
+        if(getRead() >= sizeof(T))
+        {
+            auto pT = getReadPosition<T>();
+            pT->~T();
+        }
+        else
+        {
+            throw std::runtime_error("Attempt to destroyBack object that is not present in buffer.");
+        }
+    }
+
+    template <typename T>
     size_t Message::available() const
     {
         return (capacity_ - used_) / sizeof(T);
     }
 
     template <typename T>
-    size_t Message::unread() const
+    size_t Message::getUnread() const
     {
         return (used_ - read_) / sizeof(T);
     }

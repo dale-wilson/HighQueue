@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         numberOfCopiers = 0;
     }
  
-    PassThru<ActualMessage>::CopyType copyType = PassThru<ActualMessage>::CopyBinary;
+    PassThru<ActualMessage>::CopyType copyType = PassThru<ActualMessage>::CopyBinary; // CopyForward;
 
     const size_t queueCount = numberOfCopiers + numberOfConsumers; // need a pool for each object that can receive messages
     // how many buffers do we need?
@@ -75,7 +75,8 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         name << "Connection " << nConn;
         connection->createLocal(name.str(), parameters, memoryPool);
     }
-    auto producer = std::make_shared<ProducerType>(connections[0], messageCount, 1, true);
+    volatile bool producerGo = false;
+    auto producer = std::make_shared<ProducerType>(connections[0], producerGo, messageCount, 1, true);
     std::vector<CopierPtr> copiers;
     for(size_t nCopier = 1; nCopier < connections.size(); ++nCopier)
     {
@@ -85,8 +86,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     auto consumer = std::make_shared<ConsumerType>(connections.back(), 0, true);
 
     // All wired up, ready to go.  Wait for the threads to initialize.
-    volatile bool producerGo = false;
-    producer->start(producerGo);
+    producer->start();
     for(auto copier : copiers)
     {
         copier->start();
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     auto messageBits = messageBytes * 8;
 
-    std::cerr << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
+    std::cerr << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage. Copy type: " << CopierType::copyTypeName(copyType) << ": ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "

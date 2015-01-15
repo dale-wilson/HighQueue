@@ -74,20 +74,21 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     auto consumerConnection = std::make_shared<Connection>();
     consumerConnection->createLocal("Consumer", parameters, memoryPool);
 
+    volatile bool producerGo = false;
+
     std::vector<ProducerPtr> producers;
     for(uint32_t nProducer = 0; nProducer < numberOfProducers; ++nProducer)
     {
-        producers.emplace_back(new ProducerType(arbitratorConnection, messageCount, nProducer, true));
+        producers.emplace_back(new ProducerType(arbitratorConnection, producerGo, messageCount, nProducer, true));
     }
     auto arbitrator = std::make_shared<ArbitratorType>(arbitratorConnection, consumerConnection, arbitratorLookAhead, true);
     auto consumer = std::make_shared<ConsumerType>(consumerConnection, 0, true);
 
     // All wired up, ready to go.  Wait for the threads to initialize.
-    volatile bool producerGo = false;
     arbitrator->start();
     for(auto producer : producers)
     {
-        producer->start(producerGo);
+        producer->start();
     }
 
     Stopwatch timer;

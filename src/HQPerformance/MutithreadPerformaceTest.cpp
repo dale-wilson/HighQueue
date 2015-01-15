@@ -30,7 +30,7 @@ namespace
 
             for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
             {
-                auto testMessage = producerMessage.appendEmplace<ActualMessage>(producerNumber, messageNumber);
+                auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
                 producer.publish(producerMessage);
             }
             producer.writeStats(stats);
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 
     for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
     {
-        producerMessage.appendEmplace<ActualMessage>(1, messageNumber);
+        producerMessage.emplace<ActualMessage>(1, messageNumber);
         producer.publish(producerMessage);
         consumer.getNext(consumerMessage);
         auto testMessage = consumerMessage.get<ActualMessage>();

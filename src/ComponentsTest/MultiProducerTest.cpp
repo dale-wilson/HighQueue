@@ -63,18 +63,18 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         uint32_t perProducer = messageCount / producerCount;
         uint32_t perConsumer = perProducer * producerCount;
 
+        volatile bool startSignal = false;
         std::vector<ProducerPtr> producers;
         for(uint32_t producerNumber = 0; producerNumber < producerCount; ++producerNumber)
         {
-            producers.emplace_back(new ProducerType(connection, perProducer, producerNumber, false));
+            producers.emplace_back(new ProducerType(connection, startSignal, perProducer, producerNumber, false));
         }
 
         auto consumer = std::make_shared<ConsumerType>(connection, perConsumer, true);
 
-        volatile bool startSignal = false;
         for(auto producer : producers)
         { 
-            producer->start(startSignal);
+            producer->start();
         }
         std::this_thread::yield();
 
