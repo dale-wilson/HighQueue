@@ -2,7 +2,6 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/HeaderGenerator.h>
 #include <HighQueue/Producer.h>
 #include <Mocks/TestMessage.h>
 
@@ -12,8 +11,8 @@ namespace HighQueue
 {
     namespace Components
     {
-        template<size_t Extra=0, typename HeaderGenerator = NullHeaderGenerator>
-        class TestMessageProducer : public std::enable_shared_from_this<TestMessageProducer<Extra, HeaderGenerator> >
+        template<size_t Extra=0>
+        class TestMessageProducer : public std::enable_shared_from_this<TestMessageProducer<Extra> >
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
@@ -29,7 +28,6 @@ namespace HighQueue
         private:
             void runThread(volatile bool & startSignal);
         private:
-            HeaderGenerator headerGenerator_;
             ConnectionPtr connection_;
             Producer producer_;
             Message message_;
@@ -43,8 +41,8 @@ namespace HighQueue
             std::thread thread_;
         };
 
-        template<size_t Extra, typename HeaderGenerator>
-        TestMessageProducer<Extra, HeaderGenerator>::TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount, uint32_t producerNumber, bool sendEmptyMessageOnQuit)
+        template<size_t Extra>
+        TestMessageProducer<Extra>::TestMessageProducer(ConnectionPtr & connection, uint32_t messageCount, uint32_t producerNumber, bool sendEmptyMessageOnQuit)
             : connection_(connection)
             , producer_(connection)
             , message_(connection)
@@ -56,30 +54,30 @@ namespace HighQueue
         {
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        TestMessageProducer<Extra, HeaderGenerator>::~TestMessageProducer()
+        template<size_t Extra>
+        TestMessageProducer<Extra>::~TestMessageProducer()
         {
             stop();
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        bool TestMessageProducer<Extra, HeaderGenerator>::configure()
+        template<size_t Extra>
+        bool TestMessageProducer<Extra>::configure()
         {
             // todo
             return true;
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageProducer<Extra, HeaderGenerator>::start(volatile bool & startSignal)
+        template<size_t Extra>
+        void TestMessageProducer<Extra>::start(volatile bool & startSignal)
         {
             me_ = shared_from_this();
             thread_ = std::thread(std::bind(
-                &TestMessageProducer<Extra, HeaderGenerator>::runThread,
+                &TestMessageProducer<Extra>::runThread,
                 this, std::ref(startSignal)));
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageProducer<Extra, HeaderGenerator>::stop()
+        template<size_t Extra>
+        void TestMessageProducer<Extra>::stop()
         {
             stopping_ = true;
             if(me_)
@@ -89,18 +87,18 @@ namespace HighQueue
             }
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageProducer<Extra, HeaderGenerator>::pause()
+        template<size_t Extra>
+        void TestMessageProducer<Extra>::pause()
         {
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageProducer<Extra, HeaderGenerator>::resume()
+        template<size_t Extra>
+        void TestMessageProducer<Extra>::resume()
         {
         }
 
-        template<size_t Extra, typename HeaderGenerator>
-        void TestMessageProducer<Extra, HeaderGenerator>::runThread(volatile bool & startSignal)
+        template<size_t Extra>
+        void TestMessageProducer<Extra>::runThread(volatile bool & startSignal)
         {
             while(!startSignal)
             {
@@ -111,7 +109,6 @@ namespace HighQueue
             while( messageCount_ == 0 || messageNumber < messageCount_)
             {
                 // DebugMessage("Publish " << messageNumber << '/' << messageCount_ << std::endl);
-                headerGenerator_.addHeader(message_);
                 auto testMessage = message_.appendEmplace<ActualMessage>(producerNumber_, messageNumber);
                 producer_.publish(message_);
                 ++messageNumber;

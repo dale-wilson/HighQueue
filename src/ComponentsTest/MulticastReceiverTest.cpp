@@ -18,7 +18,7 @@ namespace
 {
 }
 
-#define ENABLE_MULTICASTRECEIVERTEST 01
+#define ENABLE_MULTICASTRECEIVERTEST 0
 #if ! ENABLE_MULTICASTRECEIVERTEST
 #pragma message ("ENABLE_MULTICASTRECEIVERTEST " __FILE__)
 #else // ENABLE_MULTICASTRECEIVERTEST
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(MulticastReceiverTest)
     connection->createLocal("LocalIv", parameters);
 
     MulticastConfiguration configuration("multicastGroupIP", "listenInterfaceIP", "bindIP", 10000);
-    auto receiver = std::make_shared<MulticastReceiver<NullHeaderGenerator> >(ioservice, connection);
+    auto receiver = std::make_shared<MulticastReceiver>(ioservice, connection);
     BOOST_CHECK(receiver->configure(configuration));
 };
 

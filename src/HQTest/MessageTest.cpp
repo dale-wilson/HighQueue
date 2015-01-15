@@ -14,10 +14,10 @@ namespace
     const size_t letterCount = 26;
 }
 
-#define DISABLE_testNormalMessagesx
-#ifdef DISABLE_testNormalMessages
-#pragma message ("DISABLE_testNormalMessages " __FILE__)
-#else // DISABLE_testNormalMessages
+#define ENABLE_testNormalMessages 1
+#if !ENABLE_testNormalMessages
+#pragma message ("ENABLE_testNormalMessages " __FILE__)
+#else // ENABLE_testNormalMessages
 BOOST_AUTO_TEST_CASE(testNormalMessages)
 {
     static const size_t messageSize = sizeof(alphabet);
@@ -30,6 +30,8 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     Message message1(pool);
     BOOST_CHECK_EQUAL(message1.getUsed(), 0u);
     BOOST_CHECK(message1.isEmpty());
+    BOOST_CHECK_EQUAL(message1.meta().type_, Message::Meta::Unused);
+    message1.meta().type_ = Message::Meta::LocalType0;
 
     message1.appendBinaryCopy(alphabet.data(), letterCount);
     BOOST_CHECK_EQUAL(message1.getUsed(), letterCount);
@@ -51,33 +53,19 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     std::string value2(message2.get<char>(), message2.getUsed());
     BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value2);
 
-    message1.swap(message2);
-
-    BOOST_CHECK_EQUAL(message1.getUsed(), letterCount);
-    BOOST_CHECK(!message1.isEmpty());
-
-    std::string value1a(message1.get<char>(), message1.getUsed());
-    BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value1a);
-
-    BOOST_CHECK_EQUAL(message2.getUsed(), letterCount);
-    BOOST_CHECK(!message2.isEmpty());
-    BOOST_CHECK_GE(message2.available(), letterCount);
-    BOOST_CHECK(message2.needAvailable(letterCount));
-
-    std::string value2a(message2.get<char>(), message2.getUsed());
-    BOOST_CHECK_EQUAL(alphabet.substr(0, letterCount), value2a);
-
     message1.moveTo(message2);
 
+    BOOST_CHECK_EQUAL(message1.meta().type_, Message::Meta::LocalType0);
     BOOST_CHECK_EQUAL(message1.getUsed(), 0U);
     BOOST_CHECK(message1.isEmpty());
     BOOST_CHECK(message1.needAvailable(2 * letterCount));
 
+    BOOST_CHECK_EQUAL(message2.meta().type_, Message::Meta::LocalType0);
     BOOST_CHECK_EQUAL(message2.getUsed(), letterCount);
     BOOST_CHECK(!message2.isEmpty());
 
     std::string value2c(message2.get<char>(), message2.getUsed());
-    BOOST_CHECK_EQUAL(alphabet.substr(letterCount), value2c);
+    BOOST_CHECK_EQUAL(alphabet.substr(0,letterCount), value2c);
 
     message1.release();
     BOOST_CHECK_EQUAL(message1.getUsed(), 0U);
@@ -87,7 +75,7 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     BOOST_CHECK_EQUAL(message1.available(), 0U);
     BOOST_CHECK(!message1.needAvailable(1));
 }
-#endif // DISABLE_testNormalMessages
+#endif // ENABLE_testNormalMessages
 
 #define DISABLE_testMessageAppendz
 #ifdef DISABLE_testMessageAppend
@@ -125,3 +113,8 @@ BOOST_AUTO_TEST_CASE(testMessageAppend)
     BOOST_CHECK_EQUAL(alphabet, value2);
 }
 #endif // DISABLE_testMessageAppend
+
+/* TO BE TESTED
+Message::Meta
+*/
+

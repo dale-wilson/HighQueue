@@ -16,10 +16,10 @@ namespace
 {
     const size_t testMessageExtras = 13;
     typedef TestMessage<testMessageExtras> ActualMessage;
-    typedef TestMessageProducer<testMessageExtras, NullHeaderGenerator> ProducerType;
+    typedef TestMessageProducer<testMessageExtras> ProducerType;
     typedef std::shared_ptr<ProducerType> ProducerPtr;
 
-    typedef TestMessageConsumer<testMessageExtras, NullHeaderGenerator> ConsumerType;
+    typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 }
 
