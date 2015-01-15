@@ -1,4 +1,7 @@
-Add License info to the home page.
-Test and document the shared memory pool support.
+Add message meta information
+Dispatch on meta.
+Create timer Component
+Extract common base class(es) for Components.
+Consider the pipeline framework that runs the components.
 
 Create an example application (for example: A/B-Mcast->arbitration)
