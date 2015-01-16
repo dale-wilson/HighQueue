@@ -4,15 +4,19 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <HighQueue/ConsumerWaitStrategy.h>
+#include <HighQueue/WaitStrategy.h>
 
 namespace HighQueue
 {
     /// @brief Information needed to construct an InfiniteVectgor
     struct CreationParameters
     {
+        /// @brief How should a producer wait if the queue is full.
+        WaitStrategy producerWaitStrategy_;
         /// @brief How should a consumer wait if no data is available.
-        ConsumerWaitStrategy strategy_;
+        WaitStrategy consumerWaitStrategy_;
+        /// @brief What happens when the queue is full and no consumer is available?
+        bool discardMessagesIfNoConsumer_;
         /// @brief How many entries in the visible window of the HighQueue
         size_t entryCount_;
         /// @brief What is the minimum size of a message (will be rounded up to the next cache line boundary)
@@ -22,16 +26,19 @@ namespace HighQueue
         size_t messageCount_;
 
         CreationParameters(
-            const ConsumerWaitStrategy & strategy_,
+            const WaitStrategy & producerWaitStrategy_,
+            const WaitStrategy & consumerWaitStrategy_,
+            bool discardMessagesIfNoConsumer,
             size_t entryCount,
             size_t messageSize,
             size_t messageCount = 0
             )
-            : strategy_(strategy_)
+            : producerWaitStrategy_(producerWaitStrategy_)
+            , consumerWaitStrategy_(consumerWaitStrategy_)
+            , discardMessagesIfNoConsumer_(discardMessagesIfNoConsumer)
             , entryCount_(entryCount)
             , messageSize_(messageSize)
             , messageCount_(messageCount)
-        {
-        }
+        {}
     };
 }

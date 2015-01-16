@@ -85,7 +85,7 @@ void Producer::publish(Message & message)
             std::atomic_thread_fence(std::memory_order::memory_order_release);
             if(header_->consumerWaitStrategy_.mutexUsed_)
             {
-                std::unique_lock<std::mutex> guard(header_->consumerWaitMutex_);
+                std::unique_lock<std::mutex> guard(header_->waitMutex_);
                 header_->consumerWaitConditionVariable_.notify_all();
             }
             ++statPublishes_;

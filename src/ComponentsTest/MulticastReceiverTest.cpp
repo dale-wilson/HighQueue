@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(MulticastReceiverTest)
 {
     auto ioservice = std::make_shared<AsioService>();
     auto connection = std::make_shared<Connection>();
-    ConsumerWaitStrategy strategy;
+    WaitStrategy strategy;
     size_t entryCount = 262144 / 2; // <- thats the number of messages in the primaryRingBuffer in the pronghorn test //100000;
     size_t messageSize = sizeof(ActualMessage);
     size_t messagesNeeded = entryCount + 10;

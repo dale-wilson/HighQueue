@@ -27,7 +27,7 @@
 /// Clients interact with an HighQueue using an API that consists of the public interfaces of
 /// four primary classes:   Message, Connection, Consumer, and Producer.
 ///
-/// Two additonal classes are used when initializing an HighQueue: CreationParameters and ConsumerWaitStrategy.
+/// Two additonal classes are used when initializing an HighQueue: CreationParameters and WaitStrategy.
 ///
 /// The first step in using an HighQueue is to create an Connection using the null constructor.
 ///
@@ -35,7 +35,7 @@
 /// the methods: Connection::createLocal(), Connection::openOrCreateShared(), or Connection::openExistingShared(). 
 /// 
 /// The methods that create a new HighQueue take an instance of CreationParameters as an argument.
-/// The CreationParameters in turn contains an ConsumerWaitStrategy.   See the documentation of these
+/// The CreationParameters in turn contains an WaitStrategy.   See the documentation of these
 /// classes for details about the parameters that can be used to configure the HighQueue for the particular use.
 ///
 /// Once the InfinieVector is created or found the Connection can be used as the construction parameter for an instance

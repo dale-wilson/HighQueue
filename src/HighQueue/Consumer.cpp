@@ -74,7 +74,7 @@ bool Consumer::getNext(Message & message)
         if(remainingSpins > 0)
         {
             ++statSpins_;
-            if(remainingSpins != ConsumerWaitStrategy::FOREVER)
+            if(remainingSpins != WaitStrategy::FOREVER)
             {
                 --remainingSpins;
             }
@@ -82,7 +82,7 @@ bool Consumer::getNext(Message & message)
         else if(remainingYields > 0)
         {
             ++statYields_;
-            if(remainingYields != ConsumerWaitStrategy::FOREVER)
+            if(remainingYields != WaitStrategy::FOREVER)
             {
                 --remainingYields;
             }
@@ -91,7 +91,7 @@ bool Consumer::getNext(Message & message)
         else if(remainingSleeps > 0)
         {
             ++statSleeps_;
-            if(remainingSleeps != ConsumerWaitStrategy::FOREVER)
+            if(remainingSleeps != WaitStrategy::FOREVER)
             {
                 --remainingSleeps;
             }
@@ -100,7 +100,7 @@ bool Consumer::getNext(Message & message)
         else
         {
             ++statWaits_;
-            std::unique_lock<std::mutex> guard(header_->consumerWaitMutex_);
+            std::unique_lock<std::mutex> guard(header_->waitMutex_);
             if(tryGetNext(message))
             {
                 return true;

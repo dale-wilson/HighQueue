@@ -23,9 +23,16 @@ namespace HighQueue
         Offset reservePosition_;
         Offset memoryPool_;
 
-        ConsumerWaitStrategy consumerWaitStrategy_;
-        std::mutex consumerWaitMutex_;
+        WaitStrategy producerWaitStrategy_;
+        WaitStrategy consumerWaitStrategy_;
+        std::mutex waitMutex_;
+        std::condition_variable producerWaitConditionVariable_;
         std::condition_variable consumerWaitConditionVariable_;
+        bool discardIfNoConsumer_;
+        bool consumerWaiting_;
+        bool producerWaiting_;
+        std::atomic_bool consumerPresent_;
+        std::atomic<uint32_t> producersPresent_;
 
 	    HQHeader(
             const std::string & name, 

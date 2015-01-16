@@ -48,13 +48,14 @@ namespace
 #if ENABLE_ST_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 {
-    ConsumerWaitStrategy strategy;
+    WaitStrategy strategy;
     size_t entryCount = 262144 / 2; // <- thats the number of messages in the primaryRingBuffer in the pronghorn test //100000;
     size_t messageSize = sizeof(ActualMessage);
     size_t messagesNeeded = entryCount + 10;
     uint64_t messageCount = 1000000 * 100;
 
-    CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messagesNeeded);
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 
@@ -114,11 +115,12 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
     static const size_t spinCount = 0;
     static const size_t yieldCount = 0;
-    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    static const size_t sleepCount = WaitStrategy::FOREVER;
     static const auto sleepTime = std::chrono::nanoseconds(10);
     
-    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
-    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 

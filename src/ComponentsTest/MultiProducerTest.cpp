@@ -49,11 +49,11 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
 
     static const size_t spinCount = 0;
     static const size_t yieldCount = 0;
-    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    static const size_t sleepCount = WaitStrategy::FOREVER;
     static const auto sleepTime = std::chrono::nanoseconds(10);
-    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
-
-    CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
+    WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messagesNeeded);
     auto connection = std::make_shared<Connection>();
     connection->createLocal("LocalHQ", parameters);
 

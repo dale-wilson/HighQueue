@@ -15,11 +15,12 @@ using namespace HighQueue;
 #else // DISABLE DISABLE_testIvMemoryPoolMessages
 BOOST_AUTO_TEST_CASE(testIvMemoryPoolMessages)
 {
-    ConsumerWaitStrategy strategy;
+    WaitStrategy strategy;
     size_t entryCount = 100;
     size_t messageSize = 1234;
     size_t messageCount = 150;
-    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 

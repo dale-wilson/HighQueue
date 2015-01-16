@@ -14,11 +14,12 @@ typedef TestMessage<20> ActualMessage;
 #if ENABLE_CONSUME_SEPARATELY
 BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
-    ConsumerWaitStrategy strategy;
+    WaitStrategy strategy;
     size_t entryCount = 100000;
     size_t messageSize = sizeof(ActualMessage);
     size_t messageCount = entryCount + 10;
-    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 

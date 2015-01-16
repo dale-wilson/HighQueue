@@ -59,11 +59,12 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     const size_t spinCount = 0;
     const size_t yieldCount = 0;
-    const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    const size_t sleepCount = WaitStrategy::FOREVER;
     const auto sleepTime = std::chrono::nanoseconds(10);
-    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
+    WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
 
-    CreationParameters parameters(strategy, entryCount, messageSize, messagesNeeded);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messagesNeeded);
     MemoryPoolPtr memoryPool(new MemoryPool(messageSize, messagesNeeded));
 
     std::vector<ConnectionPtr> connections;

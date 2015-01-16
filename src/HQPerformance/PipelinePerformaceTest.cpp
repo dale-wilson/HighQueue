@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     static const size_t spinCount = 0;
     static const size_t yieldCount = 0;//1;//100;
-    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    static const size_t sleepCount = WaitStrategy::FOREVER;
     static const std::chrono::nanoseconds sleepPeriod(2);
     CopyType copyType = BinaryCopy;
                       // BufferSwap;
@@ -179,8 +179,9 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 
     std::cerr << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 
-    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
-    CreationParameters parameters(strategy, entryCount, messageBytes);
+    WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageBytes);
     MemoryPoolPtr memoryPool(new MemoryPool(messageBytes, messageCount));
 
     std::vector<std::shared_ptr<Connection> > connections;

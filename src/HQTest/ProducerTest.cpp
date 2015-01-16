@@ -30,11 +30,12 @@ namespace
 #else // DISABLE_testProducer
 BOOST_AUTO_TEST_CASE(testProducer)
 {
-    ConsumerWaitStrategy strategy;
+    WaitStrategy strategy;
     size_t entryCount = 10;
     size_t messageSize = sizeof(TestMessage);
     size_t messageCount = 50;
-    CreationParameters parameters(strategy, entryCount, messageSize, messageCount);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
     Producer producer(connection);

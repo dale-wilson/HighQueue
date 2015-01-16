@@ -41,7 +41,7 @@ namespace HighQueue
         ///
         /// @param message The message will be populated from the HighQueue entry.
         /// @returns true unless shutting down.
-        /// Note: uses the ConsumerWaitStrategy to wait.
+        /// Note: uses the WaitStrategy to wait.
         bool getNext(Message & message);
 
         /// @brief for diagnosing and performance measurements, dump statistics
@@ -55,7 +55,7 @@ namespace HighQueue
         volatile Position & readPosition_;
         volatile Position & publishPosition_;
         Position cachedPublishPosition_;
-        const ConsumerWaitStrategy & waitStrategy_;
+        const WaitStrategy & waitStrategy_;
         size_t spins_;
         size_t yields_;
         size_t sleeps_;

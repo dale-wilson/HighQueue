@@ -32,7 +32,7 @@ namespace
 
     static const size_t spinCount = 0;
     static const size_t yieldCount = 10000;
-    static const size_t sleepCount = ConsumerWaitStrategy::FOREVER;
+    static const size_t sleepCount = WaitStrategy::FOREVER;
     static const std::chrono::nanoseconds sleepPeriod(2);
 
     enum CopyType
@@ -152,8 +152,9 @@ BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
 {
     std::cerr << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 
-    ConsumerWaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
-    CreationParameters parameters(strategy, entryCount, messageBytes);
+    WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
+    bool discardMessagesIfNoConsumer = false;
+    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageBytes);
     MemoryPoolPtr memoryPool(new MemoryPool(batchMessageSize, messageCount));
 
     std::vector<std::shared_ptr<Connection> > connections;

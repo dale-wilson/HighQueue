@@ -22,8 +22,8 @@ HQHeader::HQHeader(
 , readPosition_(0)
 , publishPosition_(0)
 , reservePosition_(0)
-, consumerWaitStrategy_(parameters.strategy_)
-, consumerWaitMutex_()
+, consumerWaitStrategy_(parameters.consumerWaitStrategy_)
+, waitMutex_()
 , consumerWaitConditionVariable_()
 {
     std::memset(name_, '\0', sizeof(name_));
