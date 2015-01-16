@@ -3,29 +3,25 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include <ComponentCommon/ComponentBase.h>
+#include <ComponentCommon/MessageDispatcher.h>
+
 #include <HighQueue/Consumer.h>
+#include <HighQueue/Producer.h>
 
 #include <ComponentCommon/DebugMessage.h>
-
-////////////////////////////////////////
-#pragma message("WARNING UNDER CONSTRUCTION.  NRFPT")
 
 namespace HighQueue
 {
     namespace Components
     {
-        class ComponentProcessor : public ComponentBase
+        class MessageProcessor: public ComponentBase, public MessageDispatcher
         {
         public:
-            ComponentProcessor(ConnectionPtr & inConnection, ConnectionPtr & outConnection);
+            MessageProcessor(ConnectionPtr & inConnection, ConnectionPtr & outConnection);
+
+            virtual void run();
 
         protected:
-            virtual void handleEmptyMessage(Message & message) = 0;
-            virtual void handleMessageType(Message::Meta::MessageType type, Message & message) = 0;
-            virtual void handleHeartbeat(Message & message) = 0;
-            virtual void handleDataMessage(Message & message) = 0;
-
-        private:
             ConnectionPtr inConnection_;
             Consumer consumer_;
             Message inMessage_;
@@ -35,8 +31,8 @@ namespace HighQueue
             Message outMessage_;
         };
 
-        
-        ComponentProcessor::ComponentProcessor(ConnectionPtr & inConnection)
+        inline
+            MessageProcessor::MessageProcessor(ConnectionPtr & inConnection, ConnectionPtr & outConnection)
             : ComponentBase()
             , inConnection_(inConnection)
             , consumer_(inConnection_)
@@ -46,5 +42,19 @@ namespace HighQueue
             , outMessage_(outConnection)
         {
         }
+
+        inline
+        void MessageProcessor::run()
+        {
+            while(!stopping_)
+            {
+                stopping_ = !consumer_.getNext(inMessage_);
+                if(!stopping_)
+                {
+                    stopping_ = !dispatch(inMessage_);
+                }
+            }
+        }
+
    }
 }

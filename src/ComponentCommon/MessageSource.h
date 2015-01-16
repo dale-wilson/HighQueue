@@ -11,10 +11,10 @@ namespace HighQueue
 {
     namespace Components
     {
-        class ComponentSource : public ComponentBase
+        class MessageSource : public ComponentBase
         {
         public:
-            ComponentSource(ConnectionPtr & outConnection);
+            MessageSource(ConnectionPtr & outConnection);
 
         protected:
             ConnectionPtr outConnection_;
@@ -23,7 +23,7 @@ namespace HighQueue
         };
 
         inline
-        ComponentSource::ComponentSource(ConnectionPtr & outConnection)
+        MessageSource::MessageSource(ConnectionPtr & outConnection)
             : ComponentBase()
             , outConnection_(outConnection)
             , producer_(outConnection_)
