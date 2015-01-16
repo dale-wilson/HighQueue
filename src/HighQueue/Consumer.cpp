@@ -24,7 +24,17 @@ Consumer::Consumer(ConnectionPtr & connection)
 , statSleeps_(0)
 , statWaits_(0)
 {
+    if(header_->consumerPresent_.exchange(true))
+    {
+        throw std::runtime_error("Only one consumer can be attached to a HighQueue.");
+    }
 }
+
+Consumer::~Consumer()
+{
+    header_->consumerPresent_ = false;
+}
+
 
 inline
 void Consumer::incrementReadPosition()

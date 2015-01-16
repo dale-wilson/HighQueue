@@ -23,6 +23,8 @@ namespace HighQueue
         /// @param connection provides access to the HighQueue
 		Consumer(ConnectionPtr & connection);
 
+        ~Consumer();
+
         /// @brief Get the next message-full of data if it is available
         ///
         /// You must call one of the Message::get() methods after a successful return

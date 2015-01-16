@@ -26,10 +26,12 @@ Producer::Producer(ConnectionPtr & connection, bool solo)
 , statSleeps_(0)
 , statWaits_(0)
 {
+    ++header_->producersPresent_;
 }
 
 Producer::~Producer()
 {
+    --header_->producersPresent_;
 }
 
 inline
@@ -54,6 +56,10 @@ void Producer::publish(Message & message)
             if(publishable_ <= reserved)
             {
                 ++statFulls_;
+                if(header_->discardMessagesIfNoConsumer_ && !header_->consumerPresent_)
+                {
+                    readPosition_ = publishPosition_;
+                }
                 size_t remainingSpins = waitStrategy_.spinCount_;
                 size_t remainingYields = waitStrategy_.yieldCount_;
                 size_t remainingSleeps = waitStrategy_.sleepCount_;
@@ -148,8 +154,13 @@ void Producer::publish(Message & message)
 
 std::ostream & Producer::writeStats(std::ostream & out) const
 {
-    return out << "Full: " << statFulls_ 
+    return out << "Published " << statPublishes_
+               << " Full: " << statFulls_
                << " Skip: " << statSkips_
+               << " WaitOtherPublishers: " << statPublishWaits_
+               << " Spin: " << statSpins_ 
+               << " Yield: " << statYields_ 
+               << " Sleep: " << statSleeps_ 
                << " Wait: " << statWaits_
                << " OK: " << statPublishes_
                << std::endl;
