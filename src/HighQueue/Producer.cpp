@@ -59,6 +59,7 @@ void Producer::publish(Message & message)
                 if(header_->discardMessagesIfNoConsumer_ && !header_->consumerPresent_)
                 {
                     readPosition_ = publishPosition_;
+                    publishable_ = readPosition_ + entryCount_;
                 }
                 size_t remainingSpins = waitStrategy_.spinCount_;
                 size_t remainingYields = waitStrategy_.yieldCount_;

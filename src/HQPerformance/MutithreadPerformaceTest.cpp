@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
         auto messageBytes = sizeof(ActualMessage);
         auto messageBits = sizeof(ActualMessage) * 8;
-        std::cerr << "Test " << producerCount << " producer";
+        std::cout << "Test " << producerCount << " producer" << std::fixed;
         std::cout << " Passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
             << lapse / actualMessageCount << " nsec./message "
