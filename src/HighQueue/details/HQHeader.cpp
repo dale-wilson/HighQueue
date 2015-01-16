@@ -17,14 +17,22 @@ HQHeader::HQHeader(
     HQMemoryBlockPool * pool)
 : signature_(InitializingSignature)
 , version_(Version)
+, discardMessagesIfNoConsumer_(parameters.discardMessagesIfNoConsumer_)
+, producerWaitStrategy_(parameters.producerWaitStrategy_)
+, consumerWaitStrategy_(parameters.consumerWaitStrategy_)
 , entryCount_(parameters.entryCount_)
 , entries_(0)
 , readPosition_(0)
 , publishPosition_(0)
 , reservePosition_(0)
-, consumerWaitStrategy_(parameters.consumerWaitStrategy_)
+, memoryPool_(0)
+, consumerPresent_(false)
+, producersPresent_(0)
 , waitMutex_()
+, producerWaitConditionVariable_()
 , consumerWaitConditionVariable_()
+, producerWaiting_(false)
+, consumerWaiting_(false)
 {
     std::memset(name_, '\0', sizeof(name_));
     size_t bytesToCopy = name.size();
@@ -48,7 +56,6 @@ HQHeader::HQHeader(
     reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
     auto reservePosition = resolver.resolve<HighQReservePosition>(reservePosition_);
     reservePosition->reservePosition_ = entryCount_;
-    reservePosition->reserveSoloPosition_ = entryCount_;
     if(pool == 0)
     {
         auto messagePoolSize = HQMemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);

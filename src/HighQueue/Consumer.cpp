@@ -7,6 +7,7 @@ using namespace HighQueue;
 Consumer::Consumer(ConnectionPtr & connection)
 : connection_(connection)
 , header_(connection_->getHeader())
+, producerUsesMutex_(header_->producerWaitStrategy_.mutexUsed_)
 , resolver_(header_)
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
@@ -23,6 +24,22 @@ Consumer::Consumer(ConnectionPtr & connection)
 , statSleeps_(0)
 , statWaits_(0)
 {
+}
+
+inline
+void Consumer::incrementReadPosition()
+{
+    ++readPosition_;
+    std::atomic_thread_fence(std::memory_order::memory_order_release);
+    if(producerUsesMutex_)
+    {
+        std::unique_lock<std::mutex> guard(header_->waitMutex_);
+        if(header_->producerWaiting_)
+        {
+            header_->producerWaiting_ = false;
+            header_->producerWaitConditionVariable_.notify_all();
+        }
+    }
 }
 
 bool Consumer::tryGetNext(Message & message)
@@ -45,10 +62,10 @@ bool Consumer::tryGetNext(Message & message)
         if(entry.status_ == HighQEntry::Status::OK)
         {
             entry.message_.moveTo(message);
-            ++readPosition_;
+            incrementReadPosition();
             return true;
         }
-        ++readPosition_;
+        incrementReadPosition();
     }
 
 }
@@ -78,6 +95,7 @@ bool Consumer::getNext(Message & message)
             {
                 --remainingSpins;
             }
+            std::atomic_thread_fence(std::memory_order::memory_order_consume);
         }
         else if(remainingYields > 0)
         {
@@ -105,6 +123,7 @@ bool Consumer::getNext(Message & message)
             {
                 return true;
             }
+            header_->consumerWaiting_ = true;
             if(header_->consumerWaitConditionVariable_.wait_for(guard, waitStrategy_.mutexWaitTimeout_)
                 == std::cv_status::timeout)
             {

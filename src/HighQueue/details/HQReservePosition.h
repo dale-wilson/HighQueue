@@ -12,7 +12,6 @@ namespace HighQueue
 	struct HighQReservePosition
 	{
         AtomicPosition reservePosition_;
-        Position reserveSoloPosition_;
         Spinlock reserveSpinlock_;
     };
 }  

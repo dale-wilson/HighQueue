@@ -16,6 +16,9 @@ namespace HighQueue
         Signature signature_;
         uint8_t version_;
         char name_[32];
+        bool discardMessagesIfNoConsumer_;
+        WaitStrategy producerWaitStrategy_;
+        WaitStrategy consumerWaitStrategy_;
         size_t entryCount_;
         Offset entries_;
         Offset readPosition_;
@@ -23,16 +26,17 @@ namespace HighQueue
         Offset reservePosition_;
         Offset memoryPool_;
 
-        WaitStrategy producerWaitStrategy_;
-        WaitStrategy consumerWaitStrategy_;
+        std::atomic<bool> consumerPresent_; // VC12 has a bug in std::atomic_bool
+                                            // http://stackoverflow.com/questions/15750917/initializing-stdatomic-bool
+        std::atomic<uint32_t> producersPresent_;
+
+        // TODO: Move this to a separate cache line.  It changes on a per-message basis
+        // OTHH if we're using a mutex latency is not the primary concern.
         std::mutex waitMutex_;
         std::condition_variable producerWaitConditionVariable_;
         std::condition_variable consumerWaitConditionVariable_;
-        bool discardIfNoConsumer_;
-        bool consumerWaiting_;
         bool producerWaiting_;
-        std::atomic_bool consumerPresent_;
-        std::atomic<uint32_t> producersPresent_;
+        bool consumerWaiting_;
 
 	    HQHeader(
             const std::string & name, 

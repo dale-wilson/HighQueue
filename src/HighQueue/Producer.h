@@ -50,6 +50,9 @@ namespace HighQueue
         ConnectionPtr connection_;
         HQHeader * header_;
         size_t entryCount_;
+        WaitStrategy waitStrategy_;
+        bool consumerUsesMutex_;
+
         HighQResolver resolver_;
         volatile Position & readPosition_;
         volatile Position & publishPosition_;
@@ -57,12 +60,19 @@ namespace HighQueue
         volatile Position & reserveSoloPosition_;
         HighQEntryAccessor entryAccessor_;
 
+
+
         Position publishable_;
 
         uint64_t statFulls_;
         uint64_t statSkips_;
-        uint64_t statWaits_;
+        uint64_t statPublishWaits_;
         uint64_t statPublishes_;
+        uint64_t statSpins_;
+        uint64_t statYields_;
+        uint64_t statSleeps_;
+        uint64_t statWaits_;
+
 
 	};
 }

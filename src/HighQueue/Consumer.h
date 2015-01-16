@@ -48,8 +48,11 @@ namespace HighQueue
         std::ostream & writeStats(std::ostream & out)const;
 
     private:
+        void incrementReadPosition();
+    private:
         ConnectionPtr connection_;
         HQHeader * header_;
+        bool producerUsesMutex_;
         HighQResolver resolver_;
         HighQEntryAccessor entryAccessor_;
         volatile Position & readPosition_;
