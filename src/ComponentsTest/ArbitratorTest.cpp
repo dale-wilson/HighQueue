@@ -5,10 +5,10 @@
 #define BOOST_TEST_NO_MAIN ComponentsTest
 #include <boost/test/unit_test.hpp>
 
+#include <Components/HeartbeatProducer.h>
 #include <Components/TestMessageProducer.h>
 #include <Components/TestMessageConsumer.h>
 #include <Components/Arbitrator.h>
-#include <Common/Stopwatch.h>
 #include <Common/Stopwatch.h>
 #include <Mocks/TestMessage.h>
 
@@ -51,6 +51,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
     const size_t arbitratorLookAhead = 10000;
 
+    const size_t numberOfHeartbeats = 1;  // Don't change this
     const size_t numberOfConsumers = 1;   // Don't change this
     const uint32_t numberOfProducers = 2;   // Don't change this
     const size_t numberOfArbitrators = 1; // Don't change this.
@@ -58,7 +59,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     const size_t queueCount = numberOfArbitrators + numberOfConsumers; // need a pool for each object that can receive messages
     // how many buffers do we need?
     size_t extraMessages = 0; // in case we need it someday (YAGNI)
-    const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + numberOfArbitrators + numberOfArbitrators * arbitratorLookAhead + numberOfProducers + extraMessages;
+    const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + numberOfHeartbeats + numberOfArbitrators + numberOfArbitrators * arbitratorLookAhead + numberOfProducers + extraMessages;
 
     const size_t spinCount = 0;
     const size_t yieldCount = 0;
@@ -71,6 +72,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
     auto arbitratorConnection = std::make_shared<Connection>();
     arbitratorConnection->createLocal("Arbitrator", parameters, memoryPool);
+
     auto consumerConnection = std::make_shared<Connection>();
     consumerConnection->createLocal("Consumer", parameters, memoryPool);
 
@@ -81,21 +83,25 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     {
         producers.emplace_back(new ProducerType(arbitratorConnection, producerGo, messageCount, nProducer, true));
     }
+    auto asio = std::make_shared<AsioService>();
     auto arbitrator = std::make_shared<ArbitratorType>(arbitratorConnection, consumerConnection, arbitratorLookAhead, true);
     auto consumer = std::make_shared<ConsumerType>(consumerConnection, 0, true);
-
+    std::chrono::milliseconds heartbeatInterval(10000);
+    auto heartbeat = std::make_shared<HeartbeatProducer>(asio, arbitratorConnection, heartbeatInterval);
     // All wired up, ready to go.  Wait for the threads to initialize.
     arbitrator->start();
     for(auto producer : producers)
     {
         producer->start();
     }
+    heartbeat->start();
 
     Stopwatch timer;
     producerGo = true;
     consumer->run();
     auto lapse = timer.nanoseconds();
 
+    heartbeat->stop();
     for(auto producer : producers)
     {
         producer->stop();

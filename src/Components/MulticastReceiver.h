@@ -4,7 +4,7 @@
 #pragma once
 #include "MulticastReceiverFwd.h"
 #include <ComponentCommon/AsioService.h>
-#include <HighQueue/Producer.h>
+#include <ComponentCommon/MessageSource.h>
 
 namespace HighQueue
 {
@@ -29,20 +29,15 @@ namespace HighQueue
             {}
         };
 
-        class MulticastReceiver: public std::enable_shared_from_this<MulticastReceiver >
+        class MulticastReceiver: public MessageSource
         {
         public:
             MulticastReceiver(
                 AsioServicePtr & ioService,
                 ConnectionPtr & connection
                 );
-            ~MulticastReceiver();
 
             bool configure(const MulticastConfiguration & configuration);
-            void start();
-            void stop();
-            void pause();
-            void resume();
 
             boost::asio::ip::address listenInterface()const;
             unsigned short portNumber()const;
@@ -53,19 +48,20 @@ namespace HighQueue
             boost::asio::ip::udp::socket & socket();
             bool joined()const;
 
+            virtual void run();
+
+            virtual void doPause();
+            virtual void doResume();
+
         private:
-            void MulticastReceiver::startRead();
+            void startRead();
             void handleReceive(const boost::system::error_code& error, size_t bytesReceived);
 
         private:
             
             AsioServicePtr ioService_;
             boost::asio::ip::udp::socket socket_;
-            ConnectionPtr connection_;
-            Producer producer_;
-            Message message_;
             bool joined_;
-            bool stopping_;
 
             struct MCastInfo
             {
@@ -86,29 +82,18 @@ namespace HighQueue
                 }
             };
             std::unique_ptr<MCastInfo> mcast_;
-            std::shared_ptr<MulticastReceiver> me_;
-
         };
 
         inline
         MulticastReceiver::MulticastReceiver(
             AsioServicePtr & ioService,
             ConnectionPtr & connection)
-            : ioService_(ioService)
+            : MessageSource(connection)
+            , ioService_(ioService)
             , socket_(*ioService_)
-            , connection_(connection)
-            , producer_(connection)
-            , message_(connection)
             , joined_(false)
-            , stopping_(false)
         {
-            message_.meta().type_ = Message::Meta::MulticastPacket;
-        }
-
-        inline
-        MulticastReceiver::~MulticastReceiver()
-        {
-            stop();
+            outMessage_.meta().type_ = Message::Meta::MulticastPacket;
         }
 
         inline
@@ -116,7 +101,7 @@ namespace HighQueue
         {
             try
             {
-                 mcast_.reset(new MCastInfo(configuration));
+                mcast_.reset(new MCastInfo(configuration));
                 socket_.open(mcast_->endpoint_.protocol());
                 socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
                 boost::asio::ip::udp::endpoint bindpoint(mcast_->bindAddress_, mcast_->portNumber_);
@@ -134,15 +119,18 @@ namespace HighQueue
                 std::cerr << "Failed to initialize Multicast group: " << ex.what() << std::endl;
                 return false;
             }
-            me_ = shared_from_this();
             joined_ = true;
             return true;
         }
 
         inline
-        void MulticastReceiver::start()
+        void MulticastReceiver::run()
         {
             startRead();
+            while(!stopping_)
+            {
+                ioService_->run_one();
+            }
         }
 
         inline
@@ -151,7 +139,7 @@ namespace HighQueue
             if(!stopping_)
             {
                 socket_.async_receive_from(
-                    boost::asio::buffer(message_.getWritePosition(), message_.available()),
+                    boost::asio::buffer(outMessage_.getWritePosition(), outMessage_.available()),
                     mcast_->senderEndpoint_,
                     boost::bind(&MulticastReceiver::handleReceive,
                     this,
@@ -170,34 +158,19 @@ namespace HighQueue
             {
                 // todo: write a real logger
                 std::cerr << "Error in multicast reader.  Shutting down. Message: " << error << std::endl;
+                stop();
             }
             else
             {
-                message_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
-                message_.addUsed(bytesReceived);
-                producer_.publish(message_);
+                outMessage_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
+                outMessage_.addUsed(bytesReceived);
+                producer_.publish(outMessage_);
                 startRead();
             }
         }
 
         inline
-        void MulticastReceiver::stop()
-        {
-            stopping_ = true;
-            try
-            {
-                pause();
-                // attempt to cancel any receive requests in progress.
-                socket_.cancel();
-            }
-            catch(...)
-            {
-            }
-            me_.reset();
-        }
-
-        inline
-        void MulticastReceiver::pause()
+        void MulticastReceiver::doPause()
         {
             // Temporarily leave the group
             if(joined_)
@@ -211,7 +184,7 @@ namespace HighQueue
         }
 
         inline
-        void MulticastReceiver::resume()
+        void MulticastReceiver::doResume()
         {
             if(!joined_)
             {

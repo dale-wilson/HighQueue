@@ -24,6 +24,8 @@ namespace HighQueue
             virtual void run() = 0;
         protected:
             void startThread();
+            virtual void doPause();
+            virtual void doResume();
         protected:
             bool paused_;
             bool stopping_;
@@ -69,13 +71,26 @@ namespace HighQueue
         void ComponentBase::pause()
         {
             paused_ = true;
+            doPause();
+        }
+        inline
+        void ComponentBase::doPause()
+        {
+            // nothing here.  Intended to be overridden
         }
 
         inline
         void ComponentBase::resume()
         {
             paused_ = false;
+            doResume();
         }
+        inline
+        void ComponentBase::doResume()
+        {
+            // nothing here.  Intended to be overridden.
+        }
+
 
         inline
         void ComponentBase::startThread()
