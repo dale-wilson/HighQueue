@@ -11,7 +11,22 @@ namespace HighQueue
 {
     namespace Components
     {
-        template<typename CargoMessage, typename GapMessage>
+        class GapMessage
+        {
+        public:
+            GapMessage(uint32_t startGap, uint32_t gapEnd = 0)
+                : startGap_(startGap)
+                , endGap_(gapEnd)
+            {
+            }
+            uint32_t & startGap();
+            uint32_t & gapEnd();
+        private:
+            uint32_t startGap_;
+            uint32_t endGap_;
+        };
+
+        template<typename CargoMessage>
         class Arbitrator : public MessageProcessor
         {
         public:
@@ -23,6 +38,10 @@ namespace HighQueue
             virtual bool handleHeartbeat(Message & message);
             void handleDataMessage(Message & message);
 
+            bool findAndPublishGap();
+            void publishGapMessage(uint32_t gapStart, uint32_t gapEnd);
+            void publishPendingMessages();
+
         private:
             size_t lookAhead_;
             bool quitOnEmptyMessage_;
@@ -31,16 +50,18 @@ namespace HighQueue
 
             uint32_t expectedSequenceNumber_;
             std::vector<Message> pendingMessages_;
+            uint32_t lastHeartbeatSequenceNumber_;
         };
 
-        template<typename CargoMessage, typename GapMessage>
-        Arbitrator<CargoMessage, GapMessage>::Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, bool quitOnEmptyMessage)
+        template<typename CargoMessage>
+        Arbitrator<CargoMessage>::Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, bool quitOnEmptyMessage)
             : MessageProcessor(inConnection, outConnection)
             , lookAhead_(lookAhead)
             , quitOnEmptyMessage_(quitOnEmptyMessage)
             , paused_(false)
             , stopping_(false)
             , expectedSequenceNumber_(0)
+            , lastHeartbeatSequenceNumber_(0)
         {
             for(auto nMessage = 0; nMessage < lookAhead; ++nMessage)
             {
@@ -48,32 +69,37 @@ namespace HighQueue
             }
         }
 
-        template<typename CargoMessage, typename GapMessage>
-        bool Arbitrator<CargoMessage, GapMessage>::handleEmptyMessage(Message & message)
+        template<typename CargoMessage>
+        bool Arbitrator<CargoMessage>::handleEmptyMessage(Message & message)
         {
-            DebugMessage("Arbitrator received empty message" << std::endl);
             producer_.publish(message);
             return !quitOnEmptyMessage_;
         }
 
-        template<typename CargoMessage, typename GapMessage>
-        bool Arbitrator<CargoMessage, GapMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
+        template<typename CargoMessage>
+        bool Arbitrator<CargoMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
         {
             // todo validate message type?
             handleDataMessage(message);
             return true;
         }
 
-        template<typename CargoMessage, typename GapMessage>
-        bool Arbitrator<CargoMessage, GapMessage>::handleHeartbeat(Message & message)
+        template<typename CargoMessage>
+        bool Arbitrator<CargoMessage>::handleHeartbeat(Message & message)
         {
-            std::cerr << "Arbitrator received heartbeat\n";
+            // todo: we might want to skip some heartbeats depending on frequency
+            if(expectedSequenceNumber_ == lastHeartbeatSequenceNumber_)
+            {
+                findAndPublishGap();
+                void publishPendingMessages();
+            }
+            lastHeartbeatSequenceNumber_ = expectedSequenceNumber_;
             // todo:
             return true;
         }
 
-        template<typename CargoMessage, typename GapMessage>
-        void Arbitrator<CargoMessage, GapMessage>::handleDataMessage(Message & message)
+        template<typename CargoMessage>
+        void Arbitrator<CargoMessage>::handleDataMessage(Message & message)
         {
             auto testMessage = message.get<CargoMessage>();
             auto sequence = testMessage->getSequence();
@@ -87,10 +113,11 @@ namespace HighQueue
                 DebugMessage("Publish " << std::endl);
                 producer_.publish(message);
                 ++expectedSequenceNumber_;
+                publishPendingMessages();
             }
             else if(sequence < expectedSequenceNumber_)
             {
-                DebugMessage("Ancient" << std::endl);
+                DebugMessage("Previous Duplicate" << std::endl);
                 // ignore this one.  We've already seen it.
             }
             else if(sequence - expectedSequenceNumber_ < lookAhead_)
@@ -103,7 +130,7 @@ namespace HighQueue
                 }
                 else
                 {
-                    DebugMessage("Duplicate" << std::endl);
+                    DebugMessage("Duplicates Stash" << std::endl);
                     // ignore this one we are already holding a copy.
                 }
             }
@@ -111,32 +138,61 @@ namespace HighQueue
             {
                 while(sequence - expectedSequenceNumber_ < lookAhead_)
                 {
-                    auto index = expectedSequenceNumber_ % lookAhead_;
-                    if(pendingMessages_[index].isEmpty())
+                    if(findAndPublishGap())
                     {
-                        DebugMessage("Gap " << expectedSequenceNumber_ << std::endl);
-                        pendingMessages_[index].emplace<GapMessage>(expectedSequenceNumber_);
+                        publishPendingMessages();
                     }
                     else
                     {
-                        DebugMessage("publish Future " << expectedSequenceNumber_ << std::endl);
+                        publishGapMessage(expectedSequenceNumber_, sequence);
+                        producer_.publish(message);
                     }
-                    producer_.publish(pendingMessages_[index]);
-                    ++expectedSequenceNumber_;
                 }
                 DebugMessage("Stash future" << std::endl);
                 auto index = sequence % lookAhead_;
                 message.moveTo(pendingMessages_[index]);
             }
             // flush any additional messages
+        }
+
+        template<typename CargoMessage>
+        bool Arbitrator<CargoMessage>::findAndPublishGap()
+        {
+            auto gapStart = expectedSequenceNumber_;
+            auto gapEnd = gapStart + 1; // the first message that's NOT in the gap
+            auto endLookahead = gapStart + lookAhead_;
+            while(gapEnd < endLookahead)
+            {
+                auto index = gapEnd % lookAhead_;
+                if(!pendingMessages_[index].isEmpty())
+                {
+                    publishGapMessage(gapStart, gapEnd);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        template<typename CargoMessage>
+        void Arbitrator<CargoMessage>::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
+        {
+            outMessage_.meta().type_ = Message::Meta::Gap;
+            outMessage_.emplace<GapMessage>(gapStart, gapEnd - 1);
+            expectedSequenceNumber_ = gapEnd;
+        }
+
+        template<typename CargoMessage>
+        void Arbitrator<CargoMessage>::publishPendingMessages()
+        {
             auto index = expectedSequenceNumber_ % lookAhead_;
             while(!pendingMessages_[index].isEmpty())
             {
-                DebugMessage("Also publish " << expectedSequenceNumber_ << std::endl);
+                DebugMessage("Publish from stash " << expectedSequenceNumber_ << std::endl);
                 producer_.publish(pendingMessages_[index]);
                 ++expectedSequenceNumber_;
                 index = expectedSequenceNumber_ % lookAhead_;
             }
         }
+
    }
 }

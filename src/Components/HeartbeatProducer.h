@@ -40,7 +40,7 @@ namespace HighQueue
             , interval_(interval.count())
             , timer_(*ioService)
         {
-            outMessage_.meta().type_ = Message::Meta::TestMessage;
+            outMessage_.meta().type_ = Message::Meta::Heartbeat;
         }
 
         inline
@@ -65,8 +65,6 @@ namespace HighQueue
         {
             if(!stopping_)
             {
-                std::cerr << "Start timer " << interval_.total_milliseconds() << std::endl;
-
                 timer_.expires_from_now(interval_);
                 timer_.async_wait(boost::bind(
                     &HeartbeatProducer::handleTimer, this, boost::asio::placeholders::error));
@@ -88,7 +86,6 @@ namespace HighQueue
             {
                 outMessage_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
                 outMessage_.appendBinaryCopy(&outMessage_.meta().timestamp_, sizeof(outMessage_.meta().timestamp_));
-                std::cerr << "publish heartbeat " << outMessage_.meta().timestamp_ << std::endl;
                 producer_.publish(outMessage_);
             }
             startTimer();
