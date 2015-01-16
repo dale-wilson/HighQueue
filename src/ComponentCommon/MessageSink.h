@@ -3,41 +3,47 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include <ComponentCommon/ComponentBase.h>
+#include <ComponentCommon/MessageDispatcher.h>
 #include <HighQueue/Consumer.h>
 
 #include <ComponentCommon/DebugMessage.h>
-
-////////////////////////////////////////
-#pragma message("WARNING UNDER CONSTRUCTION.  NRFPT")
 
 namespace HighQueue
 {
     namespace Components
     {
-        class ComponentSink : public ComponentBase
+        class MessageSink: public ComponentBase, public MessageDispatcher
         {
         public:
-            ComponentSink(ConnectionPtr & inConnection);
+            MessageSink(ConnectionPtr & inConnection);
 
+            virtual void run();
         protected:
-            virtual void handleEmptyMessage(Message & message) = 0;
-            virtual void handleMessageType(Message::Meta::MessageType type, Message & message) = 0;
-            virtual void handleHeartbeat(Message & message) = 0;
-            virtual void handleDataMessage(Message & message) = 0;
-
-        private:
             ConnectionPtr inConnection_;
             Consumer consumer_;
             Message inMessage_;
         };
 
-        
-        ComponentSink::ComponentSink(ConnectionPtr & inConnection)
+        inline
+        MessageSink::MessageSink(ConnectionPtr & inConnection)
             : ComponentBase()
             , inConnection_(inConnection)
             , consumer_(inConnection_)
             , inMessage_(inConnection)
         {
         }
-   }
+
+        inline
+        void MessageSink::run()
+        {
+            while(!stopping_)
+            {
+                stopping_ = !consumer_.getNext(inMessage_);
+                if(!stopping_)
+                {
+                    stopping_ = !dispatch(inMessage_);
+                }
+            }
+        }
+    }
 }

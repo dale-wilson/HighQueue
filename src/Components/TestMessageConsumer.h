@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <HighQueue/Consumer.h>
+#include <ComponentCommon/MessageSink.h>
 #include <Mocks/TestMessage.h>
 
 #include <ComponentCommon/DebugMessage.h>
@@ -12,119 +12,77 @@ namespace HighQueue
     namespace Components
     {
         template<size_t Extra = 0>
-        class TestMessageConsumer : public std::enable_shared_from_this<TestMessageConsumer<Extra> >
+        class TestMessageConsumer : public MessageSink
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
-            TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount = 0, bool quitOnEmptyMessage = true);
-            ~TestMessageConsumer();
-
-            void start();
-            void stop();
-            void pause();
-            void resume();
+            TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount_ = 0, bool quitOnEmptyMessage = true);
 
             uint32_t errors()const
             {
                 return sequenceError_;
             }
 
-            void run();
+            ////////////////////////////
+            // Implement MessageSink
+            virtual bool handleEmptyMessage(Message & message);
+            virtual bool handleHeartbeat(Message & message);
+            virtual bool handleMessageType(Message::Meta::MessageType type, Message & message);
+
         private:
-            ConnectionPtr connection_;
-            Consumer consumer_;
-            Message message_;
             uint32_t messageCount_;
             bool quitOnEmptyMessage_;
-            bool paused_;
-            bool stopping_;
 
+            uint32_t messageReceived_;
+            uint32_t nextSequence_;
             uint32_t sequenceError_;
-            
-            std::shared_ptr<TestMessageConsumer> me_;
-            std::thread thread_;
         };
 
         template<size_t Extra>
-        TestMessageConsumer<Extra>::TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount, bool quitOnEmptyMessage)
-            : connection_(connection)
-            , consumer_(connection)
-            , message_(connection)
-            , messageCount_(messageCount)
+        TestMessageConsumer<Extra>::TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount_, bool quitOnEmptyMessage)
+            : MessageSink(connection)
+            , messageCount_(messageCount_)
             , quitOnEmptyMessage_(quitOnEmptyMessage)
-            , paused_(false)
-            , stopping_(false)
+            , messageReceived_(0)
+            , nextSequence_(0)
             , sequenceError_(0)
         {
         }
 
         template<size_t Extra>
-        TestMessageConsumer<Extra>::~TestMessageConsumer()
+        bool TestMessageConsumer<Extra>::handleEmptyMessage(Message & message)
         {
-            stop();
+            return !quitOnEmptyMessage_;
         }
 
         template<size_t Extra>
-        void TestMessageConsumer<Extra>::start()
+        bool TestMessageConsumer<Extra>::handleHeartbeat(Message & message)
         {
-            me_ = shared_from_this();
-            thread_ = std::thread(std::bind(
-                TestMessageConsumer<Extra>::run,
-                this));
+            // todo
+            return !stopping_;
         }
 
         template<size_t Extra>
-        void TestMessageConsumer<Extra>::stop()
+        bool TestMessageConsumer<Extra>::handleMessageType(Message::Meta::MessageType type, Message & message)
         {
-            stopping_ = true;
-            if(me_)
-            { 
-                thread_.join();
-                me_.reset();
-            }
-        }
-
-        template<size_t Extra>
-        void TestMessageConsumer<Extra>::pause()
-        {
-            paused_ = true;
-        }
-
-        template<size_t Extra>
-        void TestMessageConsumer<Extra>::resume()
-        {
-            paused_ = false;
-        }
-
-        template<size_t Extra>
-        void TestMessageConsumer<Extra>::run()
-        {
-            DebugMessage("Consumer start. " << connection_->getHeader()->name_ << std::endl);
-            uint32_t messageCount = 0; 
-            uint32_t nextSequence = 0;
-            while(!stopping_)
+            if(type != Message::Meta::TestMessage)
             {
-                stopping_ = !consumer_.getNext(message_);
-                if(!stopping_ && quitOnEmptyMessage_ && message_.isEmpty())
-                {
-                    stopping_ = true;
-                }
-                if(!stopping_)
-                { 
-                    auto testMessage = message_.get<ActualMessage>();
-                    DebugMessage("Consumer: " << testMessage->getSequence() << std::endl);
-                    if(nextSequence != testMessage->getSequence())
-                    {
-                        ++sequenceError_;
-                        nextSequence = testMessage->getSequence();
-                    }
-                    ++nextSequence;
-                    message_.destroy<ActualMessage>();
-                    ++messageCount;
-                    stopping_ = !(messageCount_ == 0 || messageCount < messageCount_);
-                }
+                // logging?
+                std::cerr << "TestMessageConsumer::Expecting test message" << std::endl;
+                return false;
             }
-            DebugMessage("Consumer received " << messageCount << " messages with " << sequenceError_ << " errors" << std::endl);
+            auto testMessage = message.get<ActualMessage>();
+            DebugMessage("Consumer: " << testMessage->getSequence() << std::endl);
+            if(nextSequence_ != testMessage->getSequence())
+            {
+                ++sequenceError_;
+                nextSequence_ = testMessage->getSequence();
+            }
+            ++nextSequence_;
+            message.destroy<ActualMessage>();
+            ++messageReceived_;
+            return (messageCount_ == 0 || messageReceived_ < messageCount_);
         }
+
    }
 }

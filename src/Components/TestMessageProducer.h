@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/ComponentSource.h>
+#include <ComponentCommon/MessageSource.h>
 #include <Mocks/TestMessage.h>
 
 #include <ComponentCommon/DebugMessage.h>
@@ -12,7 +12,7 @@ namespace HighQueue
     namespace Components
     {
         template<size_t Extra=0>
-        class TestMessageProducer : public ComponentSource
+        class TestMessageProducer : public MessageSource
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
@@ -41,12 +41,13 @@ namespace HighQueue
             uint32_t messageCount, 
             uint32_t producerNumber, 
             bool sendEmptyMessageOnQuit)
-            : ComponentSource(connection)
+            : MessageSource(connection)
             , startSignal_(startSignal)
             , messageCount_(messageCount)
             , producerNumber_(producerNumber)
             , sendEmptyMessageOnQuit_(sendEmptyMessageOnQuit)
         {
+            outMessage_.meta().type_ = Message::Meta::TestMessage;
         }
 
         template<size_t Extra>
