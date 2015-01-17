@@ -6,18 +6,22 @@
 #include <ComponentCommon/MessageDispatcher.h>
 #include <HighQueue/Consumer.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
     namespace Components
     {
-        class MessageSink: public ComponentBase, public MessageDispatcher
+        class MessageSink: public ComponentBase,public MessageDispatcher
         {
         public:
             MessageSink(ConnectionPtr & inConnection);
 
             virtual void run();
+
+            // Implement IMessageHandler
+            virtual bool handleMessage(Message & message);
+
         protected:
             ConnectionPtr inConnection_;
             Consumer consumer_;
@@ -45,5 +49,12 @@ namespace HighQueue
                 }
             }
         }
+
+        inline
+        bool MessageSink::handleMessage(Message & message)
+        {
+            return dispatch(message);
+        }
+
     }
 }

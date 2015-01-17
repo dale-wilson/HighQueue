@@ -5,7 +5,7 @@
 #include <ComponentCommon/MessageSink.h>
 #include <Mocks/TestMessage.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
@@ -72,7 +72,7 @@ namespace HighQueue
                 return false;
             }
             auto testMessage = message.get<ActualMessage>();
-            DebugMessage("Consumer: " << testMessage->getSequence() << std::endl);
+            LogDebug("TestMessageConsumer: " << testMessage->getSequence());
             if(nextSequence_ != testMessage->getSequence())
             {
                 ++sequenceError_;

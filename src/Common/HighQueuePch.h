@@ -25,6 +25,7 @@
 # define WIN32_LEAN_AND_MEAN      // Exclude rarely-used stuff from Windows headers
 # define NOMINMAX                 // Do not define min & max a macros: l'histoire anciene
 # include <windows.h>
+#undef ERROR   // what stupid developer would define a macro named ERROR?  If undefining this breaks their code... tough.
 #else
 #include <unistd.h>
 #endif // _WIN32

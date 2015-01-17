@@ -5,7 +5,7 @@
 
 #include <ComponentCommon/MessageProcessor.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
@@ -72,7 +72,7 @@ namespace HighQueue
         template<typename CargoMessage>
         bool Arbitrator<CargoMessage>::handleEmptyMessage(Message & message)
         {
-            producer_.publish(message);
+            publish(message);
             return !quitOnEmptyMessage_;
         }
 
@@ -107,17 +107,17 @@ namespace HighQueue
             {
                 expectedSequenceNumber_ = sequence;
             }
-            DebugMessage("Arbitrator sequence :" << sequence << " expected " << expectedSequenceNumber_ << std::endl);
+            LogVerbose("Arbitrator sequence :" << sequence << " expected " << expectedSequenceNumber_);
             if(sequence == expectedSequenceNumber_)
             {
-                DebugMessage("Publish " << std::endl);
-                producer_.publish(message);
+                LogDebug("Arbitrator Publish " << sequence);
+                publish(message);
                 ++expectedSequenceNumber_;
                 publishPendingMessages();
             }
             else if(sequence < expectedSequenceNumber_)
             {
-                DebugMessage("Previous Duplicate" << std::endl);
+                LogDebug("Arbitrator Previous Duplicate " << sequence);
                 // ignore this one.  We've already seen it.
             }
             else if(sequence - expectedSequenceNumber_ < lookAhead_)
@@ -125,12 +125,12 @@ namespace HighQueue
                 auto index = sequence % lookAhead_;
                 if(pendingMessages_[index].isEmpty())
                 {
-                    DebugMessage("Stash" << std::endl);
+                    LogDebug("Arbitrator Stash" << sequence);
                     message.moveTo(pendingMessages_[index]);
                 }
                 else
                 {
-                    DebugMessage("Duplicates Stash" << std::endl);
+                    LogDebug("Arbitrator Duplicates Stash " << sequence);
                     // ignore this one we are already holding a copy.
                 }
             }
@@ -145,10 +145,10 @@ namespace HighQueue
                     else
                     {
                         publishGapMessage(expectedSequenceNumber_, sequence);
-                        producer_.publish(message);
+                        publish(message);
                     }
                 }
-                DebugMessage("Stash future" << std::endl);
+                LogDebug("Arbitrator Stash future " << sequence);
                 auto index = sequence % lookAhead_;
                 message.moveTo(pendingMessages_[index]);
             }
@@ -187,8 +187,8 @@ namespace HighQueue
             auto index = expectedSequenceNumber_ % lookAhead_;
             while(!pendingMessages_[index].isEmpty())
             {
-                DebugMessage("Publish from stash " << expectedSequenceNumber_ << std::endl);
-                producer_.publish(pendingMessages_[index]);
+                LogDebug("Arbitrator Publish from stash " << expectedSequenceNumber_ );
+                publish(pendingMessages_[index]);
                 ++expectedSequenceNumber_;
                 index = expectedSequenceNumber_ % lookAhead_;
             }

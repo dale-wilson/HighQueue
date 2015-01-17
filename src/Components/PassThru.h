@@ -4,7 +4,7 @@
 #pragma once
 #include <ComponentCommon/MessageProcessor.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
@@ -66,7 +66,7 @@ namespace HighQueue
         bool PassThru<CargoMessage>::handleEmptyMessage(Message & message)
         {
             outMessage_.meta() = message.meta();
-            producer_.publish(outMessage_);
+            publish(outMessage_);
             return !quitOnEmptyMessage_;
         }
 
@@ -78,31 +78,31 @@ namespace HighQueue
                 default:
                 case CopyBinary:
                 {
-                    DebugMessage("PassThru  copy binary.\n");
+                    LogDebug("PassThru  copy binary.");
                     outMessage_.appendBinaryCopy(message.get(), message.getUsed());
                     outMessage_.meta() = message.meta();
-                    producer_.publish(outMessage_);
+                    publish(outMessage_);
                     return true;
                 }
                 case CopyConstruct:
                 {
-                    DebugMessage("PassThru  copy construct.\n");
+                    LogDebug("PassThru  copy construct.");
                     outMessage_.emplace<CargoMessage>(*message.get<CargoMessage>());
                     outMessage_.meta() = message.meta();
-                    producer_.publish(outMessage_);
+                    publish(outMessage_);
                     return true;
                 }
                 case CopyMove:
                 {
-                    DebugMessage("PassThru  copy move.\n");
+                    LogDebug("PassThru  copy move.");
                     message.moveTo(outMessage_);
-                    producer_.publish(outMessage_);
+                    publish(outMessage_);
                     return true;
                 }
                 case CopyForward:
                 {
-                    DebugMessage("PassThru  copy Forward.\n");
-                    producer_.publish(message);
+                    LogDebug("PassThru  copy Forward.");
+                    publish(message);
                     return true;
                 }
             }
@@ -113,7 +113,7 @@ namespace HighQueue
         {
             outMessage_.appendBinaryCopy(message.get(), message.getUsed());
             outMessage_.meta() = message.meta();
-            producer_.publish(outMessage_);
+            publish(outMessage_);
             return true;
             return true;
         }

@@ -8,7 +8,7 @@
 #include <HighQueue/Consumer.h>
 #include <HighQueue/Producer.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
@@ -20,6 +20,14 @@ namespace HighQueue
             MessageProcessor(ConnectionPtr & inConnection, ConnectionPtr & outConnection);
 
             virtual void run();
+            virtual bool handleMessage(Message & message);
+
+            void attachHandler(IMessageHandlerPtr & handler)
+            {
+                handler_ = handler;
+            }
+
+            bool publish(Message & message);
 
         protected:
             ConnectionPtr inConnection_;
@@ -27,7 +35,7 @@ namespace HighQueue
             Message inMessage_;
 
             ConnectionPtr outConnection_;
-            Producer producer_;
+            IMessageHandlerPtr handler_;
             Message outMessage_;
         };
 
@@ -38,7 +46,7 @@ namespace HighQueue
             , consumer_(inConnection_)
             , inMessage_(inConnection)
             , outConnection_(outConnection)
-            , producer_(outConnection_)
+            , handler_(new MessagePublisher(outConnection_))
             , outMessage_(outConnection)
         {
         }
@@ -54,6 +62,18 @@ namespace HighQueue
                     stopping_ = !dispatch(inMessage_);
                 }
             }
+        }
+
+        inline
+        bool MessageProcessor::handleMessage(Message & message)
+        {
+            return dispatch(message);
+        }
+
+        inline
+        bool MessageProcessor::publish(Message & message)
+        {
+            return handler_->handleMessage(message);
         }
 
    }

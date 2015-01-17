@@ -164,7 +164,7 @@ namespace HighQueue
             {
                 outMessage_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
                 outMessage_.addUsed(bytesReceived);
-                producer_.publish(outMessage_);
+                publish(outMessage_);
                 startRead();
             }
         }

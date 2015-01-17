@@ -5,7 +5,7 @@
 #include <ComponentCommon/MessageSource.h>
 #include <Mocks/TestMessage.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
@@ -30,7 +30,6 @@ namespace HighQueue
             uint32_t messageCount_;
             uint32_t producerNumber_;
             bool sendEmptyMessageOnQuit_;
-
             volatile bool & startSignal_;
         };
 
@@ -64,21 +63,21 @@ namespace HighQueue
             {
                 std::this_thread::yield();
             }
-            DebugMessage("Producer Start " << connection_->getHeader()->name_ << std::endl);
+            LogTrace("TestMessageProducer Start " << outConnection_->getHeader()->name_);
             uint32_t messageNumber = 0;
             while( messageCount_ == 0 || messageNumber < messageCount_)
             {
-                // DebugMessage("Publish " << messageNumber << '/' << messageCount_ << std::endl);
+                LogVerbose("TestMessageProducer Publish " << messageNumber << '/' << messageCount_);
                 auto testMessage = outMessage_.emplace<ActualMessage>(producerNumber_, messageNumber);
-                producer_.publish(outMessage_);
+                publish(outMessage_);
                 ++messageNumber;
             }
             if(sendEmptyMessageOnQuit_)
             {
-                DebugMessage("Producer "<< producerNumber_ <<"publish empty message" << std::endl);
-                producer_.publish(outMessage_);
+                LogDebug("Producer "<< producerNumber_ <<" publish empty message" );
+                publish(outMessage_);
             }
-            DebugMessage("Producer " << producerNumber_ << " published " << messageNumber << " messages." << std::endl);
+            LogInfo("TestMessageProducer " << producerNumber_ << " published " << messageNumber << " messages.");
         }
    }
 }

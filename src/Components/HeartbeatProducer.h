@@ -6,7 +6,7 @@
 #include <ComponentCommon/MessageSource.h>
 #include <ComponentCommon/AsioService.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
@@ -79,14 +79,15 @@ namespace HighQueue
                 if(!stopping_)
                 {
                     // todo: write/find a real logger
-                    std::cerr << "Error in HeartbeatProducer " << error << std::endl;
+                    LogError("Error in HeartbeatProducer " << error);
                 }
             }
             else if(!paused_)
             {
                 outMessage_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
                 outMessage_.appendBinaryCopy(&outMessage_.meta().timestamp_, sizeof(outMessage_.meta().timestamp_));
-                producer_.publish(outMessage_);
+                LogTrace("Publish Heartbeat: " << outMessage_.meta().timestamp_);
+                publish(outMessage_);
             }
             startTimer();
         }

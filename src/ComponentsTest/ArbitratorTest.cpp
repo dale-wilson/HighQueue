@@ -45,11 +45,11 @@ namespace
 #if ENABLE_ARBITRATOR_TEST
 BOOST_AUTO_TEST_CASE(testArbitrator)
 {
-    size_t entryCount = 100000;
+    size_t entryCount = 10000;
     size_t messageSize = sizeof(ActualMessage);
-    uint32_t messageCount = 100000000;
+    uint32_t messageCount = 100;//000000;
     bool endWithEmptyMessage = true;
-    const size_t arbitratorLookAhead = 10000;
+    const size_t arbitratorLookAhead = 100; // real world numbers would be in the thousands.
 
     const size_t numberOfHeartbeats = 1;  // Don't change this
     const size_t numberOfConsumers = 1;   // Don't change this
@@ -90,6 +90,11 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     auto heartbeat = std::make_shared<HeartbeatProducer>(asio, arbitratorConnection, heartbeatInterval);
     auto arbitrator = std::make_shared<ArbitratorType>(arbitratorConnection, consumerConnection, arbitratorLookAhead, endWithEmptyMessage);
     auto consumer = std::make_shared<ConsumerType>(consumerConnection, 0, true);
+
+    //IMessageHandlerPtr imhp = consumer;
+    //arbitrator->attachHandler(imhp);
+
+
     // All wired up, ready to go.
     arbitrator->start();
     for(auto producer : producers)
@@ -100,7 +105,14 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
     Stopwatch timer;
     producerGo = true;
-    consumer->run();
+    int todo_the_problem_is;
+    // when the consumer is attached directly it does not need its own thread.
+    // how can we tell when we're done?
+    while(!consumer->isStopping())
+    {
+        std::this_thread::yield();
+    }
+//    consumer->run();
     auto lapse = timer.nanoseconds();
 
     heartbeat->stop();

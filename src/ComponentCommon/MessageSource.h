@@ -3,9 +3,11 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include <ComponentCommon/ComponentBase.h>
+#include <ComponentCommon/IMessageHandler.h>
+#include <ComponentCommon/MessagePublisher.h>
 #include <HighQueue/Producer.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
@@ -16,9 +18,18 @@ namespace HighQueue
         public:
             MessageSource(ConnectionPtr & outConnection);
 
+            virtual bool handleMessage(Message & message);
+
+            void attachHandler(IMessageHandlerPtr & handler)
+            {
+                handler_ = handler;
+            }
+
+            bool publish(Message & message);
+
         protected:
             ConnectionPtr outConnection_;
-            Producer producer_;
+            IMessageHandlerPtr handler_;
             Message outMessage_;
         };
 
@@ -26,9 +37,21 @@ namespace HighQueue
         MessageSource::MessageSource(ConnectionPtr & outConnection)
             : ComponentBase()
             , outConnection_(outConnection)
-            , producer_(outConnection_)
+            , handler_(new MessagePublisher(outConnection_)) // todo delay this till initialization
             , outMessage_(outConnection)
         {
         }
-   }
+
+        inline
+        bool MessageSource::publish(Message & message)
+        {
+            return handler_->handleMessage(message);
+        }
+
+        inline
+        bool MessageSource::handleMessage(Message & message)
+        {
+            throw std::runtime_error("This component does not handle messages, it generates them.");
+        }
+    }
 }

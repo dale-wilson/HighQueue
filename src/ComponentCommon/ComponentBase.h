@@ -4,14 +4,15 @@
 #pragma once
 
 #include <HighQueue/Producer.h>
+#include <ComponentCommon/IMessageHandler.h>
 
-#include <ComponentCommon/DebugMessage.h>
+#include <Common/Log.h>
 
 namespace HighQueue
 {
     namespace Components
     {
-        class ComponentBase: public std::enable_shared_from_this<ComponentBase>
+        class ComponentBase: public IMessageHandler, public std::enable_shared_from_this<ComponentBase>
         {
         public:
             ComponentBase();
@@ -22,6 +23,10 @@ namespace HighQueue
             void pause();
             void resume();
             virtual void run() = 0;
+
+            bool isStopping()const;
+            bool isPaused() const;
+
         protected:
             void startThread();
             virtual void doPause();
@@ -44,6 +49,18 @@ namespace HighQueue
         ComponentBase::~ComponentBase()
         {
             stop();
+        }
+
+        inline
+        bool ComponentBase::isStopping()const 
+        { 
+            return stopping_;
+        }
+
+        inline
+        bool ComponentBase::isPaused() const
+        { 
+            return paused_;
         }
 
         inline
