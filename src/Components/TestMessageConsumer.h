@@ -67,8 +67,7 @@ namespace HighQueue
         {
             if(type != Message::Meta::TestMessage)
             {
-                // logging?
-                std::cerr << "TestMessageConsumer::Expecting test message" << std::endl;
+                LogError("TestMessageConsumer::Expecting test message");
                 return false;
             }
             auto testMessage = message.get<ActualMessage>();

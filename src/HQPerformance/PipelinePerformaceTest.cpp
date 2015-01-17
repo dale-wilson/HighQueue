@@ -59,7 +59,7 @@ namespace
         }
         catch(const std::exception & ex)
         {
-            std::cerr << "Producer Number " << producerNumber << "Failed " << ex.what() << std::endl;
+            std::cout << "Producer Number " << producerNumber << "Failed " << ex.what() << std::endl;
         }
     }
 
@@ -147,7 +147,7 @@ namespace
         }
         catch(const std::exception & ex)
         {
-            std::cerr << "Copy thread failed. " << ex.what() << std::endl;
+            std::cout << "Copy thread failed. " << ex.what() << std::endl;
         }
     }
 }
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
                       // BufferSwap;
                       // BinaryCopy;
 
-    std::cerr << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
+    std::cout << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 
     WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
     bool discardMessagesIfNoConsumer = false;
@@ -259,6 +259,6 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
         << std::endl;
 
-    consumer.writeStats(std::cerr);
+    consumer.writeStats(std::cout);
 }
 #endif // ENABLEARBITRATORPERFORMANCE

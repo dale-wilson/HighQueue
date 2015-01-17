@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
         << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
         << std::endl;
 
-    producer.writeStats(std::cerr);
+    producer.writeStats(std::cout);
 
 }
 #endif // ENABLE_NO_CONSUMER

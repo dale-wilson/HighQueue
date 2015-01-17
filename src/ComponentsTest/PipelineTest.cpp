@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     auto messageBits = messageBytes * 8;
 
-    std::cerr << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage. Copy type: " << CopierType::copyTypeName(copyType) << ": ";
+    std::cout << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage. Copy type: " << CopierType::copyTypeName(copyType) << ": ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "

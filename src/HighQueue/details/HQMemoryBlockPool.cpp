@@ -1,7 +1,7 @@
 #include <Common/HighQueuePch.h>
 
 #include <HighQueue/details/HQMemoryBlockPool.h>
-
+#include <Common/Log.h>
 using namespace HighQueue;
 
 HQMemoryBlockPool::HQMemoryBlockPool()
@@ -86,7 +86,7 @@ void HQMemoryBlockPool::release(Message & message)
     }
 
     Spinlock::Guard guard(lock_);
-//    std::cout << "Release " << message.getOffset() << std::endl;
+    LogVerbose("Release " << message.getOffset());
     *message.get<size_t>() = rootOffset_;
     rootOffset_ = message.getOffset();
     message.reset();

@@ -37,7 +37,7 @@ namespace
         }
         catch(const std::exception & ex)
         {
-            std::cerr << "Producer Number " << producerNumber << " failed. " << ex.what() << std::endl;
+            std::cout << "Producer Number " << producerNumber << " failed. " << ex.what() << std::endl;
             return;
         }
     }
@@ -189,10 +189,10 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             << std::endl;
         for(auto & out : stats)
         {
-            std::cerr << "Producer: " << out.str();
+            std::cout << "Producer: " << out.str();
         }
-        std::cerr << "Consumer: ";
-        consumer.writeStats(std::cerr);
+        std::cout << "Consumer: ";
+        consumer.writeStats(std::cout);
     }
 }
 #endif // ENABLE_MultithreadMessagePassingPerformance

@@ -3,6 +3,7 @@
 // See the file license.txt for licensing information.
 #include <ComponentCommon/ComponentPch.h>
 #include "AsioService.h"
+#include <Common/Log.h>
 
 using namespace HighQueue;
 using namespace Components;
@@ -77,8 +78,7 @@ AsioService::run()
     }
     catch (const std::exception & ex)
     {
-        // todo improve logging
-        std::cerr << ex.what() << std::endl;
+        LogError("Error in ioservice thread.  Reset and continue: " << ex.what());
     }
   }
 

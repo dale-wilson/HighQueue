@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
 
         auto messageBytes = sizeof(ActualMessage);
         auto messageBits = sizeof(ActualMessage) * 8;
-        std::cerr << "Test " << producerCount << " producer(s) ";
+        std::cout << "Test " << producerCount << " producer(s) ";
         std::cout << "passed " << perProducer << ' ' << messageBytes << " byte messages each in "
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
             << lapse / perConsumer << " nsec./message "

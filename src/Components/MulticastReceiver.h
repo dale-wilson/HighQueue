@@ -115,8 +115,7 @@ namespace HighQueue
             }
             catch(const std::exception & ex)
             {
-                // todo logging
-                std::cerr << "Failed to initialize Multicast group: " << ex.what() << std::endl;
+                LogError("Failed to initialize Multicast group: " << ex.what());
                 return false;
             }
             joined_ = true;
@@ -156,8 +155,7 @@ namespace HighQueue
         {
             if(error)
             {
-                // todo: write a real logger
-                std::cerr << "Error in multicast reader.  Shutting down. Message: " << error << std::endl;
+                LogError("Error in multicast reader.  Shutting down. Message: " << error);
                 stop();
             }
             else

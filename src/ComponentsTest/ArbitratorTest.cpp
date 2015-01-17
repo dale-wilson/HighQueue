@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
     auto messageBits = messageBytes * 8;
 
-    std::cerr << "Arbitration: ";
+    std::cout << "Arbitration: ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "
