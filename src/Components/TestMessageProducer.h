@@ -61,7 +61,7 @@ namespace HighQueue
             }
             LogTrace("TestMessageProducer Start " << outConnection_->getHeader()->name_);
             uint32_t messageNumber = 0;
-            while(!stopping_ && messageCount_ == 0 || messageNumber < messageCount_)
+            while(!stopping_ && (messageCount_ == 0 || messageNumber < messageCount_))
             {
                 LogVerbose("TestMessageProducer Publish " << messageNumber << '/' << messageCount_);
                 auto testMessage = outMessage_.emplace<ActualMessage>(producerNumber_, messageNumber);
