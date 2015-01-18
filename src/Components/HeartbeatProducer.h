@@ -29,6 +29,7 @@ namespace HighQueue
             AsioServicePtr ioService_;
             boost::posix_time::millisec interval_;
             boost::asio::deadline_timer timer_;
+            bool cancel_;
         };
 
         HeartbeatProducer::HeartbeatProducer(
@@ -39,6 +40,7 @@ namespace HighQueue
             , ioService_(ioService)
             , interval_(interval.count())
             , timer_(*ioService)
+            , cancel_(false)
         {
             outMessage_.meta().type_ = Message::Meta::Heartbeat;
         }
@@ -56,8 +58,12 @@ namespace HighQueue
         inline
         void HeartbeatProducer::doStop()
         {
-            MessageSource::stop();
+            LogTrace("***HeartbeatProducer Cancel Timer");
+            cancel_ = true;
             timer_.cancel();
+            LogTrace("***HeartbeatProducer Stopping");
+            MessageSource::doStop();
+            LogTrace("***HeartbeatProducer Exiting doStop");
         }
 
         inline
@@ -76,9 +82,9 @@ namespace HighQueue
         {
             if(error)
             {
-                if(!stopping_)
+                LogTrace("HeartbeatProducer: timer canceled.");
+                if(!cancel_) // did we expect this?
                 {
-                    // todo: write/find a real logger
                     LogError("Error in HeartbeatProducer " << error);
                 }
             }

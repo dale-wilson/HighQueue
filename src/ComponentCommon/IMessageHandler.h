@@ -17,7 +17,7 @@ namespace HighQueue
             /// @brief Implement this and voila you're a message handler
             /// @param message is the one to handle.
             /// @returns false if we should stop now.
-            virtual bool handleMessage(Message & message) = 0;
+            virtual void handleMessage(Message & message) = 0;
         };
         typedef std::shared_ptr<IMessageHandler> IMessageHandlerPtr;
    }

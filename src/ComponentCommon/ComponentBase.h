@@ -24,6 +24,8 @@ namespace HighQueue
             void resume();
             virtual void run() = 0;
 
+            virtual void doStop();
+
             bool isStopping()const;
             bool isPaused() const;
 
@@ -75,9 +77,14 @@ namespace HighQueue
         inline
         void ComponentBase::stop()
         {
+            doStop();
+        }
+
+        inline void ComponentBase::doStop()
+        {
             stopping_ = true;
             paused_ = false;
-            if(me_)
+            if(me_ && std::this_thread::get_id() != thread_.get_id())
             { 
                 thread_.join();
                 me_.reset();
@@ -112,7 +119,19 @@ namespace HighQueue
         inline
         void ComponentBase::startThread()
         {
-            run();
+            try
+            {
+                run();
+            }
+            catch(const std::exception & ex)
+            {
+                LogFatal("Caught error in Component thread: " << ex.what());
+            }
+            catch(...)
+            {
+                LogFatal("Caught unknown exceptionin Component thread.");
+                throw;
+            }
         }
    }
 }

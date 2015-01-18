@@ -12,11 +12,11 @@ namespace HighQueue
         {
         public:
             virtual ~MessageDispatcher();
-            bool dispatch(Message & message);
+            void dispatch(Message & message);
 
-            virtual bool handleEmptyMessage(Message & message) = 0;
-            virtual bool handleMessageType(Message::Meta::MessageType type, Message & message) = 0;
-            virtual bool handleHeartbeat(Message & message) = 0;
+            virtual void handleHeartbeat(Message & message) = 0;
+            virtual void handleShutdownMessage(Message & message) = 0;
+            virtual void handleMessageType(Message::Meta::MessageType type, Message & message) = 0;
         };
 
         inline
@@ -25,19 +25,23 @@ namespace HighQueue
         }
 
         inline
-        bool MessageDispatcher::dispatch(Message & message)
+        void MessageDispatcher::dispatch(Message & message)
         {
-            if(message.isEmpty())
-            {
-                return handleEmptyMessage(message);
-            }
             auto type = message.meta().type_;
             if(type == Message::Meta::Heartbeat)
             {
-                return handleHeartbeat(message);
+                LogTrace("Dispatch heartbeat");
+                handleHeartbeat(message);
             }
-            return handleMessageType(type, message);
+            else if(type == Message::Meta::Shutdown)
+            {
+                LogTrace("Dispatch shutdown");
+                handleShutdownMessage(message);
+            }
+            else
+            { 
+                handleMessageType(type, message);
+            }
         }
-
    }
 }

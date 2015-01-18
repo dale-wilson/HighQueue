@@ -47,9 +47,8 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 {
     size_t entryCount = 10000;
     size_t messageSize = sizeof(ActualMessage);
-    uint32_t messageCount = 100;//000000;
-    bool endWithEmptyMessage = true;
-    const size_t arbitratorLookAhead = 100; // real world numbers would be in the thousands.
+    uint32_t messageCount = 50000000;
+    const size_t arbitratorLookAhead = 1000; // real world numbers would be in the thousands.
 
     const size_t numberOfHeartbeats = 1;  // Don't change this
     const size_t numberOfConsumers = 1;   // Don't change this
@@ -85,10 +84,10 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     std::vector<ProducerPtr> producers;
     for(uint32_t nProducer = 0; nProducer < numberOfProducers; ++nProducer)
     {
-        producers.emplace_back(new ProducerType(arbitratorConnection, producerGo, messageCount, nProducer, endWithEmptyMessage));
+        producers.emplace_back(new ProducerType(arbitratorConnection, producerGo, messageCount, nProducer));
     }
     auto heartbeat = std::make_shared<HeartbeatProducer>(asio, arbitratorConnection, heartbeatInterval);
-    auto arbitrator = std::make_shared<ArbitratorType>(arbitratorConnection, consumerConnection, arbitratorLookAhead, endWithEmptyMessage);
+    auto arbitrator = std::make_shared<ArbitratorType>(arbitratorConnection, consumerConnection, arbitratorLookAhead);
     auto consumer = std::make_shared<ConsumerType>(consumerConnection, 0, true);
 
     //IMessageHandlerPtr imhp = consumer;
@@ -108,13 +107,16 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     int todo_the_problem_is;
     // when the consumer is attached directly it does not need its own thread.
     // how can we tell when we're done?
+#if 0
     while(!consumer->isStopping())
     {
         std::this_thread::yield();
     }
-//    consumer->run();
+#else
+    consumer->run();
+#endif
     auto lapse = timer.nanoseconds();
-
+    
     heartbeat->stop();
     for(auto producer : producers)
     {
@@ -124,7 +126,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
     auto messageBits = messageBytes * 8;
 
-    std::cout << "Arbitration: ";
+    std::cout << "Arbitration: " << std::fixed;
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "

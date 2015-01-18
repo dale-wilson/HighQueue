@@ -18,14 +18,14 @@ namespace HighQueue
         public:
             MessageSource(ConnectionPtr & outConnection);
 
-            virtual bool handleMessage(Message & message);
+            virtual void handleMessage(Message & message);
 
             void attachHandler(IMessageHandlerPtr & handler)
             {
                 handler_ = handler;
             }
 
-            bool publish(Message & message);
+            void publish(Message & message);
 
         protected:
             ConnectionPtr outConnection_;
@@ -43,13 +43,13 @@ namespace HighQueue
         }
 
         inline
-        bool MessageSource::publish(Message & message)
+        void MessageSource::publish(Message & message)
         {
-            return handler_->handleMessage(message);
+            handler_->handleMessage(message);
         }
 
         inline
-        bool MessageSource::handleMessage(Message & message)
+        void MessageSource::handleMessage(Message & message)
         {
             throw std::runtime_error("This component does not handle messages, it generates them.");
         }

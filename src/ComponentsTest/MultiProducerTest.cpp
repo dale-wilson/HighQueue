@@ -23,7 +23,7 @@ namespace
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 }
 
-#define ENABLE_MULTIPRODUCER_TEST 01
+#define ENABLE_MULTIPRODUCER_TEST 0
 #if ! ENABLE_MULTIPRODUCER_TEST
 #pragma message ("ENABLE_MULTIPRODUCER_TEST " __FILE__)
 #else // ENABLE_MULTIPRODUCER_TEST
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         std::vector<ProducerPtr> producers;
         for(uint32_t producerNumber = 0; producerNumber < producerCount; ++producerNumber)
         {
-            producers.emplace_back(new ProducerType(connection, startSignal, perProducer, producerNumber, false));
+            producers.emplace_back(new ProducerType(connection, startSignal, perProducer, producerNumber));
         }
 
         auto consumer = std::make_shared<ConsumerType>(connection, perConsumer, true);

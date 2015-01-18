@@ -31,7 +31,7 @@ namespace
     typedef std::shared_ptr<CopierType> CopierPtr;
 }
 
-#define ENABLE_PIPELINE_TEST 01
+#define ENABLE_PIPELINE_TEST 0
 #if ENABLE_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
@@ -77,11 +77,11 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         connection->createLocal(name.str(), parameters, memoryPool);
     }
     volatile bool producerGo = false;
-    auto producer = std::make_shared<ProducerType>(connections[0], producerGo, messageCount, 1, true);
+    auto producer = std::make_shared<ProducerType>(connections[0], producerGo, messageCount, 1);
     std::vector<CopierPtr> copiers;
     for(size_t nCopier = 1; nCopier < connections.size(); ++nCopier)
     {
-        copiers.emplace_back(new CopierType(connections[nCopier - 1], connections[nCopier], copyType, 0, true));
+        copiers.emplace_back(new CopierType(connections[nCopier - 1], connections[nCopier], copyType, 0));
     }
 
     auto consumer = std::make_shared<ConsumerType>(connections.back(), 0, true);

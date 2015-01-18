@@ -39,83 +39,81 @@ namespace HighQueue
             }
 
         public:
-            PassThru(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType, uint32_t messageCount = 0, bool quitOnEmptyMessage = true);
+            PassThru(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType, uint32_t messageCount = 0);
  
-            virtual bool handleEmptyMessage(Message & message);
-            virtual bool handleMessageType(Message::Meta::MessageType type, Message & message);
-            virtual bool handleHeartbeat(Message & message);
+            virtual void handleShutdownMessage(Message & message);
+            virtual void handleHeartbeat(Message & message);
+            virtual void handleMessageType(Message::Meta::MessageType type, Message & message);
 
         private:
             CopyType copyType_;
             uint32_t messageCount_;
-            bool quitOnEmptyMessage_;
             uint32_t messagesHandled_;
         };
 
         template<typename CargoMessage>
-        PassThru<CargoMessage>::PassThru(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType, uint32_t messageCount, bool quitOnEmptyMessage)
+        PassThru<CargoMessage>::PassThru(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType, uint32_t messageCount)
             : MessageProcessor(inConnection, outConnection)
             , copyType_(copyType)
             , messageCount_(messageCount)
-            , quitOnEmptyMessage_(quitOnEmptyMessage)
             , messagesHandled_(0)
         {
         }
 
         template<typename CargoMessage>
-        bool PassThru<CargoMessage>::handleEmptyMessage(Message & message)
+        void PassThru<CargoMessage>::handleShutdownMessage(Message & message)
         {
-            outMessage_.meta() = message.meta();
-            publish(outMessage_);
-            return !quitOnEmptyMessage_;
+            publish(message);
+            stop();
         }
 
         template<typename CargoMessage>
-        bool PassThru<CargoMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
+        void PassThru<CargoMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
         {
-            switch(copyType_)
-            {
-                default:
-                case CopyBinary:
+            if(!stopping_)
+            { 
+                switch(copyType_)
                 {
-                    LogDebug("PassThru  copy binary.");
-                    outMessage_.appendBinaryCopy(message.get(), message.getUsed());
-                    outMessage_.meta() = message.meta();
-                    publish(outMessage_);
-                    return true;
-                }
-                case CopyConstruct:
-                {
-                    LogDebug("PassThru  copy construct.");
-                    outMessage_.emplace<CargoMessage>(*message.get<CargoMessage>());
-                    outMessage_.meta() = message.meta();
-                    publish(outMessage_);
-                    return true;
-                }
-                case CopyMove:
-                {
-                    LogDebug("PassThru  copy move.");
-                    message.moveTo(outMessage_);
-                    publish(outMessage_);
-                    return true;
-                }
-                case CopyForward:
-                {
-                    LogDebug("PassThru  copy Forward.");
-                    publish(message);
-                    return true;
+                    default:
+                    case CopyBinary:
+                    {
+                        LogDebug("PassThru  copy binary.");
+                        outMessage_.appendBinaryCopy(message.get(), message.getUsed());
+                        outMessage_.meta() = message.meta();
+                        publish(outMessage_);
+                        break;
+                    }
+                    case CopyConstruct:
+                    {
+                        LogDebug("PassThru  copy construct.");
+                        outMessage_.emplace<CargoMessage>(*message.get<CargoMessage>());
+                        outMessage_.meta() = message.meta();
+                        publish(outMessage_);
+                        break;
+                    }
+                    case CopyMove:
+                    {
+                        LogDebug("PassThru  copy move.");
+                        message.moveTo(outMessage_);
+                        publish(outMessage_);
+                        break;
+                    }
+                    case CopyForward:
+                    {
+                        LogDebug("PassThru  copy Forward.");
+                        publish(message);
+                        break;
+                    }
                 }
             }
         }
 
         template<typename CargoMessage>
-        bool PassThru<CargoMessage>::handleHeartbeat(Message & message)
+        void PassThru<CargoMessage>::handleHeartbeat(Message & message)
         {
             outMessage_.appendBinaryCopy(message.get(), message.getUsed());
             outMessage_.meta() = message.meta();
             publish(outMessage_);
-            return true;
-            return true;
         }
    }
 }

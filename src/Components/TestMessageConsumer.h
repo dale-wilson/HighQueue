@@ -25,9 +25,7 @@ namespace HighQueue
 
             ////////////////////////////
             // Implement MessageSink
-            virtual bool handleEmptyMessage(Message & message);
-            virtual bool handleHeartbeat(Message & message);
-            virtual bool handleMessageType(Message::Meta::MessageType type, Message & message);
+            virtual void handleMessageType(Message::Meta::MessageType type, Message & message);
 
         private:
             uint32_t messageCount_;
@@ -50,25 +48,12 @@ namespace HighQueue
         }
 
         template<size_t Extra>
-        bool TestMessageConsumer<Extra>::handleEmptyMessage(Message & message)
-        {
-            return !quitOnEmptyMessage_;
-        }
-
-        template<size_t Extra>
-        bool TestMessageConsumer<Extra>::handleHeartbeat(Message & message)
-        {
-            // todo
-            return !stopping_;
-        }
-
-        template<size_t Extra>
-        bool TestMessageConsumer<Extra>::handleMessageType(Message::Meta::MessageType type, Message & message)
+        void TestMessageConsumer<Extra>::handleMessageType(Message::Meta::MessageType type, Message & message)
         {
             if(type != Message::Meta::TestMessage)
             {
-                LogError("TestMessageConsumer::Expecting test message");
-                return false;
+                LogError("TestMessageConsumer::Expecting test message, not " << Message::Meta::toText(type));
+                return;
             }
             auto testMessage = message.get<ActualMessage>();
             LogDebug("TestMessageConsumer: " << testMessage->getSequence());
@@ -80,7 +65,10 @@ namespace HighQueue
             ++nextSequence_;
             message.destroy<ActualMessage>();
             ++messageReceived_;
-            return (messageCount_ == 0 || messageReceived_ < messageCount_);
+            if(messageCount_ != 0 && messageReceived_ >= messageCount_)
+            {
+                stop();
+            }
         }
 
    }

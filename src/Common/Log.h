@@ -13,13 +13,14 @@
 #define __func__ __FUNCTION__
 #endif // _MSC_VER
 
-#define LOG_LEVEL_FATAL 0
-#define LOG_LEVEL_ERROR 1
-#define LOG_LEVEL_WARNING 2
-#define LOG_LEVEL_INFO 3
-#define LOG_LEVEL_DEBUG 4
+#define LOG_LEVEL_FORCE 0
+#define LOG_LEVEL_FATAL 1
+#define LOG_LEVEL_ERROR 2
+#define LOG_LEVEL_WARNING 3
+#define LOG_LEVEL_INFO 4
 #define LOG_LEVEL_TRACE 5
-#define LOG_LEVEL_VERBOSE 6
+#define LOG_LEVEL_DEBUG 6
+#define LOG_LEVEL_VERBOSE 7
 
 #if !defined(COMPILE_TIME_LOG_LEVEL)
 #define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_TRACE
@@ -31,12 +32,13 @@ namespace HighQueue
     {
         enum Level: byte_t
         {
+            FORCE,
             FATAL,
             ERROR,
             WARNING,
             INFO,
-            DEBUG,
             TRACE,
+            DEBUG,
             VERBOSE
         };
 
@@ -60,6 +62,7 @@ namespace HighQueue
         return runtimeLevel;
     }
 
+#define LogForce(message) do{std::stringstream msg; msg << message; Log::log(Log::FORCE, __FILE__, __func__, __LINE__, msg.str());}while(false)
 #define LogFatal(message) do{if(Log::isEnabled(Log::FATAL)){std::stringstream msg; msg << message; Log::log(Log::FATAL, __FILE__, __func__, __LINE__, msg.str());}}while(false)
 #define LogError(message) do{if(Log::isEnabled(Log::ERROR)){std::stringstream msg; msg << message; Log::log(Log::ERROR, __FILE__, __func__, __LINE__, msg.str());}}while(false)
 

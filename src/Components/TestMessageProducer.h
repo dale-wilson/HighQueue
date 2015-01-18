@@ -20,8 +20,7 @@ namespace HighQueue
                 ConnectionPtr & connection, 
                 volatile bool & startSignal, 
                 uint32_t messageCount = 0, 
-                uint32_t producerNumber = 0, 
-                bool sendEmptyMessageOnQuit = true);
+                uint32_t producerNumber = 0);
 
             bool configure();
             virtual void run();
@@ -29,7 +28,6 @@ namespace HighQueue
         private:
             uint32_t messageCount_;
             uint32_t producerNumber_;
-            bool sendEmptyMessageOnQuit_;
             volatile bool & startSignal_;
         };
 
@@ -38,13 +36,11 @@ namespace HighQueue
             ConnectionPtr & connection, 
             volatile bool & startSignal, 
             uint32_t messageCount, 
-            uint32_t producerNumber, 
-            bool sendEmptyMessageOnQuit)
+            uint32_t producerNumber)
             : MessageSource(connection)
             , startSignal_(startSignal)
             , messageCount_(messageCount)
             , producerNumber_(producerNumber)
-            , sendEmptyMessageOnQuit_(sendEmptyMessageOnQuit)
         {
             outMessage_.meta().type_ = Message::Meta::TestMessage;
         }
@@ -65,18 +61,16 @@ namespace HighQueue
             }
             LogTrace("TestMessageProducer Start " << outConnection_->getHeader()->name_);
             uint32_t messageNumber = 0;
-            while( messageCount_ == 0 || messageNumber < messageCount_)
+            while(!stopping_ && messageCount_ == 0 || messageNumber < messageCount_)
             {
                 LogVerbose("TestMessageProducer Publish " << messageNumber << '/' << messageCount_);
                 auto testMessage = outMessage_.emplace<ActualMessage>(producerNumber_, messageNumber);
                 publish(outMessage_);
                 ++messageNumber;
             }
-            if(sendEmptyMessageOnQuit_)
-            {
-                LogDebug("Producer "<< producerNumber_ <<" publish empty message" );
-                publish(outMessage_);
-            }
+            LogDebug("Producer "<< producerNumber_ <<" publish stop message" );
+            outMessage_.meta().type_ = Message::Meta::Shutdown;
+            publish(outMessage_);
             LogInfo("TestMessageProducer " << producerNumber_ << " published " << messageNumber << " messages.");
         }
    }

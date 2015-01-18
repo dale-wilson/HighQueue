@@ -19,8 +19,14 @@ namespace HighQueue
                 , endGap_(gapEnd)
             {
             }
-            uint32_t & startGap();
-            uint32_t & gapEnd();
+            uint32_t & startGap()
+            {
+                return startGap_;
+            }
+            uint32_t & gapEnd()
+            {
+                return endGap_;
+            }
         private:
             uint32_t startGap_;
             uint32_t endGap_;
@@ -30,12 +36,12 @@ namespace HighQueue
         class Arbitrator : public MessageProcessor
         {
         public:
-            Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, bool quitOnEmptyMessage = true);
+            Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, size_t expectedShutdowns = 2);
 
         private:
-            virtual bool handleEmptyMessage(Message & message);
-            virtual bool handleMessageType(Message::Meta::MessageType type, Message & message);
-            virtual bool handleHeartbeat(Message & message);
+            virtual void handleHeartbeat(Message & message);
+            virtual void handleMessageType(Message::Meta::MessageType type, Message & message);
+            void handleShutdownMessage(Message & message);
             void handleDataMessage(Message & message);
 
             bool findAndPublishGap();
@@ -44,22 +50,19 @@ namespace HighQueue
 
         private:
             size_t lookAhead_;
-            bool quitOnEmptyMessage_;
-            bool paused_;
-            bool stopping_;
-
+            size_t expectedShutdowns_;
+            size_t actualShutdowns_;
             uint32_t expectedSequenceNumber_;
             std::vector<Message> pendingMessages_;
             uint32_t lastHeartbeatSequenceNumber_;
         };
 
         template<typename CargoMessage>
-        Arbitrator<CargoMessage>::Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, bool quitOnEmptyMessage)
+        Arbitrator<CargoMessage>::Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, size_t expectedShutdowns)
             : MessageProcessor(inConnection, outConnection)
             , lookAhead_(lookAhead)
-            , quitOnEmptyMessage_(quitOnEmptyMessage)
-            , paused_(false)
-            , stopping_(false)
+            , expectedShutdowns_(expectedShutdowns)
+            , actualShutdowns_(0)
             , expectedSequenceNumber_(0)
             , lastHeartbeatSequenceNumber_(0)
         {
@@ -70,32 +73,39 @@ namespace HighQueue
         }
 
         template<typename CargoMessage>
-        bool Arbitrator<CargoMessage>::handleEmptyMessage(Message & message)
-        {
-            publish(message);
-            return !quitOnEmptyMessage_;
-        }
-
-        template<typename CargoMessage>
-        bool Arbitrator<CargoMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
+        void Arbitrator<CargoMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
         {
             // todo validate message type?
             handleDataMessage(message);
-            return true;
         }
 
         template<typename CargoMessage>
-        bool Arbitrator<CargoMessage>::handleHeartbeat(Message & message)
+        void Arbitrator<CargoMessage>::handleHeartbeat(Message & message)
         {
             // todo: we might want to skip some heartbeats depending on frequency
             if(expectedSequenceNumber_ == lastHeartbeatSequenceNumber_)
             {
                 findAndPublishGap();
-                void publishPendingMessages();
+                publishPendingMessages();
             }
             lastHeartbeatSequenceNumber_ = expectedSequenceNumber_;
-            // todo:
-            return true;
+        }
+
+        template<typename CargoMessage>
+        void Arbitrator<CargoMessage>::handleShutdownMessage(Message & message)
+        {
+            ++actualShutdowns_;
+            LogTrace("Arbitration received shutdown " << actualShutdowns_ << " of " << expectedShutdowns_);
+            if(actualShutdowns_ == expectedShutdowns_)
+            {
+                while(findAndPublishGap())
+                {
+                    publishPendingMessages();
+                }
+                // forward the shutdown message
+                publish(message);
+                stop();
+            }
         }
 
         template<typename CargoMessage>
@@ -152,7 +162,6 @@ namespace HighQueue
                 auto index = sequence % lookAhead_;
                 message.moveTo(pendingMessages_[index]);
             }
-            // flush any additional messages
         }
 
         template<typename CargoMessage>
@@ -169,6 +178,7 @@ namespace HighQueue
                     publishGapMessage(gapStart, gapEnd);
                     return true;
                 }
+                ++gapEnd;
             }
             return false;
         }

@@ -53,3 +53,29 @@ void Message::reset()
     offset_ = 0;
     used_ = 0;
 }
+
+namespace
+{
+    const char * messageTypeNames[] = {
+        "Unused",
+        "Shutdown",
+        "Heartbeat",
+        "MulticastPacket",
+        "Gap",
+        "TestMessage",
+        "LocalType0", "LocalType1", "LocalType2", "LocalType3",
+        "LocalType4", "LocalType5", "LocalType6", "LocalType7",
+        "ExtraTypeBase"
+    };
+}
+
+
+const char * Message::Meta::toText(Message::Meta::MessageType type)
+{
+    auto index = size_t(type);
+    if(index, sizeof(messageTypeNames) / sizeof(messageTypeNames[0]))
+    {
+        return messageTypeNames[index];
+    }
+    return "MessageTypeOutOfRange";
+}

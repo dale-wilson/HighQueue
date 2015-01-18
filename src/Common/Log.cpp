@@ -39,6 +39,8 @@ const char * Log::toText(Level level)
     {
         default:
             return "Unknown";
+        case FORCE:
+            return "FORCE";
         case FATAL:
             return "FATAL";
         case ERROR:
@@ -53,6 +55,5 @@ const char * Log::toText(Level level)
             return "TRACE";
         case VERBOSE:
             return "VERBOSE";
-
     }
 }

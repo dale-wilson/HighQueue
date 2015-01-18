@@ -19,17 +19,18 @@ namespace HighQueue
         /// Thus the original source of data can set the type and forget it.
         /// Developer note: The entire Message object must fit in a single cache line (64 bytes)
         /// be cautious about adding additional Meta information.
-        struct Meta
+        struct HighQueue_Export Meta
         {
             enum MessageType: uint16_t
             {
                 Unused,
+                Shutdown,
                 Heartbeat,
-                TestMessage,
                 MulticastPacket, // Generic.  Could be specialized based on source
                 Gap,             // message to replace known lost messages.
-                LocalType0, LocalType1, LocalType2, LocalType3,   // for locally private purpose to avoid redefining this class. 
-                LocalType4, LocalType5, LocalType6, LocalType7,   // for locally private purpose to avoid redefining this class. 
+                TestMessage,
+                LocalType0, LocalType1, LocalType2, LocalType3,   // for locally defined private purposes to avoid redefining this class. 
+                LocalType4, LocalType5, LocalType6, LocalType7,   // for locally defined private purposes to avoid redefining this class. 
                 ExtraTypeBase
             };
             MessageType type_;
@@ -38,6 +39,7 @@ namespace HighQueue
                 : type_(Unused)
                 , timestamp_(0)
             {}
+            static const char * toText(MessageType type);
         };
     public:
 

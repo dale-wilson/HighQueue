@@ -20,14 +20,17 @@ namespace HighQueue
             MessageProcessor(ConnectionPtr & inConnection, ConnectionPtr & outConnection);
 
             virtual void run();
-            virtual bool handleMessage(Message & message);
+            virtual void handleMessage(Message & message);
+
+            // provide default implementation of MessageDispatcher method
+            virtual void handleShutdownMessage(Message & message);
 
             void attachHandler(IMessageHandlerPtr & handler)
             {
                 handler_ = handler;
             }
 
-            bool publish(Message & message);
+            void publish(Message & message);
 
         protected:
             ConnectionPtr inConnection_;
@@ -59,22 +62,29 @@ namespace HighQueue
                 stopping_ = !consumer_.getNext(inMessage_);
                 if(!stopping_)
                 {
-                    stopping_ = !dispatch(inMessage_);
+                    dispatch(inMessage_);
                 }
             }
         }
 
         inline
-        bool MessageProcessor::handleMessage(Message & message)
+        void MessageProcessor::handleMessage(Message & message)
         {
-            return dispatch(message);
+            dispatch(message);
         }
 
         inline
-        bool MessageProcessor::publish(Message & message)
+        void MessageProcessor::publish(Message & message)
         {
-            return handler_->handleMessage(message);
+            handler_->handleMessage(message);
         }
 
+        inline
+        void MessageProcessor::handleShutdownMessage(Message & message)
+        {
+            LogTrace("MessageProcessor received shutdown messsage.");
+            publish(message);
+            stop();
+        }
    }
 }

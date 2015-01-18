@@ -17,7 +17,7 @@ namespace HighQueue
         public:
             explicit MessagePublisher(ConnectionPtr & connection);
             /// @brief Implement IMessageHandler
-            virtual bool handleMessage(Message & message);
+            virtual void handleMessage(Message & message);
 
         public:
             Producer producer_;
@@ -31,10 +31,9 @@ namespace HighQueue
         }
 
         inline
-        bool MessagePublisher::handleMessage(Message & message)
+        void MessagePublisher::handleMessage(Message & message)
         {
             producer_.publish(message);
-            return true;
         }
     }
 }

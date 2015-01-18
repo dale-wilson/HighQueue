@@ -12,7 +12,7 @@ namespace HighQueue
 {
     namespace Components
     {
-        class MessageSink: public ComponentBase,public MessageDispatcher
+        class MessageSink: public ComponentBase, public MessageDispatcher
         {
         public:
             MessageSink(ConnectionPtr & inConnection);
@@ -20,7 +20,11 @@ namespace HighQueue
             virtual void run();
 
             // Implement IMessageHandler
-            virtual bool handleMessage(Message & message);
+            virtual void handleMessage(Message & message);
+
+            // provide default implementation of MessageDispatcher method
+            virtual void handleShutdownMessage(Message & message);
+            virtual void handleHeartbeat(Message & message);
 
         protected:
             ConnectionPtr inConnection_;
@@ -40,20 +44,39 @@ namespace HighQueue
         inline
         void MessageSink::run()
         {
+            LogTrace("MessageSink::run " << (void *) this << ": " << stopping_);
             while(!stopping_)
             {
                 stopping_ = !consumer_.getNext(inMessage_);
                 if(!stopping_)
                 {
-                    stopping_ = !dispatch(inMessage_);
+                    dispatch(inMessage_);
+                }
+                else
+                {
+                    LogTrace("MessageSink::stopped by getnext? " << (void *) this << ": " << stopping_);
                 }
             }
+            LogTrace("MessageSink::run returns " << (void *) this << ": " << stopping_);
         }
 
         inline
-        bool MessageSink::handleMessage(Message & message)
+        void MessageSink::handleMessage(Message & message)
         {
-            return dispatch(message);
+            dispatch(message);
+        }
+
+        inline
+        void MessageSink::handleShutdownMessage(Message & message)
+        {
+            LogTrace("MessageSink received shutdown messsage.");
+            stop();
+        }
+
+        inline
+            void MessageSink::handleHeartbeat(Message & message)
+        {
+            ; // what heartbeat?
         }
 
     }
