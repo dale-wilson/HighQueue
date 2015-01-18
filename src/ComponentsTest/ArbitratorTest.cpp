@@ -45,6 +45,7 @@ namespace
 #if ENABLE_ARBITRATOR_TEST
 BOOST_AUTO_TEST_CASE(testArbitrator)
 {
+    std::cout << "Arbitration" << std::endl << std::flush;
     size_t entryCount = 10000;
     size_t messageSize = sizeof(ActualMessage);
     uint32_t messageCount = 50000000;
