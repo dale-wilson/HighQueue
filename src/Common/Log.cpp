@@ -7,6 +7,8 @@
 using namespace HighQueue;
 #ifdef _DEBUG
 Log::Level Log::runtimeLevel = Log::DEBUG;
+#elif 0
+Log::Level Log::runtimeLevel = Log::DEBUG;
 #else
 Log::Level Log::runtimeLevel = Log::INFO;
 #endif
