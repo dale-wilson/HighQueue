@@ -4,8 +4,10 @@
 #pragma once
 
 #include "StageFwd.h"
+#include <ComponentCommon/Component_Export.h>
 #include "HighQueue/Message.h"
 #include "HighQueue/ConnectionFwd.h"
+#include <HighQueue/MemoryPoolFwd.h>
 #include <Common/Log.h>
 
 namespace HighQueue
@@ -31,7 +33,7 @@ namespace HighQueue
         /// 10: Finish       // final cleanup 
         /// 11: Destruct     // should be nothing left, but check(?)
 
-        class Stage: public std::enable_shared_from_this<Stage>
+        class Stages_Export Stage: public std::enable_shared_from_this<Stage>
         {
         public:
             /// @brief Construct preferably with null constructor
@@ -55,7 +57,10 @@ namespace HighQueue
             virtual void attachDestination(const std::string & name, const StagePtr & destination);
 
             /// @brief Attach Connection
-            virtual void attachConnection(const ConnectionPtr & connection) = 0;
+            virtual void attachConnection(const ConnectionPtr & connection);
+
+            /// @brief Attach a memory pool to populate messages
+            virtual void attachMemoryPool(const MemoryPoolPtr & pool);
 
             /// @brief Validate configuration and attachments
             /// Lifecycle 4: Validate
@@ -102,7 +107,7 @@ namespace HighQueue
             bool paused_;
             bool stopping_;
             StagePtr primaryDestination_;
-            typedef std::pair<const std::string, const StagePtr> NamedDestination;
+            typedef std::pair<std::string,  StagePtr> NamedDestination;
             std::vector<NamedDestination> destinations_;
         };
 
@@ -129,7 +134,8 @@ namespace HighQueue
         {
             for(auto & named : destinations_)
             {
-                if(named.first == name)
+                auto & destName = named.first;
+                if(destName /*named.first */ == name)
                 {
                     named.second->handle(message);
                     return;

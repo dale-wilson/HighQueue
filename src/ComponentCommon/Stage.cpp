@@ -48,6 +48,11 @@ void Stage::attachConnection(const ConnectionPtr & connection)
     // default.  No thank you.
 }
 
+void Stage::attachMemoryPool(const MemoryPoolPtr & pool)
+{
+    // default.  No thank you.
+}
+
 void Stage::validate()
 {
     // default to do nothing
@@ -111,7 +116,7 @@ size_t Stage::destinationIndex(const std::string & name)
 {
     for(size_t index = 0; index < destinations_.size(); ++index)
     {
-        auto namedDestination = destinations_[index];
+        auto & namedDestination = destinations_[index];
         if(namedDestination.first == name)
         {
             return index;

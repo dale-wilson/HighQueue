@@ -12,7 +12,7 @@ namespace HighQueue
   {
     /// @brief Base class to allow sharing a boost::io_service
     ///
-    class Communication_Export AsioService
+    class Stages_Export AsioService
     {
     public:
       /// @brief Construct 

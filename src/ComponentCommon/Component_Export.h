@@ -9,7 +9,7 @@
 // While building the Communication library: #define COMPONENT_BUILD_DLL
 //   Default is to export symbols from a pre-built HighQueue dll
 //
-// Within Communication use the Communication_Export macro where a __declspec is needed.
+// Within Communication use the Stages_Export macro where a __declspec is needed.
 
 #if defined (_WIN32)
 
@@ -19,16 +19,16 @@
 
 #  if defined (COMPONENT_HAS_DLL) && (COMPONENT_HAS_DLL == 1)
 #    if defined (COMPONENT_BUILD_DLL)
-#      define Communication_Export __declspec(dllexport)
+#      define Stages_Export __declspec(dllexport)
 #    else /* COMPONENT_BUILD_DLL */
-#      define Communication_Export __declspec(dllimport)
+#      define Stages_Export __declspec(dllimport)
 #    endif /* COMPONENT_BUILD_DLL */
 #  else /* COMPONENT_HAS_DLL == 1 */
-#    define Communication_Export
+#    define Stages_Export
 #  endif /* COMPONENT_HAS_DLL == 1 */
 
 #  else /* !_WIN32 */
 
-#    define Communication_Export
+#    define Stages_Export
 #  endif /* _WIN32 */
 

@@ -7,7 +7,13 @@
 
 #include <Components/TestMessageProducer.h>
 #include <Components/TestMessageConsumer.h>
-#include <Components/PassThru.h>
+
+#include <Components/QueueConsumer.h>
+#include <Components/QueueProducer.h>
+#include <Components/CopyPassThru.h>
+#include <Components/ForwardPassThru.h>
+#include <Components/BinaryPassThru.h>
+
 #include <Common/Stopwatch.h>
 #include <Common/Stopwatch.h>
 #include <Mocks/TestMessage.h>
@@ -27,7 +33,7 @@ namespace
     typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
-    typedef PassThru<ActualMessage> CopierType;
+    typedef CopyPassThru<ActualMessage> CopierType;
     typedef std::shared_ptr<CopierType> CopierPtr;
 }
 
@@ -50,12 +56,10 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         numberOfCopiers = 0;
     }
  
-    PassThru<ActualMessage>::CopyType copyType = PassThru<ActualMessage>::CopyBinary; // CopyForward;
-
-    const size_t queueCount = numberOfCopiers + numberOfConsumers; // need a pool for each object that can receive messages
+    const size_t queueCount = numberOfConsumers; // need a pool for each object that can receive messages
     // how many buffers do we need?
     size_t extraMessages = 0; // in case we need it someday (YAGNI)
-    const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + 2 * numberOfCopiers + numberOfProducers + extraMessages;
+    const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + numberOfCopiers + numberOfProducers + extraMessages;
 
     const size_t spinCount = 0;
     const size_t yieldCount = 0;
@@ -81,7 +85,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     std::vector<CopierPtr> copiers;
     for(size_t nCopier = 1; nCopier < connections.size(); ++nCopier)
     {
-        copiers.emplace_back(new CopierType(connections[nCopier - 1], connections[nCopier], copyType, 0));
+        copiers.emplace_back(new CopierType());
     }
 
     auto consumer = std::make_shared<ConsumerType>(connections.back(), 0, true);
@@ -107,7 +111,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     auto messageBits = messageBytes * 8;
 
-    std::cout << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage. Copy type: " << CopierType::copyTypeName(copyType) << ": ";
+    std::cout << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage: ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "

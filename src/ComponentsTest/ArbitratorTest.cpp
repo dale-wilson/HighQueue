@@ -41,7 +41,7 @@ namespace
     typedef std::shared_ptr<ArbitratorType> ArbitratorPtr;
 }
 
-#define ENABLE_ARBITRATOR_TEST 01
+#define ENABLE_ARBITRATOR_TEST 0
 #if ENABLE_ARBITRATOR_TEST
 BOOST_AUTO_TEST_CASE(testArbitrator)
 {
