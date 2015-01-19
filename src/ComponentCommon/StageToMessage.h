@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include <ComponentCommon/Stage.h>
-#include <HighQueue/Message.h>
+#include <HighQueue/MessageFwd.h>
 
 #include <Common/Log.h>
 
@@ -11,7 +11,7 @@ namespace HighQueue
 {
     namespace Components
     {
-        class StageToMessage : public Stage
+        class  Stages_Export StageToMessage : public Stage
         {
 
         public:
@@ -26,25 +26,5 @@ namespace HighQueue
             std::unique_ptr<Message> outMessage_;
         };
 
-        StageToMessage::StageToMessage()
-        {
-        }
-
-        StageToMessage::~StageToMessage()
-        {
-        }
-
-        void StageToMessage::attachMemoryPool(const MemoryPoolPtr & pool)
-        {
-            outMessage_.reset(new Message(pool));
-        }
-
-        void StageToMessage::validate()
-        {
-            if(!outMessage_)
-            {
-                throw std::runtime_error("StageToMessage: Can't initialize output message. No memory pool attached.");
-            }
-        }        
    }
 }

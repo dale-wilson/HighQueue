@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include "HeartbeatProducerFwd.h"
-#include <ComponentCommon/MessageSource.h>
+#include <ComponentCommon/ThreadedStageToMessage.h>
 #include <ComponentCommon/AsioService.h>
 
 #include <Common/Log.h>
@@ -12,38 +12,38 @@ namespace HighQueue
 {
     namespace Components
     {
-        class HeartbeatProducer : public MessageSource
+        class HeartbeatProducer : public ThreadedStageToMessage
         {
         public:
-            HeartbeatProducer(
-                AsioServicePtr & ioService,
-                ConnectionPtr & connection, 
-                std::chrono::milliseconds interval);
+            HeartbeatProducer(std::chrono::milliseconds interval);
 
+            virtual void attachIoService(const AsioServicePtr & ioService);
             virtual void run();
-            virtual void doStop();
+            virtual void stop();
         private:
             void startTimer();
             void handleTimer(const boost::system::error_code& error);
         private:
             AsioServicePtr ioService_;
-            boost::posix_time::millisec interval_;
-            boost::asio::deadline_timer timer_;
+            typedef boost::asio::deadline_timer Timer;
+            typedef boost::posix_time::millisec Interval;
+            Interval interval_;
+            std::unique_ptr<Timer> timer_;
             bool cancel_;
         };
 
-        HeartbeatProducer::HeartbeatProducer(
-            AsioServicePtr & ioService,
-            ConnectionPtr & connection,
-            std::chrono::milliseconds interval)
-            : MessageSource(connection)
-            , ioService_(ioService)
-            , interval_(interval.count())
-            , timer_(*ioService)
+        HeartbeatProducer::HeartbeatProducer(std::chrono::milliseconds interval)
+            : interval_(interval.count())
             , cancel_(false)
         {
-            outMessage_.meta().type_ = Message::Meta::Heartbeat;
         }
+
+        void HeartbeatProducer::attachIoService(const AsioServicePtr & ioService)
+        {
+            ioService_ = ioService;
+            timer_.reset(new Timer(*ioService));
+        }
+
 
         inline
         void HeartbeatProducer::run()
@@ -56,14 +56,14 @@ namespace HighQueue
         }
 
         inline
-        void HeartbeatProducer::doStop()
+        void HeartbeatProducer::stop()
         {
+            LogTrace("***HeartbeatProducer Stopping");
+            ThreadedStageToMessage::stop();
             LogTrace("***HeartbeatProducer Cancel Timer");
             cancel_ = true;
-            timer_.cancel();
-            LogTrace("***HeartbeatProducer Stopping");
-            MessageSource::doStop();
-            LogTrace("***HeartbeatProducer Exiting doStop");
+            timer_->cancel();
+            LogTrace("***HeartbeatProducer stop exits");
         }
 
         inline
@@ -71,8 +71,8 @@ namespace HighQueue
         {
             if(!stopping_)
             {
-                timer_.expires_from_now(interval_);
-                timer_.async_wait(boost::bind(
+                timer_->expires_from_now(interval_);
+                timer_->async_wait(boost::bind(
                     &HeartbeatProducer::handleTimer, this, boost::asio::placeholders::error));
             }
         }
@@ -90,10 +90,12 @@ namespace HighQueue
             }
             else if(!paused_)
             {
-                outMessage_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
-                outMessage_.appendBinaryCopy(&outMessage_.meta().timestamp_, sizeof(outMessage_.meta().timestamp_));
-                LogTrace("Publish Heartbeat: " << outMessage_.meta().timestamp_);
-                publish(outMessage_);
+                outMessage_->meta().type_ = Message::Meta::Heartbeat;
+                auto & timestamp = outMessage_->meta().timestamp_;
+                timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+                outMessage_->appendBinaryCopy(&timestamp, sizeof(timestamp));
+                LogTrace("Publish Heartbeat: " << timestamp);
+                send(*outMessage_);
             }
             startTimer();
         }

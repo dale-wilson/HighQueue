@@ -9,6 +9,7 @@
 // I defined a simple logging system invoked via macros with the hopes that one could implement those
 // macros around the desired logging.  (This may be a case of NIH)
 
+// Give MSVC a hint about the c++11 standard macro:
 #if defined(_MSC_VER) && ! defined(__func__)
 #define __func__ __FUNCTION__
 #endif // _MSC_VER
@@ -23,10 +24,11 @@
 #define LOG_LEVEL_VERBOSE 7
 
 #if !defined(COMPILE_TIME_LOG_LEVEL)
-#elif 1
-#define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_ERROR
-#else
-#define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_TRACE
+#   if defined(_DEBUG)
+#       define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_VERBOSE
+#   else
+#       define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_ERROR
+#   endif // _DEBUG
 #endif COMPILE_TIME_LOG_LEVEL
 
 namespace HighQueue

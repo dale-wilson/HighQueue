@@ -53,6 +53,11 @@ void Stage::attachMemoryPool(const MemoryPoolPtr & pool)
     // default.  No thank you.
 }
 
+void Stage::attachIoService(const AsioServicePtr & connection)
+{
+    // default.  No thank you.
+}
+
 void Stage::validate()
 {
     // default to do nothing
@@ -60,24 +65,21 @@ void Stage::validate()
 
 void Stage::start()
 {
-    // default to do nothing
 }
 
 void Stage::pause()
 {
     paused_ = true;
-    // default to do nothing
 }
 
 void Stage::resume()
 {
     paused_ = false;
-    // default to do nothing
 }
 
 void Stage::stop()
 {
-    // default to do nothing
+    stopping_ = true;
 }
 
 

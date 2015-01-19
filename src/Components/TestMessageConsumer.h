@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/MessageSink.h>
+#include <ComponentCommon/Stage.h>
 #include <Mocks/TestMessage.h>
 
 #include <Common/Log.h>
@@ -12,11 +12,11 @@ namespace HighQueue
     namespace Components
     {
         template<size_t Extra = 0>
-        class TestMessageConsumer : public MessageSink
+        class TestMessageConsumer : public Stage
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
-            TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount_ = 0, bool quitOnEmptyMessage = true);
+            explicit TestMessageConsumer(uint32_t messageCount_ = 0, bool quitOnEmptyMessage = true);
 
             uint32_t errors()const
             {
@@ -24,8 +24,8 @@ namespace HighQueue
             }
 
             ////////////////////////////
-            // Implement MessageSink
-            virtual void handleMessageType(Message::Meta::MessageType type, Message & message);
+            // Implement Stage
+            virtual void handle(Message & message);
 
         private:
             uint32_t messageCount_;
@@ -37,9 +37,8 @@ namespace HighQueue
         };
 
         template<size_t Extra>
-        TestMessageConsumer<Extra>::TestMessageConsumer(ConnectionPtr & connection, uint32_t messageCount_, bool quitOnEmptyMessage)
-            : MessageSink(connection)
-            , messageCount_(messageCount_)
+        TestMessageConsumer<Extra>::TestMessageConsumer(uint32_t messageCount_, bool quitOnEmptyMessage)
+            : messageCount_(messageCount_)
             , quitOnEmptyMessage_(quitOnEmptyMessage)
             , messageReceived_(0)
             , nextSequence_(0)
@@ -48,26 +47,41 @@ namespace HighQueue
         }
 
         template<size_t Extra>
-        void TestMessageConsumer<Extra>::handleMessageType(Message::Meta::MessageType type, Message & message)
+        void TestMessageConsumer<Extra>::handle(Message & message)
         {
-            if(type != Message::Meta::TestMessage)
+            auto type = message.meta().type_;
+            switch(type)
             {
-                LogError("TestMessageConsumer::Expecting test message, not " << Message::Meta::toText(type));
-                return;
-            }
-            auto testMessage = message.get<ActualMessage>();
-            LogDebug("TestMessageConsumer: " << testMessage->getSequence());
-            if(nextSequence_ != testMessage->getSequence())
-            {
-                ++sequenceError_;
-                nextSequence_ = testMessage->getSequence();
-            }
-            ++nextSequence_;
-            message.destroy<ActualMessage>();
-            ++messageReceived_;
-            if(messageCount_ != 0 && messageReceived_ >= messageCount_)
-            {
-                stop();
+                default:
+                {
+                    LogError("TestMessageConsumer::Expecting test message, not " << Message::Meta::toText(type));
+                    ++sequenceError_ ;  // define a new error counter for this.
+                    return;
+                }
+                case Message::Meta::Shutdown:
+                {
+                    LogTrace("TestMessageConsumer: received Shutdown");
+                    stop();
+                    return;
+                }
+                case Message::Meta::TestMessage:
+                {
+                    auto testMessage = message.get<ActualMessage>();
+                    LogDebug("TestMessageConsumer: " << testMessage->getSequence());
+                    if(nextSequence_ != testMessage->getSequence())
+                    {
+                        ++sequenceError_;
+                        nextSequence_ = testMessage->getSequence();
+                    }
+                    ++nextSequence_;
+                    message.destroy<ActualMessage>();
+                    ++messageReceived_;
+                    if(messageCount_ != 0 && messageReceived_ >= messageCount_)
+                    {
+                        stop();
+                    }
+                    return;
+                }
             }
         }
 

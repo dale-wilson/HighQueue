@@ -3,9 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <ComponentCommon/MessageProcessor.h>
-
-#include <Common/Log.h>
+#include <ComponentCommon/StageToMessage.h>
 
 namespace HighQueue
 {
@@ -33,7 +31,7 @@ namespace HighQueue
         };
 
         template<typename CargoMessage>
-        class Arbitrator : public MessageProcessor
+        class Arbitrator : public StageToMessage
         {
         public:
             Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, size_t expectedShutdowns = 2);

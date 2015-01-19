@@ -5,12 +5,12 @@
 #define BOOST_TEST_NO_MAIN ComponentsTest
 #include <boost/test/unit_test.hpp>
 
+#include <Components/Arbitrator.h>
 #include <Components/HeartbeatProducer.h>
 #include <Components/TestMessageProducer.h>
 #include <Components/TestMessageConsumer.h>
-#include <Components/Arbitrator.h>
+
 #include <Common/Stopwatch.h>
-#include <Mocks/TestMessage.h>
 
 
 using namespace HighQueue;

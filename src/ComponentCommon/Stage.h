@@ -6,6 +6,7 @@
 #include "StageFwd.h"
 #include <ComponentCommon/Component_Export.h>
 #include "HighQueue/Message.h"
+#include <ComponentCommon/AsioServiceFwd.h>
 #include "HighQueue/ConnectionFwd.h"
 #include <HighQueue/MemoryPoolFwd.h>
 #include <Common/Log.h>
@@ -61,6 +62,9 @@ namespace HighQueue
 
             /// @brief Attach a memory pool to populate messages
             virtual void attachMemoryPool(const MemoryPoolPtr & pool);
+
+            /// @brief Attach an ASIO IoService
+            virtual void attachIoService(const AsioServicePtr & ioService);
 
             /// @brief Validate configuration and attachments
             /// Lifecycle 4: Validate
@@ -127,6 +131,7 @@ namespace HighQueue
         void Stage::send(Message & message)
         {
             primaryDestination_->handle(message);
+            message.setEmpty();
         }
 
         inline

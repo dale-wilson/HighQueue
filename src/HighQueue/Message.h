@@ -265,6 +265,11 @@ namespace HighQueue
 
     template <typename AllocatorPtr>
     Message::Message(AllocatorPtr & allocator)
+        : container_(0)
+        , capacity_(0)
+        , offset_(0)
+        , used_(0)
+        , read_(0)
     {
         allocator->allocate(*this);
     }

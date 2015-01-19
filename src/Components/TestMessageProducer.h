@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/MessageSource.h>
+#include <ComponentCommon/ThreadedStageToMessage.h>
 #include <Mocks/TestMessage.h>
 
 #include <Common/Log.h>
@@ -12,65 +12,62 @@ namespace HighQueue
     namespace Components
     {
         template<size_t Extra=0>
-        class TestMessageProducer : public MessageSource
+        class TestMessageProducer : public ThreadedStageToMessage
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
             TestMessageProducer(
-                ConnectionPtr & connection, 
                 volatile bool & startSignal, 
-                uint32_t messageCount = 0, 
-                uint32_t producerNumber = 0);
+                uint32_t messageCount, 
+                uint32_t producerNumber);
 
             bool configure();
             virtual void run();
+            void handle(Message & message);
 
         private:
+            volatile bool & startSignal_;
             uint32_t messageCount_;
             uint32_t producerNumber_;
-            volatile bool & startSignal_;
         };
 
         template<size_t Extra>
         TestMessageProducer<Extra>::TestMessageProducer(
-            ConnectionPtr & connection, 
             volatile bool & startSignal, 
             uint32_t messageCount, 
             uint32_t producerNumber)
-            : MessageSource(connection)
-            , startSignal_(startSignal)
+            : startSignal_(startSignal)
             , messageCount_(messageCount)
             , producerNumber_(producerNumber)
         {
-            outMessage_.meta().type_ = Message::Meta::TestMessage;
         }
 
         template<size_t Extra>
-        bool TestMessageProducer<Extra>::configure()
+        void TestMessageProducer<Extra>::handle(Message & message)
         {
-            // todo
-            return true;
+            throw std::runtime_error("TestMessageProducer does not accept incoming Messages");
         }
 
         template<size_t Extra>
         void TestMessageProducer<Extra>::run()
         {
+            outMessage_->meta().type_ = Message::Meta::TestMessage;
             while(!startSignal_)
             {
                 std::this_thread::yield();
             }
-            LogTrace("TestMessageProducer Start " << outConnection_->getHeader()->name_);
+            LogTrace("TestMessageProducer Start ");
             uint32_t messageNumber = 0;
             while(!stopping_ && (messageCount_ == 0 || messageNumber < messageCount_))
             {
                 LogVerbose("TestMessageProducer Publish " << messageNumber << '/' << messageCount_);
-                auto testMessage = outMessage_.emplace<ActualMessage>(producerNumber_, messageNumber);
-                publish(outMessage_);
+                auto testMessage = outMessage_->emplace<ActualMessage>(producerNumber_, messageNumber);
+                send(*outMessage_);
                 ++messageNumber;
             }
             LogDebug("Producer "<< producerNumber_ <<" publish stop message" );
-            outMessage_.meta().type_ = Message::Meta::Shutdown;
-            publish(outMessage_);
+            outMessage_->meta().type_ = Message::Meta::Shutdown;
+            send(*outMessage_);
             LogInfo("TestMessageProducer " << producerNumber_ << " published " << messageNumber << " messages.");
         }
    }

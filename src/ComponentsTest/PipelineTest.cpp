@@ -33,11 +33,17 @@ namespace
     typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
+#if 1
     typedef CopyPassThru<ActualMessage> CopierType;
+#elif 0
+    typedef BinaryPassThru CopierType;
+#else
+    typedef ForwardPassThru CopierType;
+#endif
     typedef std::shared_ptr<CopierType> CopierPtr;
 }
 
-#define ENABLE_PIPELINE_TEST 01
+#define ENABLE_PIPELINE_TEST 0
 #if ENABLE_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
@@ -81,14 +87,16 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         connection->createLocal(name.str(), parameters, memoryPool);
     }
     volatile bool producerGo = false;
-    auto producer = std::make_shared<ProducerType>(connections[0], producerGo, messageCount, 1);
+    auto producer = std::make_shared<ProducerType>(producerGo, messageCount, 1);
+    producer->attachMemoryPool(memoryPool);
     std::vector<CopierPtr> copiers;
     for(size_t nCopier = 1; nCopier < connections.size(); ++nCopier)
     {
         copiers.emplace_back(new CopierType());
+        copiers.back()->attachMemoryPool(memoryPool);
     }
 
-    auto consumer = std::make_shared<ConsumerType>(connections.back(), 0, true);
+    auto consumer = std::make_shared<ConsumerType>( 0, true);
 
     // All wired up, ready to go.  Wait for the threads to initialize.
     producer->start();
@@ -99,7 +107,10 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     Stopwatch timer;
     producerGo = true;
-    consumer->run();
+    while(!consumer->isStopping())
+    {
+        std::this_thread::yield();
+    }
     auto lapse = timer.nanoseconds();
 
     producer->stop();
@@ -121,3 +132,99 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         << std::endl;
 }
 #endif // ENABLE_PIPELINE_TEST
+
+
+#define ENABLE_DIRECT_PIPELINE_TEST 01
+#if ENABLE_DIRECT_PIPELINE_TEST
+BOOST_AUTO_TEST_CASE(testPipeline)
+{
+    size_t messageSize = sizeof(ActualMessage);
+    uint32_t messageCount = 100000000;
+
+    const size_t numberOfConsumers = 1;   // Don't change this
+    const size_t numberOfProducers = 1;   // Don't change this
+
+    int32_t numberOfCopiers = 5; // pick a number, any number
+ 
+    // how many buffers do we need?
+    size_t extraMessages = 0; // in case we need it someday (YAGNI)
+    const size_t messagesNeeded = numberOfCopiers + numberOfProducers + extraMessages;
+
+    MemoryPoolPtr memoryPool(new MemoryPool(messageSize, messagesNeeded));
+
+    volatile bool producerGo = false;
+    auto producer = std::make_shared<ProducerType>(producerGo, messageCount, 1);
+    producer->attachMemoryPool(memoryPool);
+
+    StagePtr previous = producer;
+
+    std::vector<CopierPtr> copiers;
+    for(size_t nCopier = 0; nCopier < numberOfCopiers; ++nCopier)
+    {
+        copiers.emplace_back(new CopierType());
+        auto & copier = copiers.back();
+        copier->attachMemoryPool(memoryPool);
+        previous->attachDestination(copier);
+        previous = copier;
+    }
+    auto consumer = std::make_shared<ConsumerType>( 0, true);
+    previous->attachDestination(consumer);
+
+    // All wired up.  See if everybody is happy
+    producer->validate();
+    for(auto & copier : copiers)
+    {
+        copier->validate();
+    }
+    consumer->validate();
+
+    // turn everything on
+    producer->start();
+    for(auto & copier : copiers)
+    {
+        copier->start();
+    }
+    consumer->start();
+
+    Stopwatch timer;
+    producerGo = true;
+    while(!consumer->isStopping())
+    {
+        std::this_thread::yield();
+    }
+    auto lapse = timer.nanoseconds();
+
+    producer->stop();
+    for(auto copier : copiers)
+    {
+        copier->stop();
+    }
+
+    producer->finish();
+    for(auto & copier : copiers)
+    {
+        copier->finish();
+    }
+    consumer->finish();
+
+
+    auto messageBits = messageBytes * 8;
+
+    std::cout << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage: ";
+    std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
+        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
+    if(lapse == 0)
+    {
+        std::cout << "Run time too short to measure.   Use a larger messageCount" << std::endl;
+    }
+    else
+    {
+        std::cout
+            << lapse / messageCount << " nsec./message "
+            << std::setprecision(3) << double(messageCount) / double(lapse) << " GMsg/second "
+            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
+            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
+            << std::endl;
+    }
+}
+#endif // ENABLE_DIRECT_PIPELINE_TEST

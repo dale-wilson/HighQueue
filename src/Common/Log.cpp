@@ -5,9 +5,10 @@
 #include "Log.h"
 
 using namespace HighQueue;
-#ifdef _DEBUG
-Log::Level Log::runtimeLevel = Log::DEBUG;
-#elif 0
+
+#if 0
+Log::Level Log::runtimeLevel = Log::VERBOSE;
+#elif defined(_DEBUG)
 Log::Level Log::runtimeLevel = Log::DEBUG;
 #else
 Log::Level Log::runtimeLevel = Log::INFO;

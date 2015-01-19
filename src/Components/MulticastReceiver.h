@@ -4,7 +4,7 @@
 #pragma once
 #include "MulticastReceiverFwd.h"
 #include <ComponentCommon/AsioService.h>
-#include <ComponentCommon/MessageSource.h>
+#include <ComponentCommon/ThreadedStageToMessage.h>
 
 namespace HighQueue
 {
@@ -27,17 +27,26 @@ namespace HighQueue
                 , bindIP_(bindIP)
                 , portNumber_(portNumber)
             {}
+        private:
+            friend class MulticastReceiver;
+            MulticastConfiguration()
+            : portNumber_(0)
+            {}
         };
 
-        class MulticastReceiver: public MessageSource
+        class MulticastReceiver: public ThreadedStageToMessage
         {
         public:
-            MulticastReceiver(
-                AsioServicePtr & ioService,
-                ConnectionPtr & connection
-                );
+            MulticastReceiver();
 
             bool configure(const MulticastConfiguration & configuration);
+
+            virtual void attachIoService(const AsioServicePtr & ioService);
+            virtual void start();
+            virtual void run();
+            virtual void stop();
+            virtual void pause();
+            virtual void resume();
 
             boost::asio::ip::address listenInterface()const;
             unsigned short portNumber()const;
@@ -48,20 +57,18 @@ namespace HighQueue
             boost::asio::ip::udp::socket & socket();
             bool joined()const;
 
-            virtual void run();
-
-            virtual void doPause();
-            virtual void doResume();
-
         private:
             void startRead();
             void handleReceive(const boost::system::error_code& error, size_t bytesReceived);
 
         private:
             
-            AsioServicePtr ioService_;
-            boost::asio::ip::udp::socket socket_;
             bool joined_;
+
+            AsioServicePtr ioService_;
+            typedef boost::asio::ip::udp::socket Socket;
+            std::unique_ptr<Socket> socket_;
+            MulticastConfiguration configuration_;
 
             struct MCastInfo
             {
@@ -85,41 +92,45 @@ namespace HighQueue
         };
 
         inline
-        MulticastReceiver::MulticastReceiver(
-            AsioServicePtr & ioService,
-            ConnectionPtr & connection)
-            : MessageSource(connection)
-            , ioService_(ioService)
-            , socket_(*ioService_)
-            , joined_(false)
+        MulticastReceiver::MulticastReceiver()
+            : joined_(false)
         {
-            outMessage_.meta().type_ = Message::Meta::MulticastPacket;
         }
+
+        inline
+        void MulticastReceiver::attachIoService(const AsioServicePtr & ioService)
+        {
+            ioService_ = ioService;
+            socket_.reset(new Socket(*ioService));
+        }
+
 
         inline
         bool MulticastReceiver::configure(const MulticastConfiguration & configuration)
         {
-            try
-            {
-                mcast_.reset(new MCastInfo(configuration));
-                socket_.open(mcast_->endpoint_.protocol());
-                socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-                boost::asio::ip::udp::endpoint bindpoint(mcast_->bindAddress_, mcast_->portNumber_);
-                socket_.bind(bindpoint);
+            configuration_ = configuration;
+        }
 
-                // Join the multicast group
-                boost::asio::ip::multicast::join_group joinRequest(
-                    mcast_->multicastGroup_.to_v4(),
-                    mcast_->listenInterface_.to_v4());
-                socket_.set_option(joinRequest);
-            }
-            catch(const std::exception & ex)
-            {
-                LogError("Failed to initialize Multicast group: " << ex.what());
-                return false;
-            }
+        inline
+        void MulticastReceiver::start()
+        {
+            mcast_.reset(new MCastInfo(configuration_));
+            socket_->open(mcast_->endpoint_.protocol());
+            socket_->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+            boost::asio::ip::udp::endpoint bindpoint(mcast_->bindAddress_, mcast_->portNumber_);
+            socket_->bind(bindpoint);
+
+            // Join the multicast group
+            boost::asio::ip::multicast::join_group joinRequest(
+                mcast_->multicastGroup_.to_v4(),
+                mcast_->listenInterface_.to_v4());
+            socket_->set_option(joinRequest);
             joined_ = true;
-            return true;
+            ThreadedStageToMessage::start();       
+            //catch(const std::exception & ex)
+            //{
+            //    LogError("Failed to initialize Multicast group: " << ex.what());
+            //}
         }
 
         inline
@@ -137,8 +148,8 @@ namespace HighQueue
         {
             if(!stopping_)
             {
-                socket_.async_receive_from(
-                    boost::asio::buffer(outMessage_.getWritePosition(), outMessage_.available()),
+                socket_->async_receive_from(
+                    boost::asio::buffer(outMessage_->getWritePosition(), outMessage_->available()),
                     mcast_->senderEndpoint_,
                     boost::bind(&MulticastReceiver::handleReceive,
                     this,
@@ -160,15 +171,16 @@ namespace HighQueue
             }
             else
             {
-                outMessage_.meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
-                outMessage_.addUsed(bytesReceived);
-                publish(outMessage_);
+                outMessage_->meta().type_ = Message::Meta::MulticastPacket;
+                outMessage_->meta().timestamp_ = std::chrono::steady_clock::now().time_since_epoch().count();
+                outMessage_->addUsed(bytesReceived);
+                send(*outMessage_);
                 startRead();
             }
         }
 
         inline
-        void MulticastReceiver::doPause()
+        void MulticastReceiver::pause()
         {
             // Temporarily leave the group
             if(joined_)
@@ -176,21 +188,23 @@ namespace HighQueue
                 boost::asio::ip::multicast::leave_group leaveRequest(
                     mcast_->multicastGroup_.to_v4(),
                     mcast_->listenInterface_.to_v4());
-                socket_.set_option(leaveRequest);
+                socket_->set_option(leaveRequest);
                 joined_ = false;
             }
+            ThreadedStageToMessage::pause();
         }
 
         inline
-        void MulticastReceiver::doResume()
+        void MulticastReceiver::resume()
         {
+            ThreadedStageToMessage::resume();
             if(!joined_)
             {
                 // rejoin the multicast group
                 boost::asio::ip::multicast::join_group joinRequest(
                     mcast_->multicastGroup_.to_v4(),
                     mcast_->listenInterface_.to_v4());
-                socket_.set_option(joinRequest);
+                socket_->set_option(joinRequest);
                 joined_ = true;
             }
         }
@@ -234,7 +248,7 @@ namespace HighQueue
         inline
         boost::asio::ip::udp::socket & MulticastReceiver::socket()
         {
-            return socket_;
+            return *socket_;
         }
 
         inline
