@@ -9,6 +9,7 @@ using namespace HighQueue;
 using namespace Components;
 
 QueueConsumer::QueueConsumer()
+:stopOnShutdownMessage_(false)
 {
 }
 
@@ -33,6 +34,11 @@ void QueueConsumer::validate()
     }
 }
 
+void QueueConsumer::setStopOnShutdownMessage(bool value)
+{
+    stopOnShutdownMessage_ = value;
+}
+
 void QueueConsumer::start()
 {
     me_ = shared_from_this();
@@ -48,12 +54,24 @@ void QueueConsumer::startThread()
     LogTrace("QueueConsumer thread exits. @" << (void *) this);
 }
 
+void QueueConsumer::stop()
+{
+    Stage::stop();
+    consumer_->stop();
+}
 void QueueConsumer::finish()
 {
-    if(me_ && std::this_thread::get_id() != thread_.get_id())
+    if(me_)
     {
-        thread_.join();
-        me_.reset();
+        if(std::this_thread::get_id() != thread_.get_id())
+        {
+            thread_.join();
+            me_.reset();
+        }
+        else
+        {
+            LogWarning("QueueConsumer::finish() should not be called from the running thread.");
+        }
     }
 }
 
@@ -65,7 +83,13 @@ void QueueConsumer::run()
         stopping_ = !consumer_->getNext(*message_);
         if(!stopping_)
         {
+            auto type = message_->meta().type_;
             send(*message_);
+            if(stopOnShutdownMessage_ && type == Message::Meta::MessageType::Shutdown)
+            {
+                stop();
+            }
+            
         }
         else
         {

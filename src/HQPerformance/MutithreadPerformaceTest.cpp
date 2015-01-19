@@ -87,9 +87,11 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
     std::cout << "Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "
-        << std::setprecision(3) << double(messageCount) / double(lapse) << " GMsg/second "
+        << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
+#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
         << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
         << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
+#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
         << std::endl;
 }
 #endif // ENABLEST_PERFORMANCE
@@ -179,20 +181,33 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
 
         auto messageBytes = sizeof(ActualMessage);
         auto messageBits = sizeof(ActualMessage) * 8;
-        std::cout << "Test " << producerCount << " producer" << std::fixed;
-        std::cout << " Passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
-            << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
-            << lapse / actualMessageCount << " nsec./message "
-            << std::setprecision(3) << double(actualMessageCount) / double(lapse) << " GMsg/second "
-            << std::setprecision(3) << double(actualMessageCount * messageBytes) / double(lapse) << " GByte/second "
-            << std::setprecision(3) << double(actualMessageCount * messageBits) / double(lapse) << " GBit/second."
-            << std::endl;
+        std::cout << "HighQueue Test " << producerCount << " producer" << std::fixed;
+        std::cout << " passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
+            << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
+        if(lapse == 0)
+        {
+            std::cout << "Run time too short to measure.   Use a larger messageCount" << std::endl;
+        }
+        else
+        {
+            std::cout
+                << lapse / actualMessageCount << " nsec./message "
+                << std::setprecision(3) << double(actualMessageCount * 1000) / double(lapse) << " MMsg/second "
+#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
+                << std::setprecision(3) << double(actualMessageCount * messageBytes) / double(lapse) << " GByte/second "
+                << std::setprecision(3) << double(actualMessageCount * messageBits) / double(lapse) << " GBit/second."
+#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
+                << std::endl;
+        }
+
+        std::cout << "Multithread Statistics" << std::endl;
         for(auto & out : stats)
         {
             std::cout << "Producer: " << out.str();
         }
         std::cout << "Consumer: ";
         consumer.writeStats(std::cout);
+        std::cout << std::endl;
     }
 }
 #endif // ENABLE_MultithreadMessagePassingPerformance

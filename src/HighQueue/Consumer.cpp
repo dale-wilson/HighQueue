@@ -17,6 +17,7 @@ Consumer::Consumer(ConnectionPtr & connection)
 , spins_(waitStrategy_.spinCount_)
 , yields_(waitStrategy_.yieldCount_)
 , sleeps_(waitStrategy_.sleepCount_)
+, stopping_(false)
 , statGets_(0)
 , statTrys_(0)
 , statSpins_(0)
@@ -35,6 +36,11 @@ Consumer::~Consumer()
     header_->consumerPresent_ = false;
 }
 
+void Consumer::stop()
+{
+    stopping_ = true;
+    header_->consumerWaitConditionVariable_.notify_all();
+}
 
 inline
 void Consumer::incrementReadPosition()
@@ -91,8 +97,8 @@ bool Consumer::getNext(Message & message)
     size_t remainingSpins = spins_;
     size_t remainingYields = yields_;
     size_t remainingSleeps = sleeps_;
-    // todo: check for shutting down and return false
-    while(true)
+    
+    while(!stopping_)
     {
         if(tryGetNext(message))
         {
@@ -146,6 +152,7 @@ bool Consumer::getNext(Message & message)
             }
         }
     }
+    return false;
 }
     
 

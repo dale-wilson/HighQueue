@@ -9,9 +9,12 @@
 #include <Components/HeartbeatProducer.h>
 #include <Components/TestMessageProducer.h>
 #include <Components/TestMessageConsumer.h>
+#include <Components/QueueConsumer.h>
+#include <Components/QueueProducer.h>
+
+#include <Common/ReverseRange.h>
 
 #include <Common/Stopwatch.h>
-
 
 using namespace HighQueue;
 using namespace Components;
@@ -41,14 +44,14 @@ namespace
     typedef std::shared_ptr<ArbitratorType> ArbitratorPtr;
 }
 
-#define ENABLE_ARBITRATOR_TEST 0
+#define ENABLE_ARBITRATOR_TEST 01
 #if ENABLE_ARBITRATOR_TEST
 BOOST_AUTO_TEST_CASE(testArbitrator)
 {
     std::cout << "Arbitration" << std::endl << std::flush;
     size_t entryCount = 10000;
     size_t messageSize = sizeof(ActualMessage);
-    uint32_t messageCount = 50000000;
+    uint32_t messageCount = 10000000;
     const size_t arbitratorLookAhead = 1000; // real world numbers would be in the thousands.
 
     const size_t numberOfHeartbeats = 1;  // Don't change this
@@ -77,63 +80,95 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     auto arbitratorConnection = std::make_shared<Connection>();
     arbitratorConnection->createLocal("Arbitrator", parameters, memoryPool);
 
-    auto consumerConnection = std::make_shared<Connection>();
-    consumerConnection->createLocal("Consumer", parameters, memoryPool);
-
     volatile bool producerGo = false;
 
-    std::vector<ProducerPtr> producers;
+    typedef std::vector<StagePtr> StagesVec;
+    StagesVec stages;
+
+
     for(uint32_t nProducer = 0; nProducer < numberOfProducers; ++nProducer)
     {
-        producers.emplace_back(new ProducerType(arbitratorConnection, producerGo, messageCount, nProducer));
+        auto producer = std::make_shared<ProducerType>(producerGo, messageCount, nProducer);
+        stages.emplace_back(producer);
+        producer->attachMemoryPool(memoryPool);
+
+        auto publisher = std::make_shared<QueueProducer>();
+        stages.emplace_back(publisher);
+        publisher->attachConnection(arbitratorConnection);
+        producer->attachDestination(publisher);
+
     }
-    auto heartbeat = std::make_shared<HeartbeatProducer>(asio, arbitratorConnection, heartbeatInterval);
-    auto arbitrator = std::make_shared<ArbitratorType>(arbitratorConnection, consumerConnection, arbitratorLookAhead);
-    auto consumer = std::make_shared<ConsumerType>(consumerConnection, 0, true);
+    auto heartbeat = std::make_shared<HeartbeatProducer>(heartbeatInterval);
+    stages.emplace_back(heartbeat);
+    heartbeat->attachMemoryPool(memoryPool);
+    heartbeat->attachIoService(asio);
 
-    //IMessageHandlerPtr imhp = consumer;
-    //arbitrator->attachHandler(imhp);
+    auto heartbeatPublisher = std::make_shared<QueueProducer>();
+    stages.emplace_back(heartbeatPublisher);
+    heartbeatPublisher->attachConnection(arbitratorConnection);
+    heartbeat->attachDestination(heartbeatPublisher);
 
+    auto queueConsumer = std::make_shared<QueueConsumer>();
+    stages.emplace_back(queueConsumer);
+    queueConsumer->attachConnection(arbitratorConnection);
+
+    auto arbitrator = std::make_shared<ArbitratorType>(arbitratorLookAhead);
+    stages.emplace_back(arbitrator);
+    arbitrator->attachMemoryPool(memoryPool);
+    queueConsumer->attachDestination(arbitrator);
+
+    auto consumer = std::make_shared<ConsumerType>(messageCount);
+    arbitrator->attachDestination(consumer);
 
     // All wired up, ready to go.
-    arbitrator->start();
-    for(auto producer : producers)
+    ReverseRange<StagesVec> rstages(stages);
+    for(auto stage : rstages)
     {
-        producer->start();
+        stage->validate();
     }
-    heartbeat->start();
+ 
+    for(auto stage : rstages)
+    {
+        stage->start();
+    }
 
     Stopwatch timer;
     producerGo = true;
-    int todo_the_problem_is;
-    // when the consumer is attached directly it does not need its own thread.
-    // how can we tell when we're done?
-#if 0
     while(!consumer->isStopping())
     {
         std::this_thread::yield();
     }
-#else
-    consumer->run();
-#endif
     auto lapse = timer.nanoseconds();
-    
-    heartbeat->stop();
-    for(auto producer : producers)
+
+    for(auto stage : stages)
     {
-        producer->stop();
+        stage->stop();
     }
-    arbitrator->stop();
+
+    for(auto stage : stages)
+    {
+        stage->finish();
+    }
 
     auto messageBits = messageBytes * 8;
 
     std::cout << "Arbitration: " << std::fixed;
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
-        << lapse / messageCount << " nsec./message "
-        << std::setprecision(3) << double(messageCount) / double(lapse) << " GMsg/second "
-        << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-        << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-        << std::endl;
+        << lapse / messageCount << " nsec./message ";
+    if(lapse == 0)
+    {
+        std::cout << " Lapse is too short to measure.  Increase messageCount." << std::endl;
+    }
+    else
+    {
+        std::cout
+            << std::setprecision(3) << double(messageCount) * 1000.0L / double(lapse) << " MMsg/second "
+#ifdef DISPLAY_PRONGHORN_STYLE_RESULTS
+            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
+            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
+#endif // DISPLAY_PRONGHORN_STYLE_RESULTS
+            << std::endl;
+    }
 }
 #endif // ENABLE_ARBITRATOR_TEST

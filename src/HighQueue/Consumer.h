@@ -49,6 +49,9 @@ namespace HighQueue
         /// @brief for diagnosing and performance measurements, dump statistics
         std::ostream & writeStats(std::ostream & out)const;
 
+        /// @brief stop receiving messages.
+        void stop();
+
     private:
         void incrementReadPosition();
     private:
@@ -64,6 +67,8 @@ namespace HighQueue
         size_t spins_;
         size_t yields_;
         size_t sleeps_;
+
+        bool stopping_;
         uint64_t statGets_;
         uint64_t statTrys_;
         uint64_t statSpins_;

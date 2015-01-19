@@ -34,17 +34,23 @@ namespace HighQueue
         class Arbitrator : public StageToMessage
         {
         public:
-            Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, size_t expectedShutdowns = 2);
+            Arbitrator(size_t lookAhead, size_t expectedShutdowns = 2);
+
+
+            virtual void attachConnection(const ConnectionPtr & connection);
+            virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
+
+            virtual void validate();
+            virtual void handle(Message & message);
 
         private:
-            virtual void handleHeartbeat(Message & message);
-            virtual void handleMessageType(Message::Meta::MessageType type, Message & message);
-            void handleShutdownMessage(Message & message);
-            void handleDataMessage(Message & message);
-
             bool findAndPublishGap();
             void publishGapMessage(uint32_t gapStart, uint32_t gapEnd);
             void publishPendingMessages();
+
+            void handleHeartbeat(Message & message);
+            void handleShutdown(Message & message);
+            void handleDataMessage(Message & message);
 
         private:
             size_t lookAhead_;
@@ -56,25 +62,61 @@ namespace HighQueue
         };
 
         template<typename CargoMessage>
-        Arbitrator<CargoMessage>::Arbitrator(ConnectionPtr & inConnection, ConnectionPtr & outConnection, size_t lookAhead, size_t expectedShutdowns)
-            : MessageProcessor(inConnection, outConnection)
-            , lookAhead_(lookAhead)
+        Arbitrator<CargoMessage>::Arbitrator(size_t lookAhead, size_t expectedShutdowns)
+            : lookAhead_(lookAhead)
             , expectedShutdowns_(expectedShutdowns)
             , actualShutdowns_(0)
             , expectedSequenceNumber_(0)
             , lastHeartbeatSequenceNumber_(0)
         {
-            for(auto nMessage = 0; nMessage < lookAhead; ++nMessage)
-            {
-                pendingMessages_.emplace_back(outConnection_);
-            }
         }
 
         template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::handleMessageType(Message::Meta::MessageType type, Message & message)
+        void Arbitrator<CargoMessage>::attachConnection(const ConnectionPtr & connection)
+        {      
+            while(pendingMessages_.size() < lookAhead_)
+            {
+                pendingMessages_.emplace_back(connection);
+            }
+            StageToMessage::attachConnection(connection);
+        }
+
+        template<typename CargoMessage>
+        void Arbitrator<CargoMessage>::attachMemoryPool(const MemoryPoolPtr & memoryPool)
         {
-            // todo validate message type?
-            handleDataMessage(message);
+            while(pendingMessages_.size() < lookAhead_)
+            {
+                pendingMessages_.emplace_back(memoryPool);
+            }
+            StageToMessage::attachMemoryPool(memoryPool);
+        }
+
+        template<typename CargoMessage>
+        void Arbitrator<CargoMessage>::validate()
+        {
+            if(pendingMessages_.size() < lookAhead_)
+            {
+                throw std::runtime_error("Arbitrator working messages not initialized. Missing call to attachConnection or attachMemoryPool?");
+            }
+            StageToMessage::validate();
+        }
+
+        template<typename CargoMessage>
+        void Arbitrator<CargoMessage>::handle(Message & message)
+        {
+            auto type = message.meta().type_;
+            if(type == Message::Meta::MessageType::Heartbeat)
+            {
+                handleHeartbeat(message);
+            }
+            else if(type == Message::Meta::MessageType::Shutdown)
+            {
+                handleShutdown(message);
+            }
+            else
+            {
+                handleDataMessage(message);
+            }
         }
 
         template<typename CargoMessage>
@@ -90,7 +132,7 @@ namespace HighQueue
         }
 
         template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::handleShutdownMessage(Message & message)
+        void Arbitrator<CargoMessage>::handleShutdown(Message & message)
         {
             ++actualShutdowns_;
             LogTrace("Arbitration received shutdown " << actualShutdowns_ << " of " << expectedShutdowns_);
@@ -101,7 +143,7 @@ namespace HighQueue
                     publishPendingMessages();
                 }
                 // forward the shutdown message
-                publish(message);
+                send(message);
                 stop();
             }
         }
@@ -119,7 +161,7 @@ namespace HighQueue
             if(sequence == expectedSequenceNumber_)
             {
                 LogDebug("Arbitrator Publish " << sequence);
-                publish(message);
+                send(message);
                 ++expectedSequenceNumber_;
                 publishPendingMessages();
             }
@@ -153,7 +195,7 @@ namespace HighQueue
                     else
                     {
                         publishGapMessage(expectedSequenceNumber_, sequence);
-                        publish(message);
+                        send(message);
                     }
                 }
                 LogDebug("Arbitrator Stash future " << sequence);
@@ -184,8 +226,8 @@ namespace HighQueue
         template<typename CargoMessage>
         void Arbitrator<CargoMessage>::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
         {
-            outMessage_.meta().type_ = Message::Meta::Gap;
-            outMessage_.emplace<GapMessage>(gapStart, gapEnd - 1);
+            outMessage_->meta().type_ = Message::Meta::Gap;
+            outMessage_->emplace<GapMessage>(gapStart, gapEnd - 1);
             expectedSequenceNumber_ = gapEnd;
         }
 
@@ -196,11 +238,10 @@ namespace HighQueue
             while(!pendingMessages_[index].isEmpty())
             {
                 LogDebug("Arbitrator Publish from stash " << expectedSequenceNumber_ );
-                publish(pendingMessages_[index]);
+                send(pendingMessages_[index]);
                 ++expectedSequenceNumber_;
                 index = expectedSequenceNumber_ % lookAhead_;
             }
         }
-
    }
 }

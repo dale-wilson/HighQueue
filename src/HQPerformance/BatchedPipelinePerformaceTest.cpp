@@ -146,11 +146,13 @@ namespace
     }
 }
 
-#define ENABLE_BATCHED_ARBITRATOR_PERFORMANCE_TEST 1
-#if ENABLE_BATCHED_ARBITRATOR_PERFORMANCE_TEST
+#define ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST 1
+#if ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST
 BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
 {
-    std::cout << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
+    // NOTE: This is a pretty meaningless test.  It is here to match a similar test in the Pronghorn project.
+    // All that really happens is it sends MUCH larger messages thereby generating better GByte and GBit results.
+    std::cout << "HighQueueue Batched Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 
     WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
     bool discardMessagesIfNoConsumer = false;
@@ -219,11 +221,14 @@ BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
     std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in batches of " << batchSize << " in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
         << lapse / targetMessageCount << " nsec./message "
-        << std::setprecision(3) << double(targetMessageCount) / double(lapse) << " GMsg/second "
+        << std::setprecision(3) << (double(targetMessageCount) * 1000.0L) / double(lapse) << " MMsg/second "
+#ifdef DISPLAY_PRONGHORN_STYLE_RESULTS
         << std::setprecision(3) << double(targetMessageCount * messageBytes) / double(lapse) << " GByte/second "
         << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
+#endif // DISPLAY_PRONGHORN_STYLE_RESULTS
         << std::endl;
-
+    std::cout << "Batched pipeline statistics." << std::endl;
     consumer.writeStats(std::cout);
+    std::cout << std::endl;
 }
 #endif // ENABLEBATCHED_ARBITRATOR_PERFORMANCE_TEST

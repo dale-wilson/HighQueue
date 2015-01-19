@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
                       // BufferSwap;
                       // BinaryCopy;
 
-    std::cout << "Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
+    std::cout << "HighQueue Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 
     WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepPeriod);
     bool discardMessagesIfNoConsumer = false;
@@ -252,13 +252,24 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     auto messageBits = messageBytes * 8;
 
     std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in "
-        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
-        << lapse / targetMessageCount << " nsec./message "
-        << std::setprecision(3) << double(targetMessageCount) / double(lapse) << " GMsg/second "
-        << std::setprecision(3) << double(targetMessageCount * messageBytes) / double(lapse) << " GByte/second "
-        << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
-        << std::endl;
-
+        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
+    if(lapse == 0)
+    {
+        std::cout << "Run time too short to measure.  Increase targetMessageCount." << std::endl;
+    }
+    else
+    {
+        std::cout
+            << lapse / targetMessageCount << " nsec./message "
+            << std::setprecision(3) << (double(targetMessageCount) * 1000.0L) / double(lapse) << " MMsg/second "
+#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
+            << std::setprecision(3) << double(targetMessageCount * messageBytes) / double(lapse) << " GByte/second "
+            << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
+#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
+            << std::endl;
+    }
+    std::cout << "Pipeline Statistics:" << std::endl;
     consumer.writeStats(std::cout);
+    std::cout << std::endl;
 }
 #endif // ENABLEARBITRATORPERFORMANCE

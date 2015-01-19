@@ -20,6 +20,9 @@ namespace HighQueue
             virtual void attachIoService(const AsioServicePtr & ioService);
             virtual void run();
             virtual void stop();
+
+            virtual void handle(Message & message);
+
         private:
             void startTimer();
             void handleTimer(const boost::system::error_code& error);
@@ -32,18 +35,25 @@ namespace HighQueue
             bool cancel_;
         };
 
+        inline
         HeartbeatProducer::HeartbeatProducer(std::chrono::milliseconds interval)
             : interval_(interval.count())
             , cancel_(false)
         {
         }
 
+        inline
+        void HeartbeatProducer::handle(Message & message)
+        {
+            throw std::runtime_error("HeartbeatProducer does not accept incoming Messages");
+        }
+
+        inline
         void HeartbeatProducer::attachIoService(const AsioServicePtr & ioService)
         {
             ioService_ = ioService;
             timer_.reset(new Timer(*ioService));
         }
-
 
         inline
         void HeartbeatProducer::run()

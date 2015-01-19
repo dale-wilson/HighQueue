@@ -62,8 +62,11 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 #if ENABLE_NO_CONSUMER
 BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
 {
+#if defined(_DEBUG)
+    uint32_t messageCount = 10;
+#else // _DEBUG
     uint64_t messageCount = 100000000;
-
+#endif // _DEBUG
     size_t producerCount = 1;
 
     WaitStrategy strategy;
@@ -89,16 +92,26 @@ BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
 
     auto messageBytes = sizeof(ActualMessage);
     auto messageBits = sizeof(ActualMessage) * 8;
-    std::cout << "Test with no Consumer: " << producerCount << " producer" << std::fixed;
+    std::cout << "HighQueue Test with no Consumer: " << producerCount << " producer" << std::fixed;
     std::cout << " published " << messageCount << ' ' << messageBytes << " byte messages in "
-        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
-        << std::setprecision(3) << double(lapse) / double(messageCount) << " nsec./message "
-        << std::setprecision(3) << double(messageCount) / double(lapse) << " GMsg/second "
-        << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-        << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-        << std::endl;
-
+        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
+    if(lapse == 0)
+    {
+        std::cout << "Run time too short to measure.   Use a larger messageCount" << std::endl;
+    }
+    else
+    {
+        std::cout
+            << std::setprecision(3) << double(lapse) / double(messageCount) << " nsec./message "
+            << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
+#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
+            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
+            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
+#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
+            << std::endl;
+    }
+    std::cout << "No-consumer statistics:" << std::endl;
     producer.writeStats(std::cout);
-
+    std::cout << std::endl;
 }
 #endif // ENABLE_NO_CONSUMER

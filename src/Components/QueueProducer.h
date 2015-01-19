@@ -11,7 +11,7 @@ namespace HighQueue
 {
     namespace Components
     {
-        class QueueProducer: public Stage
+        class Stages_Export QueueProducer : public Stage
         {
         public:
             QueueProducer();

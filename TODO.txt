@@ -1,44 +1,6 @@
-Consider the pipeline framework that runs the components.
-  Component life cycle:
-	constructor
-	configure
-		read configuration information 
-	attach*
-		attach various resources
-	initialize
-		validate configure and attach results.
-		allocate resources
-	start
-		create a new thread that will call run
-	run
-		loop until done calling handle message and/or publish
-	handleMessage
-		process one message
-	publish
-		publish one message
-	pause
-		run stops doing what it's doing.
-	resume
-		reverses a pause.
-	stop
-		request exit from run
-	finish
-		clean up resources.
-   
+Give stage instances a name for diagnostic purposes.
+
 Define configuration information  
 	(boost::properties?  What alternatives are available.) 
-Define or choose a logging mechanism.
-	log4cxx (apache) http://logging.apache.org/log4cxx/
-		-- still in incubator status.   Some reports of resource leaks.
-		-- Apache license
-	log4cpp (sourceforge) http://log4cpp.sourceforge.net/
-		-- LGPL license	
-	easylogging (github)
-	
-	glog (googlecode)
-	http://johnwbyrd.github.io/logog/ 
-	
-	Log levels from log4cxx:
-		 TRACE, DEBUG, INFO, WARN, ERROR and FATAL
- 
+
 Create an example application (for example: A/B-Mcast->arbitration)

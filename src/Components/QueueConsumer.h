@@ -11,7 +11,7 @@ namespace HighQueue
 {
     namespace Components
     {
-        class QueueConsumer: public Stage
+        class Stages_Export QueueConsumer : public Stage
         {
         public:
             QueueConsumer();
@@ -24,7 +24,10 @@ namespace HighQueue
 
             virtual void validate();
             virtual void start();
+            virtual void stop();
             virtual void finish();
+
+            void setStopOnShutdownMessage(bool value);
 
             void run();
         private:
@@ -37,6 +40,8 @@ namespace HighQueue
 
             std::shared_ptr<Stage> me_;
             std::thread thread_;
+
+            bool stopOnShutdownMessage_;
         };
 
     }

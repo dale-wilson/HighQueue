@@ -47,22 +47,28 @@ namespace
 #if ENABLE_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
+    std::cout << "Queued Pipeline Test" << std::endl;
     size_t entryCount = 100000;
     size_t messageSize = sizeof(ActualMessage);
+#if defined(_DEBUG)
+    uint32_t messageCount = 10;
+#else // _DEBUG
     uint32_t messageCount = 100000000;
+#endif // _DEBUG
 
     const size_t numberOfConsumers = 1;   // Don't change this
     const size_t numberOfProducers = 1;   // Don't change this
 
     const size_t coreCount = std::thread::hardware_concurrency();
-    const int32_t fudgeCopiers = -2; // if you want to see the clients fighting for cores, make this positive
+    const int32_t fudgeCopiers = 0; // if you want to see the clients fighting for cores, make this positive
     int32_t numberOfCopiers = int32_t(coreCount) - (numberOfConsumers + numberOfProducers) + fudgeCopiers;
-    if(numberOfCopiers < 0)
+    if(numberOfCopiers <= 0)
     {
         numberOfCopiers = 0;
+        numberOfCopiers = 1; // for now, we always want at least one.
     }
  
-    const size_t queueCount = numberOfConsumers; // need a pool for each object that can receive messages
+    const size_t queueCount = numberOfCopiers + numberOfConsumers; // need a pool for each object that can receive messages
     // how many buffers do we need?
     size_t extraMessages = 0; // in case we need it someday (YAGNI)
     const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + numberOfCopiers + numberOfProducers + extraMessages;
@@ -86,23 +92,49 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         name << "Connection " << nConn;
         connection->createLocal(name.str(), parameters, memoryPool);
     }
+    
     volatile bool producerGo = false;
+
+    std::vector <StagePtr> stages;
+    
     auto producer = std::make_shared<ProducerType>(producerGo, messageCount, 1);
     producer->attachMemoryPool(memoryPool);
+    stages.emplace_back(producer);
+
+    auto producerPublisher = std::make_shared<QueueProducer>();
+    producerPublisher->attachConnection(connections[0]);
+    producer->attachDestination(producerPublisher);
+    stages.emplace_back(producerPublisher);
+
     std::vector<CopierPtr> copiers;
     for(size_t nCopier = 1; nCopier < connections.size(); ++nCopier)
     {
-        copiers.emplace_back(new CopierType());
-        copiers.back()->attachMemoryPool(memoryPool);
+        auto copyConsumer = std::make_shared<QueueConsumer>();
+        copyConsumer->attachConnection(connections[nCopier-1]);
+        stages.emplace_back(copyConsumer);
+
+        auto copyPublisher = std::make_shared<QueueProducer>();
+        copyPublisher->attachConnection(connections[nCopier]);
+        copyConsumer->attachDestination(copyPublisher);
+        stages.emplace_back(copyPublisher);
     }
 
-    auto consumer = std::make_shared<ConsumerType>( 0, true);
+    auto finalConsumer = std::make_shared<QueueConsumer>();
+    finalConsumer->attachConnection(connections.back());
+    stages.emplace_back(finalConsumer);
+
+    auto consumer = std::make_shared<ConsumerType>(0);
+    finalConsumer->attachDestination(consumer);
 
     // All wired up, ready to go.  Wait for the threads to initialize.
-    producer->start();
-    for(auto copier : copiers)
+    for(auto & stage : stages)
     {
-        copier->start();
+        stage->validate();
+    }
+
+    for(auto & stage : stages)
+    {
+        stage->start();
     }
 
     Stopwatch timer;
@@ -113,38 +145,57 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     }
     auto lapse = timer.nanoseconds();
 
-    producer->stop();
-    for(auto copier : copiers)
+    for(auto stage : stages)
     {
-        copier->stop();
+        stage->stop();
     }
 
 
+    for(auto stage : stages)
+    {
+        stage->finish();
+    }
+
     auto messageBits = messageBytes * 8;
 
-    std::cout << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage: ";
+    std::cout << "Staged Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage: ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
-        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
-        << lapse / messageCount << " nsec./message "
-        << std::setprecision(3) << double(messageCount) / double(lapse) << " GMsg/second "
-        << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-        << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-        << std::endl;
+            << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
+    if(lapse == 0)
+    {
+        std::cout << "Run time too short to measure.   Use a larger messageCount" << std::endl;
+    }
+    else
+    {
+        std::cout
+            << lapse / messageCount << " nsec./message "
+            << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
+#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
+            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
+            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
+#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
+            << std::endl;
+    }
 }
 #endif // ENABLE_PIPELINE_TEST
 
 
-#define ENABLE_DIRECT_PIPELINE_TEST 01
+#define ENABLE_DIRECT_PIPELINE_TEST 0
 #if ENABLE_DIRECT_PIPELINE_TEST
-BOOST_AUTO_TEST_CASE(testPipeline)
+BOOST_AUTO_TEST_CASE(testDirectPipeline)
 {
+    std::cout << "Direct Pipeline Test" << std::endl;
     size_t messageSize = sizeof(ActualMessage);
-    uint32_t messageCount = 100000000;
+#if defined(_DEBUG)
+    uint32_t messageCount = 10;
+#else // _DEBUG
+    uint32_t messageCount = 100000000 * 10;
+#endif // _DEBUG
 
     const size_t numberOfConsumers = 1;   // Don't change this
     const size_t numberOfProducers = 1;   // Don't change this
 
-    int32_t numberOfCopiers = 5; // pick a number, any number
+    int32_t numberOfCopiers = 6; // pick a number, any number
  
     // how many buffers do we need?
     size_t extraMessages = 0; // in case we need it someday (YAGNI)
@@ -167,7 +218,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         previous->attachDestination(copier);
         previous = copier;
     }
-    auto consumer = std::make_shared<ConsumerType>( 0, true);
+    auto consumer = std::make_shared<ConsumerType>(0);
     previous->attachDestination(consumer);
 
     // All wired up.  See if everybody is happy
@@ -210,7 +261,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     auto messageBits = messageBytes * 8;
 
-    std::cout << "Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage: ";
+    std::cout << "Direct Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " stage: ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
     if(lapse == 0)
@@ -221,9 +272,11 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     {
         std::cout
             << lapse / messageCount << " nsec./message "
-            << std::setprecision(3) << double(messageCount) / double(lapse) << " GMsg/second "
+            << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
+#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
             << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
             << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
+#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
             << std::endl;
     }
 }

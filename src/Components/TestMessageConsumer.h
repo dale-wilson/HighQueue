@@ -16,7 +16,7 @@ namespace HighQueue
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
-            explicit TestMessageConsumer(uint32_t messageCount_ = 0, bool quitOnEmptyMessage = true);
+            explicit TestMessageConsumer(uint32_t messageCount_ = 0);
 
             uint32_t errors()const
             {
@@ -29,7 +29,6 @@ namespace HighQueue
 
         private:
             uint32_t messageCount_;
-            bool quitOnEmptyMessage_;
 
             uint32_t messageReceived_;
             uint32_t nextSequence_;
@@ -37,9 +36,8 @@ namespace HighQueue
         };
 
         template<size_t Extra>
-        TestMessageConsumer<Extra>::TestMessageConsumer(uint32_t messageCount_, bool quitOnEmptyMessage)
+        TestMessageConsumer<Extra>::TestMessageConsumer(uint32_t messageCount_)
             : messageCount_(messageCount_)
-            , quitOnEmptyMessage_(quitOnEmptyMessage)
             , messageReceived_(0)
             , nextSequence_(0)
             , sequenceError_(0)

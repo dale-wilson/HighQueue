@@ -14,7 +14,13 @@ QueueProducer::QueueProducer()
 
 void QueueProducer::handle(Message & message)
 {
+    auto type = message.meta().type_;
     producer_->publish(message);
+    if(type == Message::Meta::MessageType::Shutdown)
+    {
+        stop();
+    }
+
 }
 
 void QueueProducer::attachConnection(const ConnectionPtr & connection)

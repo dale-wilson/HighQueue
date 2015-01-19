@@ -19,6 +19,7 @@ namespace HighQueue
             virtual ~StageToMessage();
 
             // implement stage methods
+            virtual void attachConnection(const ConnectionPtr & connection);
             virtual void attachMemoryPool(const MemoryPoolPtr & pool);
             virtual void validate();
  
