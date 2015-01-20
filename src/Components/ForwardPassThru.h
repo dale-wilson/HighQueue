@@ -2,13 +2,13 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/Stage.h>
+#include <StageCommon/Stage.h>
 
 #include <Common/Log.h>
 
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         class ForwardPassThru: public Stage
         {

@@ -1,12 +1,12 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <ComponentCommon/ComponentPch.h>
+#include <StageCommon/StagePch.h>
 
 #include "Stage.h"
 
 using namespace HighQueue;
-using namespace Components;
+using namespace Stages;
 
 Stage::Stage()
     : paused_(false)

@@ -1,12 +1,12 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <ComponentCommon/ComponentPch.h>
+#include <StageCommon/StagePch.h>
 
 #include "QueueConsumer.h"
 
 using namespace HighQueue;
-using namespace Components;
+using namespace Stages;
 
 QueueConsumer::QueueConsumer()
 :stopOnShutdownMessage_(false)

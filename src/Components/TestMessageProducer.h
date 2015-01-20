@@ -2,14 +2,14 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/ThreadedStageToMessage.h>
+#include <StageCommon/ThreadedStageToMessage.h>
 #include <Mocks/TestMessage.h>
 
 #include <Common/Log.h>
 
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         template<size_t Extra=0>
         class TestMessageProducer : public ThreadedStageToMessage

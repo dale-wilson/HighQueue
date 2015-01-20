@@ -4,7 +4,7 @@
 #pragma once
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         class HeartbeatProducer;
         typedef std::shared_ptr<HeartbeatProducer> HeartbeatProducerFwd;

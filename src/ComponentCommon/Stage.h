@@ -4,16 +4,16 @@
 #pragma once
 
 #include "StageFwd.h"
-#include <ComponentCommon/Component_Export.h>
+#include <StageCommon/Stage_Export.h>
 #include "HighQueue/Message.h"
-#include <ComponentCommon/AsioServiceFwd.h>
+#include <StageCommon/AsioServiceFwd.h>
 #include "HighQueue/ConnectionFwd.h"
 #include <HighQueue/MemoryPoolFwd.h>
 #include <Common/Log.h>
 
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         class ConfigurationPtr; // todo: invent a configuration class.
         /// @brief Base class for Stages

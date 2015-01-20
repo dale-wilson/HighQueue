@@ -3,12 +3,12 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include "MulticastReceiverFwd.h"
-#include <ComponentCommon/AsioService.h>
-#include <ComponentCommon/ThreadedStageToMessage.h>
+#include <StageCommon/AsioService.h>
+#include <StageCommon/ThreadedStageToMessage.h>
 
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         struct MulticastConfiguration
         {

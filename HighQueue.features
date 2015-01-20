@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 // This file defines MPC features used to enable and disable portions of the build
 HighQueue=1
-Components=1
+Stages=1
 boost=1
 
 // This is a "feature" used to temporarily disable parts of the build.

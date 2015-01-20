@@ -1,18 +1,18 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <ComponentCommon/ComponentPch.h>
-#define BOOST_TEST_NO_MAIN ComponentsTest
+#include <StageCommon/StagePch.h>
+#define BOOST_TEST_NO_MAIN StagesTest
 #include <boost/test/unit_test.hpp>
 
-#include <Components/TestMessageProducer.h>
-#include <Components/TestMessageConsumer.h>
+#include <Stages/TestMessageProducer.h>
+#include <Stages/TestMessageConsumer.h>
 
-#include <Components/QueueConsumer.h>
-#include <Components/QueueProducer.h>
-#include <Components/CopyPassThru.h>
-#include <Components/ForwardPassThru.h>
-#include <Components/BinaryPassThru.h>
+#include <Stages/QueueConsumer.h>
+#include <Stages/QueueProducer.h>
+#include <Stages/CopyPassThru.h>
+#include <Stages/ForwardPassThru.h>
+#include <Stages/BinaryPassThru.h>
 
 #include <Common/Stopwatch.h>
 #include <Common/Stopwatch.h>
@@ -20,7 +20,7 @@
 
 
 using namespace HighQueue;
-using namespace Components;
+using namespace Stages;
 namespace
 {
     const size_t testMessageExtras = 13;

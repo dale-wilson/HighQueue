@@ -4,7 +4,7 @@
 #pragma once
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         class MulticastReceiver;
         typedef std::shared_ptr<MulticastReceiver> MulticastReceiverPtr;

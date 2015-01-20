@@ -2,14 +2,14 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <ComponentCommon/StageToMessage.h>
+#include <StageCommon/StageToMessage.h>
 #include <HighQueue/Message.h>
 
 #include <Common/Log.h>
 
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         class  Stages_Export ThreadedStageToMessage : public StageToMessage
         {

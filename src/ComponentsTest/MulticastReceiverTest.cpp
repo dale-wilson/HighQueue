@@ -1,17 +1,17 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include "ComponentCommon/ComponentPch.h"
-#define BOOST_TEST_NO_MAIN ComponentsTest
+#include "StageCommon/StagePch.h"
+#define BOOST_TEST_NO_MAIN StagesTest
 #include <boost/test/unit_test.hpp>
 
-#include <Components/MulticastReceiver.h>
-#include <ComponentCommon/AsioService.h>
+#include <Stages/MulticastReceiver.h>
+#include <StageCommon/AsioService.h>
 #include <HighQueue/Connection.h>
 #include <Mocks/TestMessage.h>
 
 using namespace HighQueue;
-using namespace Components;
+using namespace Stages;
 typedef TestMessage</*13*/80> ActualMessage;
 
 namespace

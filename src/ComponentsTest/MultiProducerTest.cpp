@@ -1,14 +1,14 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <ComponentCommon/ComponentPch.h>
-#define BOOST_TEST_NO_MAIN ComponentsTest
+#include <StageCommon/StagePch.h>
+#define BOOST_TEST_NO_MAIN StagesTest
 #include <boost/test/unit_test.hpp>
 
-#include <Components/TestMessageProducer.h>
-#include <Components/TestMessageConsumer.h>
-#include <Components/QueueConsumer.h>
-#include <Components/QueueProducer.h>
+#include <Stages/TestMessageProducer.h>
+#include <Stages/TestMessageConsumer.h>
+#include <Stages/QueueConsumer.h>
+#include <Stages/QueueProducer.h>
 
 #include <HighQueue/Consumer.h>
 #include <HighQueue/Producer.h>
@@ -16,7 +16,7 @@
 #include <Common/Stopwatch.h>
 
 using namespace HighQueue;
-using namespace Components;
+using namespace Stages;
 
 namespace
 {

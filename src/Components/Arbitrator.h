@@ -3,11 +3,11 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <ComponentCommon/StageToMessage.h>
+#include <StageCommon/StageToMessage.h>
 
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         class GapMessage
         {

@@ -4,11 +4,11 @@
 //
 # pragma once
 #include "AsioServiceFwd.h"
-#include <ComponentCommon/Component_Export.h>
+#include <StageCommon/Stage_Export.h>
 
 namespace HighQueue
 {
-  namespace Components
+  namespace Stages
   {
     /// @brief Base class to allow sharing a boost::io_service
     ///

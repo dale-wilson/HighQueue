@@ -5,7 +5,7 @@
 
 namespace HighQueue
 {
-    namespace Components
+    namespace Stages
     {
         class Stage;
         typedef std::shared_ptr<Stage> StagePtr;
