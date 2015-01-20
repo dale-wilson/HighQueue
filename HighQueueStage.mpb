@@ -1,5 +1,5 @@
 project :HighQueueUser{
-  requires += Components
+  requires += Stagess
 
   specific(prop:microsoft) {
     Release::libout = $(HighQueue_ROOT)/Output/Release

@@ -1,0 +1,49 @@
+// Copyright (c) 2014, 2015 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+
+//////////////////////////////
+// Build the HighQueue Stages
+project(*) : HighQueueStage, boost_base, boost_filesystem, boost_system, boost_thread {
+  sharedname = *
+  dynamicflags += STAGE_BUILD_DLL
+
+  pch_header = StageCommon/StagePch.h
+  pch_source = StageCommon/StagePch.cpp
+
+ // TODO: What to do about boost 32 bit builds?
+  libpaths -= $(BOOST_ROOT)/lib
+  libpaths += $(BOOST_LIB_PATH)
+
+  Source_Files {
+    Stages
+	StageCommon
+  }
+  Header_Files {
+    Stages
+	StageCommon
+	Common
+  }
+}
+
+////////////////////////////
+// Build the Stage tests
+project(*Test) : HighQueueStage, HighQueueAddTest, boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = *
+
+  libs += Stages
+  after += Stages
+  
+  pch_header = StageCommon/StagePch.h
+  pch_source = StageCommon/StagePch.cpp
+	
+  Source_Files {
+	StagesTest
+  }
+  Header_Files {
+    StagesTest
+	StageCommon
+	Common
+  }
+}
+
