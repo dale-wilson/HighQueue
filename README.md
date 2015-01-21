@@ -1,5 +1,5 @@
 # HighQueue and HighStages
-<b>HighQueue</b> began as tool for High Speed message passing between threads, processes, or other components of a system.   It has grown to include <b>HighStages</b> -- a framework for creating systems based on a pipeline architecture.
+<b>HighQueue</b> began as tool for high speed message passing between threads (or processes, or other components of a system.)   It has grown to include <b>HighStages</b> -- a framework for creating systems based on a pipeline architecture.
 
 
 ```
@@ -12,11 +12,11 @@
 
 ##Introduction
 
-HighQueue -- A High Performance Queue -- is a mechanism for message passing between components of a system.  It is most often used to pass messages between two or more threads in the same process, but it can also be 
-used for intra-process communication by putting the HighQueue in shared memory. 
+HighQueue -- A <b>High</b> performance <b>Queue</b> -- is a mechanism for message passing between components of a system.  It is most often used to pass messages between two or more threads in the same process, but it can also be 
+used for interprocess communication by putting the HighQueue in shared memory. 
 
-HighStages is framework for creating the processing Stages -- the units that can be assembled into a processing pipeline.   HighStages defines tools for developing the Stages.
-Eventually it will also provide the support needed to instantiate and configure those Stages, assemble them into a pipeline and run the resulting program.
+HighStages is framework for creating the processing Stages -- the units that can be assembled into a processing pipeline.   HighStages defines tools for developing the Stages.  When Stages are running within different threads, the messages are passed using a HighQueue.  When they are running within the same thread a direct virtual call is used to pass the message.
+It is still under active development.  Eventually it will also provide the support needed to instantiate and configure those Stages, assemble them into a pipeline and run the resulting program.
 
 As of this writing (mid-January, 2015) HighQueue is relatively stable (although its documentation is lagging behind)  
 
