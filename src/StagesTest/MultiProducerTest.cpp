@@ -29,7 +29,7 @@ namespace
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 }
 
-#define ENABLE_MULTIPRODUCER_TEST 0
+#define ENABLE_MULTIPRODUCER_TEST 01
 #if ! ENABLE_MULTIPRODUCER_TEST
 #pragma message ("ENABLE_MULTIPRODUCER_TEST " __FILE__)
 #else // ENABLE_MULTIPRODUCER_TEST

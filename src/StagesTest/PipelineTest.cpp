@@ -43,7 +43,7 @@ namespace
     typedef std::shared_ptr<CopierType> CopierPtr;
 }
 
-#define ENABLE_PIPELINE_TEST 0
+#define ENABLE_PIPELINE_TEST 01
 #if ENABLE_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 #endif // ENABLE_PIPELINE_TEST
 
 
-#define ENABLE_DIRECT_PIPELINE_TEST 0
+#define ENABLE_DIRECT_PIPELINE_TEST 01
 #if ENABLE_DIRECT_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testDirectPipeline)
 {
