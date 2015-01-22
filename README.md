@@ -1,7 +1,6 @@
 # HighQueue and HighStages
 <b>HighQueue</b> began as tool for high speed message passing between threads (or processes, or other components of a system.)   It has grown to include <b>HighStages</b> -- a framework for creating systems based on a pipeline architecture.
 
-
 ```
   The HighQueue Haiku
 
@@ -15,12 +14,12 @@
 HighQueue -- A <b>High</b> performance <b>Queue</b> -- is a mechanism for message passing between components of a system.  It is most often used to pass messages between two or more threads in the same process, but it can also be 
 used for interprocess communication by putting the HighQueue in shared memory. 
 
-HighStages is framework for creating the processing Stages -- the units that can be assembled into a processing pipeline.   HighStages defines tools for developing the Stages.  When Stages are running within different threads, the messages are passed using a HighQueue.  When they are running within the same thread a direct virtual call is used to pass the message.
+HighStages is framework for creating <b>High</b> performance processing <b>Stages</b>.  Stages are units that can be assembled into a processing pipeline.   HighStages defines tools for developing the Stages.  When Stages are running within different threads, the messages are passed using a HighQueue.  When they are running within the same thread a direct virtual call is used to pass the message.
 It is still under active development.  Eventually it will also provide the support needed to instantiate and configure those Stages, assemble them into a pipeline and run the resulting program.
 
-As of this writing (mid-January, 2015) HighQueue is relatively stable (although its documentation is lagging behind)  
+As of this writing (mid-January, 2015) HighQueue is reasonably stable.
 
-HighStages is still undergoing rapid developemnt and the corresponding rapid changes as it evolves into a complete, stable system.
+HighStages is still undergoing rapid development as it evolves into a complete system.
 
 ##Overview 
 
@@ -41,21 +40,22 @@ The HighQueue API is described on [this Wiki page.](https://github.com/dale-wils
 Developers who are creating pipeline-based applications using the HighStages framework can use the HighStages API to create the Stages in this pipeline.
 
 HighStages-based Stages receive messages from previous Stages; apply a transformation to the messages, then pass these messages (or new messages derived from the input messages) 
-on to subsequent stages in the pipeline.  The HighStages library supplies the plumbing and the tools.  
-It's up to application-specific code supplied by the developer to perform the actual work.
+on to subsequent stages in the pipeline.  
+
+The HighStages library supplies the plumbing and the tools.  It's up to application-specific code supplied by the developer to perform the actual work.
 
 The HighStages API is described on [this Wiki page.](https://github.com/dale-wilson/HighQueue/wiki/HighStages-API)
 
 ##How fast is it?
-###The short answer:  
+###The short answer  
 
 Very fast!
 
-###The more detailed answer:
+###The more detailed answer
 
-Absolute performance numbers are notoriously difficult to measure accurately. The results vary widely from machine to machine.
+Disclaimer: Absolute performance numbers are notoriously difficult to measure accurately. The results vary widely from machine to machine.
 
-That being said, tests on an Intel(R) Core(TM) i7-4790 CPU @3.60GHz [8 cores] I measured these results:
+That being said, tests on an Intel(R) Core(TM) i7-4790 CPU @3.60GHz [8 cores] the HighqueuePerfmanceTest measured these results:
 
 ####HighQueue performance in a simple configuration.
 
@@ -77,7 +77,9 @@ Watch this space for breaking news.
 
 ###Don't take my word for it.
 
-You can generate equivalent numbers for your machine by running the the HQPerformance executable which is created as part of building HighQueue.
+You can generate equivalent numbers for your machine by running the the HighQueuePerformance executable which is created as part of building HighQueue.
+
+You can also see preliminary results from HighStages by running Stages_Test.
 
 <b><em>Your Performance Mileage Will Vary!</em></b>
 
