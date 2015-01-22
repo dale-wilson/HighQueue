@@ -43,6 +43,8 @@ namespace HighQueue
             virtual void validate();
             virtual void handle(Message & message);
 
+			std::ostream & writeStats(std::ostream & out);
+
         private:
             bool findAndPublishGap();
             void publishGapMessage(uint32_t gapStart, uint32_t gapEnd);
@@ -59,6 +61,23 @@ namespace HighQueue
             uint32_t expectedSequenceNumber_;
             std::vector<Message> pendingMessages_;
             uint32_t lastHeartbeatSequenceNumber_;
+
+			size_t statReceived_;
+			size_t statHeartbeats_;
+			size_t statShutdowns_;
+			size_t statData_;
+			size_t statHeartbeatWithoutPublish_;
+			size_t statShutdownPublishedGap_;
+			size_t statArrivedInOrder_;
+			size_t statDuplicatesPrevious_;
+			size_t statStashed_;
+			size_t statDuplicatesStash_;
+			size_t statFuture_;
+
+				
+
+
+
         };
 
         inline
@@ -68,6 +87,17 @@ namespace HighQueue
             , actualShutdowns_(0)
             , expectedSequenceNumber_(0)
             , lastHeartbeatSequenceNumber_(0)
+			, statReceived_(0)
+			, statHeartbeats_(0)
+			, statShutdowns_(0)
+			, statData_(0)
+			, statHeartbeatWithoutPublish_(0)
+			, statShutdownPublishedGap_(0)
+			, statArrivedInOrder_(0)
+			, statDuplicatesPrevious_(0)
+			, statStashed_(0)
+			, statDuplicatesStash_(0)
+			, statFuture_(0)
         {
         }
 
@@ -104,17 +134,21 @@ namespace HighQueue
         inline
         void OrderedMerge::handle(Message & message)
         {
+			++statReceived_;
             auto type = message.getType();
             if(type == Message::MessageType::Heartbeat)
             {
+				++statHeartbeats_;
                 handleHeartbeat(message);
             }
             else if(type == Message::MessageType::Shutdown)
             {
+				++statShutdowns_;
                 handleShutdown(message);
             }
             else
             {
+				++statData_;
                 handleDataMessage(message);
             }
         }
@@ -125,6 +159,7 @@ namespace HighQueue
             // todo: we might want to skip some heartbeats depending on frequency
             if(expectedSequenceNumber_ == lastHeartbeatSequenceNumber_)
             {
+				++statHeartbeatWithoutPublish_;
                 findAndPublishGap();
                 publishPendingMessages();
             }
@@ -140,6 +175,7 @@ namespace HighQueue
             {
                 while(findAndPublishGap())
                 {
+					++statShutdownPublishedGap_;
                     publishPendingMessages();
                 }
                 // forward the shutdown message
@@ -159,6 +195,7 @@ namespace HighQueue
             LogVerbose("OrderedMerge sequence :" << sequence << " expected " << expectedSequenceNumber_);
             if(sequence == expectedSequenceNumber_)
             {
+				++statArrivedInOrder_;
                 LogDebug("OrderedMerge Publish " << sequence);
                 send(message);
                 ++expectedSequenceNumber_;
@@ -166,6 +203,7 @@ namespace HighQueue
             }
             else if(sequence < expectedSequenceNumber_)
             {
+				++statDuplicatesPrevious_;
                 LogDebug("OrderedMerge Previous Duplicate " << sequence);
                 // ignore this one.  We've already seen it.
             }
@@ -174,6 +212,7 @@ namespace HighQueue
                 auto index = sequence % lookAhead_;
                 if(pendingMessages_[index].isEmpty())
                 {
+					++statStashed_;
                     LogDebug("OrderedMerge Stash" << sequence);
                     message.moveTo(pendingMessages_[index]);
                 }
@@ -185,9 +224,10 @@ namespace HighQueue
             }
             else // Sequence number is beyond the look-ahead window size
             {
-                while(sequence - expectedSequenceNumber_ < lookAhead_)
+				++statFuture_;
+				while (sequence - expectedSequenceNumber_ < lookAhead_)
                 {
-                    if(findAndPublishGap())
+					if (findAndPublishGap())
                     {
                         publishPendingMessages();
                     }
@@ -242,5 +282,23 @@ namespace HighQueue
                 index = expectedSequenceNumber_ % lookAhead_;
             }
         }
+
+		inline
+		std::ostream & OrderedMerge::writeStats(std::ostream & out)
+		{
+			return out
+				<< " Received: " << statReceived_
+				<< " Heartbeats: " << statHeartbeats_
+				<< " Shutdowns: " << statShutdowns_
+				<< " Data: " << statData_
+				<< " HeartbeatWithoutPublish: " << statHeartbeatWithoutPublish_
+				<< " ShutdownPublishedGap: " << statShutdownPublishedGap_
+				<< " ArrivedInOrder: " << statArrivedInOrder_
+				<< " DuplicatesPrevious: " << statDuplicatesPrevious_
+				<< " Stashed: " << statStashed_
+				<< " DuplicatesStash: " << statDuplicatesStash_
+				<< " Future: " << statFuture_;
+		}
+
    }
 }

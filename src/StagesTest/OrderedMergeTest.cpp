@@ -6,6 +6,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <Stages/OrderedMerge.h>
+#include <Stages/Shuffler.h>
 #include <Stages/HeartbeatProducer.h>
 #include <Stages/TestMessageProducer.h>
 #include <Stages/TestMessageConsumer.h>
@@ -54,17 +55,26 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
 #else // _DEBUG
     uint32_t messageCount = 10000000;
 #endif // _DEBUG
-    const size_t lookAhead = 1000; // real world numbers would be in the thousands.
+    const size_t lookAhead = 50; // real world numbers would be in the thousands.
+	const size_t shuffleAhead = lookAhead + 10;
 
-    const size_t numberOfHeartbeats = 1;  // Don't change this
-    const size_t numberOfConsumers = 1;   // Don't change this
+	const uint32_t numberOfHeartbeats = 1;  // Don't change this
+	const uint32_t numberOfConsumers = 1;   // Don't change this
     const uint32_t numberOfProducers = 2;   // Don't change this
-    const size_t numberOforderedMerges = 1; // Don't change this.
+	const uint32_t numberOforderedMerges = 1; // Don't change this.
+	const uint32_t numberOfShufflers = numberOfProducers + 1 / 2;
 
     const size_t queueCount = numberOforderedMerges + numberOfConsumers; // need a pool for each object that can receive messages
     // how many buffers do we need?
     size_t extraMessages = 0; // in case we need it someday (YAGNI)
-    const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + numberOfHeartbeats + numberOforderedMerges * 2 + numberOforderedMerges * lookAhead + numberOfProducers + extraMessages;
+    const size_t messagesNeeded = 
+		entryCount * queueCount + 
+		numberOfConsumers + 
+		numberOfHeartbeats + 
+		numberOforderedMerges + numberOforderedMerges * lookAhead + 
+		numberOfShufflers + numberOfShufflers * shuffleAhead +
+		numberOfProducers + 
+		extraMessages;
 
     auto asio = std::make_shared<AsioService>();
     std::chrono::milliseconds heartbeatInterval(10000);
@@ -94,10 +104,23 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
         stages.emplace_back(producer);
         producer->attachMemoryPool(memoryPool);
 
-        auto publisher = std::make_shared<QueueProducer>();
-        stages.emplace_back(publisher);
-        publisher->attachConnection(mergeConnection);
-        producer->attachDestination(publisher);
+		auto publisher = std::make_shared<QueueProducer>();
+		stages.emplace_back(publisher);
+		publisher->attachConnection(mergeConnection);
+
+		if (nProducer % 2 == 0)
+		{
+			auto shuffler = std::make_shared<Shuffler>(shuffleAhead);
+			stages.emplace_back(shuffler);
+			shuffler->attachMemoryPool(memoryPool);
+
+			producer->attachDestination(shuffler);
+			shuffler->attachDestination(publisher);
+		}
+		else
+		{
+			producer->attachDestination(publisher);
+		}
 
     }
     auto heartbeat = std::make_shared<HeartbeatProducer>(heartbeatInterval);
@@ -134,6 +157,8 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
         stage->start();
     }
 
+	//////////////////
+	// start the test
     Stopwatch timer;
     producerGo = true;
     while(!consumer->isStopping())
@@ -141,7 +166,8 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
         std::this_thread::yield();
     }
     auto lapse = timer.nanoseconds();
-
+	// the test ends here
+	/////////////////////
     for(auto stage : stages)
     {
         stage->stop();
@@ -151,6 +177,9 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     {
         stage->finish();
     }
+
+	BOOST_CHECK_EQUAL(consumer->messagesHandled(), messageCount);
+	BOOST_CHECK_EQUAL(consumer->errors(), 0U); // this test will not be valid if we introduce gaps.
 
     auto messageBits = messageBytes * 8;
 
@@ -172,5 +201,8 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
 #endif // DISPLAY_PRONGHORN_STYLE_RESULTS
             << std::endl;
     }
+	std::cout << "Ordered Merge statistics: " << std::endl;
+	orderedMerge->writeStats(std::cout);
+	std::cout << std::endl << std::endl;
 }
 #endif // ENABLE_ORDEREDMERGE_TEST
