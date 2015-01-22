@@ -14,9 +14,9 @@ QueueProducer::QueueProducer()
 
 void QueueProducer::handle(Message & message)
 {
-    auto type = message.meta().type_;
+    auto type = message.getType();
     producer_->publish(message);
-    if(type == Message::Meta::MessageType::Shutdown)
+    if(type == Message::MessageType::Shutdown)
     {
         stop();
     }

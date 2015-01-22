@@ -30,14 +30,12 @@ namespace HighQueue
             uint32_t endGap_;
         };
 
-        template<typename CargoMessage>
         class Arbitrator : public StageToMessage
         {
         public:
             Arbitrator(size_t lookAhead, size_t expectedShutdowns = 2);
 
-
-            virtual void attachConnection(const ConnectionPtr & connection);
+			virtual void attachConnection(const ConnectionPtr & connection);
             virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
 
             virtual void validate();
@@ -61,8 +59,8 @@ namespace HighQueue
             uint32_t lastHeartbeatSequenceNumber_;
         };
 
-        template<typename CargoMessage>
-        Arbitrator<CargoMessage>::Arbitrator(size_t lookAhead, size_t expectedShutdowns)
+        inline
+        Arbitrator::Arbitrator(size_t lookAhead, size_t expectedShutdowns)
             : lookAhead_(lookAhead)
             , expectedShutdowns_(expectedShutdowns)
             , actualShutdowns_(0)
@@ -71,8 +69,8 @@ namespace HighQueue
         {
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::attachConnection(const ConnectionPtr & connection)
+        inline
+        void Arbitrator::attachConnection(const ConnectionPtr & connection)
         {      
             while(pendingMessages_.size() < lookAhead_)
             {
@@ -81,8 +79,8 @@ namespace HighQueue
             StageToMessage::attachConnection(connection);
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::attachMemoryPool(const MemoryPoolPtr & memoryPool)
+        inline
+        void Arbitrator::attachMemoryPool(const MemoryPoolPtr & memoryPool)
         {
             while(pendingMessages_.size() < lookAhead_)
             {
@@ -91,8 +89,8 @@ namespace HighQueue
             StageToMessage::attachMemoryPool(memoryPool);
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::validate()
+        inline
+        void Arbitrator::validate()
         {
             if(pendingMessages_.size() < lookAhead_)
             {
@@ -101,15 +99,15 @@ namespace HighQueue
             StageToMessage::validate();
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::handle(Message & message)
+        inline
+        void Arbitrator::handle(Message & message)
         {
-            auto type = message.meta().type_;
-            if(type == Message::Meta::MessageType::Heartbeat)
+            auto type = message.getType();
+            if(type == Message::MessageType::Heartbeat)
             {
                 handleHeartbeat(message);
             }
-            else if(type == Message::Meta::MessageType::Shutdown)
+            else if(type == Message::MessageType::Shutdown)
             {
                 handleShutdown(message);
             }
@@ -119,8 +117,8 @@ namespace HighQueue
             }
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::handleHeartbeat(Message & message)
+        inline
+        void Arbitrator::handleHeartbeat(Message & message)
         {
             // todo: we might want to skip some heartbeats depending on frequency
             if(expectedSequenceNumber_ == lastHeartbeatSequenceNumber_)
@@ -131,8 +129,8 @@ namespace HighQueue
             lastHeartbeatSequenceNumber_ = expectedSequenceNumber_;
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::handleShutdown(Message & message)
+        inline
+        void Arbitrator::handleShutdown(Message & message)
         {
             ++actualShutdowns_;
             LogTrace("Arbitration received shutdown " << actualShutdowns_ << " of " << expectedShutdowns_);
@@ -148,11 +146,10 @@ namespace HighQueue
             }
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::handleDataMessage(Message & message)
+        inline
+        void Arbitrator::handleDataMessage(Message & message)
         {
-            auto testMessage = message.get<CargoMessage>();
-            auto sequence = testMessage->getSequence();
+			auto sequence = message.getSequence();
             if(expectedSequenceNumber_ == 0)
             {
                 expectedSequenceNumber_ = sequence;
@@ -204,8 +201,8 @@ namespace HighQueue
             }
         }
 
-        template<typename CargoMessage>
-        bool Arbitrator<CargoMessage>::findAndPublishGap()
+        inline
+        bool Arbitrator::findAndPublishGap()
         {
             auto gapStart = expectedSequenceNumber_;
             auto gapEnd = gapStart + 1; // the first message that's NOT in the gap
@@ -223,16 +220,16 @@ namespace HighQueue
             return false;
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
+        inline
+        void Arbitrator::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
         {
-            outMessage_->meta().type_ = Message::Meta::Gap;
+            outMessage_->setType(Message::Gap);
             outMessage_->emplace<GapMessage>(gapStart, gapEnd - 1);
             expectedSequenceNumber_ = gapEnd;
         }
 
-        template<typename CargoMessage>
-        void Arbitrator<CargoMessage>::publishPendingMessages()
+        inline
+        void Arbitrator::publishPendingMessages()
         {
             auto index = expectedSequenceNumber_ % lookAhead_;
             while(!pendingMessages_[index].isEmpty())

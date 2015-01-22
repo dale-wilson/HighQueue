@@ -59,8 +59,7 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 
-
-    Producer producer(connection);
+	Producer producer(connection, false);
     Consumer consumer(connection);
     Message producerMessage(connection);
     Message consumerMessage(connection);
@@ -93,6 +92,15 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
         << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
 #endif //DISPLAY_PRONGHORN_STYLE_RESULTS
         << std::endl;
+
+	std::cout << "Single thread Statistics" << std::endl;
+	std::cout << "Producer: ";
+	producer.writeStats(std::cout);
+
+	std::cout << "Consumer: ";
+	consumer.writeStats(std::cout);
+	std::cout << std::endl;
+
 }
 #endif // ENABLEST_PERFORMANCE
 

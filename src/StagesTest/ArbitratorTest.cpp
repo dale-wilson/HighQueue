@@ -40,8 +40,7 @@ namespace
     typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
-    typedef Arbitrator<ActualMessage> ArbitratorType;
-    typedef std::shared_ptr<ArbitratorType> ArbitratorPtr;
+    typedef std::shared_ptr<Arbitrator> ArbitratorPtr;
 }
 
 #define ENABLE_ARBITRATOR_TEST 01
@@ -112,7 +111,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     stages.emplace_back(queueConsumer);
     queueConsumer->attachConnection(arbitratorConnection);
 
-    auto arbitrator = std::make_shared<ArbitratorType>(arbitratorLookAhead);
+    auto arbitrator = std::make_shared<Arbitrator>(arbitratorLookAhead);
     stages.emplace_back(arbitrator);
     arbitrator->attachMemoryPool(memoryPool);
     queueConsumer->attachDestination(arbitrator);

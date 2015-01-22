@@ -83,9 +83,9 @@ void QueueConsumer::run()
         stopping_ = !consumer_->getNext(*message_);
         if(!stopping_)
         {
-            auto type = message_->meta().type_;
+            auto type = message_->getType();
             send(*message_);
-            if(stopOnShutdownMessage_ && type == Message::Meta::MessageType::Shutdown)
+            if(stopOnShutdownMessage_ && type == Message::MessageType::Shutdown)
             {
                 stop();
             }

@@ -12,36 +12,21 @@ namespace HighQueue
     class HighQueue_Export Message
     {
     public:
-        const static size_t NO_POOL = ~size_t(0);
 
-        /// @brief Information describing the contents of the message
-        /// Note this is one way--it gets copied, not moved or swapped by a moveTo operator.
-        /// Thus the original source of data can set the type and forget it.
-        /// Developer note: The entire Message object must fit in a single cache line (64 bytes)
-        /// be cautious about adding additional Meta information.
-        struct HighQueue_Export Meta
-        {
-            enum MessageType: uint16_t
-            {
-                Unused,
-                Shutdown,
-                Heartbeat,
-                MulticastPacket, // Generic.  Could be specialized based on source
-                Gap,             // message to replace known lost messages.
-                TestMessage,
-                LocalType0, LocalType1, LocalType2, LocalType3,   // for locally defined private purposes to avoid redefining this class. 
-                LocalType4, LocalType5, LocalType6, LocalType7,   // for locally defined private purposes to avoid redefining this class. 
-                ExtraTypeBase
-            };
-            MessageType type_;
-            uint64_t timestamp_; // todo define units
-            Meta()
-                : type_(Unused)
-                , timestamp_(0)
-            {}
-            static const char * toText(MessageType type);
-        };
-    public:
+		enum MessageType : uint16_t
+		{
+			Unused,
+			Shutdown,
+			Heartbeat,
+			MulticastPacket, // Generic.  Could be specialized based on source
+			Gap,             // message to replace known lost messages.
+			TestMessage,
+			LocalType0, LocalType1, LocalType2, LocalType3,   // for locally defined private purposes to avoid redefining this class. 
+			LocalType4, LocalType5, LocalType6, LocalType7,   // for locally defined private purposes to avoid redefining this class. 
+			ExtraTypeBase
+		};		
+		typedef uint64_t Timestamp;
+		typedef uint32_t Sequence;
 
         /// @brief construct an empty Message
         /// @tparam AllocatorPtr points to an Allocator that attaches memory to the Message
@@ -53,12 +38,6 @@ namespace HighQueue
 
         /// @brief destruct, returning the memory to the pool.
         ~Message();
-
-        /// @brief Access meta info about this message
-        Meta & meta();
-
-        /// @brief Access constant meta info about this message
-        const Meta & meta()const;
 
         //////////////////////////////////////
         // Support 'raw' access to the buffer
@@ -214,11 +193,23 @@ namespace HighQueue
         template <typename T>
         void destroyBack() const;
 
+		MessageType getType()const;
+		Timestamp getTimestamp()const;
+		Sequence getSequence() const;
+
+		void setType(MessageType type);
+		void setTimestamp(Timestamp timestamp);
+		void setSequence(Sequence sequence);
+
+		void moveMetaInfoTo(Message & rhs);
+
+		static const char * toText(MessageType type);
+
         /////////////////////////////////////
         // Support for publishing the message
+	public:
 
-        /// @brief Move the data from one message to another, leaving the source message empty.
-        /// Note meta information is copied, but remains intact in the source message.
+		/// @brief Move the data from one message to another, leaving the source message empty.
         /// @param target is the message to receive the data
         /// @throws runtime_exception if the target message is not suitable.
         void moveTo(Message & target);
@@ -226,7 +217,7 @@ namespace HighQueue
         ////////////////////////////////////////
         // Initialization and memory management
         // Not for general use
-
+	public:
 
         /// @brief Associate a memory block from a HQMemoryBlockPool with this message.
         /// The block of data is general purpose.  It can be written to and reused as necessary.
@@ -255,13 +246,17 @@ namespace HighQueue
         void reset();
 
     private:
-        byte_t * container_;
+		const static size_t NO_POOL = ~size_t(0);
+		
+		byte_t * container_;
         size_t capacity_;
         size_t offset_;
         size_t used_;
         size_t read_;
-        Meta meta_;
-    };
+		MessageType type_;
+		Timestamp timestamp_; // todo define units
+		Sequence sequence_;
+	};
 
     template <typename AllocatorPtr>
     Message::Message(AllocatorPtr & allocator)
@@ -270,15 +265,13 @@ namespace HighQueue
         , offset_(0)
         , used_(0)
         , read_(0)
+		, type_(Message::Unused)
+		, timestamp_(0)
+		, sequence_(0)
     {
         allocator->allocate(*this);
     }
 
-    inline
-    Message::Meta & Message::meta()
-    {
-        return meta_;
-    }
 
     inline
     size_t Message::setUsed(size_t used)
@@ -357,7 +350,51 @@ namespace HighQueue
         return used_ == 0;
     }
 
-    inline
+	inline
+	Message::MessageType Message::getType()const
+	{
+		return type_;
+	}
+
+	inline
+	Message::Timestamp Message::getTimestamp()const
+	{
+		return timestamp_;
+	}
+
+	inline
+	Message::Sequence Message::getSequence() const
+	{
+		return sequence_;
+	}
+
+	inline
+	void Message::setType(Message::MessageType type)
+	{
+		type_ = type;
+	}
+
+	inline
+	void Message::setTimestamp(Message::Timestamp Timestamp)
+	{
+		timestamp_ = Timestamp;
+	}
+
+	inline
+	void Message::setSequence(Message::Sequence sequence)
+	{
+		sequence_ = sequence;
+	}
+
+	inline
+	void Message::moveMetaInfoTo(Message & rhs)
+	{
+		rhs.type_ = type_;
+		rhs.timestamp_ = timestamp_; // todo define units
+		rhs.sequence_ = sequence_;
+	}
+	
+	inline
     void Message::moveTo(Message & rhs)
     {
         std::swap(container_, rhs.container_);
@@ -365,10 +402,11 @@ namespace HighQueue
         std::swap(offset_, rhs.offset_);
         rhs.used_ = used_;
         rhs.read_ = read_;
-        rhs.meta_ = meta_;
+		moveMetaInfoTo(rhs);
         used_ = 0;
         read_ = 0;
     }
+
 
     template <typename T>
     T* Message::get()const
@@ -477,5 +515,5 @@ namespace HighQueue
         std::memcpy(position, data, count * sizeof(T));
         return reinterpret_cast<T *>(position);
     }
-}
+} // namespace HighQueue
 

@@ -51,7 +51,7 @@ namespace HighQueue
         template<size_t Extra>
         void TestMessageProducer<Extra>::run()
         {
-            outMessage_->meta().type_ = Message::Meta::TestMessage;
+            outMessage_->setType(Message::TestMessage);
             while(!startSignal_)
             {
                 std::this_thread::yield();
@@ -62,11 +62,12 @@ namespace HighQueue
             {
                 LogVerbose("TestMessageProducer Publish " << messageNumber << '/' << messageCount_);
                 auto testMessage = outMessage_->emplace<ActualMessage>(producerNumber_, messageNumber);
+				outMessage_->setSequence(messageNumber);
                 send(*outMessage_);
                 ++messageNumber;
             }
             LogDebug("Producer "<< producerNumber_ <<" publish stop message" );
-            outMessage_->meta().type_ = Message::Meta::Shutdown;
+            outMessage_->setType(Message::Shutdown);
             send(*outMessage_);
             LogInfo("TestMessageProducer " << producerNumber_ << " published " << messageNumber << " messages.");
         }

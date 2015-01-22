@@ -70,7 +70,7 @@ namespace
 }
 
 
-const char * Message::Meta::toText(Message::Meta::MessageType type)
+const char * Message::toText(Message::MessageType type)
 {
     auto index = size_t(type);
     if(index, sizeof(messageTypeNames) / sizeof(messageTypeNames[0]))

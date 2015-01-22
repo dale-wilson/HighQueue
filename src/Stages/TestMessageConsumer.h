@@ -47,22 +47,22 @@ namespace HighQueue
         template<size_t Extra>
         void TestMessageConsumer<Extra>::handle(Message & message)
         {
-            auto type = message.meta().type_;
+            auto type = message.getType();
             switch(type)
             {
                 default:
                 {
-                    LogError("TestMessageConsumer::Expecting test message, not " << Message::Meta::toText(type));
+                    LogError("TestMessageConsumer::Expecting test message, not " << Message::toText(type));
                     ++sequenceError_ ;  // define a new error counter for this.
                     return;
                 }
-                case Message::Meta::Shutdown:
+                case Message::Shutdown:
                 {
                     LogTrace("TestMessageConsumer: received Shutdown");
                     stop();
                     return;
                 }
-                case Message::Meta::TestMessage:
+                case Message::TestMessage:
                 {
                     auto testMessage = message.get<ActualMessage>();
                     LogDebug("TestMessageConsumer: " << testMessage->getSequence());

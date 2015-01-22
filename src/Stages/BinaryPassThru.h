@@ -36,10 +36,10 @@ namespace HighQueue
             { 
                 LogDebug("BinaryPassThru copy.");
                 outMessage_->appendBinaryCopy(message.get(), message.getUsed());
-                outMessage_->meta() = message.meta();
+				message.moveMetaInfoTo(*outMessage_);
                 send(*outMessage_);
-                auto type = message.meta().type_;
-                if(type == Message::Meta::MessageType::Shutdown)
+                auto type = message.getType();
+                if(type == Message::MessageType::Shutdown)
                 {
                     stop();
                 }

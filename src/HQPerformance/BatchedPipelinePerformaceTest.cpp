@@ -146,7 +146,8 @@ namespace
     }
 }
 
-#define ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST 1
+// this is a bogus test.  Leave it turned off unless you have a good reason to turn it on.
+#define ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST 0 
 #if ENABLE_BATCHED_PIPELINE_PERFORMANCE_TEST
 BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
 {

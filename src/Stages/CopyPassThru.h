@@ -39,10 +39,10 @@ namespace HighQueue
             { 
                 LogDebug("CopyPassThru<CargoType> copy.");
                 outMessage_->emplace<CargoType>(*message.get<CargoType>());
-                outMessage_->meta() = message.meta();
+				message.moveMetaInfoTo(*outMessage_);
                 send(*outMessage_);
-                auto type = message.meta().type_;
-                if(type == Message::Meta::MessageType::Shutdown)
+                auto type = message.getType();
+                if(type == Message::MessageType::Shutdown)
                 {
                     stop();
                 }

@@ -23,8 +23,8 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 
-    Producer producer(connection);
-    Consumer consumer(connection);
+    Producer producer1(connection, true);
+	Consumer consumer(connection);
     Message producerMessage(connection);
     Message consumerMessage(connection);
 
@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     for(uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
         producerMessage.emplace<ActualMessage>(1, nMessage);
-        producer.publish(producerMessage);
+        producer1.publish(producerMessage);
     }
-    auto publishTime = timer.microseconds();
+    auto publishSoloTime = timer.nanoseconds();
     timer.reset();
     // if we published another message now, it would hang.
     // todo: think of some way around that.
@@ -51,9 +51,21 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
             BOOST_CHECK_EQUAL(nMessage, testMessage->getSequence());
         }
     }
-    auto consumeTime = timer.microseconds();
+	auto consumeTime = timer.nanoseconds();
 
-    std::cout << entryCount << " messages.  Publish " << publishTime * 1000 / entryCount << " nsec.  Consume " << consumeTime * 1000 / entryCount << " nsec." << std::endl;
+	Producer producer2(connection, false);
+	for (uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
+	{
+		producerMessage.emplace<ActualMessage>(1, nMessage);
+		producer2.publish(producerMessage);
+	}
+	auto publishNotSolo = timer.nanoseconds();
+
+    std::cout << entryCount << " messages. " << std::endl
+		<< "   Publish (solo)     " << publishSoloTime << " = " << publishSoloTime / entryCount << " nsec./msg " << std::endl
+		<< "   Publish (not solo) " << publishNotSolo << " = " << publishNotSolo / entryCount << " nsec./msg " << std::endl
+		<< "   Consume            " << consumeTime << " = " << consumeTime / entryCount << " nsec./msg" << std::endl;
+	std::cout << std::endl;
 
 }
 #endif // ENABLECONSUME_SEPARATELY
@@ -78,7 +90,7 @@ BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 
-    Producer producer(connection);
+    Producer producer1(connection);
     Message producerMessage(connection);
 
     Stopwatch timer;
@@ -86,7 +98,7 @@ BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
     for(uint32_t nMessage = 0; nMessage < messageCount; ++nMessage)
     {
         producerMessage.emplace<ActualMessage>(1, nMessage);
-        producer.publish(producerMessage);
+        producer1.publish(producerMessage);
     }
     auto lapse = timer.nanoseconds();
 
@@ -111,7 +123,7 @@ BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
             << std::endl;
     }
     std::cout << "No-consumer statistics:" << std::endl;
-    producer.writeStats(std::cout);
+    producer1.writeStats(std::cout);
     std::cout << std::endl;
 }
 #endif // ENABLE_NO_CONSUMER

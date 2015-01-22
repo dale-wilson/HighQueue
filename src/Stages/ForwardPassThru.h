@@ -36,8 +36,8 @@ namespace HighQueue
             { 
                 LogTrace("ForwardPassThru copy.");
                 send(message);
-                auto type = message.meta().type_;
-                if(type == Message::Meta::MessageType::Shutdown)
+                auto type = message.getType();
+                if(type == Message::MessageType::Shutdown)
                 {
                     LogTrace("ForwardPassThru stop: shutdown.");
                     stop();
