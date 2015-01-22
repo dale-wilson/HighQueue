@@ -20,8 +20,12 @@ namespace HighQueue
 
             uint32_t errors()const
             {
-                return sequenceError_;
+                return sequenceError_ + unexpectedMessageError_;
             }
+			uint32_t messagesHandled()const
+			{
+				return messagesHandled_;
+			}
 
             ////////////////////////////
             // Implement Stage
@@ -30,17 +34,19 @@ namespace HighQueue
         private:
             uint32_t messageCount_;
 
-            uint32_t messageReceived_;
+            uint32_t messagesHandled_;
             uint32_t nextSequence_;
             uint32_t sequenceError_;
+			uint32_t unexpectedMessageError_;
         };
 
         template<size_t Extra>
         TestMessageConsumer<Extra>::TestMessageConsumer(uint32_t messageCount_)
             : messageCount_(messageCount_)
-            , messageReceived_(0)
+            , messagesHandled_(0)
             , nextSequence_(0)
             , sequenceError_(0)
+			, unexpectedMessageError_(0)
         {
         }
 
@@ -53,13 +59,16 @@ namespace HighQueue
                 default:
                 {
                     LogError("TestMessageConsumer::Expecting test message, not " << Message::toText(type));
-                    ++sequenceError_ ;  // define a new error counter for this.
-                    return;
+					++unexpectedMessageError_;  
+					return;
                 }
                 case Message::Shutdown:
                 {
-                    LogTrace("TestMessageConsumer: received Shutdown");
-                    stop();
+					if (messageCount_ == 0)
+					{
+						LogTrace("TestMessageConsumer: received Shutdown");
+						stop();
+					}
                     return;
                 }
                 case Message::TestMessage:
@@ -73,8 +82,8 @@ namespace HighQueue
                     }
                     ++nextSequence_;
                     message.destroy<ActualMessage>();
-                    ++messageReceived_;
-                    if(messageCount_ != 0 && messageReceived_ >= messageCount_)
+                    ++messagesHandled_;
+                    if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
                     {
                         stop();
                     }

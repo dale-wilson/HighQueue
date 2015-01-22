@@ -9,8 +9,15 @@ using namespace HighQueue;
 using namespace Stages;
 
 QueueProducer::QueueProducer()
+	: solo_(false)
 {
 }
+
+void QueueProducer::configureSolo(bool solo)
+{
+	solo_ = solo;
+}
+
 
 void QueueProducer::handle(Message & message)
 {
@@ -20,13 +27,12 @@ void QueueProducer::handle(Message & message)
     {
         stop();
     }
-
 }
 
 void QueueProducer::attachConnection(const ConnectionPtr & connection)
 {
     connection_ = connection;
-    producer_.reset(new Producer(connection_));
+    producer_.reset(new Producer(connection_, solo_));
 }
 
 void QueueProducer::validate()

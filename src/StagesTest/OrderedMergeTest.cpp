@@ -5,7 +5,7 @@
 #define BOOST_TEST_NO_MAIN StagesTest
 #include <boost/test/unit_test.hpp>
 
-#include <Stages/Arbitrator.h>
+#include <Stages/OrderedMerge.h>
 #include <Stages/HeartbeatProducer.h>
 #include <Stages/TestMessageProducer.h>
 #include <Stages/TestMessageConsumer.h>
@@ -40,28 +40,31 @@ namespace
     typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
-    typedef std::shared_ptr<Arbitrator> ArbitratorPtr;
 }
 
-#define ENABLE_ARBITRATOR_TEST 01
-#if ENABLE_ARBITRATOR_TEST
-BOOST_AUTO_TEST_CASE(testArbitrator)
+#define ENABLE_ORDEREDMERGE_TEST 01
+#if ENABLE_ORDEREDMERGE_TEST
+BOOST_AUTO_TEST_CASE(testOrderedMerge)
 {
-    std::cout << "Arbitration" << std::endl << std::flush;
+    std::cout << "OrderedMerge" << std::endl << std::flush;
     size_t entryCount = 10000;
     size_t messageSize = sizeof(ActualMessage);
+#if defined (_DEBUG)
+	uint32_t messageCount = 10;
+#else // _DEBUG
     uint32_t messageCount = 10000000;
-    const size_t arbitratorLookAhead = 1000; // real world numbers would be in the thousands.
+#endif // _DEBUG
+    const size_t lookAhead = 1000; // real world numbers would be in the thousands.
 
     const size_t numberOfHeartbeats = 1;  // Don't change this
     const size_t numberOfConsumers = 1;   // Don't change this
     const uint32_t numberOfProducers = 2;   // Don't change this
-    const size_t numberOfArbitrators = 1; // Don't change this.
+    const size_t numberOforderedMerges = 1; // Don't change this.
 
-    const size_t queueCount = numberOfArbitrators + numberOfConsumers; // need a pool for each object that can receive messages
+    const size_t queueCount = numberOforderedMerges + numberOfConsumers; // need a pool for each object that can receive messages
     // how many buffers do we need?
     size_t extraMessages = 0; // in case we need it someday (YAGNI)
-    const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + numberOfHeartbeats + numberOfArbitrators * 2 + numberOfArbitrators * arbitratorLookAhead + numberOfProducers + extraMessages;
+    const size_t messagesNeeded = entryCount * queueCount + numberOfConsumers + numberOfHeartbeats + numberOforderedMerges * 2 + numberOforderedMerges * lookAhead + numberOfProducers + extraMessages;
 
     auto asio = std::make_shared<AsioService>();
     std::chrono::milliseconds heartbeatInterval(10000);
@@ -76,8 +79,8 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
     CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize);
     MemoryPoolPtr memoryPool(new MemoryPool(messageSize, messagesNeeded));
 
-    auto arbitratorConnection = std::make_shared<Connection>();
-    arbitratorConnection->createLocal("Arbitrator", parameters, memoryPool);
+    auto mergeConnection = std::make_shared<Connection>();
+    mergeConnection->createLocal("OrderedMerge", parameters, memoryPool);
 
     volatile bool producerGo = false;
 
@@ -93,7 +96,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
         auto publisher = std::make_shared<QueueProducer>();
         stages.emplace_back(publisher);
-        publisher->attachConnection(arbitratorConnection);
+        publisher->attachConnection(mergeConnection);
         producer->attachDestination(publisher);
 
     }
@@ -104,20 +107,20 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
     auto heartbeatPublisher = std::make_shared<QueueProducer>();
     stages.emplace_back(heartbeatPublisher);
-    heartbeatPublisher->attachConnection(arbitratorConnection);
+    heartbeatPublisher->attachConnection(mergeConnection);
     heartbeat->attachDestination(heartbeatPublisher);
 
     auto queueConsumer = std::make_shared<QueueConsumer>();
     stages.emplace_back(queueConsumer);
-    queueConsumer->attachConnection(arbitratorConnection);
+    queueConsumer->attachConnection(mergeConnection);
 
-    auto arbitrator = std::make_shared<Arbitrator>(arbitratorLookAhead);
-    stages.emplace_back(arbitrator);
-    arbitrator->attachMemoryPool(memoryPool);
-    queueConsumer->attachDestination(arbitrator);
+    auto orderedMerge = std::make_shared<OrderedMerge>(lookAhead);
+    stages.emplace_back(orderedMerge);
+    orderedMerge->attachMemoryPool(memoryPool);
+    queueConsumer->attachDestination(orderedMerge);
 
     auto consumer = std::make_shared<ConsumerType>(messageCount);
-    arbitrator->attachDestination(consumer);
+    orderedMerge->attachDestination(consumer);
 
     // All wired up, ready to go.
     ReverseRange<StagesVec> rstages(stages);
@@ -151,7 +154,7 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
 
     auto messageBits = messageBytes * 8;
 
-    std::cout << "Arbitration: " << std::fixed;
+    std::cout << "OrderedMerge: " << std::fixed;
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message ";
@@ -170,4 +173,4 @@ BOOST_AUTO_TEST_CASE(testArbitrator)
             << std::endl;
     }
 }
-#endif // ENABLE_ARBITRATOR_TEST
+#endif // ENABLE_ORDEREDMERGE_TEST

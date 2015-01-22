@@ -33,7 +33,7 @@ namespace
     typedef TestMessageConsumer<testMessageExtras> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
-#if 1
+#if 0
     typedef CopyPassThru<ActualMessage> CopierType;
 #elif 0
     typedef BinaryPassThru CopierType;
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(testDirectPipeline)
 #if defined(_DEBUG)
     uint32_t messageCount = 10;
 #else // _DEBUG
-    uint32_t messageCount = 100000000 * 10;
+    uint32_t messageCount = 100000000;
 #endif // _DEBUG
 
     const size_t numberOfConsumers = 1;   // Don't change this

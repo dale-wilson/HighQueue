@@ -232,4 +232,4 @@ BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
     consumer.writeStats(std::cout);
     std::cout << std::endl;
 }
-#endif // ENABLEBATCHED_ARBITRATOR_PERFORMANCE_TEST
+#endif // ENABLEBATCHED_ORDEREDMERGE_PERFORMANCE_TEST

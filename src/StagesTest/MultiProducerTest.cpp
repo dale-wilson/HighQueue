@@ -14,6 +14,7 @@
 #include <HighQueue/Producer.h>
 
 #include <Common/Stopwatch.h>
+#include <Common/ReverseRange.h>
 
 using namespace HighQueue;
 using namespace Stages;
@@ -76,7 +77,8 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         uint32_t perConsumer = perProducer * producerCount;
 
         volatile bool startSignal = false;
-        std::vector<StagePtr> stages;
+		typedef std::vector<StagePtr> Stages;
+		Stages stages;
         for(uint32_t producerNumber = 0; producerNumber < producerCount; ++producerNumber)
         {
             auto producer = std::make_shared<ProducerType>(startSignal, perProducer, producerNumber);
@@ -85,6 +87,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
 
             auto queueProducer = std::make_shared<QueueProducer>();
             stages.emplace_back(queueProducer);
+			queueProducer->configureSolo(producerCount == 1);
             producer->attachDestination(queueProducer);
             queueProducer->attachConnection(connection);
         }
@@ -100,12 +103,14 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
             stage->validate();
         }
 
-        for(auto stage : stages)
+		for (auto stage : ReverseRange<Stages>(stages))
         {
             stage->start();
         }
 
-        Stopwatch timer;
+		////////////////////////
+		// Begin the actual test.
+		Stopwatch timer;
         startSignal = true;
 
         while(!consumer->isStopping())
@@ -114,6 +119,9 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         }
 
         auto lapse = timer.nanoseconds();
+		// End the test
+		///////////////
+
         for(auto stage : stages)
         {
             stage->stop();
@@ -137,7 +145,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         {
             std::cout
                 << lapse / perConsumer << " nsec./message "
-                << std::setprecision(3) << double(perConsumer * 1000) / double(lapse) << " MMsg/second "
+                << std::setprecision(3) << double(perConsumer) * 1000.0L / double(lapse) << " MMsg/second "
 #if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
                 << std::setprecision(3) << double(perConsumer * messageBytes) / double(lapse) << " GByte/second "
                 << std::setprecision(3) << double(perConsumer * messageBits) / double(lapse) << " GBit/second."

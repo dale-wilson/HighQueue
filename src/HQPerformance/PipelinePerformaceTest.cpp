@@ -152,8 +152,8 @@ namespace
     }
 }
 
-#define ENABLE_ARBITRATORPERFORMANCE 1
-#if ENABLE_ARBITRATORPERFORMANCE
+#define ENABLE_PIPELINEPERFORMANCE 1
+#if ENABLE_PIPELINEPERFORMANCE
 BOOST_AUTO_TEST_CASE(testPipelinePerformance)
 {
     static const size_t numberOfConsumers = 1;   // Don't change this
@@ -272,4 +272,4 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     consumer.writeStats(std::cout);
     std::cout << std::endl;
 }
-#endif // ENABLEARBITRATORPERFORMANCE
+#endif // ENABLEORDEREDMERGEPERFORMANCE

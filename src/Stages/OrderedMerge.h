@@ -3,6 +3,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 
+#include "OrderedMergeFwd.h"
+
 #include <StageCommon/StageToMessage.h>
 
 namespace HighQueue
@@ -30,10 +32,10 @@ namespace HighQueue
             uint32_t endGap_;
         };
 
-        class Arbitrator : public StageToMessage
+        class OrderedMerge : public StageToMessage
         {
         public:
-            Arbitrator(size_t lookAhead, size_t expectedShutdowns = 2);
+            OrderedMerge(size_t lookAhead, size_t expectedShutdowns = 2);
 
 			virtual void attachConnection(const ConnectionPtr & connection);
             virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
@@ -60,7 +62,7 @@ namespace HighQueue
         };
 
         inline
-        Arbitrator::Arbitrator(size_t lookAhead, size_t expectedShutdowns)
+        OrderedMerge::OrderedMerge(size_t lookAhead, size_t expectedShutdowns)
             : lookAhead_(lookAhead)
             , expectedShutdowns_(expectedShutdowns)
             , actualShutdowns_(0)
@@ -70,7 +72,7 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::attachConnection(const ConnectionPtr & connection)
+        void OrderedMerge::attachConnection(const ConnectionPtr & connection)
         {      
             while(pendingMessages_.size() < lookAhead_)
             {
@@ -80,7 +82,7 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::attachMemoryPool(const MemoryPoolPtr & memoryPool)
+        void OrderedMerge::attachMemoryPool(const MemoryPoolPtr & memoryPool)
         {
             while(pendingMessages_.size() < lookAhead_)
             {
@@ -90,17 +92,17 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::validate()
+        void OrderedMerge::validate()
         {
             if(pendingMessages_.size() < lookAhead_)
             {
-                throw std::runtime_error("Arbitrator working messages not initialized. Missing call to attachConnection or attachMemoryPool?");
+                throw std::runtime_error("OrderedMerge working messages not initialized. Missing call to attachConnection or attachMemoryPool?");
             }
             StageToMessage::validate();
         }
 
         inline
-        void Arbitrator::handle(Message & message)
+        void OrderedMerge::handle(Message & message)
         {
             auto type = message.getType();
             if(type == Message::MessageType::Heartbeat)
@@ -118,7 +120,7 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::handleHeartbeat(Message & message)
+        void OrderedMerge::handleHeartbeat(Message & message)
         {
             // todo: we might want to skip some heartbeats depending on frequency
             if(expectedSequenceNumber_ == lastHeartbeatSequenceNumber_)
@@ -130,10 +132,10 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::handleShutdown(Message & message)
+        void OrderedMerge::handleShutdown(Message & message)
         {
             ++actualShutdowns_;
-            LogTrace("Arbitration received shutdown " << actualShutdowns_ << " of " << expectedShutdowns_);
+            LogTrace("OrderedMerge received shutdown " << actualShutdowns_ << " of " << expectedShutdowns_);
             if(actualShutdowns_ == expectedShutdowns_)
             {
                 while(findAndPublishGap())
@@ -147,24 +149,24 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::handleDataMessage(Message & message)
+        void OrderedMerge::handleDataMessage(Message & message)
         {
 			auto sequence = message.getSequence();
             if(expectedSequenceNumber_ == 0)
             {
                 expectedSequenceNumber_ = sequence;
             }
-            LogVerbose("Arbitrator sequence :" << sequence << " expected " << expectedSequenceNumber_);
+            LogVerbose("OrderedMerge sequence :" << sequence << " expected " << expectedSequenceNumber_);
             if(sequence == expectedSequenceNumber_)
             {
-                LogDebug("Arbitrator Publish " << sequence);
+                LogDebug("OrderedMerge Publish " << sequence);
                 send(message);
                 ++expectedSequenceNumber_;
                 publishPendingMessages();
             }
             else if(sequence < expectedSequenceNumber_)
             {
-                LogDebug("Arbitrator Previous Duplicate " << sequence);
+                LogDebug("OrderedMerge Previous Duplicate " << sequence);
                 // ignore this one.  We've already seen it.
             }
             else if(sequence - expectedSequenceNumber_ < lookAhead_)
@@ -172,12 +174,12 @@ namespace HighQueue
                 auto index = sequence % lookAhead_;
                 if(pendingMessages_[index].isEmpty())
                 {
-                    LogDebug("Arbitrator Stash" << sequence);
+                    LogDebug("OrderedMerge Stash" << sequence);
                     message.moveTo(pendingMessages_[index]);
                 }
                 else
                 {
-                    LogDebug("Arbitrator Duplicates Stash " << sequence);
+                    LogDebug("OrderedMerge Duplicates Stash " << sequence);
                     // ignore this one we are already holding a copy.
                 }
             }
@@ -195,14 +197,14 @@ namespace HighQueue
                         send(message);
                     }
                 }
-                LogDebug("Arbitrator Stash future " << sequence);
+                LogDebug("OrderedMerge Stash future " << sequence);
                 auto index = sequence % lookAhead_;
                 message.moveTo(pendingMessages_[index]);
             }
         }
 
         inline
-        bool Arbitrator::findAndPublishGap()
+        bool OrderedMerge::findAndPublishGap()
         {
             auto gapStart = expectedSequenceNumber_;
             auto gapEnd = gapStart + 1; // the first message that's NOT in the gap
@@ -221,7 +223,7 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
+        void OrderedMerge::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
         {
             outMessage_->setType(Message::Gap);
             outMessage_->emplace<GapMessage>(gapStart, gapEnd - 1);
@@ -229,12 +231,12 @@ namespace HighQueue
         }
 
         inline
-        void Arbitrator::publishPendingMessages()
+        void OrderedMerge::publishPendingMessages()
         {
             auto index = expectedSequenceNumber_ % lookAhead_;
             while(!pendingMessages_[index].isEmpty())
             {
-                LogDebug("Arbitrator Publish from stash " << expectedSequenceNumber_ );
+                LogDebug("OrderedMerge Publish from stash " << expectedSequenceNumber_ );
                 send(pendingMessages_[index]);
                 ++expectedSequenceNumber_;
                 index = expectedSequenceNumber_ % lookAhead_;
