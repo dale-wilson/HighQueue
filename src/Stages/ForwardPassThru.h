@@ -24,24 +24,20 @@ namespace HighQueue
             uint32_t messagesHandled_;
         };
 
+		inline
         ForwardPassThru::ForwardPassThru(uint32_t messageCount)
             : messageCount_(messageCount)
             , messagesHandled_(0)
         {
         }
 
+		inline
         void ForwardPassThru::handle(Message & message)
         {
             if(!stopping_)
             { 
                 LogTrace("ForwardPassThru copy.");
-                send(message);
-                auto type = message.getType();
-                if(type == Message::MessageType::Shutdown)
-                {
-                    LogTrace("ForwardPassThru stop: shutdown.");
-                    stop();
-                }
+				send(message);
                 ++messagesHandled_;
                 if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
                 {

@@ -9,6 +9,7 @@
 #include <Stages/TestMessageConsumer.h>
 #include <Stages/QueueConsumer.h>
 #include <Stages/QueueProducer.h>
+#include <Stages/Tee.h>
 
 #include <HighQueue/Consumer.h>
 #include <HighQueue/Producer.h>
@@ -96,8 +97,18 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         stages.emplace_back(queueConsumer);
         queueConsumer->attachConnection(connection);
         auto consumer = std::make_shared<ConsumerType>(perConsumer);
-        queueConsumer->attachDestination(consumer);
+		stages.emplace_back(consumer);
 
+#define USE_T 1
+#ifdef USE_T
+		auto tee = std::make_shared<Tee>();
+		stages.emplace_back(tee);
+		tee->attachOutputStream(& std::cerr);
+		queueConsumer->attachDestination(tee);
+		tee->attachDestination(consumer);
+#else // USE_T
+        queueConsumer->attachDestination(consumer);
+#endif // USE_T
         for(auto stage : stages)
         { 
             stage->validate();
