@@ -59,7 +59,7 @@ That being said, tests on an Intel(R) Core(TM) i7-4790 CPU @3.60GHz [8 cores] I 
 
 ####HighQueue performance in a simple configuration.
 
-With one producer and one consumer HighQueue can pass a message between threads at a sustained rate of 40 million messages per second (that's 20 nanoseconds per message.)
+With one producer and one consumer HighQueue can pass a message between threads at a sustained rate of 40 million messages per second (that's about 25 nanoseconds per message.)
 
 #####Adding producers.
 
