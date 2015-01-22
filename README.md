@@ -63,9 +63,10 @@ With one producer and one consumer HighQueue can pass a message between threads 
 
 #####Adding producers.
 
-As the load grows to 6 producers feeding a single consumer the rate drops to around 16 million messages per second (60 nanoseconds per message) because the 
-producers are contending for the right to send the next message.  Beyond that the threads start competing with the operating system (Win7) and with each other 
-for the available cores and throughput drops more steeply.  With 8 producers + 1 consumer + Windows competing for 8 cores, a message is delivered to the consumer thread every 145 nanoseconds.
+With more than one Producer the producers must contend for the right to publish the next message.  This reduces the throughput to around 14 million messages per second (70 nanoseconds per message) 
+
+This rate can be sustained up to six producers and one consumer. Beyond that the threads start competing with the operating system (Win7) and with each other 
+for the available cores and throughput begins to drop.  With 8 producers + 1 consumer + Windows competing for 8 cores, a message is delivered to the consumer thread every 145 nanoseconds.
 
 Note it would be highly unusual to have more than a couple of producers feeding messages to a single producer, but if the need arises HighQueue can handle it with style.
 
