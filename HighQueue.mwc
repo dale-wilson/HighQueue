@@ -2,6 +2,7 @@ workspace(*) {
   cmdline += -feature_file HighQueue.features
   specific(prop:microsoft) {
     cmdline += -expand_vars
+    cmdline += -value_template "platforms=x64"
   }
   specific(make) {
     cmdline += -value_template "configurations=Release Debug"
