@@ -5,8 +5,10 @@
 
 #include "StageFwd.h"
 #include <StageCommon/Stage_Export.h>
-#include "HighQueue/Message.h"
 #include <StageCommon/AsioServiceFwd.h>
+#include <StageCommon/Configuration.h>
+
+#include "HighQueue/Message.h"
 #include "HighQueue/ConnectionFwd.h"
 #include <HighQueue/MemoryPoolFwd.h>
 #include <Common/Log.h>
@@ -15,7 +17,6 @@ namespace HighQueue
 {
     namespace Stages
     {
-        class ConfigurationPtr; // todo: invent a configuration class.
         /// @brief Base class for Stages
         /// 
         /// Stage life cycle:
@@ -47,7 +48,7 @@ namespace HighQueue
 
             /// @brief Configure 
             /// Lifecycle 2: Configure
-            virtual bool configure(const ConfigurationPtr & configuration);
+            virtual bool configure(const ConfigurationNode & configuration);
 
             /// @brief Attach primary destination
             /// Lifecycle 3: Attach
