@@ -73,11 +73,6 @@ namespace HighQueue
 			size_t statStashed_;
 			size_t statDuplicatesStash_;
 			size_t statFuture_;
-
-				
-
-
-
         };
 
         inline
@@ -99,6 +94,7 @@ namespace HighQueue
 			, statDuplicatesStash_(0)
 			, statFuture_(0)
         {
+            setName("OrderedMerge"); // default name
         }
 
         inline

@@ -29,6 +29,7 @@ namespace HighQueue
             : messageCount_(messageCount)
             , messagesHandled_(0)
         {
+            setName("ForwardPassThru"); // default name
         }
 
 		inline

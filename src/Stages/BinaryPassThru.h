@@ -28,6 +28,7 @@ namespace HighQueue
             : messageCount_(messageCount)
             , messagesHandled_(0)
         {
+            setName("BinaryPassThru"); // default name
         }
         
         void BinaryPassThru::handle(Message & message)

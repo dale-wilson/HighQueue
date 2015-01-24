@@ -40,6 +40,7 @@ namespace HighQueue
             : interval_(interval.count())
             , cancel_(false)
         {
+            setName("HeartbeatProducer"); // default name
         }
 
         inline

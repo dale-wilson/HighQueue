@@ -95,6 +95,7 @@ namespace HighQueue
         MulticastReceiver::MulticastReceiver()
             : joined_(false)
         {
+            setName("MulicastReceiver"); // default name
         }
 
         inline

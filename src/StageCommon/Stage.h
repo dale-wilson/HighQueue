@@ -50,6 +50,10 @@ namespace HighQueue
             /// Lifecycle 2: Configure
             virtual bool configure(const ConfigurationNode & configuration);
 
+            /// @brief Configure
+            /// Lifecycle 2a: Give it a name
+            void setName(const std::string & name);
+
             /// @brief Attach primary destination
             /// Lifecycle 3: Attach
             virtual void attachDestination(const StagePtr & destination);
@@ -111,6 +115,7 @@ namespace HighQueue
         protected:
             bool paused_;
             bool stopping_;
+            std::string name_;
             StagePtr primaryDestination_;
             typedef std::pair<std::string,  StagePtr> NamedDestination;
             std::vector<NamedDestination> destinations_;

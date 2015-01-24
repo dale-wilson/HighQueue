@@ -41,6 +41,7 @@ namespace HighQueue
             : lookAhead_(lookAhead)
 			, position_(0)
         {
+            setName("Shuffler"); // default name
         }
 
         inline

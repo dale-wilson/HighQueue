@@ -40,6 +40,7 @@ namespace HighQueue
             , messageCount_(messageCount)
             , producerNumber_(producerNumber)
         {
+            setName("TestMessageProducer"); // default name
         }
 
         template<size_t Extra>

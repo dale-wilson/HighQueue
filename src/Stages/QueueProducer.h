@@ -30,6 +30,5 @@ namespace HighQueue
             ConnectionPtr connection_;
             std::unique_ptr<Producer> producer_;
         };
-
     }
 }

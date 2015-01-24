@@ -33,6 +33,11 @@ bool Stage::configure(const ConfigurationNode & configuration)
     return true;
 }
 
+void Stage::setName(const std::string & name)
+{
+    name_ = name;
+}
+
 void Stage::attachDestination(const StagePtr & destination)
 {
     primaryDestination_ = destination;

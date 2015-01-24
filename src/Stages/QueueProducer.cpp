@@ -11,6 +11,7 @@ using namespace Stages;
 QueueProducer::QueueProducer()
 	: solo_(false)
 {
+    setName("QueueProducer"); // default name
 }
 
 void QueueProducer::configureSolo(bool solo)
