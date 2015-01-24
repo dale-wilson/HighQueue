@@ -20,7 +20,7 @@ namespace HighQueue
         /// @brief Base class for Stages
         /// 
         /// Stage life cycle:
-        /// 1: Construct using Null constructor.
+        /// 1: Construct 
         /// 2: Configure    // capture parameters
         /// 3: Attach*      // attach destination(s) and resources as needed
         /// 4: Validate     // validate configuration and attachment
@@ -38,7 +38,7 @@ namespace HighQueue
         class Stages_Export Stage: public std::enable_shared_from_this<Stage>
         {
         public:
-            /// @brief Construct preferably with null constructor
+            /// @brief Construct 
             /// Lifecycle 1: Constuct
             Stage();
 

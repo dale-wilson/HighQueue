@@ -12,6 +12,24 @@ namespace HighQueue
     namespace Stages
     {
 
+        class Stages_Export BoostPropertyTreeChildren: public ConfigurationChildren
+        {
+        public:
+            explicit BoostPropertyTreeChildren(boost::property_tree::ptree & ptree);
+            BoostPropertyTreeChildren(const BoostPropertyTreeChildren & rhs);
+            void set(boost::property_tree::ptree::iterator iterator);
+
+            virtual ~BoostPropertyTreeChildren();
+            virtual bool first();
+            virtual bool next();
+            virtual ConfigurationNodePtr getChild();
+
+        private:
+            boost::property_tree::ptree & ptree_;
+            boost::property_tree::ptree::iterator position_;
+        };
+
+
         class Stages_Export BoostPropertyTreeNode : public ConfigurationNode
         {
         public:
@@ -22,44 +40,34 @@ namespace HighQueue
             /// @brief destruct
 			virtual ~BoostPropertyTreeNode();
 
-			void load(const std::istream & propertyFile);
-			void load(const std::string & propertyFileName);
+			void loadJson(std::istream & propertyFile);
+			void loadJson(const std::string & propertyFileName);
 
-
-            /// @brief Get the name of this node.
+            virtual ConfigurationChildrenPtr getChildren();
 			virtual std::string getName();
-
-            /// @brief Typesave get of the value associated with this node as a string
-            /// @param[out] value receives the value.
-            /// @param defaultValue is assigned to value if this node does not have a string value.
 			virtual bool getValue(std::string & value, const std::string & defaultValue = "") const;
-
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
 			virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const;
-
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
 			virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const;
-
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getValue(double & value, double defaultValue.0L) const;
-
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getBool(bool & value, bool defaultValue) const;
-
-			virtual ConfigurationIterator begin() const;
-			virtual ConfigurationIterator end() const;
-
+			virtual bool getValue(double & value, double defaultValue = 0L) const;
+            virtual bool getValue(bool & value, bool defaultValue) const;
+        private:
+            template <typename Type, typename DefaultType>
+            bool getTypedValue(Type & value, DefaultType defaultValue) const;
 		private:
 			boost::property_tree::ptree ptree_;
         };
 
+        template <typename Type, typename DefaultType>
+        bool BoostPropertyTreeNode::getTypedValue(Type & value, DefaultType defaultValue) const
+        {
+            auto v = ptree_.get_value_optional<Type>();
+            if(v)
+            {
+                value = v.value();
+                return true;
+            }
+            value = defaultValue;
+            return false;
+        }
    }
 }

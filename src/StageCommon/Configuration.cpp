@@ -9,7 +9,7 @@
 using namespace HighQueue;
 using namespace Stages;
 
-ConfigurationIterator::~ConfigurationIterator()
+ConfigurationChildren::~ConfigurationChildren()
 {
 }
 

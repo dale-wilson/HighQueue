@@ -9,15 +9,36 @@ namespace HighQueue
 {
     namespace Stages
     {
+		class ConfigurationNode;
+        typedef std::shared_ptr<ConfigurationNode> ConfigurationNodePtr;
+        class ConfigurationChildren;
+        typedef std::shared_ptr<ConfigurationChildren> ConfigurationChildrenPtr;
 
-//		class ConfigurationNode;
-		class ConfigurationIterator;
+        /// @brief A collection of properties(child nodes)
+        ///
+        /// Note I tried to make this an iterator but various technical difficulties arose
+        /// due to mixing templates and abstract methods.
+        class Stages_Export ConfigurationChildren
+        {
+        public:
+            virtual ~ConfigurationChildren();
+            virtual bool first() = 0;
+            virtual bool next() = 0;
+            virtual ConfigurationNodePtr getChild() = 0;
+        };
 
+        /// @brief A Configuration entry
+        ///
+        /// Each entry has a name, a value, and a set of children.
+        /// Any of these may be empty/missing.
+        ///
         class Stages_Export ConfigurationNode
         {
         public:
             /// @brief destruct
 			virtual ~ConfigurationNode();
+
+            virtual ConfigurationChildrenPtr getChildren() = 0;
 
             /// @brief Get the name of this node.
 			virtual std::string getName() = 0;
@@ -46,18 +67,6 @@ namespace HighQueue
 			/// @param[out] value receives the value.
 			/// @param defaultValue is assigned to value if this node does not have a string value.
 			virtual bool getBool(bool & value, bool defaultValue) const;
-
-			virtual ConfigurationIterator begin() const = 0;
-			virtual ConfigurationIterator end() const = 0;
         };
-
-		class Stages_Export ConfigurationIterator
-		{
-		public:
-			virtual ~ConfigurationIterator();
-			virtual ConfigurationNode & operator->() = 0;
-			virtual ConfigurationIterator & operator++() = 0;
-		};
-
    }
 }

@@ -8,58 +8,45 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
-
 using namespace HighQueue;
 using namespace Stages;
 
-namespace {
-	class BoostPropertyTreeIterator
-	{
-	public:
-		BoostPropertyTreeIterator(boost::property_tree::ptree::iterator iterator);
-		BoostPropertyTreeIterator(const BoostPropertyTreeIterator & rhs);
-        
-        virtual ~BoostPropertyTreeIterator();
-		virtual ConfigurationNode & operator->();
-		virtual ConfigurationIterator & operator++();
+BoostPropertyTreeChildren::BoostPropertyTreeChildren(boost::property_tree::ptree & ptree)
+    : ptree_(ptree)
+    , position_(ptree_.begin())
+{
+}
 
-		bool operator==(const & BoostPropertyTreeIterator rhs)const;
+BoostPropertyTreeChildren::BoostPropertyTreeChildren(const BoostPropertyTreeChildren & rhs)
+    : ptree_(rhs.ptree_)
+    , position_(ptree_.begin())
+{
+}
 
-	private:
-		boost::property_tree::ptree::iterator iterator_;
+BoostPropertyTreeChildren::~BoostPropertyTreeChildren()
+{
+}
 
-	};
+bool BoostPropertyTreeChildren::first()
+{
+    position_ = ptree_.begin();
+    return position_ != ptree_.end();
+}
 
-
-	BoostPropertyTreeIterator::BoostPropertyTreeIterator(boost::property_tree::ptree::iterator & iterator)
-		: iterator_(iterator)
-	{
-	}
-
-	BoostPropertyTreeIterator::BoostPropertyTreeIterator(const BoostPropertyTreeIterator & rhs)
-		: iterator_(rhs.iterator_)
-	{
-	}
-
-	bool operator==(const & BoostPropertyTreeIterator rhs)const
-	{
-		return iterator_ == rhs.iterator_;
-	}
-
-	BoostPropertyTreeIterator::~BoostPropertyTreeIterator()
+bool BoostPropertyTreeChildren::next()
+{
+    if(position_ != ptree_.end())
     {
+        ++position_;
     }
+    return position_ != ptree_.end();
+}
 
-    ConfigurationNode & BoostPropertyTreeIterator::operator->()
-    {
-		return BoostPropertyTreeNode(*iterator_);
-    }
-
-    ConfigurationIterator & BoostPropertyTreeIterator::operator++()
-    {
-		++iterator_;
-		return *this;
-    }
+ConfigurationNodePtr BoostPropertyTreeChildren::getChild()
+{
+    boost::property_tree::ptree & child = position_->second;
+    auto result = std::make_shared<BoostPropertyTreeNode>(child);
+    return result;
 }
 
 ///////////////
@@ -67,7 +54,6 @@ namespace {
 
 BoostPropertyTreeNode::BoostPropertyTreeNode()
 {
-
 }
 
 BoostPropertyTreeNode::BoostPropertyTreeNode(boost::property_tree::ptree ptree)
@@ -78,124 +64,59 @@ BoostPropertyTreeNode::BoostPropertyTreeNode(boost::property_tree::ptree ptree)
 
 BoostPropertyTreeNode::~BoostPropertyTreeNode()
 {
-
 }
 
 
-void BoostPropertyTreeNode::load(const std::istream & propertyFile)
+void BoostPropertyTreeNode::loadJson(std::istream & propertyFile)
 {
 	boost::property_tree::json_parser::read_json(propertyFile, ptree_);
 }
 
-void BoostPropertyTreeNode::load(const std::string & propertyFileName)
+void BoostPropertyTreeNode::loadJson(const std::string & propertyFileName)
 {
 	boost::property_tree::json_parser::read_json(propertyFileName, ptree_);
 }
 
-/// @brief Get the name of this node.
+
+ConfigurationChildrenPtr BoostPropertyTreeNode::getChildren()
+{
+    auto result = std::make_shared<BoostPropertyTreeChildren>(ptree_);
+    return result;
+}
+
+
 std::string BoostPropertyTreeNode::getName()
 {
 	return ptree_.data();
 }
 
-ConfigurationIterator BoostPropertyTreeNode::begin() const
+bool BoostPropertyTreeNode::getValue(std::string & value, const std::string & defaultValue)const
 {
-	return BoostPropertyTreeIterator(ptree_.begin());
+    auto v = ptree_.get_value_optional<std::string>();
+    if(v)
+    {
+        value = v.value();
+        return true;
+    }
+    return false;
 }
-
-ConfigurationIterator BoostPropertyTreeNode::end() const
-{
-	return BoostPropertyTreeIterator(ptree_.end());
-}
-
-
-
-#if 0
-/// @brief Typesave get of the value associated with this node as a string
-/// @param[out] value receives the value.
-/// @param defaultValue is assigned to value if this node does not have a string value.
-bool getValue(std::string & value, const std::string & defaultValue = "") const
-{
-
-}
-
-
 
 bool BoostPropertyTreeNode::getValue(int64_t & value, int64_t defaultValue) const
 {
-	std::string str;
-	if (getValue(str))
-	{
-		try
-		{
-			value = boost::lexical_cast<int64_t>(str);
-			return true;
-		}
-		catch (...)
-		{
-            // never mind
-		}
-	}
-	value = defaultValue;
-	return false;
+    return getValue(value, defaultValue);
 }
 
 bool BoostPropertyTreeNode::getValue(uint64_t & value, uint64_t defaultValue) const
 {
-	std::string str;
-	if (getValue(str))
-	{
-		try
-		{
-			value = boost::lexical_cast<uint64_t>(str);
-			return true;
-		}
-		catch (...)
-		{
-			// never mind
-		}
-	}
-	value = defaultValue;
-	return false;
+    return getValue(value, defaultValue);
 }
 
 bool BoostPropertyTreeNode::getValue(double & value, double defaultValue) const
 {
-	std::string str;
-	if (getValue(str))
-	{
-		try
-		{
-			value = boost::lexical_cast<double>(str);
-			return true;
-		}
-		catch (...)
-		{
-			// never mind
-		}
-	}
-	value = defaultValue;
-	return false;
+    return getValue(value, defaultValue);
 }
 
-bool BoostPropertyTreeNode::getBool(bool & value, bool defaultValue) const
+bool BoostPropertyTreeNode::getValue(bool & value, bool defaultValue) const
 {
-	std::string str;
-	if (getValue(str))
-	{
-		std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-		if (str == "y" || str == "yes" || str == "1" || str == "t" || str == "true")
-		{
-			value = true;
-			return true;
-		}
-		else if (str == "n" || str == "no" || str == "0" || str == "f" || str == "false")
-		{
-			value = false;
-			return true;
-		}
-	}
-	value = defaultValue;
-	return false;
+    return getValue(value, defaultValue);
 }
-#endif
