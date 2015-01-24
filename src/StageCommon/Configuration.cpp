@@ -75,7 +75,7 @@ bool ConfigurationNode::getValue(double & value, double defaultValue) const
 	return false;
 }
 
-bool ConfigurationNode::getBool(bool & value, bool defaultValue) const
+bool ConfigurationNode::getValue(bool & value, bool defaultValue) const
 {
 	std::string str;
 	if (getValue(str))

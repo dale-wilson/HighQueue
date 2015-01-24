@@ -35,12 +35,12 @@ namespace HighQueue
         public:
 			BoostPropertyTreeNode();
 
-			explicit BoostPropertyTreeNode(boost::property_tree::ptree ptree);
+			explicit BoostPropertyTreeNode(const std::string & name, boost::property_tree::ptree ptree);
 			
             /// @brief destruct
 			virtual ~BoostPropertyTreeNode();
 
-			void loadJson(std::istream & propertyFile);
+			void loadJson(std::istream & propertyFile, const std::string & name = "json");
 			void loadJson(const std::string & propertyFileName);
 
             virtual ConfigurationChildrenPtr getChildren();
@@ -54,6 +54,7 @@ namespace HighQueue
             template <typename Type, typename DefaultType>
             bool getTypedValue(Type & value, DefaultType defaultValue) const;
 		private:
+            std::string name_;
 			boost::property_tree::ptree ptree_;
         };
 

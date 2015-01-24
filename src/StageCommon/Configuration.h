@@ -66,7 +66,7 @@ namespace HighQueue
 			/// @brief Typesave get of the value associated with this node as a string
 			/// @param[out] value receives the value.
 			/// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getBool(bool & value, bool defaultValue) const;
+			virtual bool getValue(bool & value, bool defaultValue = false) const;
         };
    }
 }

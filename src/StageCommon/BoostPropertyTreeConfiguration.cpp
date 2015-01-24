@@ -5,7 +5,7 @@
 #include <StageCommon/StagePch.h>
 
 #include "BoostPropertyTreeConfiguration.h"
-
+#include <Common/Log.h>
 #include <boost/property_tree/json_parser.hpp>
 
 using namespace HighQueue;
@@ -44,8 +44,7 @@ bool BoostPropertyTreeChildren::next()
 
 ConfigurationNodePtr BoostPropertyTreeChildren::getChild()
 {
-    boost::property_tree::ptree & child = position_->second;
-    auto result = std::make_shared<BoostPropertyTreeNode>(child);
+    auto result = std::make_shared<BoostPropertyTreeNode>(position_->first, position_->second);
     return result;
 }
 
@@ -56,9 +55,11 @@ BoostPropertyTreeNode::BoostPropertyTreeNode()
 {
 }
 
-BoostPropertyTreeNode::BoostPropertyTreeNode(boost::property_tree::ptree ptree)
-	:ptree_(ptree)
+BoostPropertyTreeNode::BoostPropertyTreeNode(const std::string & name, boost::property_tree::ptree ptree)
+    : name_(name)
+    , ptree_(ptree)
 {
+    LogTrace("BoostPropertyTreeNode: construct node: " << name_ );
 }
 
 
@@ -67,13 +68,17 @@ BoostPropertyTreeNode::~BoostPropertyTreeNode()
 }
 
 
-void BoostPropertyTreeNode::loadJson(std::istream & propertyFile)
+void BoostPropertyTreeNode::loadJson(std::istream & propertyFile, const std::string & name)
 {
+    LogTrace("BoostPropertyTreeNode: Load Json from stream: " << name);
+    name_ = name;
 	boost::property_tree::json_parser::read_json(propertyFile, ptree_);
 }
 
 void BoostPropertyTreeNode::loadJson(const std::string & propertyFileName)
 {
+    LogTrace("BoostPropertyTreeNode: Load Json from file: " << propertyFileName);
+    name_ = propertyFileName;
 	boost::property_tree::json_parser::read_json(propertyFileName, ptree_);
 }
 
@@ -87,36 +92,47 @@ ConfigurationChildrenPtr BoostPropertyTreeNode::getChildren()
 
 std::string BoostPropertyTreeNode::getName()
 {
-	return ptree_.data();
+    return name_;
 }
 
 bool BoostPropertyTreeNode::getValue(std::string & value, const std::string & defaultValue)const
 {
-    auto v = ptree_.get_value_optional<std::string>();
-    if(v)
-    {
-        value = v.value();
-        return true;
-    }
-    return false;
+    return getTypedValue(value, defaultValue);
 }
 
 bool BoostPropertyTreeNode::getValue(int64_t & value, int64_t defaultValue) const
 {
-    return getValue(value, defaultValue);
+    return getTypedValue(value, defaultValue);
 }
 
 bool BoostPropertyTreeNode::getValue(uint64_t & value, uint64_t defaultValue) const
 {
-    return getValue(value, defaultValue);
+    return getTypedValue(value, defaultValue);
 }
 
 bool BoostPropertyTreeNode::getValue(double & value, double defaultValue) const
 {
-    return getValue(value, defaultValue);
+    return getTypedValue(value, defaultValue);
 }
 
 bool BoostPropertyTreeNode::getValue(bool & value, bool defaultValue) const
 {
-    return getValue(value, defaultValue);
+    std::string str;
+    if(getValue(str))
+    {
+        // this is terribly English-centric. Sorry....
+        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+        if(str == "1" || str == "T" || str == "TRUE" || str == "Y" || str == "YES")
+        {
+            value = true;
+            return true;
+        }
+        else if(str == "0" || str == "F" || str == "FALSE" || str == "N" || str == "NO")
+        {
+            value = false;
+            return true;
+        }
+    }
+    value = defaultValue;
+    return false;
 }
