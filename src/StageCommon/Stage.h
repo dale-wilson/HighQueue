@@ -54,6 +54,8 @@ namespace HighQueue
             /// Lifecycle 2a: Give it a name
             void setName(const std::string & name);
 
+            const std::string & getName()const;
+
             /// @brief Attach primary destination
             /// Lifecycle 3: Attach
             virtual void attachDestination(const StagePtr & destination);
