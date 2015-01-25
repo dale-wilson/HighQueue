@@ -1,12 +1,12 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include "StageCommon/StagePch.h"
+#include "StagesSupport/StagePch.h"
 #define BOOST_TEST_NO_MAIN StagesPerformance
 #include <boost/test/unit_test.hpp>
 
 #include <Stages/MulticastReceiver.h>
-#include <StageCommon/AsioService.h>
+#include <StagesSupport/AsioService.h>
 #include <HighQueue/Connection.h>
 #include <Mocks/TestMessage.h>
 

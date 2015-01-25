@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <StageCommon/StagePch.h>
+#include <StagesSupport/StagePch.h>
 
 #include "BoostPropertyTreeConfiguration.h"
 #include <Common/Log.h>

@@ -3,8 +3,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include "HeartbeatProducerFwd.h"
-#include <StageCommon/ThreadedStageToMessage.h>
-#include <StageCommon/AsioService.h>
+#include <StagesSupport/ThreadedStageToMessage.h>
+#include <StagesSupport/AsioService.h>
 
 #include <Common/Log.h>
 

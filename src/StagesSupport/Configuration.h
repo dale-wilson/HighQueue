@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <StageCommon/Stage_Export.h>
+#include <StagesSupport/Stage_Export.h>
 
 #include "ConfigurationFwd.h"
 

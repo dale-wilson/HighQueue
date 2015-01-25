@@ -4,9 +4,9 @@
 #pragma once
 
 #include "StageFwd.h"
-#include <StageCommon/Stage_Export.h>
-#include <StageCommon/AsioServiceFwd.h>
-#include <StageCommon/Configuration.h>
+#include <StagesSupport/Stage_Export.h>
+#include <StagesSupport/AsioServiceFwd.h>
+#include <StagesSupport/Configuration.h>
 
 #include "HighQueue/Message.h"
 #include "HighQueue/ConnectionFwd.h"

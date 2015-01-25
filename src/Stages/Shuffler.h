@@ -5,7 +5,7 @@
 
 #include "ShufflerFwd.h"
 
-#include <StageCommon/StageToMessage.h>
+#include <StagesSupport/StageToMessage.h>
 
 namespace HighQueue
 {

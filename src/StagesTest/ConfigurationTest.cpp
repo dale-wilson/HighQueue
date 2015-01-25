@@ -1,11 +1,11 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <StageCommon/StagePch.h>
+#include <StagesSupport/StagePch.h>
 #define BOOST_TEST_NO_MAIN StagesTest
 #include <boost/test/unit_test.hpp>
 
-#include <StageCommon/BoostPropertyTreeConfiguration.h>
+#include <StagesSupport/BoostPropertyTreeConfiguration.h>
 
 using namespace HighQueue;
 using namespace Stages;

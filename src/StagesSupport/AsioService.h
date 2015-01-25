@@ -4,7 +4,7 @@
 //
 # pragma once
 #include "AsioServiceFwd.h"
-#include <StageCommon/Stage_Export.h>
+#include <StagesSupport/Stage_Export.h>
 
 namespace HighQueue
 {

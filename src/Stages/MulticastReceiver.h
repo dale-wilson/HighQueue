@@ -3,8 +3,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include "MulticastReceiverFwd.h"
-#include <StageCommon/AsioService.h>
-#include <StageCommon/ThreadedStageToMessage.h>
+#include <StagesSupport/AsioService.h>
+#include <StagesSupport/ThreadedStageToMessage.h>
 
 namespace HighQueue
 {

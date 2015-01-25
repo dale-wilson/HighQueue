@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <StageCommon/Stage.h>
+#include <StagesSupport/Stage.h>
 #include <Mocks/TestMessage.h>
 
 #include <Common/Log.h>

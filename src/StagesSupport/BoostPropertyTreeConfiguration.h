@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <StageCommon/Configuration.h>
+#include <StagesSupport/Configuration.h>
 
 #include <boost/property_tree/ptree.hpp>
 

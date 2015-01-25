@@ -8,8 +8,8 @@ project(*) : HighQueueStage, boost_base, boost_filesystem, boost_system, boost_t
   sharedname = *
   dynamicflags += STAGE_BUILD_DLL
 
-  pch_header = StageCommon/StagePch.h
-  pch_source = StageCommon/StagePch.cpp
+  pch_header = StagesSupport/StagePch.h
+  pch_source = StagesSupport/StagePch.cpp
 
  // TODO: What to do about boost 32 bit builds?
   libpaths -= $(BOOST_ROOT)/lib
@@ -17,11 +17,11 @@ project(*) : HighQueueStage, boost_base, boost_filesystem, boost_system, boost_t
 
   Source_Files {
     Stages
-	StageCommon
+	StagesSupport
   }
   Header_Files {
     Stages
-	StageCommon
+	StagesSupport
 	Common
   }
 }
@@ -34,15 +34,15 @@ project(*Test) : HighQueueStage, HighQueueAddTest, boost_unit_test_framework, bo
   libs += Stages
   after += Stages
   
-  pch_header = StageCommon/StagePch.h
-  pch_source = StageCommon/StagePch.cpp
+  pch_header = StagesSupport/StagePch.h
+  pch_source = StagesSupport/StagePch.cpp
 	
   Source_Files {
 	StagesTest
   }
   Header_Files {
     StagesTest
-	StageCommon
+	StagesSupport
 	Common
   }
 }
@@ -55,15 +55,15 @@ project(*Performance) : HighQueueStage, HighQueueAddTest, boost_unit_test_framew
   libs += Stages
   after += Stages
   
-  pch_header = StageCommon/StagePch.h
-  pch_source = StageCommon/StagePch.cpp
+  pch_header = StagesSupport/StagePch.h
+  pch_source = StagesSupport/StagePch.cpp
 	
   Source_Files {
 	StagesPerformance
   }
   Header_Files {
     StagesPerformance
-	StageCommon
+	StagesSupport
 	Common
   }
 }

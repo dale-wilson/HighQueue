@@ -1,7 +1,7 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <StageCommon/StagePch.h>
+#include <StagesSupport/StagePch.h>
 
 #include "Stage.h"
 
