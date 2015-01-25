@@ -27,6 +27,11 @@ BoostPropertyTreeChildren::~BoostPropertyTreeChildren()
 {
 }
 
+bool BoostPropertyTreeChildren::has() const
+{
+    return position_ != ptree_.end();
+}
+
 bool BoostPropertyTreeChildren::first()
 {
     position_ = ptree_.begin();

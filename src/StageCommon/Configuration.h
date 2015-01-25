@@ -5,15 +5,12 @@
 
 #include <StageCommon/Stage_Export.h>
 
+#include "ConfigurationFwd.h"
+
 namespace HighQueue
 {
     namespace Stages
     {
-		class ConfigurationNode;
-        typedef std::shared_ptr<ConfigurationNode> ConfigurationNodePtr;
-        class ConfigurationChildren;
-        typedef std::shared_ptr<ConfigurationChildren> ConfigurationChildrenPtr;
-
         /// @brief A collection of properties(child nodes)
         ///
         /// Note I tried to make this an iterator but various technical difficulties arose
@@ -22,6 +19,7 @@ namespace HighQueue
         {
         public:
             virtual ~ConfigurationChildren();
+            virtual bool has() const = 0;
             virtual bool first() = 0;
             virtual bool next() = 0;
             virtual ConfigurationNodePtr getChild() = 0;

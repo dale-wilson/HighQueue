@@ -20,6 +20,7 @@ namespace HighQueue
             void set(boost::property_tree::ptree::iterator iterator);
 
             virtual ~BoostPropertyTreeChildren();
+            virtual bool has() const;
             virtual bool first();
             virtual bool next();
             virtual ConfigurationNodePtr getChild();
