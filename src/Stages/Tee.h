@@ -35,6 +35,7 @@ namespace HighQueue
         Tee::Tee()
 			: out_(0)
         {
+            setName("Tee"); // default name
         }
 
 		inline

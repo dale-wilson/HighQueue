@@ -30,6 +30,7 @@ namespace HighQueue
             : messageCount_(messageCount)
             , messagesHandled_(0)
         {
+            setName("CopyPassThru"); // default name
         }
 
         template<typename CargoType>

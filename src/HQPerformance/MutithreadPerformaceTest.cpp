@@ -128,9 +128,10 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t sleepCount = WaitStrategy::FOREVER;
     static const auto sleepTime = std::chrono::nanoseconds(10);
     
-    WaitStrategy strategy(spinCount, yieldCount, sleepCount, sleepTime);
+    WaitStrategy consumerStrategy(spinCount, yieldCount, sleepCount, sleepTime);
+    WaitStrategy producerStrategy(spinCount, yieldCount + 10000, sleepCount, sleepTime);
     bool discardMessagesIfNoConsumer = false;
-    CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
+    CreationParameters parameters(producerStrategy, consumerStrategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 

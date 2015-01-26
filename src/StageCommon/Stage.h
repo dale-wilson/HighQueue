@@ -5,8 +5,10 @@
 
 #include "StageFwd.h"
 #include <StageCommon/Stage_Export.h>
-#include "HighQueue/Message.h"
 #include <StageCommon/AsioServiceFwd.h>
+#include <StageCommon/Configuration.h>
+
+#include "HighQueue/Message.h"
 #include "HighQueue/ConnectionFwd.h"
 #include <HighQueue/MemoryPoolFwd.h>
 #include <Common/Log.h>
@@ -15,11 +17,10 @@ namespace HighQueue
 {
     namespace Stages
     {
-        class ConfigurationPtr; // todo: invent a configuration class.
         /// @brief Base class for Stages
         /// 
         /// Stage life cycle:
-        /// 1: Construct using Null constructor.
+        /// 1: Construct 
         /// 2: Configure    // capture parameters
         /// 3: Attach*      // attach destination(s) and resources as needed
         /// 4: Validate     // validate configuration and attachment
@@ -37,7 +38,7 @@ namespace HighQueue
         class Stages_Export Stage: public std::enable_shared_from_this<Stage>
         {
         public:
-            /// @brief Construct preferably with null constructor
+            /// @brief Construct 
             /// Lifecycle 1: Constuct
             Stage();
 
@@ -47,7 +48,13 @@ namespace HighQueue
 
             /// @brief Configure 
             /// Lifecycle 2: Configure
-            virtual bool configure(const ConfigurationPtr & configuration);
+            virtual bool configure(const ConfigurationNode & configuration);
+
+            /// @brief Configure
+            /// Lifecycle 2a: Give it a name
+            void setName(const std::string & name);
+
+            const std::string & getName()const;
 
             /// @brief Attach primary destination
             /// Lifecycle 3: Attach
@@ -110,6 +117,7 @@ namespace HighQueue
         protected:
             bool paused_;
             bool stopping_;
+            std::string name_;
             StagePtr primaryDestination_;
             typedef std::pair<std::string,  StagePtr> NamedDestination;
             std::vector<NamedDestination> destinations_;

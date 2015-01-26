@@ -48,6 +48,7 @@ namespace HighQueue
             , sequenceError_(0)
 			, unexpectedMessageError_(0)
         {
+            setName("TestMessageConsumer"); // default name
         }
 
         template<size_t Extra>

@@ -47,3 +47,24 @@ project(*Test) : HighQueueStage, HighQueueAddTest, boost_unit_test_framework, bo
   }
 }
 
+////////////////////////////
+// Build the Stage Performance tests
+project(*Performance) : HighQueueStage, HighQueueAddTest, boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = *
+
+  libs += Stages
+  after += Stages
+  
+  pch_header = StageCommon/StagePch.h
+  pch_source = StageCommon/StagePch.cpp
+	
+  Source_Files {
+	StagesPerformance
+  }
+  Header_Files {
+    StagesPerformance
+	StageCommon
+	Common
+  }
+}
+

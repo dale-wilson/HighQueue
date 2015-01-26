@@ -27,10 +27,19 @@ Stage::~Stage()
     }
 }
 
-bool Stage::configure(const ConfigurationPtr & configuration)
+bool Stage::configure(const ConfigurationNode & configuration)
 {
     // default to do nothing
     return true;
+}
+
+void Stage::setName(const std::string & name)
+{
+    name_ = name;
+}
+const std::string & Stage::getName()const
+{
+    return name_;
 }
 
 void Stage::attachDestination(const StagePtr & destination)

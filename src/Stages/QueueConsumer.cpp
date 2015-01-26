@@ -11,6 +11,7 @@ using namespace Stages;
 QueueConsumer::QueueConsumer()
 :stopOnShutdownMessage_(false)
 {
+    setName("QueueConsumer"); // default name
 }
 
 void QueueConsumer::handle(Message & message)

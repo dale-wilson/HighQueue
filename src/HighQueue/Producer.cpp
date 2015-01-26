@@ -138,17 +138,19 @@ void Producer::publish(Message & message)
         if(publishPosition_ == reserved)
         {
             ++publishPosition_;
-            std::atomic_thread_fence(std::memory_order::memory_order_release);
-            if(consumerUsesMutex_)
-            {
-                std::unique_lock<std::mutex> guard(header_->waitMutex_);
-                if(header_->consumerWaiting_)
-                {
-                    header_->consumerWaiting_ = false;
-                    header_->consumerWaitConditionVariable_.notify_all();
-                }
-            }
             ++statPublishes_;
+            if(!consumerUsesMutex_)
+            {
+                std::atomic_thread_fence(std::memory_order::memory_order_release);
+                return;
+            }
+
+            std::unique_lock<std::mutex> guard(header_->waitMutex_);
+            if(header_->consumerWaiting_)
+            {
+                header_->consumerWaiting_ = false;
+                header_->consumerWaitConditionVariable_.notify_all();
+            }
         }
     }
 }
