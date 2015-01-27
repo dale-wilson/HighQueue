@@ -26,13 +26,23 @@ R"json({
        "message_size": 42,
        "message_count" : 1000
    },
-   "anotherNode":
+   "asio":
    {
-       "double": 101.5,
-       "negative": -40
+       "name" : "asio1",
+       "thread_count" : 1
    },
-   "finalNode" : "yes"
-
+   "queue":
+   {
+        "name" : "queue1",
+        "memory_pool" : "pool1",
+        "common_wait_strategy" : 
+         {
+             "spin_count" : 0,
+             "yield_count" : "forever"
+         },
+         "discard_messages_if_no_consumer" : false,
+         "entry_count" : 100
+   }
 })json";
 
 }

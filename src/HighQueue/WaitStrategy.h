@@ -3,7 +3,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-
+#include "WaitStrategyFwd.h"
 #include <HighQueue/details/HQDefinitions.h>
 
 namespace HighQueue

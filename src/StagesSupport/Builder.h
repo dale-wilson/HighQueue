@@ -5,16 +5,32 @@
 
 #include <StagesSupport/Stage_Export.h>
 
+#include <StagesSupport/ComponentBuilderFwd.h>
+
 #include <StagesSupport/ConfigurationFwd.h>
 #include <HighQueue/MemoryPoolFwd.h>
 #include <HighQueue/ConnectionFwd.h>
 #include <StagesSupport/AsioServiceFwd.h>
 #include <StagesSupport/StageFwd.h>
+#include <HighQueue/WaitStrategyFwd.h>
+#include <HighQueue/CreationParametersFwd.h>
+
+#include <Common/Log.h>
 
 namespace HighQueue
 {
     namespace Stages
     {
+        namespace
+        {
+            // Top level
+            const std::string keyQueue = "queue";
+            const std::string keyAsio = "asio";
+            const std::string keyPipe = "pipe";
+            const std::string keyPool = "memory_pool";
+
+        }
+
         class Stages_Export Builder
         {
         public:
@@ -23,19 +39,19 @@ namespace HighQueue
 
             bool construct(const ConfigurationNodePtr & config);
 
-        private:
-            bool constructPool(const ConfigurationNodePtr & config);
-            bool constructQueue(const ConfigurationNodePtr & config);
-            bool constructAsio(const ConfigurationNodePtr & config);
-            bool constructPipe(const ConfigurationNodePtr & config);
-        private:
-            typedef std::map<std::string, MemoryPoolPtr> Pools;
-            Pools pools_;
-            typedef std::map<std::string, ConnectionPtr> Queues;
-            Queues queues_;
-            typedef std::map<std::string, AsioServicePtr> Asios;
-            Asios asios_;
+        public:
+            typedef std::map<std::string, PoolBuilderPtr> Pools;
+            typedef std::map<std::string, QueueBuilderPtr> Queues;
+            typedef std::map<std::string, AsioBuilderPtr> Asios;
             typedef std::vector<StagePtr> Stages;
+
+        private:
+            bool constructPipe(const ConfigurationNodePtr & config);
+
+        private:
+            Pools pools_;
+            Queues queues_;
+            Asios asios_;
             Stages stages_;
         };
    }

@@ -3,7 +3,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-
+#include "CreationParametersFwd.h"
 #include <HighQueue/WaitStrategy.h>
 
 namespace HighQueue
@@ -24,6 +24,15 @@ namespace HighQueue
         /// @brief What is the minimum number of messages needed (one extra may be allocated just because...)
         /// Not needed when an external memory pool will be used.
         size_t messageCount_;
+
+        CreationParameters()
+            : producerWaitStrategy_()
+            , consumerWaitStrategy_()
+            , discardMessagesIfNoConsumer_(false)
+            , entryCount_(0)
+            , messageSize_(0)
+            , messageCount_(0)
+        {}
 
         CreationParameters(
             const WaitStrategy & producerWaitStrategy_,
