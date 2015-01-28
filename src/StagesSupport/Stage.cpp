@@ -31,6 +31,7 @@ Stage::~Stage()
 
 bool Stage::configure(const ConfigurationNodePtr & configuration)
 {
+int todo_parse_name_then_pass_params_to_children;
     // default to do nothing
     return true;
 }
