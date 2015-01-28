@@ -27,7 +27,7 @@ Stage::~Stage()
     }
 }
 
-bool Stage::configure(const ConfigurationNode & configuration)
+bool Stage::configure(const ConfigurationNodePtr & configuration)
 {
     // default to do nothing
     return true;

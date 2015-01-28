@@ -35,7 +35,7 @@ namespace HighQueue
         class OrderedMerge : public StageToMessage
         {
         public:
-            OrderedMerge(size_t lookAhead, size_t expectedShutdowns = 2);
+            OrderedMerge(size_t lookAhead = 0, size_t expectedShutdowns = 2);
 
 			virtual void attachConnection(const ConnectionPtr & connection);
             virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);

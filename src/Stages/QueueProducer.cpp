@@ -19,6 +19,13 @@ void QueueProducer::configureSolo(bool solo)
 	solo_ = solo;
 }
 
+bool QueueProducer::configure(const ConfigurationNodePtr & configuration)
+{
+    int todo;
+    return true;
+}
+
+
 
 void QueueProducer::handle(Message & message)
 {

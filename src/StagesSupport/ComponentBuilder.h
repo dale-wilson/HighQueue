@@ -23,7 +23,6 @@ namespace HighQueue
 {
     namespace Stages
     {
-        template<typename Component>
         class ComponentBuilder
         {
         public:
@@ -50,21 +49,15 @@ namespace HighQueue
 
             static const std::string keyThreadCount;
 
-            typedef std::shared_ptr<Component> ComponentPtr;
+        public:
             ComponentBuilder();
-
             virtual ~ComponentBuilder();
+
             bool configure(const ConfigurationNodePtr & config);
             const std::string & getName()
             {
                 return name_;
             }
-
-            const ComponentPtr & get() const
-            {
-                return value_;
-            }
-
         protected:
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter) = 0;
             virtual bool validate() = 0;
@@ -72,87 +65,28 @@ namespace HighQueue
 
         protected:
             std::string name_;
-            ComponentPtr value_;
         };
 
         template<typename Component>
-        const std::string ComponentBuilder<Component>::keyName = "name";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyMessageSize = "message_size";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyMessageCount = "message_count";
-
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyConsumerWaitStrategy = "consumer_wait_strategy";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyProducerWaitStrategy = "produder_wait_strategy";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyCommonWaitStrategy = "common_wait_strategy";
-
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keySpinCount = "spin_count";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyYieldCount = "yield_count";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keySleepCount = "sleep_count";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keySleepPeriod = "sleep_nanoseconds";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyMutexWaitTimeout = "timeout_nanoseconds";
-
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::valueForever = "forever";
-
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyPool = "memory_pool";
-
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyDiscardMessagesIfNoConsumer = "discard_messages_if_no_consumer";
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyEntryCount = "entry_count";
-
-        template<typename Component>
-        const std::string ComponentBuilder<Component>::keyThreadCount = "thread_count";
-
-        template<typename Component>
-        ComponentBuilder<Component>::ComponentBuilder()
-        {}
-
-        template<typename Component>
-        ComponentBuilder<Component>::~ComponentBuilder()
+        class TypedComponentBuilder : public ComponentBuilder
         {
-        }
+        public:
+            typedef std::shared_ptr<Component> ComponentPtr;
+            TypedComponentBuilder()
+            {}
 
-        template<typename Component>
-        bool ComponentBuilder<Component>::configure(const ConfigurationNodePtr & config)
-        {
-            for(auto poolChildren = config->getChildren();
-                poolChildren->has();
-                poolChildren->next())
+            virtual ~TypedComponentBuilder()
+            {}
+
+            const ComponentPtr & get() const
             {
-                auto & parameter = poolChildren->getChild();
-                auto & key = parameter->getName();
-
-                if(key == keyName)
-                {
-                    parameter->getValue(name_);
-                }
-                else if(! interpretParameter(key, parameter))
-                {
-                    return false;
-                }
+                return value_;
             }
+        protected:
+            ComponentPtr value_;
+        };
 
-            if(name_.empty())
-            {
-                LogFatal("Missing required parameter " << keyName << " for " << keyAsio << ".");
-                return false;
-            }
-            return true;
-        }
-
-
-        class PoolBuilder: public ComponentBuilder < MemoryPool >
+        class PoolBuilder: public TypedComponentBuilder < MemoryPool >
         {
         public:
             PoolBuilder();
@@ -160,13 +94,16 @@ namespace HighQueue
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
             virtual bool validate();
             virtual void create();
+
+            void addToMessageCount(size_t additionalMessages);
+            void needAtLeast(size_t byteCount);
         private:
             static const size_t NONE = ~size_t(0);
             uint64_t messageSize_ = NONE;
             uint64_t messageCount_ = NONE;
         };
 
-        class AsioBuilder : public ComponentBuilder<AsioService>
+        class AsioBuilder: public TypedComponentBuilder<AsioService>
         {
         public:
             AsioBuilder();
@@ -179,7 +116,7 @@ namespace HighQueue
             size_t threadCount_;
         };
 
-        class QueueBuilder: public ComponentBuilder<Connection>
+        class QueueBuilder: public TypedComponentBuilder<Connection>
         {
         public:
             QueueBuilder(Builder::Pools & pools);
@@ -187,12 +124,9 @@ namespace HighQueue
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
             virtual bool validate();
             virtual void create();
-            virtual void start();
-
 
             bool constructWaitStrategy(const ConfigurationNodePtr & config, WaitStrategy & strategy);
             bool constructCreationParameters(const ConfigurationNodePtr & config, CreationParameters & parameters);
-
 
         private:
             Builder::Pools & pools_;
@@ -205,6 +139,23 @@ namespace HighQueue
             uint64_t entryCount_;
             uint64_t messageSize_;
             uint64_t messageCount_;
+        };
+
+        class PipeBuilder: public ComponentBuilder
+        {
+        public:
+            PipeBuilder(Builder::Stages & stages, Builder::Pools & pools, Builder::Asios & asios, Builder::Queues & queues);
+            virtual ~PipeBuilder();
+            virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
+            virtual bool validate();
+            virtual void create();
+
+        private:
+            Builder::Stages & stages_;
+            Builder::Pools & pools_;
+            Builder::Asios & asios_;
+            Builder::Queues & queues_;
+
         };
    }
 }

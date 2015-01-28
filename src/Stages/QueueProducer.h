@@ -21,7 +21,7 @@ namespace HighQueue
             // Implement Stage
             virtual void handle(Message & message);
 
-            // todo: virtual void configure(const ConfigurationPtr & configuration);
+            virtual bool configure(const ConfigurationNodePtr & configuration);
             void attachConnection(const ConnectionPtr & connection);
 
             virtual void validate();

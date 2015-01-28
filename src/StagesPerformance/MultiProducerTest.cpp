@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
 		Stages stages;
         for(uint32_t producerNumber = 0; producerNumber < producerCount; ++producerNumber)
         {
-            auto producer = std::make_shared<ProducerType>(startSignal, perProducer, producerNumber);
+            auto producer = std::make_shared<ProducerType>(&startSignal, perProducer, producerNumber);
             stages.emplace_back(producer);
             producer->attachMemoryPool(memoryPool);
 

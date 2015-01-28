@@ -40,7 +40,7 @@ namespace HighQueue
             MulticastReceiver();
 
             bool configure(const MulticastConfiguration & configuration);
-
+            virtual bool configure(ConfigurationNodePtr & config);
             virtual void attachIoService(const AsioServicePtr & ioService);
             virtual void start();
             virtual void run();
@@ -111,6 +111,12 @@ namespace HighQueue
         {
             configuration_ = configuration;
         }
+        inline
+        bool MulticastReceiver::configure(ConfigurationNodePtr & config)
+        {
+            int todo;
+        }
+
 
         inline
         void MulticastReceiver::start()

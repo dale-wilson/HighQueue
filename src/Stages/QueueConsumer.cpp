@@ -19,6 +19,13 @@ void QueueConsumer::handle(Message & message)
     throw std::runtime_error("QueueConsuemr does not accept incoming Messages");
 }
 
+
+bool QueueConsumer::configure(const ConfigurationNodePtr & configuration)
+{
+    int todo;
+    return true;
+}
+
 void QueueConsumer::attachConnection(const ConnectionPtr & connection)
 {
     connection_ = connection;

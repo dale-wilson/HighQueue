@@ -43,6 +43,7 @@ namespace HighQueue
             typedef std::map<std::string, PoolBuilderPtr> Pools;
             typedef std::map<std::string, QueueBuilderPtr> Queues;
             typedef std::map<std::string, AsioBuilderPtr> Asios;
+            typedef std::map<std::string, PipeBuilderPtr> Pipes;
             typedef std::vector<StagePtr> Stages;
 
         private:
@@ -52,6 +53,7 @@ namespace HighQueue
             Pools pools_;
             Queues queues_;
             Asios asios_;
+            Pipes pipes_;
             Stages stages_;
         };
    }

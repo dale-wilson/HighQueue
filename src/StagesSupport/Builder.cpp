@@ -65,7 +65,12 @@ bool Builder::construct(const ConfigurationNodePtr & config)
         }
         else if(key == keyPipe)
         {
-            constructPipe(child);
+            auto pipeBuilder = std::make_shared<PipeBuilder>(stages_, pools_, asios_, queues_);
+            if(!pipeBuilder->configure(child))
+            {
+                return false;
+            }
+            pipes_[pipeBuilder->getName()] = pipeBuilder;
         }
         else
         {

@@ -13,5 +13,7 @@ namespace HighQueue
         typedef std::shared_ptr<AsioBuilder> AsioBuilderPtr;
         class QueueBuilder;
         typedef std::shared_ptr<QueueBuilder> QueueBuilderPtr;
+        class PipeBuilder;
+        typedef std::shared_ptr<PipeBuilder> PipeBuilderPtr;
    }
 }

@@ -48,7 +48,7 @@ namespace HighQueue
 
             /// @brief Configure 
             /// Lifecycle 2: Configure
-            virtual bool configure(const ConfigurationNode & configuration);
+            virtual bool configure(const ConfigurationNodePtr & configuration);
 
             /// @brief Configure
             /// Lifecycle 2a: Give it a name

@@ -15,7 +15,7 @@ namespace HighQueue
         class HeartbeatProducer : public ThreadedStageToMessage
         {
         public:
-            HeartbeatProducer(std::chrono::milliseconds interval);
+            HeartbeatProducer(std::chrono::milliseconds interval = std::chrono::milliseconds(1000));
 
             virtual void attachIoService(const AsioServicePtr & ioService);
             virtual void run();

@@ -15,7 +15,7 @@ namespace HighQueue
         {
         public:
 			static const size_t relativelyPrime_ = 101;
-            Shuffler(size_t lookAhead);
+            Shuffler(size_t lookAhead = 50);
 
 			virtual void attachConnection(const ConnectionPtr & connection);
             virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);

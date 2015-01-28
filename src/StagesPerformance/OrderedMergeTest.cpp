@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
 
     for(uint32_t nProducer = 0; nProducer < numberOfProducers; ++nProducer)
     {
-        auto producer = std::make_shared<ProducerType>(producerGo, messageCount, nProducer);
+        auto producer = std::make_shared<ProducerType>(&producerGo, messageCount, nProducer);
         stages.emplace_back(producer);
         producer->attachMemoryPool(memoryPool);
 

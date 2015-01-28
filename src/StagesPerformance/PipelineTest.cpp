@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 
     std::vector <StagePtr> stages;
     
-    auto producer = std::make_shared<ProducerType>(producerGo, messageCount, 1);
+    auto producer = std::make_shared<ProducerType>(&producerGo, messageCount, 1);
     producer->attachMemoryPool(memoryPool);
     stages.emplace_back(producer);
 
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(testDirectPipeline)
     MemoryPoolPtr memoryPool(new MemoryPool(messageSize, messagesNeeded));
 
     volatile bool producerGo = false;
-    auto producer = std::make_shared<ProducerType>(producerGo, messageCount, 1);
+    auto producer = std::make_shared<ProducerType>(&producerGo, messageCount, 1);
     producer->attachMemoryPool(memoryPool);
 
     StagePtr previous = producer;

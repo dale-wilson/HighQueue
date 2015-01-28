@@ -20,6 +20,62 @@ using namespace Stages;
 
 ////////////////////////
 // ComponentBuilder
+const std::string ComponentBuilder::keyName = "name";
+const std::string ComponentBuilder::keyMessageSize = "message_size";
+const std::string ComponentBuilder::keyMessageCount = "message_count";
+
+const std::string ComponentBuilder::keyConsumerWaitStrategy = "consumer_wait_strategy";
+const std::string ComponentBuilder::keyProducerWaitStrategy = "produder_wait_strategy";
+const std::string ComponentBuilder::keyCommonWaitStrategy = "common_wait_strategy";
+
+const std::string ComponentBuilder::keySpinCount = "spin_count";
+const std::string ComponentBuilder::keyYieldCount = "yield_count";
+const std::string ComponentBuilder::keySleepCount = "sleep_count";
+const std::string ComponentBuilder::keySleepPeriod = "sleep_nanoseconds";
+const std::string ComponentBuilder::keyMutexWaitTimeout = "timeout_nanoseconds";
+
+const std::string ComponentBuilder::valueForever = "forever";
+
+const std::string ComponentBuilder::keyPool = "memory_pool";
+
+const std::string ComponentBuilder::keyDiscardMessagesIfNoConsumer = "discard_messages_if_no_consumer";
+const std::string ComponentBuilder::keyEntryCount = "entry_count";
+
+const std::string ComponentBuilder::keyThreadCount = "thread_count";
+
+ComponentBuilder::ComponentBuilder()
+{}
+
+ComponentBuilder::~ComponentBuilder()
+{}
+
+bool ComponentBuilder::configure(const ConfigurationNodePtr & config)
+{
+    for(auto poolChildren = config->getChildren();
+        poolChildren->has();
+        poolChildren->next())
+    {
+        auto & parameter = poolChildren->getChild();
+        auto & key = parameter->getName();
+
+        if(key == keyName)
+        {
+            parameter->getValue(name_);
+        }
+        else if(! interpretParameter(key, parameter))
+        {
+            return false;
+        }
+    }
+
+    if(name_.empty())
+    {
+        LogFatal("Missing required parameter " << keyName << " for " << config->getName() << ".");
+        return false;
+    }
+    return true;
+}
+
 /////////////////////////
 // class AsioBuilder
 AsioBuilder::AsioBuilder()
@@ -80,6 +136,34 @@ PoolBuilder::PoolBuilder()
 PoolBuilder::~PoolBuilder()
 {
 }
+
+void PoolBuilder::addToMessageCount(size_t additionalMessages)
+{
+    if(additionalMessages > 0)
+    {
+        if(messageCount_ == NONE)
+        {
+            messageCount_ = 0;
+        }
+        messageCount_ += additionalMessages;
+    }
+}
+
+void PoolBuilder::needAtLeast(size_t byteCount)
+{
+    if(byteCount > 0)
+    {     
+        if(messageSize_ == NONE)
+        {
+            messageSize_ = 0;
+        }
+        if(byteCount > messageSize_)
+        {
+            messageSize_ = byteCount;
+        }
+    }
+}
+
 
 bool PoolBuilder::interpretParameter(const std::string & key, ConfigurationNodePtr & parameter)
 {
@@ -147,8 +231,6 @@ QueueBuilder::QueueBuilder(Builder::Pools & pools)
 QueueBuilder::~QueueBuilder()
 {}
 
-
-
 bool QueueBuilder::constructWaitStrategy(const ConfigurationNodePtr & config, WaitStrategy & strategy)
 {
     size_t spinCount = WaitStrategy::FOREVER;
@@ -157,11 +239,11 @@ bool QueueBuilder::constructWaitStrategy(const ConfigurationNodePtr & config, Wa
     uint64_t sleepPeriod = WaitStrategy::FOREVER;
     uint64_t mutexWaitTimeout = WaitStrategy::FOREVER;
 
-    for(auto poolChildren = config->getChildren();
-        poolChildren->has();
-        poolChildren->next())
+    for(auto children = config->getChildren();
+        children->has();
+        children->next())
     {
-        auto & parameter = poolChildren->getChild();
+        auto & parameter = children->getChild();
         auto & key = parameter->getName();
         std::string valueString;
         uint64_t value = WaitStrategy::FOREVER;
@@ -175,23 +257,23 @@ bool QueueBuilder::constructWaitStrategy(const ConfigurationNodePtr & config, Wa
             }
         }
 
-        if(key == PoolBuilder::keySpinCount)
+        if(key == keySpinCount)
         {
             spinCount = size_t(value);
         }
-        else if(key == PoolBuilder::keyYieldCount)
+        else if(key == keyYieldCount)
         {
             yieldCount = size_t(value);
         }
-        else if(key == PoolBuilder::keySleepCount)
+        else if(key == keySleepCount)
         {
             sleepCount = size_t(value);
         }
-        else if(key == PoolBuilder::keySleepPeriod)
+        else if(key == keySleepPeriod)
         {
             sleepPeriod = value;
         }
-        else if(key == PoolBuilder::keyMutexWaitTimeout)
+        else if(key == keyMutexWaitTimeout)
         {
             mutexWaitTimeout = value;
         }
@@ -199,9 +281,9 @@ bool QueueBuilder::constructWaitStrategy(const ConfigurationNodePtr & config, Wa
         {
             LogFatal("Unknown  wait_strategy parameter: " << key
                 << ". Expecting: "
-                << PoolBuilder::keyName << ", "
-                << PoolBuilder::keyMessageSize << ", or"
-                << PoolBuilder::keyMessageCount << ".");
+                << keyName << ", "
+                << keyMessageSize << ", or"
+                << keyMessageCount << ".");
             return false;
         }
     }
@@ -215,25 +297,25 @@ bool QueueBuilder::constructWaitStrategy(const ConfigurationNodePtr & config, Wa
 
 bool QueueBuilder::interpretParameter(const std::string & key, ConfigurationNodePtr & parameter)
 {
-    if(key == PoolBuilder::keyPool)
+    if(key == keyPool)
     {
         parameter->getValue(poolName_);
     }
-    else if(key == PoolBuilder::keyProducerWaitStrategy)
+    else if(key == keyProducerWaitStrategy)
     {
         if(!constructWaitStrategy(parameter, producerWaitStrategy_))
         {
             return false;
         }
     }
-    else if(key == PoolBuilder::keyConsumerWaitStrategy)
+    else if(key == keyConsumerWaitStrategy)
     {
         if(!constructWaitStrategy(parameter, consumerWaitStrategy_))
         {
             return false;
         }
     }
-    else if(key == PoolBuilder::keyCommonWaitStrategy)
+    else if(key == keyCommonWaitStrategy)
     {
         if(!constructWaitStrategy(parameter, producerWaitStrategy_))
         {
@@ -241,35 +323,35 @@ bool QueueBuilder::interpretParameter(const std::string & key, ConfigurationNode
         }
         consumerWaitStrategy_ = producerWaitStrategy_;
     }
-    else if(key == PoolBuilder::keyDiscardMessagesIfNoConsumer)
+    else if(key == keyDiscardMessagesIfNoConsumer)
     {
         if(!parameter->getValue(discardMessagesIfNoConsumer_))
         {
-            LogFatal("Can't interpret " << keyQueue << " parameter " << PoolBuilder::keyDiscardMessagesIfNoConsumer);
+            LogFatal("Can't interpret " << keyQueue << " parameter " << keyDiscardMessagesIfNoConsumer);
             return false;
         }
     }
-    else if(key == PoolBuilder::keyEntryCount)
+    else if(key == keyEntryCount)
     {
         if(!parameter->getValue(entryCount_))
         {
-            LogFatal("Can't interpret " << keyQueue << " parameter " << PoolBuilder::keyEntryCount);
+            LogFatal("Can't interpret " << keyQueue << " parameter " << keyEntryCount);
             return false;
         }
     }
-    else if(key == PoolBuilder::keyMessageSize)
+    else if(key == keyMessageSize)
     {
         if(!parameter->getValue(messageSize_))
         {
-            LogFatal("Can't interpret " << keyQueue << " parameter " << PoolBuilder::keyMessageSize);
+            LogFatal("Can't interpret " << keyQueue << " parameter " << keyMessageSize);
             return false;
         }
     }
-    else if(key == PoolBuilder::keyMessageCount)
+    else if(key == keyMessageCount)
     {
         if(!parameter->getValue(messageCount_))
         {
-            LogFatal("Can't interpret " << keyQueue << " parameter " << PoolBuilder::keyMessageCount);
+            LogFatal("Can't interpret " << keyQueue << " parameter " << keyMessageCount);
             return false;
         }
     }
@@ -277,14 +359,26 @@ bool QueueBuilder::interpretParameter(const std::string & key, ConfigurationNode
     {
         LogFatal("Unknown " << keyQueue << " parameter: " << key
             << ". Expecting: "
-            << PoolBuilder::keyProducerWaitStrategy << ", "
-            << PoolBuilder::keyConsumerWaitStrategy << ", "
-            << PoolBuilder::keyCommonWaitStrategy << ", "
-            << PoolBuilder::keyDiscardMessagesIfNoConsumer << ", "
-            << PoolBuilder::keyEntryCount << ", "
-            << PoolBuilder::keyMessageSize << ", or "
-            << PoolBuilder::keyMessageCount << ".");
+            << keyProducerWaitStrategy << ", "
+            << keyConsumerWaitStrategy << ", "
+            << keyCommonWaitStrategy << ", "
+            << keyDiscardMessagesIfNoConsumer << ", "
+            << keyEntryCount << ", "
+            << keyMessageSize << ", or "
+            << keyMessageCount << ".");
         return false;
+    }
+    if(!poolName_.empty())
+    {
+        auto pPool = pools_.find(poolName_);
+        if(pPool == pools_.end())
+        {
+            LogFatal("Unknown memory pool " << poolName_ << " while configuring queue " << name_);
+            return false;
+        }
+        pPool->second->addToMessageCount(messageCount_);
+        pPool->second->needAtLeast(messageSize_);
+
     }
     return true;
 }
@@ -302,14 +396,131 @@ void QueueBuilder::create()
         << " entries: " << entryCount_
         << " size: " << messageSize_
         << " count: " << messageCount_);
+    CreationParameters parameters(producerWaitStrategy_, consumerWaitStrategy_, discardMessagesIfNoConsumer_, entryCount_, messageSize_, messageCount_);
+    auto pool = pools_.at(poolName_);
+    value_->createLocal(name_, parameters, pool->get());
+}
+
+PipeBuilder::PipeBuilder(
+    Builder::Stages & stages, 
+    Builder::Pools & pools, 
+    Builder::Asios & asios, 
+    Builder::Queues & queues)
+    : stages_(stages)
+    , pools_(pools)
+    , asios_(asios)
+    , queues_(queues)
+{
+}
+
+PipeBuilder::~PipeBuilder()
+{
+}
+
+
+namespace
+{
+    std::string stageBinaryPassThru = "binary_pass_thru";
+    std::string stageCopyPassThru = "copy_pass_thru";
+    std::string stageForwardPassThru = "forward_pass_thru";
+    std::string stageHeartbeatProducer = "heartbeat_producer";
+    std::string stageMulticastReceiver = "multicast_receiver";
+    std::string stageOrderedMerge = "ordered_merge";
+    std::string stageQueueConsumer = "queue_consumer";
+    std::string stageQueueProducer = "queue_producer";
+    std::string stageShuffle = "shuffle";
+    std::string stageTee = "tee";
+    std::string stageTestMessageConsumer = "test_message_consumer";
+    std::string stageTestMessageProducer = "test_message_producer";
+}
+
+#include <Stages/BinaryPassThru.h>
+#include <Stages/CopyPassThru.h>
+#include <Stages/ForwardPassThru.h>
+#include <Stages/HeartbeatProducer.h>
+#include <Stages/MulticastReceiver.h>
+#include <Stages/OrderedMerge.h>
+#include <Stages/QueueConsumer.h>
+#include <Stages/QueueProducer.h>
+#include <Stages/Shuffler.h>
+#include <Stages/Tee.h>
+#include <Stages/TestMessageConsumer.h>
+#include <Stages/TestMessageProducer.h>
+
+bool PipeBuilder::interpretParameter(const std::string & key, ConfigurationNodePtr & parameter)
+{
+    
+    int todo_TurnThisIntoAFactory;
+    StagePtr stage;
+    if(key == stageBinaryPassThru)
+    {
+        stage = std::make_shared<BinaryPassThru>();
+    }
+    //else if(key == stageCopyPassThru)
+    //{
+    //    stage = std::make_shared<CopyPassThru>();
+    //}
+    else if(key == stageForwardPassThru)
+    {
+        stage = std::make_shared<ForwardPassThru>();
+    }
+    else if(key == stageHeartbeatProducer)
+    {
+        stage = std::make_shared<HeartbeatProducer>();
+    }
+    //else if(key == stageMulticastReceiver)
+    //{
+    //    stage = std::make_shared<MulticastReceiver>();
+    //}
+    else if(key == stageOrderedMerge)
+    {
+        stage = std::make_shared<OrderedMerge>();
+    }
+    else if(key == stageQueueConsumer)
+    {
+        stage = std::make_shared<QueueConsumer>();
+    }
+    else if(key == stageQueueProducer)
+    {
+        stage = std::make_shared<QueueProducer>();
+    }
+    else if(key == stageShuffle)
+    {
+        stage = std::make_shared<Shuffler>();
+    }
+    else if(key == stageTee)
+    {
+        stage = std::make_shared<Tee>();
+    }
+    else if(key == stageTestMessageConsumer)
+    {
+        stage = std::make_shared<TestMessageConsumer<10>>();
+    }
+    else if(key == stageTestMessageProducer)
+    {
+        stage = std::make_shared<TestMessageProducer<10>>();
+    }
+    else
+    {
+        LogFatal("Unknown stage " << key);
+        return false;
+    }
+
+    stage->configure(parameter);
+
+    return false;
+}
+
+
+bool PipeBuilder::validate()
+{
+    int todo;
+    return false;
 
 }
 
-void QueueBuilder::start()
+void PipeBuilder::create()
 {
-    CreationParameters parameters(producerWaitStrategy_, consumerWaitStrategy_, discardMessagesIfNoConsumer_, entryCount_, messageSize_, messageCount_);
-    auto pool = pools_.at(poolName_);
-    pool->create(); // todo: not now!  Shoudl be done already
-    value_->createLocal(name_, parameters, pool->get());
+
 }
 

@@ -16,24 +16,24 @@ namespace HighQueue
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
-            TestMessageProducer(
-                volatile bool & startSignal, 
-                uint32_t messageCount, 
-                uint32_t producerNumber);
+            explicit TestMessageProducer(
+                volatile bool * startSignal = 0, 
+                uint32_t messageCount = 100, 
+                uint32_t producerNumber = 1);
 
-            bool configure();
+//            virtual bool configure(ConfigurationNodePtr & config);
             virtual void run();
             void handle(Message & message);
 
         private:
-            volatile bool & startSignal_;
+            volatile bool * startSignal_;
             uint32_t messageCount_;
             uint32_t producerNumber_;
         };
 
         template<size_t Extra>
         TestMessageProducer<Extra>::TestMessageProducer(
-            volatile bool & startSignal, 
+            volatile bool * startSignal, 
             uint32_t messageCount, 
             uint32_t producerNumber)
             : startSignal_(startSignal)
@@ -53,9 +53,12 @@ namespace HighQueue
         void TestMessageProducer<Extra>::run()
         {
             outMessage_->setType(Message::TestMessage);
-            while(!startSignal_)
+            if(startSignal_)
             {
-                std::this_thread::yield();
+                while(!*startSignal_)
+                {
+                    std::this_thread::yield();
+                }
             }
             LogTrace("TestMessageProducer Start ");
             uint32_t messageNumber = 0;
