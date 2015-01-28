@@ -20,6 +20,7 @@ Producer::Producer(ConnectionPtr & connection, bool solo)
 , statFulls_(0)
 , statSkips_(0)
 , statPublishWaits_(0)
+, statPublishInLine_(0)
 , statPublishes_(0)
 , statSpins_(0)
 , statYields_(0)
@@ -129,11 +130,20 @@ void Producer::publish(Message & message)
         {
             ++statSkips_;
         }
-        while(publishPosition_ < reserved)
+        int64_t pending = reserved - publishPosition_;
+        while(pending > 0)
         {
             ++statPublishWaits_;
-            std::this_thread::yield();
-            std::atomic_thread_fence(std::memory_order::memory_order_acquire);
+            if(pending > 1)
+            {
+                ++statPublishInLine_;
+                std::this_thread::yield();
+            }
+            else
+            {
+                std::atomic_thread_fence(std::memory_order::memory_order_acquire);
+            }
+            pending = reserved - publishPosition_;
         }
         if(publishPosition_ == reserved)
         {
@@ -161,6 +171,7 @@ std::ostream & Producer::writeStats(std::ostream & out) const
                << " Full: " << statFulls_
                << " Skip: " << statSkips_
                << " WaitOtherPublishers: " << statPublishWaits_
+               << "/" << statPublishInLine_
                << " Spin: " << statSpins_ 
                << " Yield: " << statYields_ 
                << " Sleep: " << statSleeps_ 

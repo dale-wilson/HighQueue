@@ -67,6 +67,7 @@ namespace HighQueue
         uint64_t statFulls_;
         uint64_t statSkips_;
         uint64_t statPublishWaits_;
+        uint64_t statPublishInLine_;
         uint64_t statPublishes_;
         uint64_t statSpins_;
         uint64_t statYields_;
