@@ -9,8 +9,8 @@
 
 namespace HighQueue
 {
-	struct HighQReservePosition
-	{
+    struct HighQReservePosition
+    {
         AtomicPosition reservePosition_;
         Spinlock reserveSpinlock_;
     };

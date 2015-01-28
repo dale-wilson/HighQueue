@@ -37,7 +37,7 @@ namespace HighQueue
             { 
                 LogDebug("BinaryPassThru copy.");
                 outMessage_->appendBinaryCopy(message.get(), message.getUsed());
-				message.moveMetaInfoTo(*outMessage_);
+                message.moveMetaInfoTo(*outMessage_);
                 send(*outMessage_);
                 auto type = message.getType();
                 if(type == Message::MessageType::Shutdown)

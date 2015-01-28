@@ -179,8 +179,8 @@ namespace HighQueue
             else
             {
                 outMessage_->setType(Message::MulticastPacket);
-				auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
-				outMessage_->setTimestamp(timestamp);
+                auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+                outMessage_->setTimestamp(timestamp);
                 outMessage_->addUsed(bytesReceived);
                 send(*outMessage_);
                 startRead();

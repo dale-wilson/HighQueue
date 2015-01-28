@@ -17,11 +17,11 @@ namespace HighQueue
     /// this object, you will need a Message which has been initialized
     /// by calling the Connection::allocate() method.
     class HighQueue_Export Consumer
-	{
-	public:
+    {
+    public:
         /// @brief Construct and attach to a connection
         /// @param connection provides access to the HighQueue
-		Consumer(ConnectionPtr & connection);
+        Consumer(ConnectionPtr & connection);
 
         ~Consumer();
 
@@ -75,5 +75,5 @@ namespace HighQueue
         uint64_t statYields_;
         uint64_t statSleeps_;
         uint64_t statWaits_;
-	};
+    };
 }

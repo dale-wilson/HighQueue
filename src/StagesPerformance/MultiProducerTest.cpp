@@ -78,8 +78,8 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         uint32_t perConsumer = perProducer * producerCount;
 
         volatile bool startSignal = false;
-		typedef std::vector<StagePtr> Stages;
-		Stages stages;
+        typedef std::vector<StagePtr> Stages;
+        Stages stages;
         for(uint32_t producerNumber = 0; producerNumber < producerCount; ++producerNumber)
         {
             auto producer = std::make_shared<ProducerType>(&startSignal, perProducer, producerNumber);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
 
             auto queueProducer = std::make_shared<QueueProducer>();
             stages.emplace_back(queueProducer);
-			queueProducer->configureSolo(producerCount == 1);
+            queueProducer->configureSolo(producerCount == 1);
             producer->attachDestination(queueProducer);
             queueProducer->attachConnection(connection);
         }
@@ -97,15 +97,15 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         stages.emplace_back(queueConsumer);
         queueConsumer->attachConnection(connection);
         auto consumer = std::make_shared<ConsumerType>(perConsumer);
-		stages.emplace_back(consumer);
+        stages.emplace_back(consumer);
 
 #define USE_T 1
 #ifdef USE_T
-		auto tee = std::make_shared<Tee>();
-		stages.emplace_back(tee);
-		tee->attachOutputStream(& std::cerr);
-		queueConsumer->attachDestination(tee);
-		tee->attachDestination(consumer);
+        auto tee = std::make_shared<Tee>();
+        stages.emplace_back(tee);
+        tee->attachOutputStream(& std::cerr);
+        queueConsumer->attachDestination(tee);
+        tee->attachDestination(consumer);
 #else // USE_T
         queueConsumer->attachDestination(consumer);
 #endif // USE_T
@@ -114,14 +114,14 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
             stage->validate();
         }
 
-		for (auto stage : ReverseRange<Stages>(stages))
+        for (auto stage : ReverseRange<Stages>(stages))
         {
             stage->start();
         }
 
-		////////////////////////
-		// Begin the actual test.
-		Stopwatch timer;
+        ////////////////////////
+        // Begin the actual test.
+        Stopwatch timer;
         startSignal = true;
 
         while(!consumer->isStopping())
@@ -130,8 +130,8 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         }
 
         auto lapse = timer.nanoseconds();
-		// End the test
-		///////////////
+        // End the test
+        ///////////////
 
         for(auto stage : stages)
         {

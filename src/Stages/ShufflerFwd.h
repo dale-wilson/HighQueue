@@ -7,7 +7,7 @@ namespace HighQueue
 {
     namespace Stages
     {
-		class Shuffler;
-		typedef std::shared_ptr<Shuffler> ShufflerPtr;
+        class Shuffler;
+        typedef std::shared_ptr<Shuffler> ShufflerPtr;
     }
 }

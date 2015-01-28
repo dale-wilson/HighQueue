@@ -16,16 +16,20 @@ namespace HighQueue
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
+            static const std::string keyMessageCount;
+
             explicit TestMessageConsumer(uint32_t messageCount_ = 0);
+
+            virtual bool configure(ConfigurationNodePtr & config);
 
             uint32_t errors()const
             {
                 return sequenceError_ + unexpectedMessageError_;
             }
-			uint32_t messagesHandled()const
-			{
-				return messagesHandled_;
-			}
+            uint32_t messagesHandled()const
+            {
+                return messagesHandled_;
+            }
 
             ////////////////////////////
             // Implement Stage
@@ -37,8 +41,11 @@ namespace HighQueue
             uint32_t messagesHandled_;
             uint32_t nextSequence_;
             uint32_t sequenceError_;
-			uint32_t unexpectedMessageError_;
+            uint32_t unexpectedMessageError_;
         };
+
+        template<size_t Extra>
+        const std::string TestMessageConsumer<Extra>::keyMessageCount = "message_count";
 
         template<size_t Extra>
         TestMessageConsumer<Extra>::TestMessageConsumer(uint32_t messageCount_)
@@ -46,10 +53,51 @@ namespace HighQueue
             , messagesHandled_(0)
             , nextSequence_(0)
             , sequenceError_(0)
-			, unexpectedMessageError_(0)
+            , unexpectedMessageError_(0)
         {
             setName("TestMessageConsumer"); // default name
         }
+
+
+        template<size_t Extra>
+        bool TestMessageConsumer<Extra>::configure(ConfigurationNodePtr & config)
+        {
+            for(auto poolChildren = config->getChildren();
+                poolChildren->has();
+                poolChildren->next())
+            {
+                auto & parameter = poolChildren->getChild();
+                auto & key = parameter->getName();
+
+                if(key == keyName)
+                {
+                    parameter->getValue(name_);
+                }
+                else if(key == keyMessageCount)
+                {
+                    uint64_t messageCount;
+                    if(!config->getValue(messageCount))
+                    {
+                        LogFatal("TestMessagConsumer can't interpret value for " << keyMessageCount);
+                    }
+                    messageCount_ = uint32_t(messageCount);
+                }
+                else
+                {
+                    LogFatal("Unknown configuration parameter " << key << "  " << config->getName() << " "  << name_);
+                    return false;
+                }
+            }
+            
+            if(name_.empty())
+            {
+                LogFatal("Missing required parameter " << keyName << " for  " << config->getName() << ".");
+                return false;
+            }
+            return true;
+        }
+
+
 
         template<size_t Extra>
         void TestMessageConsumer<Extra>::handle(Message & message)
@@ -60,16 +108,16 @@ namespace HighQueue
                 default:
                 {
                     LogError("TestMessageConsumer::Expecting test message, not " << Message::toText(type));
-					++unexpectedMessageError_;  
-					return;
+                    ++unexpectedMessageError_;  
+                    return;
                 }
                 case Message::Shutdown:
                 {
-					if (messageCount_ == 0)
-					{
-						LogTrace("TestMessageConsumer: received Shutdown");
-						stop();
-					}
+                    if (messageCount_ == 0)
+                    {
+                        LogTrace("TestMessageConsumer: received Shutdown");
+                        stop();
+                    }
                     return;
                 }
                 case Message::TestMessage:

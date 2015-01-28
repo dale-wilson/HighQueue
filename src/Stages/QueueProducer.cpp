@@ -9,14 +9,14 @@ using namespace HighQueue;
 using namespace Stages;
 
 QueueProducer::QueueProducer()
-	: solo_(false)
+    : solo_(false)
 {
     setName("QueueProducer"); // default name
 }
 
 void QueueProducer::configureSolo(bool solo)
 {
-	solo_ = solo;
+    solo_ = solo;
 }
 
 bool QueueProducer::configure(const ConfigurationNodePtr & configuration)

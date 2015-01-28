@@ -38,6 +38,7 @@ namespace HighQueue
         class Stages_Export Stage: public std::enable_shared_from_this<Stage>
         {
         public:
+            static const std::string keyName;
             /// @brief Construct 
             /// Lifecycle 1: Constuct
             Stage();
@@ -83,9 +84,11 @@ namespace HighQueue
 
             /// @brief Handle a message.
             /// Lifecycle 6: Handle
+            /// Default behavior is to throw a runtime_error exception.
+            /// Override if this stage accepts incoming messages.
             /// @param message is the one to handle.
             /// @returns false if we should stop now.
-            virtual void handle(Message & message) = 0;
+            virtual void handle(Message & message);
 
             /// @brief Temporary stop sending to destination
             /// @lifecycle 7: Pause

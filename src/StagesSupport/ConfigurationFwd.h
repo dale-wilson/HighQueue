@@ -9,7 +9,7 @@ namespace HighQueue
 {
     namespace Stages
     {
-		class ConfigurationNode;
+        class ConfigurationNode;
         typedef std::shared_ptr<ConfigurationNode> ConfigurationNodePtr;
         class ConfigurationChildren;
         typedef std::shared_ptr<ConfigurationChildren> ConfigurationChildrenPtr;

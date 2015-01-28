@@ -16,20 +16,28 @@ namespace HighQueue
         {
         public:
             typedef TestMessage<Extra> ActualMessage;
+
+            static const std::string keyMessageCount;
+            static const std::string keyProducerNumber;
+
             explicit TestMessageProducer(
                 volatile bool * startSignal = 0, 
                 uint32_t messageCount = 100, 
                 uint32_t producerNumber = 1);
 
-//            virtual bool configure(ConfigurationNodePtr & config);
+            virtual bool configure(ConfigurationNodePtr & config);
             virtual void run();
-            void handle(Message & message);
 
         private:
             volatile bool * startSignal_;
             uint32_t messageCount_;
             uint32_t producerNumber_;
         };
+
+        template<size_t Extra>
+        const std::string TestMessageProducer<Extra>::keyMessageCount = "message_count";
+        template<size_t Extra>
+        const std::string TestMessageProducer<Extra>::keyProducerNumber = "producer_number";
 
         template<size_t Extra>
         TestMessageProducer<Extra>::TestMessageProducer(
@@ -44,10 +52,52 @@ namespace HighQueue
         }
 
         template<size_t Extra>
-        void TestMessageProducer<Extra>::handle(Message & message)
+        bool TestMessageProducer<Extra>::configure(ConfigurationNodePtr & config)
         {
-            throw std::runtime_error("TestMessageProducer does not accept incoming Messages");
+            for(auto poolChildren = config->getChildren();
+                poolChildren->has();
+                poolChildren->next())
+            {
+                auto & parameter = poolChildren->getChild();
+                auto & key = parameter->getName();
+
+                if(key == keyName)
+                {
+                    parameter->getValue(name_);
+                }
+                else if(key == keyMessageCount)
+                {
+                    uint64_t messageCount;
+                    if(!config->getValue(messageCount))
+                    {
+                        LogFatal("TestMessagProducer can't interpret value for " << keyMessageCount);
+                    }
+                    messageCount_ = uint32_t(messageCount);
+                }
+                else if(key == keyProducerNumber)
+                {
+                    uint64_t producerNumber;
+                    if(!config->getValue(producerNumber))
+                    {
+                        LogFatal("TestMessagProducer can't interpret value for " << keyProducerNumber);
+                    }
+                    producerNumber_ = uint32_t(producerNumber);
+                }
+                else
+                {
+                    LogFatal("Unknown configuration parameter " << key << "  " << config->getName() << " "  << name_);
+                    return false;
+                }
+            }
+            
+            if(name_.empty())
+            {
+                LogFatal("Missing required parameter " << keyName << " for  " << config->getName() << ".");
+                return false;
+            }
+            return true;
         }
+
 
         template<size_t Extra>
         void TestMessageProducer<Extra>::run()
@@ -66,7 +116,7 @@ namespace HighQueue
             {
                 LogVerbose("TestMessageProducer Publish " << messageNumber << '/' << messageCount_);
                 auto testMessage = outMessage_->emplace<ActualMessage>(producerNumber_, messageNumber);
-				outMessage_->setSequence(messageNumber);
+                outMessage_->setSequence(messageNumber);
                 send(*outMessage_);
                 ++messageNumber;
             }

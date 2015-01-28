@@ -34,29 +34,29 @@ namespace HighQueue
         class Stages_Export BoostPropertyTreeNode : public ConfigurationNode
         {
         public:
-			BoostPropertyTreeNode();
+            BoostPropertyTreeNode();
 
-			explicit BoostPropertyTreeNode(const std::string & name, boost::property_tree::ptree ptree);
-			
+            explicit BoostPropertyTreeNode(const std::string & name, boost::property_tree::ptree ptree);
+            
             /// @brief destruct
-			virtual ~BoostPropertyTreeNode();
+            virtual ~BoostPropertyTreeNode();
 
-			void loadJson(std::istream & propertyFile, const std::string & name = "json");
-			void loadJson(const std::string & propertyFileName);
+            void loadJson(std::istream & propertyFile, const std::string & name = "json");
+            void loadJson(const std::string & propertyFileName);
 
             virtual ConfigurationChildrenPtr getChildren();
-			virtual std::string getName();
-			virtual bool getValue(std::string & value, const std::string & defaultValue = "") const;
-			virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const;
-			virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const;
-			virtual bool getValue(double & value, double defaultValue = 0L) const;
+            virtual std::string getName();
+            virtual bool getValue(std::string & value, const std::string & defaultValue = "") const;
+            virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const;
+            virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const;
+            virtual bool getValue(double & value, double defaultValue = 0L) const;
             virtual bool getValue(bool & value, bool defaultValue) const;
         private:
             template <typename Type, typename DefaultType>
             bool getTypedValue(Type & value, DefaultType defaultValue) const;
-		private:
+        private:
             std::string name_;
-			boost::property_tree::ptree ptree_;
+            boost::property_tree::ptree ptree_;
         };
 
         template <typename Type, typename DefaultType>

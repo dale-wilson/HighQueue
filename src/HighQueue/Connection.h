@@ -23,10 +23,10 @@ namespace HighQueue
     /// @see HighQueue::Consumer
     /// @see HighQueue::Message
     class HighQueue_Export Connection
-	{
-	public:
+    {
+    public:
         /// @brief Construct.
-		Connection();
+        Connection();
             
         ~Connection();
 

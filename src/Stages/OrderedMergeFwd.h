@@ -7,7 +7,7 @@ namespace HighQueue
 {
     namespace Stages
     {
-		class OrderedMerge;
-		typedef std::shared_ptr<OrderedMerge> OrderedMergePtr;
+        class OrderedMerge;
+        typedef std::shared_ptr<OrderedMerge> OrderedMergePtr;
     }
 }

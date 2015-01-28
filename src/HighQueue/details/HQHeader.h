@@ -96,7 +96,7 @@ namespace HighQueue
         bool consumerWaiting_;
 
         /// @brief Initialize the header during construction of a HighQueue
-	    HQHeader(
+        HQHeader(
             const std::string & name, 
             HQAllocator & allocator, 
             const CreationParameters & parameters,

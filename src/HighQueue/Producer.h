@@ -16,14 +16,14 @@ namespace HighQueue
     /// this object, you will need a Message which has been initialized
     /// by calling the Connection::allocate() method.
     class HighQueue_Export Producer
-	{
+    {
     public:
         /// @brief Construct and attach to a connection
         /// @param connection provides access to the HighQueue
         /// @param solo indicates that this is the only producer.
         ///        solo producers run faster using techniques that would be 
         ///        unsafe with multiple producers.
-		explicit Producer(ConnectionPtr & connection, bool solo = false);  
+        explicit Producer(ConnectionPtr & connection, bool solo = false);  
 
         /// @brief Destructor
         ~Producer();
@@ -74,5 +74,5 @@ namespace HighQueue
         uint64_t statWaits_;
 
 
-	};
+    };
 }

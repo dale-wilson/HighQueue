@@ -8,6 +8,8 @@
 using namespace HighQueue;
 using namespace Stages;
 
+const std::string Stage::keyName = "name";
+
 Stage::Stage()
     : paused_(false)
     , stopping_(false)
@@ -75,6 +77,14 @@ void Stage::validate()
 void Stage::start()
 {
 }
+
+void Stage::handle(Message & message)
+{
+    std::stringstream msg;
+    msg << "Stage " << name_ << " does not accept incoming Messages.";
+    throw std::runtime_error(msg.str());
+}
+
 
 void Stage::pause()
 {

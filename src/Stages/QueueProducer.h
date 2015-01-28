@@ -16,7 +16,7 @@ namespace HighQueue
         public:
             QueueProducer();
 
-			void configureSolo(bool solo);
+            void configureSolo(bool solo);
 
             // Implement Stage
             virtual void handle(Message & message);
@@ -26,7 +26,7 @@ namespace HighQueue
 
             virtual void validate();
         private:
-			bool solo_;
+            bool solo_;
             ConnectionPtr connection_;
             std::unique_ptr<Producer> producer_;
         };

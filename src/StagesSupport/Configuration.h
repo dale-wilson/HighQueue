@@ -34,37 +34,37 @@ namespace HighQueue
         {
         public:
             /// @brief destruct
-			virtual ~ConfigurationNode();
+            virtual ~ConfigurationNode();
 
             virtual ConfigurationChildrenPtr getChildren() = 0;
 
             /// @brief Get the name of this node.
-			virtual std::string getName() = 0;
+            virtual std::string getName() = 0;
 
             /// @brief Typesave get of the value associated with this node as a string
             /// @param[out] value receives the value.
             /// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getValue(std::string & value, const std::string & defaultValue = "") const = 0;
+            virtual bool getValue(std::string & value, const std::string & defaultValue = "") const = 0;
 
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const;
+            /// @brief Typesave get of the value associated with this node as a string
+            /// @param[out] value receives the value.
+            /// @param defaultValue is assigned to value if this node does not have a string value.
+            virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const;
 
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const;
+            /// @brief Typesave get of the value associated with this node as a string
+            /// @param[out] value receives the value.
+            /// @param defaultValue is assigned to value if this node does not have a string value.
+            virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const;
 
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getValue(double & value, double defaultValue = 0.0L) const;
+            /// @brief Typesave get of the value associated with this node as a string
+            /// @param[out] value receives the value.
+            /// @param defaultValue is assigned to value if this node does not have a string value.
+            virtual bool getValue(double & value, double defaultValue = 0.0L) const;
 
-			/// @brief Typesave get of the value associated with this node as a string
-			/// @param[out] value receives the value.
-			/// @param defaultValue is assigned to value if this node does not have a string value.
-			virtual bool getValue(bool & value, bool defaultValue = false) const;
+            /// @brief Typesave get of the value associated with this node as a string
+            /// @param[out] value receives the value.
+            /// @param defaultValue is assigned to value if this node does not have a string value.
+            virtual bool getValue(bool & value, bool defaultValue = false) const;
         };
    }
 }

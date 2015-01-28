@@ -10,9 +10,9 @@ namespace HighQueue
 {
     /// @brief A helper class to assist in memory allocation in an infinite vector.
     /// Works in offsets
-	class HQAllocator
-	{
-	public:
+    class HQAllocator
+    {
+    public:
         /// @brief Construct 
         /// @param available how many bytes do we have from which to allocate?
         /// @param initialPosition where should allocation begin?
@@ -58,5 +58,5 @@ namespace HighQueue
     private:
         size_t available_;
         Offset position_;
-	};
+    };
 }

@@ -14,10 +14,10 @@ namespace HighQueue
         class Shuffler : public StageToMessage
         {
         public:
-			static const size_t relativelyPrime_ = 101;
+            static const size_t relativelyPrime_ = 101;
             Shuffler(size_t lookAhead = 50);
 
-			virtual void attachConnection(const ConnectionPtr & connection);
+            virtual void attachConnection(const ConnectionPtr & connection);
             virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
 
             virtual void validate();
@@ -33,13 +33,13 @@ namespace HighQueue
         private:
             size_t lookAhead_;
             std::vector<Message> pendingMessages_;
-			uint64_t position_;
+            uint64_t position_;
         };
 
         inline
         Shuffler::Shuffler(size_t lookAhead)
             : lookAhead_(lookAhead)
-			, position_(0)
+            , position_(0)
         {
             setName("Shuffler"); // default name
         }
@@ -95,39 +95,39 @@ namespace HighQueue
         inline
         void Shuffler::handleHeartbeat(Message & message)
         {
-			publishPendingMessages();
-		}
+            publishPendingMessages();
+        }
 
         inline
         void Shuffler::handleShutdown(Message & message)
         {
-			// make the user call stop();
-			handleDataMessage(message);
-			publishPendingMessages();
-		}
+            // make the user call stop();
+            handleDataMessage(message);
+            publishPendingMessages();
+        }
 
         inline
         void Shuffler::handleDataMessage(Message & message)
         {
-			position_ += relativelyPrime_;
-			size_t index = position_ % lookAhead_;
-			if(!pendingMessages_[index].isEmpty())
-			{
-				send(pendingMessages_[index]);
-			}
-			message.moveTo(pendingMessages_[index]);
+            position_ += relativelyPrime_;
+            size_t index = position_ % lookAhead_;
+            if(!pendingMessages_[index].isEmpty())
+            {
+                send(pendingMessages_[index]);
+            }
+            message.moveTo(pendingMessages_[index]);
         }
 
         inline
         void Shuffler::publishPendingMessages()
         {
-			for(auto & message : pendingMessages_)
-			{
-				if(!message.isEmpty())
-				{
-					send(message);
-				}
-			}
-		}
+            for(auto & message : pendingMessages_)
+            {
+                if(!message.isEmpty())
+                {
+                    send(message);
+                }
+            }
+        }
    }
 }

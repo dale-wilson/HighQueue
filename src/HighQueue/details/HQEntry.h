@@ -10,9 +10,9 @@
 
 namespace HighQueue
 {
-	PRE_CACHE_ALIGN
-	struct HighQEntry
-	{
+    PRE_CACHE_ALIGN
+    struct HighQEntry
+    {
         enum Status : uint8_t
         {
             OK,
@@ -34,5 +34,5 @@ namespace HighQueue
             return HQAllocator::align(sizeof(HighQEntry), CacheLineSize);
         }
 
-	} POST_CACHE_ALIGN;
+    } POST_CACHE_ALIGN;
 }

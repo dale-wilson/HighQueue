@@ -20,7 +20,7 @@ namespace
 #else // ENABLE_testNormalMessages
 BOOST_AUTO_TEST_CASE(testNormalMessages)
 {
-	BOOST_CHECK_LE(sizeof(Message), CacheLineSize);
+    BOOST_CHECK_LE(sizeof(Message), CacheLineSize);
     static const size_t messageSize = sizeof(alphabet);
     static const size_t messageCount = 2;
  

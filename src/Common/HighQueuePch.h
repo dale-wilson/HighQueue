@@ -37,11 +37,11 @@
 //     } POST_CACHE_ALIGN;
 const size_t CacheLineSize = 64;
 #if defined(_MSC_VER)
-#	define PRE_CACHE_ALIGN __declspec(align(64))
+#    define PRE_CACHE_ALIGN __declspec(align(64))
 #   define POST_CACHE_ALIGN
 #else // gcc?
 #   define PRE_CACHE_ALIGN
-#	define POST_CACHE_ALIGN __attribute__ ((aligned (64)))
+#    define POST_CACHE_ALIGN __attribute__ ((aligned (64)))
 #endif // _MSC_VER
 
 // This reports at compile time which boost libraries will be used

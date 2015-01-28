@@ -77,14 +77,14 @@ void BoostPropertyTreeNode::loadJson(std::istream & propertyFile, const std::str
 {
     LogTrace("BoostPropertyTreeNode: Load Json from stream: " << name);
     name_ = name;
-	boost::property_tree::json_parser::read_json(propertyFile, ptree_);
+    boost::property_tree::json_parser::read_json(propertyFile, ptree_);
 }
 
 void BoostPropertyTreeNode::loadJson(const std::string & propertyFileName)
 {
     LogTrace("BoostPropertyTreeNode: Load Json from file: " << propertyFileName);
     name_ = propertyFileName;
-	boost::property_tree::json_parser::read_json(propertyFileName, ptree_);
+    boost::property_tree::json_parser::read_json(propertyFileName, ptree_);
 }
 
 

@@ -24,7 +24,7 @@ namespace HighQueue
             uint32_t messagesHandled_;
         };
 
-		inline
+        inline
         ForwardPassThru::ForwardPassThru(uint32_t messageCount)
             : messageCount_(messageCount)
             , messagesHandled_(0)
@@ -32,13 +32,13 @@ namespace HighQueue
             setName("ForwardPassThru"); // default name
         }
 
-		inline
+        inline
         void ForwardPassThru::handle(Message & message)
         {
             if(!stopping_)
             { 
                 LogTrace("ForwardPassThru copy.");
-				send(message);
+                send(message);
                 ++messagesHandled_;
                 if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
                 {

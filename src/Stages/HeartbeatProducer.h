@@ -103,8 +103,8 @@ namespace HighQueue
             {
                 outMessage_->setType(Message::Heartbeat);
                 auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
-				outMessage_->setTimestamp(timestamp);
-				outMessage_->appendBinaryCopy(&timestamp, sizeof(timestamp));
+                outMessage_->setTimestamp(timestamp);
+                outMessage_->appendBinaryCopy(&timestamp, sizeof(timestamp));
                 LogTrace("Publish Heartbeat: " << timestamp);
                 send(*outMessage_);
             }

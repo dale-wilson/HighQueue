@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     connection->createLocal("LocalIv", parameters);
 
     Producer producer1(connection, true);
-	Consumer consumer(connection);
+    Consumer consumer(connection);
     Message producerMessage(connection);
     Message consumerMessage(connection);
 
@@ -51,21 +51,21 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
             BOOST_CHECK_EQUAL(nMessage, testMessage->getSequence());
         }
     }
-	auto consumeTime = timer.nanoseconds();
+    auto consumeTime = timer.nanoseconds();
 
-	Producer producer2(connection, false);
-	for (uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
-	{
-		producerMessage.emplace<ActualMessage>(1, nMessage);
-		producer2.publish(producerMessage);
-	}
-	auto publishNotSolo = timer.nanoseconds();
+    Producer producer2(connection, false);
+    for (uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
+    {
+        producerMessage.emplace<ActualMessage>(1, nMessage);
+        producer2.publish(producerMessage);
+    }
+    auto publishNotSolo = timer.nanoseconds();
 
     std::cout << entryCount << " messages. " << std::endl
-		<< "   Publish (solo)     " << publishSoloTime << " = " << publishSoloTime / entryCount << " nsec./msg " << std::endl
-		<< "   Publish (not solo) " << publishNotSolo << " = " << publishNotSolo / entryCount << " nsec./msg " << std::endl
-		<< "   Consume            " << consumeTime << " = " << consumeTime / entryCount << " nsec./msg" << std::endl;
-	std::cout << std::endl;
+        << "   Publish (solo)     " << publishSoloTime << " = " << publishSoloTime / entryCount << " nsec./msg " << std::endl
+        << "   Publish (not solo) " << publishNotSolo << " = " << publishNotSolo / entryCount << " nsec./msg " << std::endl
+        << "   Consume            " << consumeTime << " = " << consumeTime / entryCount << " nsec./msg" << std::endl;
+    std::cout << std::endl;
 
 }
 #endif // ENABLECONSUME_SEPARATELY
