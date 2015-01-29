@@ -4,9 +4,14 @@
 #include <StagesSupport/StagePch.h>
 
 #include "Tee.h"
+#include <StagesSupport/StageFactory.h>
 using namespace HighQueue;
 using namespace Stages;
 
+namespace
+{
+    Registrar<Tee> registerTee("tee");
+}
 
 const std::string Tee::keyOutput = "output";
 

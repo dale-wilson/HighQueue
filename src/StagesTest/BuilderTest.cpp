@@ -7,14 +7,10 @@
 
 #include <StagesSupport/BoostPropertyTreeConfiguration.h>
 #include <StagesSupport/Builder.h>
-
+#include <StagesSupport/Stage.h>
+#include <StagesSupport/StageFactory.h>
 using namespace HighQueue;
 using namespace Stages;
-
-#define ENABLE_PERFORMANCE_TEST 01
-#if ! ENABLE_PERFORMANCE_TEST
-#pragma message ("ENABLE_PERFORMANCE_TEST " __FILE__)
-#else // ENABLE_PERFORMANCE_TEST
 
 namespace
 {
@@ -47,22 +43,56 @@ R"json({
 
 }
 
-//bool build(std::string &configFileName);
-//bool build(std::istream & configFile, const std::string & name);
-//
-//bool Builder::build(std::string &configFileName)
-//{
-//    BoostPropertyTreeNode config;
-//    config.loadJson(configFileName);
-//    return load(config);
-//}
-//
-//bool Builder::build(std::istream & configFile, const std::string & name)
-//{
-//    BoostPropertyTreeNode config;
-//    config.loadJson(configFile, name);
-//    return load(config);
-//}
+
+#define ENABLE_FACTORY_TEST 01
+#if ! ENABLE_FACTORY_TEST
+#pragma message ("ENABLE_FACTORY_TEST " __FILE__)
+#else // ENABLE_FACTORY_TEST
+
+namespace
+{
+    class MockStage : public Stage
+    {
+    public:
+        MockStage()
+        {
+            LogTrace("Construct Mock Stage @" << (void*)this);
+        }
+        virtual ~MockStage()
+        {
+            LogTrace("Destruct Mock Stage @" << (void*)this);
+        }
+
+    };
+}
+BOOST_AUTO_TEST_CASE(TestFactory)
+{
+    std::cout << "TestFactory" << std::endl;
+
+    const std::string stageName = "MockStage";
+
+    auto stagemaker = [](){ return std::make_shared<MockStage>();};
+
+    StageFactory::registerMaker(stageName, stagemaker);
+
+    auto madeStage = StageFactory::make(stageName);
+    BOOST_CHECK(madeStage);
+
+    auto madeTee = StageFactory::make("tee");
+    BOOST_CHECK(madeTee);
+
+    auto madeFail = StageFactory::make("nonexistent_stage");
+    BOOST_CHECK(!madeFail);
+
+    StageFactory::list(std::cerr << "Registry: ") << std::endl;
+}
+
+#endif // ENABLE_BUILDER_TEST
+
+#define ENABLE_BUILDER_TEST 01
+#if ! ENABLE_BUILDER_TEST
+#pragma message ("ENABLE_BUILDER_TEST " __FILE__)
+#else // ENABLE_BUILDER_TEST
 
 
 BOOST_AUTO_TEST_CASE(TestBuilder)
@@ -79,4 +109,4 @@ BOOST_AUTO_TEST_CASE(TestBuilder)
 
 }
 
-#endif // ENABLE_PERFORMANCE_TEST
+#endif // ENABLE_BUILDER_TEST

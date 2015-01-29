@@ -28,7 +28,6 @@ namespace HighQueue
             const std::string keyAsio = "asio";
             const std::string keyPipe = "pipe";
             const std::string keyPool = "memory_pool";
-
         }
 
         class Stages_Export Builder

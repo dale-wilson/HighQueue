@@ -14,7 +14,6 @@
 #include <StagesSupport/AsioService.h>
 #include <StagesSupport/Stage.h>
 
-
 using namespace HighQueue;
 using namespace Stages;
 
