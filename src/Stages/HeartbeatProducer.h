@@ -3,8 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include "HeartbeatProducerFwd.h"
-#include <StagesSupport/ThreadedStageToMessage.h>
-#include <StagesSupport/AsioService.h>
+#include <StagesSupport/AsioStageToMessage.h>
 
 #include <Common/Log.h>
 
@@ -12,22 +11,18 @@ namespace HighQueue
 {
     namespace Stages
     {
-        class HeartbeatProducer : public ThreadedStageToMessage
+        class HeartbeatProducer : public AsioStageToMessage
         {
         public:
             HeartbeatProducer(std::chrono::milliseconds interval = std::chrono::milliseconds(1000));
 
-            virtual void attachIoService(const AsioServicePtr & ioService);
-            virtual void run();
+            virtual void start();
             virtual void stop();
-
-            virtual void handle(Message & message);
 
         private:
             void startTimer();
             void handleTimer(const boost::system::error_code& error);
         private:
-            AsioServicePtr ioService_;
             typedef boost::asio::deadline_timer Timer;
             typedef boost::posix_time::millisec Interval;
             Interval interval_;
@@ -44,37 +39,20 @@ namespace HighQueue
         }
 
         inline
-        void HeartbeatProducer::handle(Message & message)
+        void HeartbeatProducer::start()
         {
-            throw std::runtime_error("HeartbeatProducer does not accept incoming Messages");
-        }
-
-        inline
-        void HeartbeatProducer::attachIoService(const AsioServicePtr & ioService)
-        {
-            ioService_ = ioService;
-            timer_.reset(new Timer(*ioService));
-        }
-
-        inline
-        void HeartbeatProducer::run()
-        {
+            timer_.reset(new Timer(*ioService_));
             startTimer();
-            while(!stopping_)
-            {
-                ioService_->run_one();
-            }
         }
 
         inline
         void HeartbeatProducer::stop()
         {
-            LogTrace("***HeartbeatProducer Stopping");
-            ThreadedStageToMessage::stop();
             LogTrace("***HeartbeatProducer Cancel Timer");
             cancel_ = true;
             timer_->cancel();
-            LogTrace("***HeartbeatProducer stop exits");
+            LogTrace("***HeartbeatProducer Stopping");
+            AsioStageToMessage::stop();
         }
 
         inline

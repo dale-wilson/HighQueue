@@ -66,7 +66,14 @@ void Tee::start()
     else
     {
         outfile_.open(outputName_);
-        out_ = & outfile_;
+        if(outfile_.good())
+        {
+            out_ = & outfile_;
+        }
+        else
+        {
+            LogError("Tee processor cannot open output file " << outputName_);
+        }
     }
 }
 

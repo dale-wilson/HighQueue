@@ -157,6 +157,8 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
         stage->start();
     }
 
+    asio->runThreads(1, false);
+
     //////////////////
     // start the test
     Stopwatch timer;
@@ -172,6 +174,9 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     {
         stage->stop();
     }
+
+    asio->stopService();
+    asio->joinThreads();
 
     for(auto stage : stages)
     {

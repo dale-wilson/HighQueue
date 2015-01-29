@@ -15,7 +15,7 @@ typedef TestMessage<20> ActualMessage;
 BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
     WaitStrategy strategy;
-    size_t entryCount = 100000;
+    size_t entryCount = 10000000;
     size_t messageSize = sizeof(ActualMessage);
     size_t messagesNeeded = entryCount + 10;
     bool discardMessagesIfNoConsumer = false;

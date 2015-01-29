@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         auto consumer = std::make_shared<ConsumerType>(perConsumer);
         stages.emplace_back(consumer);
 
-#define USE_T 1
-#ifdef USE_T
+#define USE_T 0
+#if USE_T
         auto tee = std::make_shared<Tee>();
         stages.emplace_back(tee);
         tee->attachOutputStream(& std::cerr);
@@ -109,12 +109,12 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
 #else // USE_T
         queueConsumer->attachDestination(consumer);
 #endif // USE_T
-        for(auto stage : stages)
+        for(auto & stage : stages)
         { 
             stage->validate();
         }
 
-        for (auto stage : ReverseRange<Stages>(stages))
+        for (auto & stage : ReverseRange<Stages>(stages))
         {
             stage->start();
         }
@@ -133,12 +133,12 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         // End the test
         ///////////////
 
-        for(auto stage : stages)
+        for(auto & stage : stages)
         {
             stage->stop();
         }
 
-        for(auto stage : stages)
+        for(auto & stage : stages)
         {
             stage->finish();
         }
