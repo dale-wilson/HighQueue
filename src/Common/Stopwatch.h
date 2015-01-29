@@ -3,6 +3,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 
+#include <Common/HighQueue_Export.h>
+
 namespace HighQueue
 {
     /// @brief Stopwatch measures time intervals
@@ -12,7 +14,7 @@ namespace HighQueue
     /// The watch continues to run after a lapsed time is captured.
     ///
     /// The reset() method resets the lapse time to zero.  The watch continues to run.
-    class Stopwatch
+    class HighQueue_Export Stopwatch
     {
     public:
         /// @brief Convenient number for time calculaions.
@@ -59,15 +61,20 @@ namespace HighQueue
         }
 
         /// @brief Get the current time in nanoseconds in some arbitrary epoch.
-        static uint64_t now()
-        {
-            auto point = std::chrono::high_resolution_clock::now();
-            std::chrono::nanoseconds duration = point.time_since_epoch();
-            return duration.count();
-        }
+        static uint64_t now();
 
     private:
         uint64_t start_;
     };
+
+#ifndef _WIN32 // Windows' chrono implementation is brain-dead (as of Vc12/vs2013)  Don't use it.
+    inline
+    uint64_t Stopwatch::now()
+    {
+        auto point = std::chrono::high_resolution_clock::now();
+        std::chrono::nanoseconds duration = point.time_since_epoch();
+        return duration.count();
+    }       
+#endif // _WIN32
 
 } // namespace HighQueue
