@@ -4,9 +4,16 @@
 #include <StagesSupport/StagePch.h>
 
 #include "QueueProducer.h"
+#include <StagesSupport/StageFactory.h>
 
 using namespace HighQueue;
 using namespace Stages;
+
+namespace
+{
+    Registrar<QueueProducer> registerStage("queue_producer");
+}
+
 
 QueueProducer::QueueProducer()
     : solo_(false)

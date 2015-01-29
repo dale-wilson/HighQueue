@@ -10,7 +10,7 @@ using namespace Stages;
 
 namespace
 {
-    Registrar<Tee> registerTee("tee");
+    Registrar<Tee> registerStage("tee");
 }
 
 const std::string Tee::keyOutput = "output";

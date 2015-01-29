@@ -4,9 +4,16 @@
 #include <StagesSupport/StagePch.h>
 
 #include "QueueConsumer.h"
+#include <StagesSupport/StageFactory.h>
 
 using namespace HighQueue;
 using namespace Stages;
+
+namespace
+{
+    Registrar<QueueConsumer> registerStage("queue_consumer");
+}
+
 
 QueueConsumer::QueueConsumer()
 :stopOnShutdownMessage_(false)
