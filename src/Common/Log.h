@@ -67,35 +67,74 @@ namespace HighQueue
         return runtimeLevel;
     }
 
-#define LogForce(message) do{std::stringstream msg; msg << message; Log::log(Log::FORCE, __FILE__, __func__, __LINE__, msg.str());}while(false)
-#define LogFatal(message) do{if(Log::isEnabled(Log::FATAL)){std::stringstream msg; msg << message; Log::log(Log::FATAL, __FILE__, __func__, __LINE__, msg.str());}}while(false)
-#define LogError(message) do{if(Log::isEnabled(Log::ERROR)){std::stringstream msg; msg << message; Log::log(Log::ERROR, __FILE__, __func__, __LINE__, msg.str());}}while(false)
+
+#define LogTyped(type, message)\
+    do{\
+        std::stringstream msg;\
+        msg << message;\
+        Log::log(Log::type, __FILE__, __func__, __LINE__, msg.str());\
+    }while(false)
+
+#define LogTypedLimited(type, limit, message)\
+    do{\
+        static size_t remaining__ = limit;\
+        if(remaining__ > 0){\
+            --remaining__;\
+            std::stringstream msg__;\
+            msg__ << (remaining__ == 0 ? "Last time: " : "") << message;\
+            Log::log(Log::type, __FILE__, __func__, __LINE__, msg__.str());\
+            }\
+        }while(false)
+
+#define LogDisabled do{}while(false)
+
+#define LogForce(message) LogTyped(FORCE, message)
+#define LogForceLimited(limit, message) LogTypedLimited(FORCE, limit, message)
+
+#define LogFatal(message) LogTyped(FATAL, message)
+#define LogFatalLimited(limit, message) LogTypedLimited(FATAL, limit, message)
+
+#define LogError(message) LogTyped(ERROR, message)
+#define LogErrorLimited(limit, message) LogTypedLimited(ERROR, limit, message)
 
 #if (LOG_LEVEL_WARNING <= COMPILE_TIME_LOG_LEVEL)
-#define LogWarning(message) do{if(Log::isEnabled(Log::WARNING)){std::stringstream msg; msg << message; Log::log(Log::WARNING, __FILE__, __func__, __LINE__, msg.str());}}while(false)
+#define LogWarning(message) LogTyped(WARNING, message)
+#define LogWarningLimited(limit, message) LogTypedLimited(WARNING, limit, message)
 #else // LOG_LEVEL_WARNING 
-#define LogWarning(message) do{}while(false)
+#define LogWarning(message) LogDisabled
+#define LogWarningLimited(limited, message) LogDisabled
 #endif // LOG_LEVEL_WARNING 
 
 #if (LOG_LEVEL_INFO <= COMPILE_TIME_LOG_LEVEL)
-#define LogInfo(message) do{if(Log::isEnabled(Log::INFO)){std::stringstream msg; msg << message; Log::log(Log::INFO, __FILE__, __func__, __LINE__, msg.str());}}while(false)
+#define LogInfo(message) LogTyped(INFO, message)
+#define LogInfoLimited(limit, message) LogTypedLimited(INFO, limit, message)
 #else // LOG_LEVEL_INFO 
-#define LogInfo(message) do{}while(false)
+#define LogInfo(message) LogDisabled
+#define LogInfoLimited(limit, message) LogDisabled
 #endif // LOG_LEVEL_INFO 
+
 #if (LOG_LEVEL_DEBUG <= COMPILE_TIME_LOG_LEVEL)
-#define LogDebug(message) do{if(Log::isEnabled(Log::DEBUG)){std::stringstream msg; msg << message; Log::log(Log::DEBUG, __FILE__, __func__, __LINE__, msg.str());}}while(false)
+#define LogDebug(message) LogTyped(DEBUG, message)
+#define LogDebugLimited(limit, message) LogTypedLimited(DEBUG, limit, message)
 #else // LOG_LEVEL_DEBUG 
-#define LogDebug(message) do{}while(false)
+#define LogDebug(message) LogDisabled
+#define LogDebugLimited(limit, message) LogDisabled
 #endif // LOG_LEVEL_DEBUG 
+
 #if (LOG_LEVEL_TRACE <= COMPILE_TIME_LOG_LEVEL)
-#define LogTrace(message) do{if(Log::isEnabled(Log::TRACE)){std::stringstream msg; msg << message; Log::log(Log::TRACE, __FILE__, __func__, __LINE__, msg.str());}}while(false)
+#define LogTrace(message) LogTyped(TRACE, message)
+#define LogTraceLimited(limit, message) LogTypedLimited(TRACE, limit, message)
 #else // LOG_LEVEL_TRACE 
-#define LogTrace(message) do{}while(false)
+#define LogTrace(message) LogDisabled
+#define LogTraceLimited(limit, message) LogDisabled
 #endif // LOG_LEVEL_TRACE 
+
 #if (LOG_LEVEL_VERBOSE <= COMPILE_TIME_LOG_LEVEL)
-#define LogVerbose(message) do{if(Log::isEnabled(Log::VERBOSE)){std::stringstream msg; msg << message; Log::log(Log::VERBOSE, __FILE__, __func__, __LINE__, msg.str());}}while(false)
+#define LogVerbose(message) LogTyped(VERBOSE, message)
+#define LogVerboseLimited(limit, message) LogTypedLimited(VERBOSE, limit, message)
 #else // LOG_LEVEL_VERBOSE 
-#define LogVerbose(message) do{}while(false)
+#define LogVerbose(message) LogDisabled
+#define LogVerboseLimited(limit, message) LogDisabled
 #endif // LOG_LEVEL_VERBOSE 
 
 } // namespace HighQueue

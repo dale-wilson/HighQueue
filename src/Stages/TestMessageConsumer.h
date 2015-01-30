@@ -126,7 +126,7 @@ namespace HighQueue
                     LogDebug("TestMessageConsumer: " << testMessage->getSequence());
                     if(nextSequence_ != testMessage->getSequence())
                     {
-                        LogForce("Expecting " << nextSequence_ << " received " << testMessage->getSequence());
+                        LogWarningLimited(10, "Expecting " << nextSequence_ << " received " << testMessage->getSequence());
                         ++sequenceError_;
                         nextSequence_ = testMessage->getSequence();
                     }
