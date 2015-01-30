@@ -494,11 +494,11 @@ bool PipeBuilder::interpretParameter(const std::string & key, ConfigurationNodeP
     }
     else if(key == stageTestMessageConsumer)
     {
-        stage = std::make_shared<TestMessageConsumer<10>>();
+        stage = std::make_shared<TestMessageConsumer<SmallTestMessage> >();
     }
     else if(key == stageTestMessageProducer)
     {
-        stage = std::make_shared<TestMessageProducer<10>>();
+        stage = std::make_shared<TestMessageProducer<SmallTestMessage> >();
     }
     else
     {

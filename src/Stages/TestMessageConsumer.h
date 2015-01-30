@@ -11,11 +11,11 @@ namespace HighQueue
 {
     namespace Stages
     {
-        template<size_t Extra = 0>
+        template<typename TestMessageType>
         class TestMessageConsumer : public Stage
         {
         public:
-            typedef TestMessage<Extra> ActualMessage;
+            typedef TestMessageType ActualMessage;
             static const std::string keyMessageCount;
 
             explicit TestMessageConsumer(uint32_t messageCount_ = 0);
@@ -44,11 +44,11 @@ namespace HighQueue
             uint32_t unexpectedMessageError_;
         };
 
-        template<size_t Extra>
-        const std::string TestMessageConsumer<Extra>::keyMessageCount = "message_count";
+        template<typename TestMessageType>
+        const std::string TestMessageConsumer<TestMessageType>::keyMessageCount = "message_count";
 
-        template<size_t Extra>
-        TestMessageConsumer<Extra>::TestMessageConsumer(uint32_t messageCount_)
+        template<typename TestMessageType>
+        TestMessageConsumer<TestMessageType>::TestMessageConsumer(uint32_t messageCount_)
             : messageCount_(messageCount_)
             , messagesHandled_(0)
             , nextSequence_(0)
@@ -59,8 +59,8 @@ namespace HighQueue
         }
 
 
-        template<size_t Extra>
-        bool TestMessageConsumer<Extra>::configure(ConfigurationNodePtr & config)
+        template<typename TestMessageType>
+        bool TestMessageConsumer<TestMessageType>::configure(ConfigurationNodePtr & config)
         {
             for(auto poolChildren = config->getChildren();
                 poolChildren->has();
@@ -99,8 +99,8 @@ namespace HighQueue
 
 
 
-        template<size_t Extra>
-        void TestMessageConsumer<Extra>::handle(Message & message)
+        template<typename TestMessageType>
+        void TestMessageConsumer<TestMessageType>::handle(Message & message)
         {
             auto type = message.getType();
             switch(type)

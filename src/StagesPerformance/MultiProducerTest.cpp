@@ -22,12 +22,11 @@ using namespace Stages;
 
 namespace
 {
-    const size_t testMessageExtras = 13;
-    typedef TestMessage<testMessageExtras> ActualMessage;
-    typedef TestMessageProducer<testMessageExtras> ProducerType;
+    typedef SmallTestMessage ActualMessage;
+    typedef TestMessageProducer<ActualMessage> ProducerType;
     typedef std::shared_ptr<ProducerType> ProducerPtr;
 
-    typedef TestMessageConsumer<testMessageExtras> ConsumerType;
+    typedef TestMessageConsumer<ActualMessage> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 }
 

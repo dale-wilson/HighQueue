@@ -10,7 +10,7 @@ namespace HighQueue
 {
     namespace Stages
     {
-        class ForwardPassThru: public Stage
+        class Stages_Export ForwardPassThru: public Stage
         {
 
         public:
@@ -23,29 +23,5 @@ namespace HighQueue
             uint32_t messageCount_;
             uint32_t messagesHandled_;
         };
-
-        inline
-        ForwardPassThru::ForwardPassThru(uint32_t messageCount)
-            : messageCount_(messageCount)
-            , messagesHandled_(0)
-        {
-            setName("ForwardPassThru"); // default name
-        }
-
-        inline
-        void ForwardPassThru::handle(Message & message)
-        {
-            if(!stopping_)
-            { 
-                LogTrace("ForwardPassThru copy.");
-                send(message);
-                ++messagesHandled_;
-                if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
-                {
-                    LogTrace("ForwardPassThru stop: message count: " << messagesHandled_);
-                    stop();
-                }
-            }
-        }
    }
 }

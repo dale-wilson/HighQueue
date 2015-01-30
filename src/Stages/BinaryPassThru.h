@@ -11,7 +11,7 @@ namespace HighQueue
 {
     namespace Stages
     {
-        class BinaryPassThru : public StageToMessage
+        class Stages_Export BinaryPassThru : public StageToMessage
         {
 
         public:
@@ -23,33 +23,5 @@ namespace HighQueue
             uint32_t messageCount_;
             uint32_t messagesHandled_;
         };
-
-        BinaryPassThru::BinaryPassThru(uint32_t messageCount)
-            : messageCount_(messageCount)
-            , messagesHandled_(0)
-        {
-            setName("BinaryPassThru"); // default name
-        }
-        
-        void BinaryPassThru::handle(Message & message)
-        {
-            if(!stopping_)
-            { 
-                LogDebug("BinaryPassThru copy.");
-                outMessage_->appendBinaryCopy(message.get(), message.getUsed());
-                message.moveMetaInfoTo(*outMessage_);
-                send(*outMessage_);
-                auto type = message.getType();
-                if(type == Message::MessageType::Shutdown)
-                {
-                    stop();
-                }
-                ++messagesHandled_;
-                if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
-                {
-                    stop();
-                }
-            }
-        }
    }
 }

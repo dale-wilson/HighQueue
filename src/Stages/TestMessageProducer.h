@@ -11,11 +11,11 @@ namespace HighQueue
 {
     namespace Stages
     {
-        template<size_t Extra=0>
+        template<typename TestMessageType>
         class TestMessageProducer : public ThreadedStageToMessage
         {
         public:
-            typedef TestMessage<Extra> ActualMessage;
+            typedef TestMessageType ActualMessage;
 
             static const std::string keyMessageCount;
             static const std::string keyProducerNumber;
@@ -34,13 +34,13 @@ namespace HighQueue
             uint32_t producerNumber_;
         };
 
-        template<size_t Extra>
-        const std::string TestMessageProducer<Extra>::keyMessageCount = "message_count";
-        template<size_t Extra>
-        const std::string TestMessageProducer<Extra>::keyProducerNumber = "producer_number";
+        template<typename TestMessageType>
+        const std::string TestMessageProducer<TestMessageType>::keyMessageCount = "message_count";
+        template<typename TestMessageType>
+        const std::string TestMessageProducer<TestMessageType>::keyProducerNumber = "producer_number";
 
-        template<size_t Extra>
-        TestMessageProducer<Extra>::TestMessageProducer(
+        template<typename TestMessageType>
+        TestMessageProducer<TestMessageType>::TestMessageProducer(
             volatile bool * startSignal, 
             uint32_t messageCount, 
             uint32_t producerNumber)
@@ -51,8 +51,8 @@ namespace HighQueue
             setName("TestMessageProducer"); // default name
         }
 
-        template<size_t Extra>
-        bool TestMessageProducer<Extra>::configure(ConfigurationNodePtr & config)
+        template<typename TestMessageType>
+        bool TestMessageProducer<TestMessageType>::configure(ConfigurationNodePtr & config)
         {
             for(auto poolChildren = config->getChildren();
                 poolChildren->has();
@@ -99,8 +99,8 @@ namespace HighQueue
         }
 
 
-        template<size_t Extra>
-        void TestMessageProducer<Extra>::run()
+        template<typename TestMessageType>
+        void TestMessageProducer<TestMessageType>::run()
         {
             outMessage_->setType(Message::TestMessage);
             if(startSignal_)
