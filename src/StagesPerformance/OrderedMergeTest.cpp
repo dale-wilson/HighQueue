@@ -110,12 +110,16 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
 
         if (nProducer % 2 == 0)
         {
+#ifdef USE_SHUFFLER
             auto shuffler = std::make_shared<Shuffler>(shuffleAhead);
             stages.emplace_back(shuffler);
             shuffler->attachMemoryPool(memoryPool);
 
             producer->attachDestination(shuffler);
             shuffler->attachDestination(publisher);
+#else // ShUFFLER
+            producer->attachDestination(publisher);
+#endif // SHUFFLER
         }
         else
         {
@@ -147,12 +151,12 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
 
     // All wired up, ready to go.
     ReverseRange<StagesVec> rstages(stages);
-    for(auto stage : rstages)
+    for(auto & stage : rstages)
     {
         stage->validate();
     }
  
-    for(auto stage : rstages)
+    for(auto & stage : rstages)
     {
         stage->start();
     }
@@ -170,7 +174,7 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     auto lapse = timer.nanoseconds();
     // the test ends here
     /////////////////////
-    for(auto stage : stages)
+    for(auto & stage : stages)
     {
         stage->stop();
     }
@@ -178,7 +182,7 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     asio->stopService();
     asio->joinThreads();
 
-    for(auto stage : stages)
+    for(auto & stage : stages)
     {
         stage->finish();
     }

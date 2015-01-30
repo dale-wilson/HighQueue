@@ -47,6 +47,9 @@ namespace HighQueue
             return value;
         }
     };
+    typedef TestMessage<1> SmallTestMessage;
+    typedef TestMessage<20> MediumTestMessage;
+    typedef TestMessage<200> LargeTestMessage;
 }
 
 
