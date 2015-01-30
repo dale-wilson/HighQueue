@@ -5,12 +5,12 @@
 
 #include "StageFwd.h"
 #include <StagesSupport/Stage_Export.h>
-#include <StagesSupport/AsioServiceFwd.h>
-#include <StagesSupport/Configuration.h>
-
-#include "HighQueue/Message.h"
+#include <StagesSupport/BuildResourcesFwd.h>
+#include <StagesSupport/ConfigurationFwd.h>
 #include "HighQueue/ConnectionFwd.h"
 #include <HighQueue/MemoryPoolFwd.h>
+#include "HighQueue/MessageFwd.h"
+
 #include <Common/Log.h>
 
 namespace HighQueue
@@ -22,7 +22,7 @@ namespace HighQueue
         /// Stage life cycle:
         /// 1: Construct 
         /// 2: Configure    // capture parameters
-        /// 3: Attach*      // attach destination(s) and resources as needed
+        /// 3: Attach       // attach destination(s) and resources as needed
         /// 4: Validate     // validate configuration and attachment
         /// 5: Start        // Acquire resources and go live
         ///                 // should not fail due to bad configuration or attachments. 
@@ -49,7 +49,7 @@ namespace HighQueue
 
             /// @brief Configure 
             /// Lifecycle 2: Configure
-            virtual bool configure(const ConfigurationNodePtr & configuration);
+            virtual bool configure(const ConfigurationNodePtr & configuration, BuildResources & resources);
 
             /// @brief Configure
             /// Lifecycle 2a: Give it a name
@@ -65,14 +65,8 @@ namespace HighQueue
             /// Lifecycle 3: Attach
             virtual void attachDestination(const std::string & name, const StagePtr & destination);
 
-            /// @brief Attach Connection
-            virtual void attachConnection(const ConnectionPtr & connection);
-
-            /// @brief Attach a memory pool to populate messages
-            virtual void attachMemoryPool(const MemoryPoolPtr & pool);
-
-            /// @brief Attach an ASIO IoService
-            virtual void attachIoService(const AsioServicePtr & ioService);
+            /// @brief Attach resources
+            virtual void attach(BuildResources & resources);
 
             /// @brief Validate configuration and attachments
             /// Lifecycle 4: Validate

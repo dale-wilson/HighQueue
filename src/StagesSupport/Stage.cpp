@@ -55,24 +55,14 @@ void Stage::attachDestination(const std::string & name, const StagePtr & destina
     destinations_.push_back(std::make_pair(name, destination));
 }
 
-void Stage::attachConnection(const ConnectionPtr & connection)
+void Stage::attach(BuildResources & resources)
 {
-    // default.  No thank you.
-}
-
-void Stage::attachMemoryPool(const MemoryPoolPtr & pool)
-{
-    // default.  No thank you.
-}
-
-void Stage::attachIoService(const AsioServicePtr & connection)
-{
-    // default.  No thank you.
+    // do nothing
 }
 
 void Stage::validate()
 {
-    // default to do nothing
+    // do nothing
 }
 
 void Stage::start()

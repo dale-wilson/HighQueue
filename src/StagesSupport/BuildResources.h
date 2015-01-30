@@ -3,6 +3,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 
+#include "BuildResourcesFwd.h"
+
 #include <StagesSupport/Stage_Export.h>
 
 #include <StagesSupport/ComponentBuilderFwd.h>

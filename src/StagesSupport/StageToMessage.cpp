@@ -4,9 +4,9 @@
 #include <StagesSupport/StagePch.h>
 
 #include "StageToMessage.h"
-#include <HighQueue/MemoryPool.h>
+#include <StagesSupport/BuildResources.h>
+
 #include <HighQueue/Message.h>
-#include <HighQueue/Connection.h>
 
 using namespace HighQueue;
 using namespace Stages;
@@ -19,16 +19,20 @@ StageToMessage::~StageToMessage()
 {
 }
 
-void StageToMessage::attachMemoryPool(const MemoryPoolPtr & pool)
+
+bool StageToMessage::configure(const ConfigurationNodePtr & configuration, BuildResources & resources)
 {
-    outMessage_.reset(new Message(pool));
-    Stage::attachMemoryPool(pool);
+    resources.requestMessages(1);
 }
 
-void StageToMessage::attachConnection(const ConnectionPtr & connection)
+void StageToMessage::attach(BuildResources & resources)
 {
-    outMessage_.reset(new Message(connection));
-    Stage::attachConnection(connection);
+    auto & pool = resources.getMemoryPool();
+    if(pool)
+    {
+        outMessage_.reset(new Message(*pool));
+    }
+    Stage::attach(resources);
 }
 
 void StageToMessage::validate()

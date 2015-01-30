@@ -20,7 +20,7 @@ namespace HighQueue
             virtual void attachConnection(const ConnectionPtr & connection);
             virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
 
-            virtual void validate();
+            virtual void attach();
             virtual void handle(Message & message);
 
         private:

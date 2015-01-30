@@ -40,13 +40,13 @@ void Shuffler::attachMemoryPool(const MemoryPoolPtr & memoryPool)
     StageToMessage::attachMemoryPool(memoryPool);
 }
 
-void Shuffler::validate()
+void Shuffler::attach()
 {
     if(pendingMessages_.size() < lookAhead_)
     {
         throw std::runtime_error("Shuffler working messages not initialized. Missing call to attachConnection or attachMemoryPool?");
     }
-    StageToMessage::validate();
+    StageToMessage::attach();
 }
 
 void Shuffler::handle(Message & message)

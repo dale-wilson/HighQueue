@@ -35,12 +35,14 @@ namespace HighQueue
         class Stages_Export OrderedMerge : public StageToMessage
         {
         public:
-            OrderedMerge(size_t lookAhead = 0, size_t expectedShutdowns = 2);
+            OrderedMerge();
 
-            virtual void attachConnection(const ConnectionPtr & connection);
-            virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
+            virtual bool configure(const ConfigurationNodePtr & configuration, BuildResources & resources);
 
-            virtual void validate();
+            virtual void attach(BuildResources & resources);
+            //virtual void attachConnection(const ConnectionPtr & connection);
+            //virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
+
             virtual void handle(Message & message);
 
             std::ostream & writeStats(std::ostream & out);

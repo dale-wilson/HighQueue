@@ -50,7 +50,7 @@ void QueueProducer::attachConnection(const ConnectionPtr & connection)
     producer_.reset(new Producer(connection_, solo_));
 }
 
-void QueueProducer::validate()
+void QueueProducer::attach()
 {
     mustNotHaveDestination();
     if(!connection_)

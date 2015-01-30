@@ -24,7 +24,7 @@ namespace HighQueue
             virtual bool configure(const ConfigurationNodePtr & configuration);
             void attachConnection(const ConnectionPtr & connection);
 
-            virtual void validate();
+            virtual void attach();
         private:
             bool solo_;
             ConnectionPtr connection_;

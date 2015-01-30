@@ -5,7 +5,8 @@
 
 #include "OrderedMerge.h"
 #include <StagesSupport/StageFactory.h>
-#include <HighQueue/Connection.h>
+#include <StagesSupport/BuildResources.h>
+#include <StagesSupport/BuildResources.h>
 
 using namespace HighQueue;
 using namespace Stages;
@@ -15,9 +16,9 @@ namespace
     Registrar<OrderedMerge> registerStageSmall("ordered_merge");
 }
 
-OrderedMerge::OrderedMerge(size_t lookAhead, size_t expectedShutdowns)
-    : lookAhead_(lookAhead)
-    , expectedShutdowns_(expectedShutdowns)
+OrderedMerge::OrderedMerge()
+    : lookAhead_(0)
+    , expectedShutdowns_(0)// <-- todo make it stop
     , actualShutdowns_(0)
     , expectedSequenceNumber_(0)
     , lastHeartbeatSequenceNumber_(0)
@@ -36,31 +37,19 @@ OrderedMerge::OrderedMerge(size_t lookAhead, size_t expectedShutdowns)
     setName("OrderedMerge"); // default name
 }
 
-void OrderedMerge::attachConnection(const ConnectionPtr & connection)
-{      
-    while(pendingMessages_.size() < lookAhead_)
-    {
-        pendingMessages_.emplace_back(connection);
-    }
-    StageToMessage::attachConnection(connection);
-}
-
-void OrderedMerge::attachMemoryPool(const MemoryPoolPtr & memoryPool)
+void OrderedMerge::attach(BuildResources & resources)
 {
+    auto memoryPool = resources.getMemoryPool();
+    if!(memoryPool)
+    {
+        throw std::runtime_error("OrderedMerge: no memory pool available.");
+    }
     while(pendingMessages_.size() < lookAhead_)
     {
         pendingMessages_.emplace_back(memoryPool);
     }
-    StageToMessage::attachMemoryPool(memoryPool);
-}
 
-void OrderedMerge::validate()
-{
-    if(pendingMessages_.size() < lookAhead_)
-    {
-        throw std::runtime_error("OrderedMerge working messages not initialized. Missing call to attachConnection or attachMemoryPool?");
-    }
-    StageToMessage::validate();
+    StageToMessage::attach(resources);
 }
 
 void OrderedMerge::handle(Message & message)

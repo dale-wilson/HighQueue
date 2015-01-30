@@ -4,7 +4,7 @@
 #include <StagesSupport/StagePch.h>
 
 #include "AsioStageToMessage.h"
-
+#include <StagesSupport/BuildResources.h>
 using namespace HighQueue;
 using namespace Stages;
 AsioStageToMessage::AsioStageToMessage()
@@ -15,9 +15,9 @@ AsioStageToMessage::~AsioStageToMessage()
 {
 }
 
-void AsioStageToMessage::attachIoService(const AsioServicePtr & ioService)
+void AsioStageToMessage::attach(BuildResources & resources)
 {
-    ioService_ = ioService;
+    ioService_ = resources.getAsioService();
 }
 
 void AsioStageToMessage::validate()

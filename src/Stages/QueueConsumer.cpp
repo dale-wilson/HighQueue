@@ -40,7 +40,7 @@ void QueueConsumer::attachConnection(const ConnectionPtr & connection)
     message_.reset(new Message(connection_));
 }
 
-void QueueConsumer::validate()
+void QueueConsumer::attach()
 {
     mustHaveDestination();
     if(!connection_)

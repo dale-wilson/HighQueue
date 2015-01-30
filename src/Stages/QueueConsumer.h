@@ -22,7 +22,7 @@ namespace HighQueue
             virtual bool configure(const ConfigurationNodePtr & configuration);
             void attachConnection(const ConnectionPtr & connection);
 
-            virtual void validate();
+            virtual void attach();
             virtual void start();
             virtual void stop();
             virtual void finish();

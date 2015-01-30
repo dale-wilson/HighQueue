@@ -107,7 +107,7 @@ bool AsioBuilder::interpretParameter(const std::string & key, ConfigurationNodeP
     return true;
 }
 
-bool AsioBuilder::validate()
+bool AsioBuilder::attach()
 {
     if(threadCount_ == 0)
     {
@@ -195,7 +195,7 @@ bool PoolBuilder::interpretParameter(const std::string & key, ConfigurationNodeP
     return true;
 }
 
-bool PoolBuilder::validate()
+bool PoolBuilder::attach()
 {
     if(messageCount_ == NONE)
     {
@@ -382,7 +382,7 @@ bool QueueBuilder::interpretParameter(const std::string & key, ConfigurationNode
     }
     return true;
 }
-bool QueueBuilder::validate()
+bool QueueBuilder::attach()
 {
     // todo
     return true;
@@ -512,7 +512,7 @@ bool PipeBuilder::interpretParameter(const std::string & key, ConfigurationNodeP
 }
 
 
-bool PipeBuilder::validate()
+bool PipeBuilder::attach()
 {
     int todo;
     return false;

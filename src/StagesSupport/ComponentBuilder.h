@@ -60,7 +60,7 @@ namespace HighQueue
             }
         protected:
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter) = 0;
-            virtual bool validate() = 0;
+            virtual bool attach() = 0;
             virtual void create() = 0;
 
         protected:
@@ -92,7 +92,7 @@ namespace HighQueue
             PoolBuilder();
             virtual ~PoolBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool validate();
+            virtual bool attach();
             virtual void create();
 
             void addToMessageCount(size_t additionalMessages);
@@ -109,7 +109,7 @@ namespace HighQueue
             AsioBuilder();
             virtual ~AsioBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool validate();
+            virtual bool attach();
             virtual void create();
 
         private:
@@ -122,7 +122,7 @@ namespace HighQueue
             QueueBuilder(Builder::Pools & pools);
             virtual ~QueueBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool validate();
+            virtual bool attach();
             virtual void create();
 
             bool constructWaitStrategy(const ConfigurationNodePtr & config, WaitStrategy & strategy);
@@ -147,7 +147,7 @@ namespace HighQueue
             PipeBuilder(Builder::Stages & stages, Builder::Pools & pools, Builder::Asios & asios, Builder::Queues & queues);
             virtual ~PipeBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool validate();
+            virtual bool attach();
             virtual void create();
 
         private:

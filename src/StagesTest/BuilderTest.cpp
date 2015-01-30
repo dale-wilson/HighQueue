@@ -16,17 +16,6 @@ namespace
 {
     std::string testJson =
 R"json({
-   "memory_pool":
-   {
-       "name": "pool1",
-       "message_size": 42,
-       "message_count" : 1000
-   },
-   "asio":
-   {
-       "name" : "asio1",
-       "thread_count" : 1
-   },
    "queue":
    {
         "name" : "queue1",
