@@ -8,8 +8,8 @@
 #include <Stages/OrderedMerge.h>
 #include <Stages/Shuffler.h>
 #include <Stages/HeartbeatProducer.h>
-#include <Stages/TestMessageProducer.h>
-#include <Stages/TestMessageConsumer.h>
+#include <Stages/MockMessageProducer.h>
+#include <Stages/MockMessageConsumer.h>
 #include <Stages/QueueConsumer.h>
 #include <Stages/QueueProducer.h>
 
@@ -31,18 +31,18 @@ namespace
         }
     };
 
-    typedef MediumTestMessage ActualMessage;
+    typedef MediumMockMessage ActualMessage;
     auto messageBytes = sizeof(ActualMessage);
 
-    typedef TestMessageProducer<ActualMessage> ProducerType;
+    typedef MockMessageProducer<ActualMessage> ProducerType;
     typedef std::shared_ptr<ProducerType> ProducerPtr;
 
-    typedef TestMessageConsumer<ActualMessage> ConsumerType;
+    typedef MockMessageConsumer<ActualMessage> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
 }
 
-#define ENABLE_ORDEREDMERGE_TEST 01
+#define ENABLE_ORDEREDMERGE_TEST 0
 #if ENABLE_ORDEREDMERGE_TEST
 BOOST_AUTO_TEST_CASE(testOrderedMerge)
 {

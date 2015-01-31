@@ -5,14 +5,17 @@
 
 #include "Shuffler.h"
 #include <StagesSupport/StageFactory.h>
-#include <HighQueue/Connection.h>
+#include <StagesSupport/BuildResources.h>
+#include <HighQueue/MemoryPool.h>
 
 using namespace HighQueue;
 using namespace Stages;
 
 namespace
 {
-    Registrar<Shuffler> registerStage("shuffler");
+    StageFactory::Registrar<Shuffler> registerStage("shuffler");
+
+    const std::string keyLookAhead = "look_ahead";
 }
 
 Shuffler::Shuffler(size_t lookAhead)
@@ -22,31 +25,44 @@ Shuffler::Shuffler(size_t lookAhead)
     setName("Shuffler"); // default name
 }
 
-void Shuffler::attachConnection(const ConnectionPtr & connection)
-{      
-    while(pendingMessages_.size() < lookAhead_)
-    {
-        pendingMessages_.emplace_back(connection);
-    }
-    StageToMessage::attachConnection(connection);
+/// @brief Configure 
+/// Lifecycle 2: Configure
+bool Shuffler::configureParameter(const std::string & key, const ConfigurationNode & configuration)
+{
+    int todo;
+    return StageToMessage::configureParameter(key, configuration);
 }
 
-void Shuffler::attachMemoryPool(const MemoryPoolPtr & memoryPool)
+void Shuffler::configureResources(BuildResources & resources)
 {
+    int todo;
+    return StageToMessage::configureResources(resources);
+
+}
+
+/// @brief Attach resources
+void Shuffler::attachResources(BuildResources & resources)
+{
+    auto & memoryPool = resources.getMemoryPool();
+    if(!memoryPool)
+    {
+        throw std::runtime_error("OrderedMerge: no memory pool available.");
+    }
+
     while(pendingMessages_.size() < lookAhead_)
     {
         pendingMessages_.emplace_back(memoryPool);
     }
-    StageToMessage::attachMemoryPool(memoryPool);
+    StageToMessage::attachResources(resources);
 }
 
-void Shuffler::attach()
+void Shuffler::validate()
 {
     if(pendingMessages_.size() < lookAhead_)
     {
         throw std::runtime_error("Shuffler working messages not initialized. Missing call to attachConnection or attachMemoryPool?");
     }
-    StageToMessage::attach();
+    StageToMessage::validate();
 }
 
 void Shuffler::handle(Message & message)

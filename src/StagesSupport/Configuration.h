@@ -36,10 +36,10 @@ namespace HighQueue
             /// @brief destruct
             virtual ~ConfigurationNode();
 
-            virtual ConfigurationChildrenPtr getChildren() = 0;
+            virtual ConfigurationChildrenPtr getChildren() const = 0;
 
             /// @brief Get the name of this node.
-            virtual std::string getName() = 0;
+            virtual std::string getName() const = 0;
 
             /// @brief Typesave get of the value associated with this node as a string
             /// @param[out] value receives the value.

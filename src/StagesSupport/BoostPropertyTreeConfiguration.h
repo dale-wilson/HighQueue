@@ -15,7 +15,7 @@ namespace HighQueue
         class Stages_Export BoostPropertyTreeChildren: public ConfigurationChildren
         {
         public:
-            explicit BoostPropertyTreeChildren(boost::property_tree::ptree & ptree);
+            explicit BoostPropertyTreeChildren(const boost::property_tree::ptree & ptree);
             BoostPropertyTreeChildren(const BoostPropertyTreeChildren & rhs);
             void set(boost::property_tree::ptree::iterator iterator);
 
@@ -44,8 +44,8 @@ namespace HighQueue
             void loadJson(std::istream & propertyFile, const std::string & name = "json");
             void loadJson(const std::string & propertyFileName);
 
-            virtual ConfigurationChildrenPtr getChildren();
-            virtual std::string getName();
+            virtual ConfigurationChildrenPtr getChildren() const;
+            virtual std::string getName()const;
             virtual bool getValue(std::string & value, const std::string & defaultValue = "") const;
             virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const;
             virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const;

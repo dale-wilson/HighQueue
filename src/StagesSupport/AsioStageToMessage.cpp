@@ -15,7 +15,7 @@ AsioStageToMessage::~AsioStageToMessage()
 {
 }
 
-void AsioStageToMessage::attach(BuildResources & resources)
+void AsioStageToMessage::attachResources(BuildResources & resources)
 {
     ioService_ = resources.getAsioService();
 }

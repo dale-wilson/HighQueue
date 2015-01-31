@@ -4,6 +4,8 @@
 #include <StagesSupport/StagePch.h>
 
 #include "Stage.h"
+#include <StagesSupport/Configuration.h>
+#include <Common/Log.h>
 
 using namespace HighQueue;
 using namespace Stages;
@@ -29,12 +31,44 @@ Stage::~Stage()
     }
 }
 
-bool Stage::configure(const ConfigurationNodePtr & configuration)
+bool Stage::configure(const ConfigurationNode & configuration)
 {
-int todo_parse_name_then_pass_params_to_children;
-    // default to do nothing
+    for(auto poolChildren = configuration.getChildren();
+        poolChildren->has();
+        poolChildren->next())
+    {
+        auto & parameter = poolChildren->getChild();
+        auto & key = parameter->getName();
+
+        if(key == keyName)
+        {
+            parameter->getValue(name_);
+        }
+        else if(! configureParameter(key, *parameter))
+        {
+            return false;
+        }
+    }
+
+    if(name_.empty())
+    {
+        LogFatal("Missing required parameter " << keyName << " for " << configuration.getName() << ".");
+        return false;
+    }
     return true;
 }
+
+bool Stage::configureParameter(const std::string & key, const ConfigurationNode & configuration)
+{
+    LogError("Unknown parameter \"" << key << "\" for " << name_);
+    return false; // false meaning "huh?"
+}
+
+void Stage::configureResources(BuildResources & resources)
+{
+    // default do nothing
+}
+
 
 void Stage::setName(const std::string & name)
 {
@@ -55,7 +89,7 @@ void Stage::attachDestination(const std::string & name, const StagePtr & destina
     destinations_.push_back(std::make_pair(name, destination));
 }
 
-void Stage::attach(BuildResources & resources)
+void Stage::attachResources(BuildResources & resources)
 {
     // do nothing
 }

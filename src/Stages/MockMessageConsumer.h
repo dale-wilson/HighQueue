@@ -3,7 +3,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include <StagesSupport/Stage.h>
-#include <Mocks/TestMessage.h>
+#include <Mocks/MockMessage.h>
+#include <StagesSupport/Configuration.h>
 
 #include <Common/Log.h>
 
@@ -11,14 +12,14 @@ namespace HighQueue
 {
     namespace Stages
     {
-        template<typename TestMessageType>
-        class TestMessageConsumer : public Stage
+        template<typename MockMessageType>
+        class MockMessageConsumer : public Stage
         {
         public:
-            typedef TestMessageType ActualMessage;
+            typedef MockMessageType ActualMessage;
             static const std::string keyMessageCount;
 
-            explicit TestMessageConsumer(uint32_t messageCount_ = 0);
+            explicit MockMessageConsumer(uint32_t messageCount_ = 0);
 
             virtual bool configure(ConfigurationNodePtr & config);
 
@@ -44,23 +45,23 @@ namespace HighQueue
             uint32_t unexpectedMessageError_;
         };
 
-        template<typename TestMessageType>
-        const std::string TestMessageConsumer<TestMessageType>::keyMessageCount = "message_count";
+        template<typename MockMessageType>
+        const std::string MockMessageConsumer<MockMessageType>::keyMessageCount = "message_count";
 
-        template<typename TestMessageType>
-        TestMessageConsumer<TestMessageType>::TestMessageConsumer(uint32_t messageCount_)
+        template<typename MockMessageType>
+        MockMessageConsumer<MockMessageType>::MockMessageConsumer(uint32_t messageCount_)
             : messageCount_(messageCount_)
             , messagesHandled_(0)
             , nextSequence_(0)
             , sequenceError_(0)
             , unexpectedMessageError_(0)
         {
-            setName("TestMessageConsumer"); // default name
+            setName("MockMessageConsumer"); // default name
         }
 
 
-        template<typename TestMessageType>
-        bool TestMessageConsumer<TestMessageType>::configure(ConfigurationNodePtr & config)
+        template<typename MockMessageType>
+        bool MockMessageConsumer<MockMessageType>::configure(ConfigurationNodePtr & config)
         {
             for(auto poolChildren = config->getChildren();
                 poolChildren->has();
@@ -99,15 +100,15 @@ namespace HighQueue
 
 
 
-        template<typename TestMessageType>
-        void TestMessageConsumer<TestMessageType>::handle(Message & message)
+        template<typename MockMessageType>
+        void MockMessageConsumer<MockMessageType>::handle(Message & message)
         {
             auto type = message.getType();
             switch(type)
             {
                 default:
                 {
-                    LogError("TestMessageConsumer::Expecting test message, not " << Message::toText(type));
+                    LogError("MockMessageConsumer::Expecting test message, not " << Message::toText(type));
                     ++unexpectedMessageError_;  
                     return;
                 }
@@ -115,15 +116,15 @@ namespace HighQueue
                 {
                     if (messageCount_ == 0)
                     {
-                        LogTrace("TestMessageConsumer: received Shutdown");
+                        LogTrace("MockMessageConsumer: received Shutdown");
                         stop();
                     }
                     return;
                 }
-                case Message::TestMessage:
+                case Message::MockMessage:
                 {
                     auto testMessage = message.get<ActualMessage>();
-                    LogDebug("TestMessageConsumer: " << testMessage->getSequence());
+                    LogDebug("MockMessageConsumer: " << testMessage->getSequence());
                     if(nextSequence_ != testMessage->getSequence())
                     {
                         LogWarningLimited(10, "Expecting " << nextSequence_ << " received " << testMessage->getSequence());

@@ -3,9 +3,12 @@
 // See the file license.txt for licensing information.
 #include <StagesSupport/StagePch.h>
 
+#ifdef DISABLE
+
 #include "ComponentBuilder.h"
 
 #include <StagesSupport/Configuration.h>
+#include <StagesSupport/StageFactory.h>
 #include <HighQueue/MemoryPool.h>
 #include <HighQueue/Connection.h>
 #include <HighQueue/WaitStrategy.h>
@@ -49,7 +52,7 @@ ComponentBuilder::ComponentBuilder()
 ComponentBuilder::~ComponentBuilder()
 {}
 
-bool ComponentBuilder::configure(const ConfigurationNodePtr & config)
+bool ComponentBuilder::configure(const ConfigurationNode& config, BuildResources & resources)
 {
     for(auto poolChildren = config->getChildren();
         poolChildren->has();
@@ -107,7 +110,7 @@ bool AsioBuilder::interpretParameter(const std::string & key, ConfigurationNodeP
     return true;
 }
 
-bool AsioBuilder::attach()
+bool AsioBuilder::validate()
 {
     if(threadCount_ == 0)
     {
@@ -195,7 +198,7 @@ bool PoolBuilder::interpretParameter(const std::string & key, ConfigurationNodeP
     return true;
 }
 
-bool PoolBuilder::attach()
+bool PoolBuilder::validate()
 {
     if(messageCount_ == NONE)
     {
@@ -231,7 +234,7 @@ QueueBuilder::QueueBuilder(Builder::Pools & pools)
 QueueBuilder::~QueueBuilder()
 {}
 
-bool QueueBuilder::constructWaitStrategy(const ConfigurationNodePtr & config, WaitStrategy & strategy)
+bool QueueBuilder::constructWaitStrategy(const ConfigurationNode & config, WaitStrategy & strategy)
 {
     size_t spinCount = WaitStrategy::FOREVER;
     size_t yieldCount = WaitStrategy::FOREVER;
@@ -382,7 +385,7 @@ bool QueueBuilder::interpretParameter(const std::string & key, ConfigurationNode
     }
     return true;
 }
-bool QueueBuilder::attach()
+bool QueueBuilder::validate()
 {
     // todo
     return true;
@@ -430,8 +433,8 @@ namespace
     std::string stageQueueProducer = "queue_producer";
     std::string stageShuffle = "shuffle";
     std::string stageTee = "tee";
-    std::string stageTestMessageConsumer = "test_message_consumer";
-    std::string stageTestMessageProducer = "test_message_producer";
+    std::string stageMockMessageConsumer = "test_message_consumer";
+    std::string stageMockMessageProducer = "test_message_producer";
 }
 
 #include <Stages/BinaryPassThru.h>
@@ -444,83 +447,33 @@ namespace
 #include <Stages/QueueProducer.h>
 #include <Stages/Shuffler.h>
 #include <Stages/Tee.h>
-#include <Stages/TestMessageConsumer.h>
-#include <Stages/TestMessageProducer.h>
-
-bool PipeBuilder::interpretParameter(const std::string & key, ConfigurationNodePtr & parameter)
-{
-    
-    int todo_TurnThisIntoAFactory;
-    StagePtr stage;
-    if(key == stageBinaryPassThru)
-    {
-        stage = std::make_shared<BinaryPassThru>();
-    }
-    //else if(key == stageCopyPassThru)
-    //{
-    //    stage = std::make_shared<CopyPassThru>();
-    //}
-    else if(key == stageForwardPassThru)
-    {
-        stage = std::make_shared<ForwardPassThru>();
-    }
-    else if(key == stageHeartbeatProducer)
-    {
-        stage = std::make_shared<HeartbeatProducer>();
-    }
-    //else if(key == stageMulticastReceiver)
-    //{
-    //    stage = std::make_shared<MulticastReceiver>();
-    //}
-    else if(key == stageOrderedMerge)
-    {
-        stage = std::make_shared<OrderedMerge>();
-    }
-    else if(key == stageQueueConsumer)
-    {
-        stage = std::make_shared<QueueConsumer>();
-    }
-    else if(key == stageQueueProducer)
-    {
-        stage = std::make_shared<QueueProducer>();
-    }
-    else if(key == stageShuffle)
-    {
-        stage = std::make_shared<Shuffler>();
-    }
-    else if(key == stageTee)
-    {
-        stage = std::make_shared<Tee>();
-    }
-    else if(key == stageTestMessageConsumer)
-    {
-        stage = std::make_shared<TestMessageConsumer<SmallTestMessage> >();
-    }
-    else if(key == stageTestMessageProducer)
-    {
-        stage = std::make_shared<TestMessageProducer<SmallTestMessage> >();
-    }
-    else
-    {
-        LogFatal("Unknown stage " << key);
-        return false;
-    }
-
-    stage->configure(parameter);
-
-    return false;
-}
-
-
-bool PipeBuilder::attach()
-{
-    int todo;
-    return false;
-
-}
-
-void PipeBuilder::create()
-{
-
-}
-
+#include <Stages/MockMessageConsumer.h>
+#include <Stages/MockMessageProducer.h>
+//
+//bool PipeBuilder::interpretParameter(const std::string & key, ConfigurationNodePtr & parameter, BuildResources & resources)
+//{
+//    StagePtr stage = StageFactory::make(key);
+//    if(!stage)
+//    {
+//        LogFatal("Unknown stage " << key);
+//        return false;
+//    }
+//
+//    return stage->configure(parameter, resources);
+//    return true;
+//}
+//
+//
+//bool PipeBuilder::validate()
+//{
+//    int todo;
+//    return false;
+//
+//}
+//
+//void PipeBuilder::create()
+//{
+//
+//}
+//
+#endif // DISABLE

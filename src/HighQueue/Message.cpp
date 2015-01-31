@@ -62,7 +62,7 @@ namespace
         "Heartbeat",
         "MulticastPacket",
         "Gap",
-        "TestMessage",
+        "MockMessage",
         "LocalType0", "LocalType1", "LocalType2", "LocalType3",
         "LocalType4", "LocalType5", "LocalType6", "LocalType7",
         "ExtraTypeBase"

@@ -2,6 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
+#ifdef DISABLED
 #include "MulticastReceiverFwd.h"
 #include <StagesSupport/AsioService.h>
 #include <StagesSupport/ThreadedStageToMessage.h>
@@ -266,3 +267,4 @@ namespace HighQueue
         }
    }
 }
+#endif //DISABLED

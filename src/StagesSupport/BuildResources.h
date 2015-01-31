@@ -38,6 +38,10 @@ namespace HighQueue
             const MemoryPoolPtr & getMemoryPool()const;
             const AsioServicePtr & getAsioService()const;
 
+            void start();
+            void stop();
+            void finish();
+
         public:
             typedef std::map<std::string, QueueBuilderPtr> Queues;
 

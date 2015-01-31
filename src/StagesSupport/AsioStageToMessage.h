@@ -20,7 +20,7 @@ namespace HighQueue
             AsioStageToMessage();
             virtual ~AsioStageToMessage();
 
-            virtual void attach(BuildResources & resources);
+            virtual void attachResources(BuildResources & resources);
             virtual void validate();
 
             virtual void start();

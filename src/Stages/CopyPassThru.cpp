@@ -5,13 +5,13 @@
 
 #include "CopyPassThru.h"
 #include <StagesSupport/StageFactory.h>
-#include <Mocks/TestMessage.h>
+#include <Mocks/MockMessage.h>
 using namespace HighQueue;
 using namespace Stages;
 
 namespace
 {
-    Registrar<CopyPassThru<SmallTestMessage> > registerStageSmall("small_test_message_copy");
-    Registrar<CopyPassThru<MediumTestMessage> > registerStageMedium("medium_test_message_copy");
-    Registrar<CopyPassThru<LargeTestMessage> > registerStageLarge("large_test_message_copy");
+    StageFactory::Registrar<CopyPassThru<SmallMockMessage> > registerStageSmall("small_test_message_copy");
+    StageFactory::Registrar<CopyPassThru<MediumMockMessage> > registerStageMedium("medium_test_message_copy");
+    StageFactory::Registrar<CopyPassThru<LargeMockMessage> > registerStageLarge("large_test_message_copy");
 }

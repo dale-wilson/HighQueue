@@ -10,7 +10,7 @@ using namespace Stages;
 
 namespace
 {
-    Registrar<BinaryPassThru> registerStage("binary_copy");
+    StageFactory::Registrar<BinaryPassThru> registerStage("binary_copy");
 }
 
 

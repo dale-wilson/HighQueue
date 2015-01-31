@@ -21,7 +21,7 @@ namespace HighQueue
             /// @brief construct
             Tee();
 
-            virtual bool configure(const ConfigurationNodePtr & config);
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
             virtual void start();
 
             /// @brief Attach an ostream.  If none, don't dump the data.

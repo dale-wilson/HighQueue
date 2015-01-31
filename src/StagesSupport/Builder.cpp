@@ -4,18 +4,18 @@
 #include <StagesSupport/StagePch.h>
 
 #include "Builder.h"
-#include <StagesSupport/ComponentBuilder.h>
-
 #include <StagesSupport/Configuration.h>
-#include <HighQueue/MemoryPool.h>
-#include <HighQueue/Connection.h>
-#include <HighQueue/WaitStrategy.h>
-#include <HighQueue/CreationParameters.h>
-#include <StagesSupport/AsioService.h>
 #include <StagesSupport/Stage.h>
+#include <StagesSupport/StageFactory.h>
+#include <Common/ReverseRange.h>
 
 using namespace HighQueue;
 using namespace Stages;
+
+namespace
+{
+    std::string keyPipe("pipe");
+}
 
 Builder::Builder()
 {
@@ -25,73 +25,93 @@ Builder::~Builder()
 {
 }
             
-bool Builder::construct(const ConfigurationNodePtr & config)
+bool Builder::construct(const ConfigurationNode & config)
 {
-    for(auto rootChildren = config->getChildren();
+    for(auto rootChildren = config.getChildren();
         rootChildren->has();
         rootChildren->next())
     {
         auto child = rootChildren->getChild();
-        std::string key = child->getName();
-        if(key == keyPool)
+        auto & key = child->getName();
+        if(key == keyPipe)
         {
-            auto poolBuilder = std::make_shared<PoolBuilder>();
-            if(!poolBuilder->configure(child))
+            if(!constructPipe(*child))
             {
                 return false;
             }
-            pools_[poolBuilder->getName()] = poolBuilder;
-        }
-        else if(key == keyQueue)
-        {
-
-            auto queueBuilder = std::make_shared<QueueBuilder>(pools_);
-            if(!queueBuilder->configure(child))
-            {
-                return false;
-            }
-            queues_[queueBuilder->getName()] = queueBuilder;
-
-        }
-        else if(key == keyAsio)
-        {
-            auto asioBuilder = std::make_shared<AsioBuilder>();
-            if(!asioBuilder->configure(child))
-            {
-                return false;
-            }
-            asios_[asioBuilder->getName()] = asioBuilder;
-        }
-        else if(key == keyPipe)
-        {
-            auto pipeBuilder = std::make_shared<PipeBuilder>(stages_, pools_, asios_, queues_);
-            if(!pipeBuilder->configure(child))
-            {
-                return false;
-            }
-            pipes_[pipeBuilder->getName()] = pipeBuilder;
         }
         else
         {
-            LogFatal("Unknown configuration element " << key 
-                << ". Expecting: " 
-                << keyPool << ", "
-                << keyQueue << ", "
-                << keyAsio << ", or"
-                << keyPipe << ".");
+            LogFatal("Unknown configuration key: " << key);
             return false;
         }
     }
+
+    // we have created all stages, and used them to configure the build resources.
+    resources_.createResources();
+    for(auto & stage : stages_)
+    {
+        stage->attachResources(resources_);
+    }
+    // now check to see if we got it right.
+    for(auto & stage : stages_)
+    {
+        stage->validate();
+    }
+
     return true;
 }
 
-
-bool Builder::constructPipe(const ConfigurationNodePtr & config)
+void Builder::start()
 {
-    LogTrace("Pipe");
-    int todo;
-    return false;
+
+    for(auto & stage : ReverseRange<Stages>(stages_))
+    {
+        stage->start();
+    }
+    resources_.start();
 }
 
+void Builder::stop()
+{
+    resources_.stop();
+    for(auto & stage : stages_)
+    {
+        stage->stop();
+    }
+}
 
+void Builder::finish()
+{
+    resources_.finish();
+    for(auto & stage : stages_)
+    {
+        stage->finish();
+    }
+}
 
+bool Builder::constructPipe(const ConfigurationNode & config)
+{
+    StagePtr previousStage;
+
+    for(auto rootChildren = config.getChildren();
+        rootChildren->has();
+        rootChildren->next())
+    {
+        auto child = rootChildren->getChild();
+        auto & key = child->getName();
+        auto stage = StageFactory::make(key);
+        if(!stage->configure(*child))
+        {
+            return false;
+        }
+        stage->configureResources(resources_);
+        stages_.emplace_back(stage);
+        if(previousStage)
+        {
+            previousStage->attachDestination(stage);
+        }
+        previousStage = stage;
+    }
+    return true;
+}

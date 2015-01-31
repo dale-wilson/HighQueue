@@ -11,8 +11,8 @@
 using namespace HighQueue;
 using namespace Stages;
 
-BoostPropertyTreeChildren::BoostPropertyTreeChildren(boost::property_tree::ptree & ptree)
-    : ptree_(ptree)
+BoostPropertyTreeChildren::BoostPropertyTreeChildren(const boost::property_tree::ptree & ptree)
+    : ptree_(const_cast<boost::property_tree::ptree &>(ptree))
     , position_(ptree_.begin())
 {
 }
@@ -88,14 +88,14 @@ void BoostPropertyTreeNode::loadJson(const std::string & propertyFileName)
 }
 
 
-ConfigurationChildrenPtr BoostPropertyTreeNode::getChildren()
+ConfigurationChildrenPtr BoostPropertyTreeNode::getChildren() const
 {
     auto result = std::make_shared<BoostPropertyTreeChildren>(ptree_);
     return result;
 }
 
 
-std::string BoostPropertyTreeNode::getName()
+std::string BoostPropertyTreeNode::getName() const
 {
     return name_;
 }

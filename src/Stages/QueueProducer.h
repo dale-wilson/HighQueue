@@ -21,10 +21,11 @@ namespace HighQueue
             // Implement Stage
             virtual void handle(Message & message);
 
-            virtual bool configure(const ConfigurationNodePtr & configuration);
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
+            virtual void configureResources(BuildResources & resources);
             void attachConnection(const ConnectionPtr & connection);
 
-            virtual void attach();
+            virtual void validate();
         private:
             bool solo_;
             ConnectionPtr connection_;

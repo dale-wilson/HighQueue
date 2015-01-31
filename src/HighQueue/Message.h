@@ -20,7 +20,7 @@ namespace HighQueue
             Heartbeat,
             MulticastPacket, // Generic.  Could be specialized based on source
             Gap,             // message to replace known lost messages.
-            TestMessage,
+            MockMessage,
             LocalType0, LocalType1, LocalType2, LocalType3,   // for locally defined private purposes to avoid redefining this class. 
             LocalType4, LocalType5, LocalType6, LocalType7,   // for locally defined private purposes to avoid redefining this class. 
             ExtraTypeBase

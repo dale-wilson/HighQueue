@@ -11,7 +11,7 @@ using namespace Stages;
 
 namespace
 {
-    Registrar<QueueProducer> registerStage("queue_producer");
+    StageFactory::Registrar<QueueProducer> registerStage("queue_producer");
 }
 
 
@@ -26,10 +26,15 @@ void QueueProducer::configureSolo(bool solo)
     solo_ = solo;
 }
 
-bool QueueProducer::configure(const ConfigurationNodePtr & configuration)
+bool QueueProducer::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     int todo;
-    return true;
+    return Stage::configureParameter(key, configuration);
+}
+
+void QueueProducer::configureResources(BuildResources & resources)
+{
+    return Stage::configureResources(resources);
 }
 
 
@@ -50,7 +55,7 @@ void QueueProducer::attachConnection(const ConnectionPtr & connection)
     producer_.reset(new Producer(connection_, solo_));
 }
 
-void QueueProducer::attach()
+void QueueProducer::validate()
 {
     mustNotHaveDestination();
     if(!connection_)

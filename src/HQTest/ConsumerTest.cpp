@@ -9,11 +9,11 @@ using namespace HighQueue;
 
 namespace
 {
-    struct TestMessage
+    struct MockMessage
     {
         size_t size_;
         char message_[100];
-        TestMessage(const std::string & message)
+        MockMessage(const std::string & message)
         {
             size_ = sizeof(message_);
             if(size_ > message.size())
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
 {
     WaitStrategy strategy;
     size_t entryCount = 10;
-    size_t messageSize = sizeof(TestMessage);
+    size_t messageSize = sizeof(MockMessage);
     size_t messageCount = 50;
     bool discardMessagesIfNoConsumer = false;
     CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
     {
         std::stringstream msg;
         msg << nMessage << std::ends;
-        new (message.get<TestMessage>()) TestMessage(msg.str());
-        message.setUsed(sizeof(TestMessage));
+        new (message.get<MockMessage>()) MockMessage(msg.str());
+        message.setUsed(sizeof(MockMessage));
         producer.publish(message);
     }
     // if we published another message now, it would hang.
@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE(testConsumerWithoutWaits)
         msg << nMessage << std::ends;
 
         BOOST_REQUIRE(consumer.getNext(message));
-        BOOST_CHECK_EQUAL(sizeof(TestMessage), message.getUsed());
-        auto testMessage = message.get<TestMessage>();
+        BOOST_CHECK_EQUAL(sizeof(MockMessage), message.getUsed());
+        auto testMessage = message.get<MockMessage>();
         BOOST_CHECK_EQUAL(msg.str(), testMessage->getString());                
     }
 

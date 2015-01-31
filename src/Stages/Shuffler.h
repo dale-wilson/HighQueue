@@ -15,12 +15,12 @@ namespace HighQueue
         {
         public:
             static const size_t relativelyPrime_ = 101;
-            Shuffler(size_t lookAhead = 50);
+            explicit Shuffler(size_t lookAhead = 50);
 
-            virtual void attachConnection(const ConnectionPtr & connection);
-            virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
-
-            virtual void attach();
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
+            virtual void configureResources(BuildResources & resources);
+            virtual void attachResources(BuildResources & resources);
+            virtual void validate();
             virtual void handle(Message & message);
 
         private:

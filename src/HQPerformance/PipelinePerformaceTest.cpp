@@ -5,7 +5,7 @@
 #include <HighQueue/Producer.h>
 #include <HighQueue/Consumer.h>
 #include <Common/Stopwatch.h>
-#include <Mocks/TestMessage.h>
+#include <Mocks/MockMessage.h>
 
 
 using namespace HighQueue;
@@ -13,7 +13,7 @@ using namespace HighQueue;
 #define VALIDATE_OUTPUT 0
 namespace
 {
-    typedef TestMessage<13> ActualMessage;
+    typedef MockMessage<13> ActualMessage;
 #if USE_PRONGHORN_MESSAGE
     byte_t testArray[] = 
 #if 1

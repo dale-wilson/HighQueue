@@ -5,8 +5,8 @@
 #define BOOST_TEST_NO_MAIN StagesPerformance
 #include <boost/test/unit_test.hpp>
 
-#include <Stages/TestMessageProducer.h>
-#include <Stages/TestMessageConsumer.h>
+#include <Stages/MockMessageProducer.h>
+#include <Stages/MockMessageConsumer.h>
 
 #include <Stages/QueueConsumer.h>
 #include <Stages/QueueProducer.h>
@@ -16,20 +16,20 @@
 
 #include <Common/Stopwatch.h>
 #include <Common/Stopwatch.h>
-#include <Mocks/TestMessage.h>
+#include <Mocks/MockMessage.h>
 
 
 using namespace HighQueue;
 using namespace Stages;
 namespace
 {
-    typedef MediumTestMessage ActualMessage;
+    typedef MediumMockMessage ActualMessage;
     auto messageBytes = sizeof(ActualMessage);
 
-    typedef TestMessageProducer<ActualMessage> ProducerType;
+    typedef MockMessageProducer<ActualMessage> ProducerType;
     typedef std::shared_ptr<ProducerType> ProducerPtr;
 
-    typedef TestMessageConsumer<ActualMessage> ConsumerType;
+    typedef MockMessageConsumer<ActualMessage> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 
 #if 0
@@ -42,7 +42,7 @@ namespace
     typedef std::shared_ptr<CopierType> CopierPtr;
 }
 
-#define ENABLE_PIPELINE_TEST 01
+#define ENABLE_PIPELINE_TEST 0
 #if ENABLE_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testPipeline)
 {
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
 #endif // ENABLE_PIPELINE_TEST
 
 
-#define ENABLE_DIRECT_PIPELINE_TEST 01
+#define ENABLE_DIRECT_PIPELINE_TEST 0
 #if ENABLE_DIRECT_PIPELINE_TEST
 BOOST_AUTO_TEST_CASE(testDirectPipeline)
 {

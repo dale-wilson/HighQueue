@@ -3,7 +3,7 @@
 namespace HighQueue
 {
     template<size_t ExtraCount = 0>
-    struct TestMessage
+    struct MockMessage
     {
         enum Indexes : uint32_t
         {
@@ -14,7 +14,7 @@ namespace HighQueue
 
         uint32_t message_[ExtraCount + ExtraStart];
         inline
-        TestMessage(uint32_t producerNumber, uint32_t sequenceNumber)
+        MockMessage(uint32_t producerNumber, uint32_t sequenceNumber)
         {
             message_[SequenceNumber] = sequenceNumber;
             message_[ProducerNumber] = producerNumber;
@@ -47,9 +47,9 @@ namespace HighQueue
             return value;
         }
     };
-    typedef TestMessage<1> SmallTestMessage;
-    typedef TestMessage<20> MediumTestMessage;
-    typedef TestMessage<200> LargeTestMessage;
+    typedef MockMessage<1> SmallMockMessage;
+    typedef MockMessage<20> MediumMockMessage;
+    typedef MockMessage<200> LargeMockMessage;
 }
 
 

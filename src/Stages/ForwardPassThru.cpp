@@ -12,7 +12,7 @@ using namespace Stages;
 
 namespace
 {
-    Registrar<ForwardPassThru> registerStage("forward_pass_thru");
+    StageFactory::Registrar<ForwardPassThru> registerStage("forward_pass_thru");
 }
 
 ForwardPassThru::ForwardPassThru(uint32_t messageCount)

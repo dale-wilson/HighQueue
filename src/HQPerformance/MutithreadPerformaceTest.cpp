@@ -5,10 +5,10 @@
 #include <HighQueue/Producer.h>
 #include <HighQueue/Consumer.h>
 #include <Common/Stopwatch.h>
-#include <Mocks/TestMessage.h>
+#include <Mocks/MockMessage.h>
 
 using namespace HighQueue;
-typedef TestMessage<13> ActualMessage;
+typedef MockMessage<13> ActualMessage;
 
 namespace
 {

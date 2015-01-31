@@ -38,10 +38,12 @@ project(*test) : HighQueueUser, HighQueueAddTest {
   pch_source = Common/HighQueuePch.cpp
   Source_Files {
     HQTest
+	Mock
   }
   Header_Files {
     HQTest
 	Common
+	Mocks
   }
 }
 
@@ -75,9 +77,11 @@ project(*performance) : HighQueueUser, boost_unit_test_framework, boost_base, bo
   pch_source = Common/HighQueuePch.cpp
   Source_Files {
     HQPerformance
+	Mocks
   }
   Header_Files {
     HQPerformance
 	Common
+	Mocks
   }
 }

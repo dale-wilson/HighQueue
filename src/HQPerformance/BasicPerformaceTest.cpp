@@ -4,11 +4,11 @@
 
 #include <HighQueue/Producer.h>
 #include <HighQueue/Consumer.h>
-#include <Mocks/TestMessage.h>
+#include <Mocks/MockMessage.h>
 #include <Common/Stopwatch.h>
 
 using namespace HighQueue;
-typedef TestMessage<20> ActualMessage;
+typedef MockMessage<20> ActualMessage;
 
 #define ENABLE_CONSUME_SEPARATELY 1
 #if ENABLE_CONSUME_SEPARATELY

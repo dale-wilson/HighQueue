@@ -11,7 +11,7 @@ using namespace Stages;
 
 namespace
 {
-    Registrar<QueueConsumer> registerStage("queue_consumer");
+    StageFactory::Registrar<QueueConsumer> registerStage("queue_consumer");
 }
 
 
@@ -27,10 +27,16 @@ void QueueConsumer::handle(Message & message)
 }
 
 
-bool QueueConsumer::configure(const ConfigurationNodePtr & configuration)
+bool QueueConsumer::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     int todo;
-    return true;
+    return Stage::configureParameter(key, configuration);
+}
+
+void QueueConsumer::configureResources(BuildResources & resources)
+{
+    int todo;
+    return Stage::configureResources(resources);
 }
 
 void QueueConsumer::attachConnection(const ConnectionPtr & connection)
@@ -40,7 +46,7 @@ void QueueConsumer::attachConnection(const ConnectionPtr & connection)
     message_.reset(new Message(connection_));
 }
 
-void QueueConsumer::attach()
+void QueueConsumer::validate()
 {
     mustHaveDestination();
     if(!connection_)

@@ -5,8 +5,8 @@
 #define BOOST_TEST_NO_MAIN StagesPerformance
 #include <boost/test/unit_test.hpp>
 
-#include <Stages/TestMessageProducer.h>
-#include <Stages/TestMessageConsumer.h>
+#include <Stages/MockMessageProducer.h>
+#include <Stages/MockMessageConsumer.h>
 #include <Stages/QueueConsumer.h>
 #include <Stages/QueueProducer.h>
 #include <Stages/Tee.h>
@@ -22,15 +22,15 @@ using namespace Stages;
 
 namespace
 {
-    typedef SmallTestMessage ActualMessage;
-    typedef TestMessageProducer<ActualMessage> ProducerType;
+    typedef SmallMockMessage ActualMessage;
+    typedef MockMessageProducer<ActualMessage> ProducerType;
     typedef std::shared_ptr<ProducerType> ProducerPtr;
 
-    typedef TestMessageConsumer<ActualMessage> ConsumerType;
+    typedef MockMessageConsumer<ActualMessage> ConsumerType;
     typedef std::shared_ptr<ConsumerType> ConsumerPtr;
 }
 
-#define ENABLE_MULTIPRODUCER_TEST 01
+#define ENABLE_MULTIPRODUCER_TEST 0
 #if ! ENABLE_MULTIPRODUCER_TEST
 #pragma message ("ENABLE_MULTIPRODUCER_TEST " __FILE__)
 #else // ENABLE_MULTIPRODUCER_TEST

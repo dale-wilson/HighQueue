@@ -39,10 +39,15 @@ void BuildResources::requestMessageSize(size_t bytes)
 
 void BuildResources::createResources()
 {
-    if(numberOfMessagesNeeded_ == 0 || largestMessageSize_ == 0)
+    if(numberOfMessagesNeeded_ == 0)
     {
         throw std::runtime_error("No requests for memmory pool buffers.");
     }
+    if(largestMessageSize_ == 0)
+    {
+        throw std::runtime_error("Memmory pool buffer size was not set.");
+    }
+    LogInfo("Creating Memory Pool : " << numberOfMessagesNeeded_ << " messages. " << largestMessageSize_ << " bytes each.");
     pool_ = std::make_shared<MemoryPool>(largestMessageSize_, numberOfMessagesNeeded_);
 
     if(numberOfAsioThreadsNeeded_ > 0)
@@ -54,6 +59,31 @@ void BuildResources::createResources()
     else
     {
         LogInfo("No requests for asio.  AsioService not created.");
+    }
+}
+
+void BuildResources::start()
+{
+    if(asio_)
+    {
+        LogTrace("BuildResources running AsioService with " << numberOfAsioThreadsNeeded_ << " threads.");
+        asio_->runThreads(numberOfAsioThreadsNeeded_, false);
+    }
+}
+
+void BuildResources::stop()
+{
+    if(asio_)
+    {
+        asio_->stopService();
+    }
+}
+
+void BuildResources::finish()
+{
+    if(asio_)
+    {
+        asio_->joinThreads();
     }
 }
 

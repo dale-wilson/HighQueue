@@ -2,18 +2,20 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #include <StagesSupport/StagePch.h>
+#ifdef DISABLED
 
 #include "OrderedMerge.h"
 #include <StagesSupport/StageFactory.h>
 #include <StagesSupport/BuildResources.h>
 #include <StagesSupport/BuildResources.h>
+#include <HighQueue/MemoryPool.h>
 
 using namespace HighQueue;
 using namespace Stages;
 
 namespace
 {
-    Registrar<OrderedMerge> registerStageSmall("ordered_merge");
+    StageFactory::Registrar<OrderedMerge> registerStageSmall("ordered_merge");
 }
 
 OrderedMerge::OrderedMerge()
@@ -37,10 +39,10 @@ OrderedMerge::OrderedMerge()
     setName("OrderedMerge"); // default name
 }
 
-void OrderedMerge::attach(BuildResources & resources)
+void OrderedMerge::attachResources(BuildResources & resources)
 {
-    auto memoryPool = resources.getMemoryPool();
-    if!(memoryPool)
+    auto & memoryPool = resources.getMemoryPool();
+    if(!memoryPool)
     {
         throw std::runtime_error("OrderedMerge: no memory pool available.");
     }
@@ -49,7 +51,7 @@ void OrderedMerge::attach(BuildResources & resources)
         pendingMessages_.emplace_back(memoryPool);
     }
 
-    StageToMessage::attach(resources);
+    StageToMessage::attachResources(resources);
 }
 
 void OrderedMerge::handle(Message & message)
@@ -212,3 +214,4 @@ std::ostream & OrderedMerge::writeStats(std::ostream & out)
         << " DuplicatesStash: " << statDuplicatesStash_
         << " Future: " << statFuture_;
 }
+#endif //DISABLED

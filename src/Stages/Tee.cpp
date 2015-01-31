@@ -5,12 +5,13 @@
 
 #include "Tee.h"
 #include <StagesSupport/StageFactory.h>
+#include <StagesSupport/Configuration.h>
 using namespace HighQueue;
 using namespace Stages;
 
 namespace
 {
-    Registrar<Tee> registerStage("tee");
+    StageFactory::Registrar<Tee> registerStage("tee");
 }
 
 const std::string Tee::keyOutput = "output";
@@ -26,36 +27,13 @@ void Tee::attachOutputStream(std::ostream * outputStream)
     out_ = outputStream;
 }
 
-bool Tee::configure(const ConfigurationNodePtr & config)
+bool Tee::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
-    for(auto poolChildren = config->getChildren();
-        poolChildren->has();
-        poolChildren->next())
+    if(key == keyOutput)
     {
-        auto & parameter = poolChildren->getChild();
-        auto & key = parameter->getName();
-
-        if(key == keyName)
-        {
-            parameter->getValue(name_);
-        }
-        else if(key == keyOutput)
-        {
-            config->getValue(outputName_);
-        }
-        else
-        {
-            LogFatal("Unknown configuration parameter " << key << "  " << config->getName() << " "  << name_);
-            return false;
-        }
+        return configuration.getValue(outputName_);
     }
-
-    if(name_.empty())
-    {
-        LogFatal("Missing required parameter " << keyName << " for  " << config->getName() << ".");
-        return false;
-    }
-    return true;
+    return Stage::configureParameter(key, configuration);
 }
 
 void Tee::start()

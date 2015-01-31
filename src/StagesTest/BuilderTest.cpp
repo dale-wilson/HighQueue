@@ -16,67 +16,20 @@ namespace
 {
     std::string testJson =
 R"json({
-   "queue":
-   {
-        "name" : "queue1",
-        "memory_pool" : "pool1",
-        "common_wait_strategy" : 
-         {
-             "spin_count" : 0,
-             "yield_count" : "forever"
-         },
-         "discard_messages_if_no_consumer" : false,
-         "entry_count" : 100
-   }
-})json";
+  "pipe": {
+    "small_test_message_producer" : {
+      "name" : "MockMessageProducer",
+      "message_count" : 10
+    },
+    "small_test_message_consumer" : {
+      "name" : "MockMessageConsumer"
+    }
+  }
+}
+)json";
 
 }
 
-
-#define ENABLE_FACTORY_TEST 01
-#if ! ENABLE_FACTORY_TEST
-#pragma message ("ENABLE_FACTORY_TEST " __FILE__)
-#else // ENABLE_FACTORY_TEST
-
-namespace
-{
-    class MockStage : public Stage
-    {
-    public:
-        MockStage()
-        {
-            LogTrace("Construct Mock Stage @" << (void*)this);
-        }
-        virtual ~MockStage()
-        {
-            LogTrace("Destruct Mock Stage @" << (void*)this);
-        }
-
-    };
-}
-BOOST_AUTO_TEST_CASE(TestFactory)
-{
-    std::cout << "TestFactory" << std::endl;
-
-    const std::string stageName = "MockStage";
-
-    auto stagemaker = [](){ return std::make_shared<MockStage>();};
-
-    StageFactory::registerMaker(stageName, stagemaker);
-
-    auto madeStage = StageFactory::make(stageName);
-    BOOST_CHECK(madeStage);
-
-    auto madeTee = StageFactory::make("tee");
-    BOOST_CHECK(madeTee);
-
-    auto madeFail = StageFactory::make("nonexistent_stage");
-    BOOST_CHECK(!madeFail);
-
-    StageFactory::list(std::cerr << "Registry: ") << std::endl;
-}
-
-#endif // ENABLE_BUILDER_TEST
 
 #define ENABLE_BUILDER_TEST 01
 #if ! ENABLE_BUILDER_TEST
@@ -87,15 +40,28 @@ BOOST_AUTO_TEST_CASE(TestFactory)
 BOOST_AUTO_TEST_CASE(TestBuilder)
 {
     std::cout << "Builder test" << std::endl;
+    {
+        std::istringstream testConfig(testJson);
+        size_t lineNumber = 0;
+        while(!testConfig.eof())
+        {
+            char line[1000];
+            testConfig.getline(line, sizeof(line));
+            std::cout << ++lineNumber << ": " << line << std::endl;
+        }
+    }
     std::istringstream testConfig(testJson);
 
     std::string streamName = "testJson";
-    auto properties = std::make_shared<BoostPropertyTreeNode>();
-    properties->loadJson(testConfig, streamName);
+    BoostPropertyTreeNode properties;
+    properties.loadJson(testConfig, streamName);
 
     Builder builder;
-    builder.construct(properties);
-
+    BOOST_REQUIRE(builder.construct(properties));
+    builder.start();
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    builder.stop();
+    builder.finish();
 }
 
 #endif // ENABLE_BUILDER_TEST

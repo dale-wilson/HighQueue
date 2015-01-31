@@ -2,6 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
+#ifdef DISABLE
 
 #include <StagesSupport/Stage_Export.h>
 
@@ -16,6 +17,7 @@
 #include <HighQueue/CreationParametersFwd.h>
 
 #include <StagesSupport/Builder.h>
+#include <StagesSupport/BuildResources.h>
 
 #include <Common/Log.h>
 
@@ -53,14 +55,14 @@ namespace HighQueue
             ComponentBuilder();
             virtual ~ComponentBuilder();
 
-            bool configure(const ConfigurationNodePtr & config);
+            bool configure(const ConfigurationNode & config);
             const std::string & getName()
             {
                 return name_;
             }
         protected:
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter) = 0;
-            virtual bool attach() = 0;
+            virtual bool validate() = 0;
             virtual void create() = 0;
 
         protected:
@@ -92,7 +94,7 @@ namespace HighQueue
             PoolBuilder();
             virtual ~PoolBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool attach();
+            virtual bool validate();
             virtual void create();
 
             void addToMessageCount(size_t additionalMessages);
@@ -109,7 +111,7 @@ namespace HighQueue
             AsioBuilder();
             virtual ~AsioBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool attach();
+            virtual bool validate();
             virtual void create();
 
         private:
@@ -122,11 +124,11 @@ namespace HighQueue
             QueueBuilder(Builder::Pools & pools);
             virtual ~QueueBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool attach();
+            virtual bool validate();
             virtual void create();
 
-            bool constructWaitStrategy(const ConfigurationNodePtr & config, WaitStrategy & strategy);
-            bool constructCreationParameters(const ConfigurationNodePtr & config, CreationParameters & parameters);
+            bool constructWaitStrategy(const ConfigurationNode & config, WaitStrategy & strategy);
+            bool constructCreationParameters(const ConfigurationNode & config, CreationParameters & parameters);
 
         private:
             Builder::Pools & pools_;
@@ -147,7 +149,7 @@ namespace HighQueue
             PipeBuilder(Builder::Stages & stages, Builder::Pools & pools, Builder::Asios & asios, Builder::Queues & queues);
             virtual ~PipeBuilder();
             virtual bool interpretParameter(const std::string & key, ConfigurationNodePtr & parameter);
-            virtual bool attach();
+            virtual bool validate();
             virtual void create();
 
         private:
@@ -159,3 +161,5 @@ namespace HighQueue
         };
    }
 }
+
+#endif // DISABLE

@@ -8,10 +8,10 @@ using namespace HighQueue;
 
 namespace
 {
-    struct TestMessage
+    struct MockMessage
     {
         char message_[100];
-        TestMessage(const std::string & text)
+        MockMessage(const std::string & text)
         {
             size_t size = sizeof(message_);
             if(size > text.size())
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
 {
     WaitStrategy strategy;
     size_t entryCount = 10;
-    size_t messageSize = sizeof(TestMessage);
+    size_t messageSize = sizeof(MockMessage);
     size_t messageCount = 50;
     bool discardMessagesIfNoConsumer = false;
     CreationParameters parameters(strategy, strategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
@@ -49,9 +49,9 @@ BOOST_AUTO_TEST_CASE(testProducer)
 
 
     Message message(connection);
-    auto testMessage = message.get<TestMessage>();
-    new (testMessage) TestMessage("Hello world");
-    message.setUsed(sizeof(TestMessage));
+    auto testMessage = message.get<MockMessage>();
+    new (testMessage) MockMessage("Hello world");
+    message.setUsed(sizeof(MockMessage));
     BOOST_CHECK(!message.isEmpty());
 
     producer.publish(message);
@@ -64,17 +64,17 @@ BOOST_AUTO_TEST_CASE(testProducer)
     HighQEntry & firstEntry = accessor[*readPosition];
     BOOST_CHECK_EQUAL(firstEntry.status_, HighQEntry::Status::OK);
     Message & firstMessage = firstEntry.message_;
-    auto publishedMessage = firstMessage.get<TestMessage>(); 
+    auto publishedMessage = firstMessage.get<MockMessage>(); 
     auto publishedSize = firstMessage.getUsed();
     BOOST_CHECK_EQUAL(publishedMessage, testMessage);
-    BOOST_CHECK_EQUAL(sizeof(TestMessage), publishedSize);
+    BOOST_CHECK_EQUAL(sizeof(MockMessage), publishedSize);
     
     for(size_t nMessage = 1; nMessage < entryCount; ++nMessage)
     {
         std::stringstream msg;
         msg << "Published " << nMessage << std::ends;
-        new (message.get<TestMessage>()) TestMessage(msg.str());
-        message.setUsed(sizeof(TestMessage));
+        new (message.get<MockMessage>()) MockMessage(msg.str());
+        message.setUsed(sizeof(MockMessage));
         producer.publish(message);
     }
     // if we published another message now, it would hang.
@@ -84,10 +84,10 @@ BOOST_AUTO_TEST_CASE(testProducer)
     BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 
     // Be sure the first message is still intact:
-    publishedMessage = firstMessage.get<TestMessage>(); 
+    publishedMessage = firstMessage.get<MockMessage>(); 
     publishedSize = firstMessage.getUsed();
     BOOST_CHECK_EQUAL(publishedMessage, testMessage);
-    BOOST_CHECK_EQUAL(sizeof(TestMessage), publishedSize);
+    BOOST_CHECK_EQUAL(sizeof(MockMessage), publishedSize);
 
     // Simulate a consumer consuming the first message.
     ++(*readPosition);
@@ -95,18 +95,18 @@ BOOST_AUTO_TEST_CASE(testProducer)
     // Then publish one more
     // this technique is for testing, it is not recommended for production!
     // use the construct method
-    auto fromTheTopMessage = message.get<TestMessage>();
+    auto fromTheTopMessage = message.get<MockMessage>();
     char topMessage[] = "Take it from the top";
-    new (fromTheTopMessage) TestMessage("Take it from the top.");
+    new (fromTheTopMessage) MockMessage("Take it from the top.");
     message.setUsed(sizeof(topMessage));     
     producer.publish(message);
 
     // Check to be sure that overwrote the first message.
     BOOST_CHECK_EQUAL(firstEntry.status_, HighQEntry::Status::OK);
     Message & newestMessage = firstEntry.message_;
-    auto newestTestMessage = newestMessage.get<TestMessage>(); 
+    auto newestMockMessage = newestMessage.get<MockMessage>(); 
     auto newestSize = newestMessage.getUsed();
-    BOOST_CHECK_EQUAL(newestTestMessage, fromTheTopMessage);
+    BOOST_CHECK_EQUAL(newestMockMessage, fromTheTopMessage);
     BOOST_CHECK_EQUAL(sizeof(topMessage), newestSize);
 }
 #endif //  DISABLE_testProducer

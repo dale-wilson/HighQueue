@@ -11,7 +11,7 @@ using namespace Stages;
 
 namespace
 {
-    Registrar<HeartbeatProducer> registerStage("heartbeat");
+    StageFactory::Registrar<HeartbeatProducer> registerStage("heartbeat");
 }
 
 

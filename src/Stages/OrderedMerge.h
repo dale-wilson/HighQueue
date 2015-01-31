@@ -2,6 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
+#ifdef DISABLED
 
 #include "OrderedMergeFwd.h"
 
@@ -37,11 +38,10 @@ namespace HighQueue
         public:
             OrderedMerge();
 
-            virtual bool configure(const ConfigurationNodePtr & configuration, BuildResources & resources);
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
+            virtual void configureResources(BuildResources & resources);
 
-            virtual void attach(BuildResources & resources);
-            //virtual void attachConnection(const ConnectionPtr & connection);
-            //virtual void attachMemoryPool(const MemoryPoolPtr & memoryPool);
+            virtual void attachResources(BuildResources & resources);
 
             virtual void handle(Message & message);
 
@@ -79,3 +79,4 @@ namespace HighQueue
 
    }
 }
+#endif //DISABLED

@@ -8,11 +8,11 @@
 #include <Stages/MulticastReceiver.h>
 #include <StagesSupport/AsioService.h>
 #include <HighQueue/Connection.h>
-#include <Mocks/TestMessage.h>
+#include <Mocks/MockMessage.h>
 
 using namespace HighQueue;
 using namespace Stages;
-typedef TestMessage</*13*/80> ActualMessage;
+typedef MockMessage</*13*/80> ActualMessage;
 
 namespace
 {
