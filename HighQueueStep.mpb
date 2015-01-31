@@ -1,5 +1,5 @@
 project :HighQueueUser{
-  requires += Stepss
+  requires += HighSteps
 
   specific(prop:microsoft) {
     Release::libout = $(HighQueue_ROOT)/Output/Release

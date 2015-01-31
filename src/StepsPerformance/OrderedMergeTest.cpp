@@ -1,17 +1,17 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <StepsSupport/StepPch.h>
+#include <Steps/StepPch.h>
 #define BOOST_TEST_NO_MAIN StepsPerformance
 #include <boost/test/unit_test.hpp>
 
-#include <Steps/OrderedMerge.h>
-#include <Steps/Shuffler.h>
-#include <Steps/HeartbeatProducer.h>
-#include <Steps/MockMessageProducer.h>
-#include <Steps/MockMessageConsumer.h>
-#include <Steps/QueueConsumer.h>
-#include <Steps/QueueProducer.h>
+#include <StepLibrary/OrderedMerge.h>
+#include <StepLibrary/Shuffler.h>
+#include <StepLibrary/HeartbeatProducer.h>
+#include <StepLibrary/MockMessageProducer.h>
+#include <StepLibrary/MockMessageConsumer.h>
+#include <StepLibrary/QueueConsumer.h>
+#include <StepLibrary/QueueProducer.h>
 
 #include <Common/ReverseRange.h>
 

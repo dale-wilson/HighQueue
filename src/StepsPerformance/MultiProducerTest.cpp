@@ -1,15 +1,15 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <StepsSupport/StepPch.h>
+#include <Steps/StepPch.h>
 #define BOOST_TEST_NO_MAIN StepsPerformance
 #include <boost/test/unit_test.hpp>
 
-#include <Steps/MockMessageProducer.h>
-#include <Steps/MockMessageConsumer.h>
-#include <Steps/QueueConsumer.h>
-#include <Steps/QueueProducer.h>
-#include <Steps/Tee.h>
+#include <StepLibrary/MockMessageProducer.h>
+#include <StepLibrary/MockMessageConsumer.h>
+#include <StepLibrary/QueueConsumer.h>
+#include <StepLibrary/QueueProducer.h>
+#include <StepLibrary/Tee.h>
 
 #include <HighQueue/Consumer.h>
 #include <HighQueue/Producer.h>

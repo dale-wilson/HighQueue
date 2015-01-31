@@ -3,25 +3,25 @@
 // See the file license.txt for licensing information.
 
 //////////////////////////////
-// Build the HighQueue Steps
+// Build the HighQueue StepLibrary
 project(*) : HighQueueStep, boost_base, boost_filesystem, boost_system, boost_thread {
   sharedname = *
   dynamicflags += STEP_BUILD_DLL
 
-  pch_header = StepsSupport/StepPch.h
-  pch_source = StepsSupport/StepPch.cpp
+  pch_header = Steps/StepPch.h
+  pch_source = Steps/StepPch.cpp
 
  // TODO: What to do about boost 32 bit builds?
   libpaths -= $(BOOST_ROOT)/lib
   libpaths += $(BOOST_LIB_PATH)
 
   Source_Files {
-    Steps
-	StepsSupport
+    StepLibrary
+	Steps
   }
   Header_Files {
-    Steps
-	StepsSupport
+    StepLibrary
+	Steps
 	Common
   }
 }
@@ -34,15 +34,15 @@ project(*Test) : HighQueueStep, HighQueueAddTest, boost_unit_test_framework, boo
   libs += Steps
   after += Steps
   
-  pch_header = StepsSupport/StepPch.h
-  pch_source = StepsSupport/StepPch.cpp
+  pch_header = Steps/StepPch.h
+  pch_source = Steps/StepPch.cpp
 	
   Source_Files {
 	StepsTest
   }
   Header_Files {
     StepsTest
-	StepsSupport
+	Steps
 	Common
   }
 }
@@ -55,15 +55,15 @@ project(*Performance) : HighQueueStep, HighQueueAddTest, boost_unit_test_framewo
   libs += Steps
   after += Steps
   
-  pch_header = StepsSupport/StepPch.h
-  pch_source = StepsSupport/StepPch.cpp
+  pch_header = Steps/StepPch.h
+  pch_source = Steps/StepPch.cpp
 	
   Source_Files {
 	StepsPerformance
   }
   Header_Files {
     StepsPerformance
-	StepsSupport
+	Steps
 	Common
   }
 }

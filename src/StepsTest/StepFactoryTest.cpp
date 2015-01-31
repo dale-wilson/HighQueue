@@ -1,12 +1,12 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <StepsSupport/StepPch.h>
+#include <Steps/StepPch.h>
 #define BOOST_TEST_NO_MAIN StepsTest
 #include <boost/test/unit_test.hpp>
 
-#include <StepsSupport/Step.h>
-#include <StepsSupport/StepFactory.h>
+#include <Steps/Step.h>
+#include <Steps/StepFactory.h>
 using namespace HighQueue;
 using namespace Steps;
 
