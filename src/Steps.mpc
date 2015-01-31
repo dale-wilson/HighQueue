@@ -1,0 +1,70 @@
+// Copyright (c) 2014, 2015 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+
+//////////////////////////////
+// Build the HighQueue Steps
+project(*) : HighQueueStep, boost_base, boost_filesystem, boost_system, boost_thread {
+  sharedname = *
+  dynamicflags += STEP_BUILD_DLL
+
+  pch_header = StepsSupport/StepPch.h
+  pch_source = StepsSupport/StepPch.cpp
+
+ // TODO: What to do about boost 32 bit builds?
+  libpaths -= $(BOOST_ROOT)/lib
+  libpaths += $(BOOST_LIB_PATH)
+
+  Source_Files {
+    Steps
+	StepsSupport
+  }
+  Header_Files {
+    Steps
+	StepsSupport
+	Common
+  }
+}
+
+////////////////////////////
+// Build the Step tests
+project(*Test) : HighQueueStep, HighQueueAddTest, boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = *
+
+  libs += Steps
+  after += Steps
+  
+  pch_header = StepsSupport/StepPch.h
+  pch_source = StepsSupport/StepPch.cpp
+	
+  Source_Files {
+	StepsTest
+  }
+  Header_Files {
+    StepsTest
+	StepsSupport
+	Common
+  }
+}
+
+////////////////////////////
+// Build the Step Performance tests
+project(*Performance) : HighQueueStep, HighQueueAddTest, boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = *
+
+  libs += Steps
+  after += Steps
+  
+  pch_header = StepsSupport/StepPch.h
+  pch_source = StepsSupport/StepPch.cpp
+	
+  Source_Files {
+	StepsPerformance
+  }
+  Header_Files {
+    StepsPerformance
+	StepsSupport
+	Common
+  }
+}
+

@@ -1,0 +1,12 @@
+project :HighQueueUser{
+  requires += Stepss
+
+  specific(prop:microsoft) {
+    Release::libout = $(HighQueue_ROOT)/Output/Release
+    Debug::libout = $(HighQueue_ROOT)/Output/Debug
+  } else {
+    libout = $(HighQueue_ROOT)/lib	
+  }
+
+  
+}

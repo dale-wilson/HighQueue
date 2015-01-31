@@ -1,5 +1,5 @@
-# HighQueue and HighStages
-<b>HighQueue</b> began as tool for high speed message passing between threads (or processes, or other components of a system.)   It has grown to include <b>HighStages</b> -- a framework for creating systems based on a pipeline architecture.
+# HighQueue and HighSteps
+<b>HighQueue</b> began as tool for high speed message passing between threads (or processes, or other components of a system.)   It has grown to include <b>HighSteps</b> -- a framework for creating systems based on a pipeline architecture.
 
 ```
   The HighQueue Haiku
@@ -14,12 +14,12 @@
 HighQueue -- A <b>High</b> performance <b>Queue</b> -- is a mechanism for message passing between components of a system.  It is most often used to pass messages between two or more threads in the same process, but it can also be 
 used for interprocess communication by putting the HighQueue in shared memory. 
 
-HighStages is framework for creating <b>High</b> performance processing <b>Stages</b>.  Stages are units that can be assembled into a processing pipeline.   HighStages defines tools for developing the Stages.  When Stages are running within different threads, the messages are passed using a HighQueue.  When they are running within the same thread a direct virtual call is used to pass the message.
-It is still under active development.  Eventually it will also provide the support needed to instantiate and configure those Stages, assemble them into a pipeline and run the resulting program.
+HighSteps is framework for creating <b>High</b> performance processing <b>Steps</b>.  Steps are units that can be assembled into a processing pipeline.   HighSteps defines tools for developing the Steps.  When Steps are running within different threads, the messages are passed using a HighQueue.  When they are running within the same thread a direct virtual call is used to pass the message.
+It is still under active development.  Eventually it will also provide the support needed to instantiate and configure those Steps, assemble them into a pipeline and run the resulting program.
 
 As of this writing (mid-January, 2015) HighQueue is reasonably stable.
 
-HighStages is still undergoing rapid development as it evolves into a complete system.
+HighSteps is still undergoing rapid development as it evolves into a complete system.
 
 ##Overview 
 
@@ -36,15 +36,15 @@ Each HighQueue instance (each individual queue) supports multiple Producers, but
 The API used by HighQueue Producers and Consumers is designed to simple and to use common C++ idioms.  Experienced C++ programs should be able to get up-to-speed with HighQueue very quickly.
 The HighQueue API is described on [this Wiki page.](https://github.com/dale-wilson/HighQueue/wiki/HighQueue-API)
 
-## The HighStages API
-Developers who are creating pipeline-based applications using the HighStages framework can use the HighStages API to create the Stages in this pipeline.
+## The HighSteps API
+Developers who are creating pipeline-based applications using the HighSteps framework can use the HighSteps API to create the Steps in this pipeline.
 
-HighStages-based Stages receive messages from previous Stages; apply a transformation to the messages, then pass these messages (or new messages derived from the input messages) 
-on to subsequent stages in the pipeline.  
+HighSteps-based Steps receive messages from previous Steps; apply a transformation to the messages, then pass these messages (or new messages derived from the input messages) 
+on to subsequent Steps in the pipeline.  
 
-The HighStages library supplies the plumbing and the tools.  It's up to application-specific code supplied by the developer to perform the actual work.
+The HighSteps library supplies the plumbing and the tools.  It's up to application-specific code supplied by the developer to perform the actual work.
 
-The HighStages API is described on [this Wiki page.](https://github.com/dale-wilson/HighQueue/wiki/HighStages-API)
+The HighSteps API is described on [this Wiki page.](https://github.com/dale-wilson/HighQueue/wiki/HighSteps-API)
 
 ##How fast is it?
 ###The short answer  
@@ -70,16 +70,16 @@ for the available cores and throughput begins to drop.  With 8 producers + 1 con
 
 Note it would be highly unusual to have more than a couple of producers feeding messages to a single producer, but if the need arises HighQueue can handle it with style.
 
-####HighStages performance.
+####HighSteps performance.
 
-<em>Because HighStages is very much still under construction, detailed performance numbers are not available, yet, but preliminary results are promising.</em> 
+<em>Because HighSteps is very much still under construction, detailed performance numbers are not available, yet, but preliminary results are promising.</em> 
 Watch this space for breaking news.
 
 ###Don't take my word for it.
 
 You can generate equivalent numbers for your machine by running the the HighQueuePerformance executable which is created as part of building HighQueue.
 
-You can also see preliminary results from HighStages by running Stages_Test.
+You can also see preliminary results from HighSteps by running Steps_Test.
 
 <b><em>Your Performance Mileage Will Vary!</em></b>
 

@@ -9,6 +9,6 @@ workspace(*) {
   }
   
   src/HighQueue.mpc
-  src/Stages.mpc
+  src/Steps.mpc
 
 }

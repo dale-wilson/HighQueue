@@ -5,7 +5,7 @@ project :HighQueueBase{
   } else {
     libpaths += $(HighQueue_ROOT)/lib
   }
-  includes += $(HighQueue_ROOT)/src/Stages
+  includes += $(HighQueue_ROOT)/src/Steps
   libs += HighQueue
   after += HighQueue
 }
