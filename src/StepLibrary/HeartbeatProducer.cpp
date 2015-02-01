@@ -5,6 +5,8 @@
 
 #include "HeartbeatProducer.h"
 #include <Steps/StepFactory.h>
+#include <Steps/Configuration.h>
+#include <Steps/BuildResources.h>
 
 using namespace HighQueue;
 using namespace Steps;
@@ -12,28 +14,69 @@ using namespace Steps;
 namespace
 {
     StepFactory::Registrar<HeartbeatProducer> registerStep("heartbeat");
+
+    const std::string keyInterval = "milliseconds";
+
+    //TODO: Make this public
+    struct HeartbeatMessage
+    {
+        std::chrono::milliseconds timeStamp_;
+        HeartbeatMessage(uint64_t now)
+        {
+            timeStamp_ = std::chrono::milliseconds(now);
+        }
+    };
 }
 
-
-HeartbeatProducer::HeartbeatProducer(std::chrono::milliseconds interval)
-    : interval_(interval.count())
+HeartbeatProducer::HeartbeatProducer()
+    : interval_(1000)
     , cancel_(false)
 {
-    setName("HeartbeatProducer"); // default name
 }
+
+void HeartbeatProducer::setInterval(std::chrono::milliseconds interval)
+{
+    interval_ = Interval(interval.count());
+}
+
+bool HeartbeatProducer::configureParameter(const std::string & key, const ConfigurationNode & configuration)
+{
+    if(key == keyInterval)
+    {
+        uint64_t msec;
+        if(!configuration.getValue(msec))
+        {
+            LogError("Can't interpret parameter \"" << key << "\" for " << name_);
+            return false;
+        }
+        interval_ = boost::posix_time::milliseconds(msec);
+        return true;
+    }
+    else
+    {
+        return AsioStepToMessage::configureParameter(key, configuration);
+    }
+}
+
+void HeartbeatProducer::configureResources(BuildResources & resources)
+{
+    resources.requestMessageSize(sizeof(HeartbeatMessage));
+    AsioStepToMessage::configureResources(resources);
+}
+
 
 void HeartbeatProducer::start()
 {
     timer_.reset(new Timer(*ioService_));
+    LogTrace("Heartbeat: StartTimer " << interval_.total_milliseconds());
     startTimer();
 }
 
 void HeartbeatProducer::stop()
 {
-    LogTrace("***HeartbeatProducer Cancel Timer");
+    LogTrace("HeartbeatProducer Stopping:  Cancel Timer");
     cancel_ = true;
     timer_->cancel();
-    LogTrace("***HeartbeatProducer Stopping");
     AsioStepToMessage::stop();
 }
 
@@ -60,9 +103,10 @@ void HeartbeatProducer::handleTimer(const boost::system::error_code& error)
     else if(!paused_)
     {
         outMessage_->setType(Message::Heartbeat);
-        auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+        auto now = std::chrono::steady_clock::now().time_since_epoch();
+        auto timestamp = now.count();
         outMessage_->setTimestamp(timestamp);
-        outMessage_->appendBinaryCopy(&timestamp, sizeof(timestamp));
+        outMessage_->emplace<HeartbeatMessage>(timestamp);
         LogTrace("Publish Heartbeat: " << timestamp);
         send(*outMessage_);
     }

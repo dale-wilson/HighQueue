@@ -6,17 +6,25 @@
 
 using namespace HighQueue;
 
-#if 0
-Log::Level Log::runtimeLevel = Log::VERBOSE;
+#if 0 // VERBOSE
+Log::Level Log::runtimeLevel = Log::Level(
+    Log::FORCE | Log::FATAL | Log::ERROR | Log::WARNING | 
+    Log::INFO | Log::STATISTICS | Log::TRACE | Log::DEBUG |
+    Log::VERBOSE);
 #elif defined(_DEBUG)
-Log::Level Log::runtimeLevel = Log::DEBUG;
+Log::Level Log::runtimeLevel = Log::Level(
+    Log::FORCE | Log::FATAL | Log::ERROR | Log::WARNING | 
+    Log::INFO | Log::STATISTICS | Log::TRACE | Log::DEBUG
+    );
 #else
-Log::Level Log::runtimeLevel = Log::INFO;
+Log::Level Log::runtimeLevel = Log::Level(
+    Log::FORCE | Log::FATAL | Log::ERROR | Log::WARNING |
+    Log::INFO | Log::STATISTICS);
 #endif
 
 void Log::log(Log::Level level, const char * file, const char * function, uint16_t line, const std::string & message)
 {
-    if(level <= runtimeLevel)
+    if(level && runtimeLevel != 0)
     {
 #ifdef LOG_INCLUDES_LOCATION
         std::cerr << toText(level) 
@@ -36,27 +44,44 @@ void Log::setLevel(Level level)
     runtimeLevel = level;
 }
 
-const char * Log::toText(Level level)
+std::string Log::toText(Level level)
 {
-    switch(level)
+    std::ostringstream str;
+    if((level & FORCE) != 0)
     {
-        default:
-            return "Unknown";
-        case FORCE:
-            return "FORCE";
-        case FATAL:
-            return "FATAL";
-        case ERROR:
-            return "ERROR";
-        case WARNING:
-            return "WARNING";
-        case INFO:
-            return "DEBUG";
-        case DEBUG:
-            return "TRACE";
-        case TRACE:
-            return "TRACE";
-        case VERBOSE:
-            return "VERBOSE";
+        str << " FORCE";
     }
+    if((level & FATAL) != 0)
+    {
+        str << " FATAL";
+    }
+    if((level & ERROR) != 0)
+    {
+        str << " ERROR";
+    }
+    if((level & WARNING) != 0)
+    {
+        str << " WARNING";
+    }
+    if((level & INFO) != 0)
+    {
+        str << " DEBUG";
+    }
+    if((level & STATISTICS) != 0)
+    {
+        str << " STATISTICS";
+    }
+    if((level & DEBUG) != 0)
+    {
+        str << " TRACE";
+    }
+    if((level & TRACE) != 0)
+    {
+        str << " TRACE";
+    }
+    if((level & VERBOSE) != 0)
+    {
+        str << " VERBOSE";
+    }
+    return str.str();
 }

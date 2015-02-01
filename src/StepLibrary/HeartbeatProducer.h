@@ -14,7 +14,10 @@ namespace HighQueue
         class Steps_Export HeartbeatProducer : public AsioStepToMessage
         {
         public:
-            HeartbeatProducer(std::chrono::milliseconds interval = std::chrono::milliseconds(1000));
+            HeartbeatProducer();
+            void setInterval(std::chrono::milliseconds interval);
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
+            virtual void configureResources(BuildResources & resources);
 
             virtual void start();
             virtual void stop();

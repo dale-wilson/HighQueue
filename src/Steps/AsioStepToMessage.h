@@ -19,7 +19,7 @@ namespace HighQueue
         public:
             AsioStepToMessage();
             virtual ~AsioStepToMessage();
-
+            virtual void configureResources(BuildResources & resources);
             virtual void attachResources(BuildResources & resources);
             virtual void validate();
 

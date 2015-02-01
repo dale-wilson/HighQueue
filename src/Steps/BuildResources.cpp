@@ -13,7 +13,7 @@ using namespace Steps;
 BuildResources::BuildResources()
     : numberOfMessagesNeeded_(0)
     , largestMessageSize_(0)
-    , numberOfAsioThreadsNeeded_(0)
+    , tenthsOfAsioThreadsNeeded_(0)
 {
 }
 
@@ -21,10 +21,11 @@ BuildResources::~BuildResources()
 {
 }
             
-void BuildResources::requestAsioThread(size_t count)
+void BuildResources::requestAsioThread(size_t threads, size_t tenthsOfThread)
 {
-    numberOfAsioThreadsNeeded_ += count;
+    tenthsOfAsioThreadsNeeded_ += threads * 10 + tenthsOfThread;
 }
+
 void BuildResources::requestMessages(size_t count)
 {
     numberOfMessagesNeeded_ += count;
@@ -50,11 +51,10 @@ void BuildResources::createResources()
     LogInfo("Creating Memory Pool : " << numberOfMessagesNeeded_ << " messages. " << largestMessageSize_ << " bytes each.");
     pool_ = std::make_shared<MemoryPool>(largestMessageSize_, numberOfMessagesNeeded_);
 
-    if(numberOfAsioThreadsNeeded_ > 0)
+    if(tenthsOfAsioThreadsNeeded_ > 0)
     { 
-        LogInfo("Creating Asio Service with " << numberOfAsioThreadsNeeded_ << " threads.");
+        LogInfo("Creating Asio Service with " << tenthsOfAsioThreadsNeeded_ << "/10 threads.");
         asio_ = std::make_shared<AsioService>();
-        asio_->runThreads(numberOfAsioThreadsNeeded_, false);
     }
     else
     {
@@ -66,8 +66,9 @@ void BuildResources::start()
 {
     if(asio_)
     {
-        LogTrace("BuildResources running AsioService with " << numberOfAsioThreadsNeeded_ << " threads.");
-        asio_->runThreads(numberOfAsioThreadsNeeded_, false);
+        auto actualThreads = (tenthsOfAsioThreadsNeeded_ + 9) / 10;
+        LogTrace("BuildResources running AsioService with " << tenthsOfAsioThreadsNeeded_ << " threads.");
+        asio_->runThreads(actualThreads, false);
     }
 }
 

@@ -9,25 +9,27 @@
 // I defined a simple logging system invoked via macros with the hopes that one could implement those
 // macros around the desired logging.  (This may be a case of NIH)
 
-// Give MSVC a hint about the c++11 standard macro:
+// Give MSVC a clue about the c++11 standard macro:
 #if defined(_MSC_VER) && ! defined(__func__)
 #define __func__ __FUNCTION__
 #endif // _MSC_VER
 
-#define LOG_LEVEL_FORCE 0
-#define LOG_LEVEL_FATAL 1
-#define LOG_LEVEL_ERROR 2
-#define LOG_LEVEL_WARNING 3
-#define LOG_LEVEL_INFO 4
-#define LOG_LEVEL_TRACE 5
-#define LOG_LEVEL_DEBUG 6
-#define LOG_LEVEL_VERBOSE 7
+#define LOG_LEVEL_FORCE 0x0001
+#define LOG_LEVEL_FATAL 0x0002
+#define LOG_LEVEL_ERROR 0x0004
+#define LOG_LEVEL_WARNING 0x0008
+#define LOG_LEVEL_INFO 0x0010
+#define LOG_LEVEL_STATISTICS 0x0020
+#define LOG_LEVEL_TRACE 0x0040
+#define LOG_LEVEL_DEBUG 0x0080
+#define LOG_LEVEL_VERBOSE 0x0100
 
 #if !defined(COMPILE_TIME_LOG_LEVEL)
 #   if defined(_DEBUG)
-#       define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_VERBOSE
+#       define COMPILE_TIME_LOG_LEVEL (LOG_LEVEL_FORCE | LOG_LEVEL_FATAL | LOG_LEVEL_ERROR | LOG_LEVEL_WARNING | \
+                                      LOG_LEVEL_INFO | LOG_LEVEL_STATISTICS | LOG_LEVEL_TRACE | LOG_LEVEL_DEBUG)
 #   else
-#       define COMPILE_TIME_LOG_LEVEL LOG_LEVEL_ERROR
+#       define COMPILE_TIME_LOG_LEVEL (LOG_LEVEL_FORCE | LOG_LEVEL_FATAL | LOG_LEVEL_ERROR | LOG_LEVEL_STATISTICS)
 #   endif // _DEBUG
 #endif COMPILE_TIME_LOG_LEVEL
 
@@ -35,16 +37,17 @@ namespace HighQueue
 {
     struct HighQueue_Export Log
     {
-        enum Level: byte_t
+        enum Level: uint16_t
         {
-            FORCE,
-            FATAL,
-            ERROR,
-            WARNING,
-            INFO,
-            TRACE,
-            DEBUG,
-            VERBOSE
+            FORCE = LOG_LEVEL_FORCE,
+            FATAL = LOG_LEVEL_FATAL,
+            ERROR = LOG_LEVEL_ERROR,
+            WARNING = LOG_LEVEL_WARNING,
+            INFO = LOG_LEVEL_INFO,
+            STATISTICS = LOG_LEVEL_STATISTICS,
+            TRACE = LOG_LEVEL_TRACE,
+            DEBUG = LOG_LEVEL_DEBUG,
+            VERBOSE = LOG_LEVEL_VERBOSE
         };
 
         static Level runtimeLevel;
@@ -52,13 +55,13 @@ namespace HighQueue
         static bool isEnabled(Level level);
         static Level getLevel();
         static void setLevel(Level level);
-        static const char * toText(Level level);
+        static std::string toText(Level level);
     };
 
     inline
     bool Log::isEnabled(Level level)
     {
-        return level <= runtimeLevel;
+        return (level & runtimeLevel) != 0;
     }
 
     inline
@@ -97,7 +100,7 @@ namespace HighQueue
 #define LogError(message) LogTyped(ERROR, message)
 #define LogErrorLimited(limit, message) LogTypedLimited(ERROR, limit, message)
 
-#if (LOG_LEVEL_WARNING <= COMPILE_TIME_LOG_LEVEL)
+#if (LOG_LEVEL_WARNING & COMPILE_TIME_LOG_LEVEL)
 #define LogWarning(message) LogTyped(WARNING, message)
 #define LogWarningLimited(limit, message) LogTypedLimited(WARNING, limit, message)
 #else // LOG_LEVEL_WARNING 
@@ -105,7 +108,7 @@ namespace HighQueue
 #define LogWarningLimited(limited, message) LogDisabled
 #endif // LOG_LEVEL_WARNING 
 
-#if (LOG_LEVEL_INFO <= COMPILE_TIME_LOG_LEVEL)
+#if (LOG_LEVEL_INFO & COMPILE_TIME_LOG_LEVEL)
 #define LogInfo(message) LogTyped(INFO, message)
 #define LogInfoLimited(limit, message) LogTypedLimited(INFO, limit, message)
 #else // LOG_LEVEL_INFO 
@@ -113,7 +116,15 @@ namespace HighQueue
 #define LogInfoLimited(limit, message) LogDisabled
 #endif // LOG_LEVEL_INFO 
 
-#if (LOG_LEVEL_DEBUG <= COMPILE_TIME_LOG_LEVEL)
+#if (LOG_LEVEL_STATISTICS & COMPILE_TIME_LOG_LEVEL)
+#define LogStatistics(message) LogTyped(STATISTICS, message)
+#define LogStatisticsLimited(limit, message) LogTypedLimited(STATISTICS, limit, message)
+#else // LOG_LEVEL_STATISTICS 
+#define LogStatistics(message) LogDisabled
+#define LogStatisticsLimited(limit, message) LogDisabled
+#endif // LOG_LEVEL_STATISTICS 
+
+#if (LOG_LEVEL_DEBUG & COMPILE_TIME_LOG_LEVEL)
 #define LogDebug(message) LogTyped(DEBUG, message)
 #define LogDebugLimited(limit, message) LogTypedLimited(DEBUG, limit, message)
 #else // LOG_LEVEL_DEBUG 
@@ -121,7 +132,7 @@ namespace HighQueue
 #define LogDebugLimited(limit, message) LogDisabled
 #endif // LOG_LEVEL_DEBUG 
 
-#if (LOG_LEVEL_TRACE <= COMPILE_TIME_LOG_LEVEL)
+#if (LOG_LEVEL_TRACE & COMPILE_TIME_LOG_LEVEL)
 #define LogTrace(message) LogTyped(TRACE, message)
 #define LogTraceLimited(limit, message) LogTypedLimited(TRACE, limit, message)
 #else // LOG_LEVEL_TRACE 
@@ -129,7 +140,7 @@ namespace HighQueue
 #define LogTraceLimited(limit, message) LogDisabled
 #endif // LOG_LEVEL_TRACE 
 
-#if (LOG_LEVEL_VERBOSE <= COMPILE_TIME_LOG_LEVEL)
+#if (LOG_LEVEL_VERBOSE & COMPILE_TIME_LOG_LEVEL)
 #define LogVerbose(message) LogTyped(VERBOSE, message)
 #define LogVerboseLimited(limit, message) LogTypedLimited(VERBOSE, limit, message)
 #else // LOG_LEVEL_VERBOSE 

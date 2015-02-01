@@ -100,18 +100,18 @@ bool Builder::constructPipe(const ConfigurationNode & config)
     {
         auto child = rootChildren->getChild();
         auto & key = child->getName();
-        auto Step = StepFactory::make(key);
-        if(!Step->configure(*child))
+        auto & step = StepFactory::make(key);
+        if(!step->configure(*child))
         {
             return false;
         }
-        Step->configureResources(resources_);
-        Steps_.emplace_back(Step);
+        step->configureResources(resources_);
+        Steps_.emplace_back(step);
         if(previousStep)
         {
-            previousStep->attachDestination(Step);
+            previousStep->attachDestination(step);
         }
-        previousStep = Step;
+        previousStep = step;
     }
     return true;
 }

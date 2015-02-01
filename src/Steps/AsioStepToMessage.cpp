@@ -15,9 +15,16 @@ AsioStepToMessage::~AsioStepToMessage()
 {
 }
 
+void AsioStepToMessage::configureResources(BuildResources & resources)
+{
+    resources.requestAsioThread(0, 1);
+    StepToMessage::configureResources(resources);
+}
+
 void AsioStepToMessage::attachResources(BuildResources & resources)
 {
     ioService_ = resources.getAsioService();
+    StepToMessage::attachResources(resources);
 }
 
 void AsioStepToMessage::validate()

@@ -31,7 +31,7 @@ namespace HighQueue
 
             void requestMessages(size_t count = 1);
             void requestMessageSize(size_t bytes);
-            void requestAsioThread(size_t count = 1);
+            void requestAsioThread(size_t threads = 1, size_t tenthsOfThread = 0);
 
             void createResources();
 
@@ -65,7 +65,7 @@ namespace HighQueue
 
             //////////////////
             // Asio parameters
-            size_t numberOfAsioThreadsNeeded_;
+            size_t tenthsOfAsioThreadsNeeded_;
 
         };
    }

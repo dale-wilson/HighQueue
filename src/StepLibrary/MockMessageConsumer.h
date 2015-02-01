@@ -20,9 +20,7 @@ namespace HighQueue
             static const std::string keyMessageCount;
 
             explicit MockMessageConsumer(uint32_t messageCount_ = 0);
-
-            virtual bool configure(ConfigurationNodePtr & config);
-
+         
             uint32_t errors()const
             {
                 return sequenceError_ + unexpectedMessageError_;
@@ -31,14 +29,21 @@ namespace HighQueue
             {
                 return messagesHandled_;
             }
+            uint32_t heartbeatsReceived()const
+            {
+                return heartbeats_;
+            }
 
             ////////////////////////////
             // Implement Step
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
             virtual void handle(Message & message);
+            virtual void finish();
 
         private:
             uint32_t messageCount_;
 
+            uint32_t heartbeats_;
             uint32_t messagesHandled_;
             uint32_t nextSequence_;
             uint32_t sequenceError_;
@@ -51,6 +56,7 @@ namespace HighQueue
         template<typename MockMessageType>
         MockMessageConsumer<MockMessageType>::MockMessageConsumer(uint32_t messageCount_)
             : messageCount_(messageCount_)
+            , heartbeats_(0)
             , messagesHandled_(0)
             , nextSequence_(0)
             , sequenceError_(0)
@@ -59,46 +65,22 @@ namespace HighQueue
             setName("MockMessageConsumer"); // default name
         }
 
-
         template<typename MockMessageType>
-        bool MockMessageConsumer<MockMessageType>::configure(ConfigurationNodePtr & config)
+        bool MockMessageConsumer<MockMessageType>::configureParameter(const std::string & key, const ConfigurationNode & configuration)
         {
-            for(auto poolChildren = config->getChildren();
-                poolChildren->has();
-                poolChildren->next())
+            if(key == keyMessageCount)
             {
-                auto & parameter = poolChildren->getChild();
-                auto & key = parameter->getName();
+                uint64_t messageCount;
+                if(!configuration.getValue(messageCount))
+                {
+                    LogFatal("TestMessagConsumer can't interpret value for " << keyMessageCount);
+                }
+                messageCount_ = uint32_t(messageCount);
+                return true;
+            }
 
-                if(key == keyName)
-                {
-                    parameter->getValue(name_);
-                }
-                else if(key == keyMessageCount)
-                {
-                    uint64_t messageCount;
-                    if(!config->getValue(messageCount))
-                    {
-                        LogFatal("TestMessagConsumer can't interpret value for " << keyMessageCount);
-                    }
-                    messageCount_ = uint32_t(messageCount);
-                }
-                else
-                {
-                    LogFatal("Unknown configuration parameter " << key << "  " << config->getName() << " "  << name_);
-                    return false;
-                }
-            }
-            
-            if(name_.empty())
-            {
-                LogFatal("Missing required parameter " << keyName << " for  " << config->getName() << ".");
-                return false;
-            }
-            return true;
+            return false;
         }
-
-
 
         template<typename MockMessageType>
         void MockMessageConsumer<MockMessageType>::handle(Message & message)
@@ -140,7 +122,21 @@ namespace HighQueue
                     }
                     return;
                 }
+                case Message::Heartbeat:
+                {
+                    ++heartbeats_;
+                }
             }
+        }
+
+        template<typename MockMessageType>
+        void MockMessageConsumer<MockMessageType>::finish()
+        {
+            LogStatistics("MockMessageConsumer::heartbeats:" << heartbeats_);
+            LogStatistics("MockMessageConsumer::messagesHandled:" << messagesHandled_);
+            LogStatistics("MockMessageConsumer::sequenceError:" << sequenceError_);
+            LogStatistics("MockMessageConsumer::unexpectedMessageError:" << unexpectedMessageError_);
+            Step::finish();
         }
 
    }
