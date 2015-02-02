@@ -11,7 +11,7 @@
 #include <StepLibrary/MockMessageProducer.h>
 #include <StepLibrary/MockMessageConsumer.h>
 #include <StepLibrary/InputQueue.h>
-#include <StepLibrary/QueueProducer.h>
+#include <StepLibrary/SendToQueue.h>
 
 #include <Common/ReverseRange.h>
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
         steps.emplace_back(producer);
         producer->attachMemoryPool(memoryPool);
 
-        auto publisher = std::make_shared<QueueProducer>();
+        auto publisher = std::make_shared<SendToQueue>();
         steps.emplace_back(publisher);
         publisher->attachConnection(mergeConnection);
 
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     heartbeat->attachMemoryPool(memoryPool);
     heartbeat->attachIoService(asio);
 
-    auto heartbeatPublisher = std::make_shared<QueueProducer>();
+    auto heartbeatPublisher = std::make_shared<SendToQueue>();
     steps.emplace_back(heartbeatPublisher);
     heartbeatPublisher->attachConnection(mergeConnection);
     heartbeat->attachDestination(heartbeatPublisher);

@@ -11,10 +11,10 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class Steps_Export QueueProducer : public Step
+        class Steps_Export SendToQueue : public Step
         {
         public:
-            QueueProducer();
+            SendToQueue();
 
             void configureSolo(bool solo);
 

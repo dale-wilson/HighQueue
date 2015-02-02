@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #include <Steps/StepPch.h>
 
-#include "QueueProducer.h"
+#include "SendToQueue.h"
 #include <Steps/StepFactory.h>
 
 using namespace HighQueue;
@@ -11,35 +11,35 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<QueueProducer> registerStep("queue_producer");
+    StepFactory::Registrar<SendToQueue> registerStep("send_to_queue");
 }
 
 
-QueueProducer::QueueProducer()
+SendToQueue::SendToQueue()
     : solo_(false)
 {
-    setName("QueueProducer"); // default name
+    setName("SendToQueue"); // default name
 }
 
-void QueueProducer::configureSolo(bool solo)
+void SendToQueue::configureSolo(bool solo)
 {
     solo_ = solo;
 }
 
-bool QueueProducer::configureParameter(const std::string & key, const ConfigurationNode & configuration)
+bool SendToQueue::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     int todo;
     return Step::configureParameter(key, configuration);
 }
 
-void QueueProducer::configureResources(BuildResources & resources)
+void SendToQueue::configureResources(BuildResources & resources)
 {
     return Step::configureResources(resources);
 }
 
 
 
-void QueueProducer::handle(Message & message)
+void SendToQueue::handle(Message & message)
 {
     auto type = message.getType();
     producer_->publish(message);
@@ -49,17 +49,17 @@ void QueueProducer::handle(Message & message)
     }
 }
 
-void QueueProducer::attachConnection(const ConnectionPtr & connection)
+void SendToQueue::attachConnection(const ConnectionPtr & connection)
 {
     connection_ = connection;
     producer_.reset(new Producer(connection_, solo_));
 }
 
-void QueueProducer::validate()
+void SendToQueue::validate()
 {
     mustNotHaveDestination();
     if(!connection_)
     {
-        throw std::runtime_error("QueueProducer must have an attached Connection");
+        throw std::runtime_error("SendToQueue must have an attached Connection");
     }
 }

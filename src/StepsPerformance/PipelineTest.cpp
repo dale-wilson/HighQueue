@@ -9,7 +9,7 @@
 #include <StepLibrary/MockMessageConsumer.h>
 
 #include <StepLibrary/InputQueue.h>
-#include <StepLibrary/QueueProducer.h>
+#include <StepLibrary/SendToQueue.h>
 #include <StepLibrary/CopyPassThru.h>
 #include <StepLibrary/ForwardPassThru.h>
 #include <StepLibrary/BinaryPassThru.h>
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     producer->attachMemoryPool(memoryPool);
     steps.emplace_back(producer);
 
-    auto producerPublisher = std::make_shared<QueueProducer>();
+    auto producerPublisher = std::make_shared<SendToQueue>();
     producerPublisher->attachConnection(connections[0]);
     producer->attachDestination(producerPublisher);
     steps.emplace_back(producerPublisher);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         copyConsumer->attachConnection(connections[nCopier-1]);
         steps.emplace_back(copyConsumer);
 
-        auto copyPublisher = std::make_shared<QueueProducer>();
+        auto copyPublisher = std::make_shared<SendToQueue>();
         copyPublisher->attachConnection(connections[nCopier]);
         copyConsumer->attachDestination(copyPublisher);
         steps.emplace_back(copyPublisher);

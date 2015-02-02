@@ -8,7 +8,7 @@
 #include <StepLibrary/MockMessageProducer.h>
 #include <StepLibrary/MockMessageConsumer.h>
 #include <StepLibrary/InputQueue.h>
-#include <StepLibrary/QueueProducer.h>
+#include <StepLibrary/SendToQueue.h>
 #include <StepLibrary/Tee.h>
 
 #include <HighQueue/Consumer.h>
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
             steps.emplace_back(producer);
             producer->attachMemoryPool(memoryPool);
 
-            auto queueProducer = std::make_shared<QueueProducer>();
+            auto queueProducer = std::make_shared<SendToQueue>();
             steps.emplace_back(queueProducer);
             queueProducer->configureSolo(producerCount == 1);
             producer->attachDestination(queueProducer);
