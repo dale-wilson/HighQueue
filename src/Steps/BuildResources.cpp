@@ -38,6 +38,23 @@ void BuildResources::requestMessageSize(size_t bytes)
     }
 }
 
+void BuildResources::addConnection(const std::string & name, const ConnectionPtr & connection)
+{
+    // TODO: check for duplicates?
+    connections_[name] == connection;
+}
+
+ConnectionPtr BuildResources::findConnection(const std::string & name) const
+{
+    ConnectionPtr result;
+    auto pConnection = connections_.find(name);
+    if(pConnection != connections_.end())
+    {
+        result = pConnection->second;
+    }
+    return result;
+}
+
 void BuildResources::createResources()
 {
     if(numberOfMessagesNeeded_ == 0)

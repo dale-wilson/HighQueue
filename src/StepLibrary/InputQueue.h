@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Steps/Step.h>
+#include <Steps/ThreadedStepToMessage.h>
 #include <HighQueue/Consumer.h>
 
 #include <Common/Log.h>
@@ -11,38 +11,30 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class Steps_Export QueueConsumer : public Step
+        class Steps_Export InputQueue: public ThreadedStepToMessage
         {
         public:
-            QueueConsumer();
+            InputQueue();
 
-            // Implement Step
-            virtual void handle(Message & message);
-
+            // Implement ThreadedStepToMessage
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
             virtual void configureResources(BuildResources & resources);
-            void attachConnection(const ConnectionPtr & connection);
-
-            virtual void validate();
-            virtual void start();
+            virtual void attachResources(BuildResources & resources);
+            virtual void run();
             virtual void stop();
-            virtual void finish();
 
             void setStopOnShutdownMessage(bool value);
 
-            void run();
         private:
-            void startThread();
+            bool constructWaitStrategy(const ConfigurationNode & config, WaitStrategy & strategy);
 
         private:
             ConnectionPtr connection_;
+            bool discardMessagesIfNoConsumer_;
+            CreationParameters parameters_;
+
             std::unique_ptr<Consumer> consumer_;
             std::unique_ptr<Message> message_;
-
-            std::shared_ptr<Step> me_;
-            std::thread thread_;
-
-            bool stopOnShutdownMessage_;
         };
 
     }

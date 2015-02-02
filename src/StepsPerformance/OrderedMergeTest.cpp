@@ -10,7 +10,7 @@
 #include <StepLibrary/HeartbeatProducer.h>
 #include <StepLibrary/MockMessageProducer.h>
 #include <StepLibrary/MockMessageConsumer.h>
-#include <StepLibrary/QueueConsumer.h>
+#include <StepLibrary/InputQueue.h>
 #include <StepLibrary/QueueProducer.h>
 
 #include <Common/ReverseRange.h>
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     heartbeatPublisher->attachConnection(mergeConnection);
     heartbeat->attachDestination(heartbeatPublisher);
 
-    auto queueConsumer = std::make_shared<QueueConsumer>();
+    auto queueConsumer = std::make_shared<InputQueue>();
     steps.emplace_back(queueConsumer);
     queueConsumer->attachConnection(mergeConnection);
 

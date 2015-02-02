@@ -8,7 +8,7 @@
 #include <StepLibrary/MockMessageProducer.h>
 #include <StepLibrary/MockMessageConsumer.h>
 
-#include <StepLibrary/QueueConsumer.h>
+#include <StepLibrary/InputQueue.h>
 #include <StepLibrary/QueueProducer.h>
 #include <StepLibrary/CopyPassThru.h>
 #include <StepLibrary/ForwardPassThru.h>
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
     std::vector<CopierPtr> copiers;
     for(size_t nCopier = 1; nCopier < connections.size(); ++nCopier)
     {
-        auto copyConsumer = std::make_shared<QueueConsumer>();
+        auto copyConsumer = std::make_shared<InputQueue>();
         copyConsumer->attachConnection(connections[nCopier-1]);
         steps.emplace_back(copyConsumer);
 
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         steps.emplace_back(copyPublisher);
     }
 
-    auto finalConsumer = std::make_shared<QueueConsumer>();
+    auto finalConsumer = std::make_shared<InputQueue>();
     finalConsumer->attachConnection(connections.back());
     steps.emplace_back(finalConsumer);
 

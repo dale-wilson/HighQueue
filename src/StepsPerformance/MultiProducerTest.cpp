@@ -7,7 +7,7 @@
 
 #include <StepLibrary/MockMessageProducer.h>
 #include <StepLibrary/MockMessageConsumer.h>
-#include <StepLibrary/QueueConsumer.h>
+#include <StepLibrary/InputQueue.h>
 #include <StepLibrary/QueueProducer.h>
 #include <StepLibrary/Tee.h>
 
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
             queueProducer->attachConnection(connection);
         }
 
-        auto queueConsumer = std::make_shared<QueueConsumer>();
+        auto queueConsumer = std::make_shared<InputQueue>();
         steps.emplace_back(queueConsumer);
         queueConsumer->attachConnection(connection);
         auto consumer = std::make_shared<ConsumerType>(perConsumer);
