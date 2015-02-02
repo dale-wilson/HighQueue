@@ -16,18 +16,16 @@ namespace HighQueue
         public:
             SendToQueue();
 
-            void configureSolo(bool solo);
-
             // Implement Step
-            virtual void handle(Message & message);
-
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(BuildResources & resources);
-            void attachConnection(const ConnectionPtr & connection);
-
+//            virtual void configureResources(BuildResources & resources);
+            virtual void attachResources(BuildResources & resources);
             virtual void validate();
+            virtual void start();
+            virtual void handle(Message & message);
+            
         private:
-            bool solo_;
+            std::string queueName_;
             ConnectionPtr connection_;
             std::unique_ptr<Producer> producer_;
         };

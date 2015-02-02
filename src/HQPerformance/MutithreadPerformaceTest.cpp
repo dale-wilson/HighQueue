@@ -15,11 +15,11 @@ namespace
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
 
-    void producerFunction(ConnectionPtr & connection, uint32_t producerNumber, uint64_t messageCount, bool solo, std::ostream & stats)
+    void producerFunction(ConnectionPtr & connection, uint32_t producerNumber, uint64_t messageCount, std::ostream & stats)
     {
         try
         {
-            Producer producer(connection, solo);
+            Producer producer(connection);
             Message producerMessage(connection);
         
             ++threadsReady;
@@ -59,7 +59,8 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 
-    Producer producer(connection, false);
+    connection->willProduce(); // enable solo mode
+    Producer producer(connection);
     Consumer consumer(connection);
     Message producerMessage(connection);
     Message consumerMessage(connection);
@@ -149,10 +150,13 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         size_t perProducer = targetMessageCount / producerCount;
         size_t actualMessageCount = perProducer * producerCount;
 
+        /// solo first time thru.  After that, no-solo.
+        connection->willProduce();
+
         for(uint32_t nTh = 0; nTh < producerCount; ++nTh)
         {
             producerThreads.emplace_back(
-                std::bind(producerFunction, connection, nTh, perProducer, producerCount == 1, std::ref(stats[nTh])));
+                std::bind(producerFunction, connection, nTh, perProducer, std::ref(stats[nTh])));
         }
         std::this_thread::yield();
 

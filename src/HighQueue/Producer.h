@@ -23,7 +23,7 @@ namespace HighQueue
         /// @param solo indicates that this is the only producer.
         ///        solo producers run faster using techniques that would be 
         ///        unsafe with multiple producers.
-        explicit Producer(ConnectionPtr & connection, bool solo = false);  
+        explicit Producer(ConnectionPtr & connection);  
 
         /// @brief Destructor
         ~Producer();
@@ -46,8 +46,8 @@ namespace HighQueue
     private:
         uint64_t reserve();
     private:
-        bool solo_;
         ConnectionPtr connection_;
+        bool solo_;
         HQHeader * header_;
         size_t entryCount_;
         WaitStrategy waitStrategy_;

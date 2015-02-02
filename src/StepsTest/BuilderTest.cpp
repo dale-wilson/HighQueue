@@ -42,6 +42,63 @@ R"json({
 }
 )json";
 
+    std::string testJson3 =
+R"json({
+  "pipe": {
+    "heartbeat" : {
+      "name" : "HeartbeatProducer",
+      "milliseconds" : 100
+    },
+    "send_to_queue" : {
+        "name" : "SendToQueue1",
+        "queue" : "queue1"
+    }
+  },
+  "pipe": {
+    "input_queue" : {
+        "name" : "queue1",
+        "entry_count" : 100
+    },
+    "small_test_message_consumer" : {
+      "name" : "MockMessageConsumer"
+    }
+  }
+}
+)json";
+
+    std::string testJson4 =
+R"json({
+  "pipe": {
+    "heartbeat" : {
+      "name" : "HeartbeatProducer",
+      "milliseconds" : 100
+    },
+    "send_to_queue" : {
+        "name" : "SendHeartbeatsToQueue1",
+        "queue" : "queue1"
+    }
+  },
+  "pipe": {
+    "small_test_message_producer" : {
+      "name" : "MockMessageProducer",
+      "message_count" : 0
+    },
+    "send_to_queue" : {
+        "name" : "SendTestMessagesToQueue1",
+        "queue" : "queue1"
+    }
+  },
+  "pipe": {
+    "input_queue" : {
+        "name" : "queue1",
+        "entry_count" : 100
+    },
+    "small_test_message_consumer" : {
+      "name" : "MockMessageConsumer"
+    }
+  }
+}
+)json";
 
 
     void listLines(const std::string & lines)
@@ -74,9 +131,7 @@ R"json({
 }
 
 #define ENABLE_BUILDER_TEST1 0
-#if ! ENABLE_BUILDER_TEST1
-#pragma message ("ENABLE_BUILDER_TEST1 " __FILE__)
-#else // ENABLE_BUILDER_TEST
+#if ENABLE_BUILDER_TEST1
 
 BOOST_AUTO_TEST_CASE(TestBuilder1)
 {
@@ -87,10 +142,8 @@ BOOST_AUTO_TEST_CASE(TestBuilder1)
 
 #endif // ENABLE_BUILDER_TEST1
 
-#define ENABLE_BUILDER_TEST2 01
-#if ! ENABLE_BUILDER_TEST2
-#pragma message ("ENABLE_BUILDER_TEST2 " __FILE__)
-#else // ENABLE_BUILDER_TEST
+#define ENABLE_BUILDER_TEST2 0
+#if ENABLE_BUILDER_TEST2
 
 BOOST_AUTO_TEST_CASE(TestBuilder2)
 {
@@ -99,3 +152,26 @@ BOOST_AUTO_TEST_CASE(TestBuilder2)
     runBuilderTest(testJson2);
 }
 #endif // ENABLE_BUILDER_TEST2
+
+#define ENABLE_BUILDER_TEST3 0
+#if ENABLE_BUILDER_TEST3
+
+BOOST_AUTO_TEST_CASE(TestBuilder3)
+{
+    std::cout << "Builder test3" << std::endl;
+    listLines(testJson3);
+    runBuilderTest(testJson3);
+}
+#endif // ENABLE_BUILDER_TEST3
+
+#define ENABLE_BUILDER_TEST4 01
+#if ENABLE_BUILDER_TEST4
+
+BOOST_AUTO_TEST_CASE(TestBuilder4)
+{
+    std::cout << "Builder test4" << std::endl;
+    listLines(testJson4);
+    runBuilderTest(testJson4);
+}
+#endif // ENABLE_BUILDER_TEST4
+

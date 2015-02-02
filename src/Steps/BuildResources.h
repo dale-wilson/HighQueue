@@ -33,20 +33,22 @@ namespace HighQueue
             void requestMessageSize(size_t bytes);
             void requestAsioThread(size_t threads = 1, size_t tenthsOfThread = 0);
 
-            void addConnection(const std::string & name, const ConnectionPtr & connection);
-            ConnectionPtr findConnection(const std::string & name) const;
+            void addQueue(const std::string & name, const ConnectionPtr & connection);
+            ConnectionPtr findQueue(const std::string & name) const;
 
             void createResources();
 
             const MemoryPoolPtr & getMemoryPool()const;
             const AsioServicePtr & getAsioService()const;
 
+            std::string getQueueNames()const;
+
             void start();
             void stop();
             void finish();
 
         public:
-            typedef std::map<std::string, ConnectionPtr> Connections;
+            typedef std::map<std::string, ConnectionPtr> Queues;
 
         private:
             /// @brief use a single memory pool for all users.
@@ -58,8 +60,8 @@ namespace HighQueue
             /// @brief use a single AsioService for all users.
             AsioServicePtr asio_;
 
-            /// @brief A named collection of HighQueue Connections
-            Connections connections_;
+            /// @brief A named collection of HighQueue Queues
+            Queues queues_;
 
             //////////////////////////
             // Memory Pool Parameters

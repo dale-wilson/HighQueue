@@ -3,9 +3,9 @@
 #include <HighQueue/details/HQReservePosition.h>
 using namespace HighQueue;
 
-Producer::Producer(ConnectionPtr & connection, bool solo)
-: solo_(solo)
-, connection_(connection)
+Producer::Producer(ConnectionPtr & connection)
+: connection_(connection)
+, solo_(connection_->canSolo())
 , header_(connection_->getHeader())
 , entryCount_(header_->entryCount_)
 , waitStrategy_(header_->producerWaitStrategy_)

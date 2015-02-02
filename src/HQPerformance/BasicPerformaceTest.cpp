@@ -23,7 +23,8 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     ConnectionPtr connection = std::make_shared<Connection>();
     connection->createLocal("LocalIv", parameters);
 
-    Producer producer1(connection, true);
+    connection->willProduce(); // tell the connection that only one producer will use it.  This enables solo operation.
+    Producer producer1(connection);
     Consumer consumer(connection);
     Message producerMessage(connection);
     Message consumerMessage(connection);
@@ -53,7 +54,8 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
     }
     auto consumeTime = timer.nanoseconds();
 
-    Producer producer2(connection, false);
+    connection->willProduce(); // tell the connection that another producer will use it.  This disables solo operation.
+    Producer producer2(connection);
     for (uint32_t nMessage = 0; nMessage < entryCount; ++nMessage)
     {
         producerMessage.emplace<ActualMessage>(1, nMessage);

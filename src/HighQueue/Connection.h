@@ -79,9 +79,13 @@ namespace HighQueue
         /// @returns a byte count suitable for use in "new byte_t[count]" or even malloc.
         static size_t spaceNeededForHeader(const CreationParameters & parameters);
 
+        void willProduce();
+        bool canSolo()const;
     private:
+        size_t expectedProducers_;
         MemoryPoolPtr memoryPool_;
         std::unique_ptr<byte_t[]> queueMemory_; 
         HQHeader * header_;
     };
 }
+

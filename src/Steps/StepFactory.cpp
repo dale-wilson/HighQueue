@@ -36,7 +36,13 @@ StepPtr StepFactory::make(const std::string & name)
     }
     else
     {
-        LogWarning("No Step Factory Registry entry found for " << name);
+        if(Log::isEnabled(Log::WARNING))
+        {
+            // todo: this is ugly
+            std::stringstream entries;
+            list(entries);
+            LogWarning("No Step Factory Registry entry found for " << name << ". Expecting one of " << entries.str());
+        }
     }
     return result;
 }

@@ -55,7 +55,8 @@ namespace
     {
         try
         {
-            Producer producer(connection, true);
+            connection->willProduce(); // enable solo mode
+            Producer producer(connection);
             Message producerMessage(connection);
 
             ++threadsReady;
@@ -93,7 +94,8 @@ namespace
             Consumer consumer(inConnection);
             Message consumerMessage(inConnection);
  
-            Producer producer(outConnection, true);
+            outConnection->willProduce(); // enable solo mode
+            Producer producer(outConnection);
             Message producerMessage(outConnection);
             ++threadsReady;
             switch(copyType)

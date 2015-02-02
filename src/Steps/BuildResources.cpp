@@ -38,17 +38,17 @@ void BuildResources::requestMessageSize(size_t bytes)
     }
 }
 
-void BuildResources::addConnection(const std::string & name, const ConnectionPtr & connection)
+void BuildResources::addQueue(const std::string & name, const ConnectionPtr & connection)
 {
     // TODO: check for duplicates?
-    connections_[name] == connection;
+    queues_[name] = connection;
 }
 
-ConnectionPtr BuildResources::findConnection(const std::string & name) const
+ConnectionPtr BuildResources::findQueue(const std::string & name) const
 {
     ConnectionPtr result;
-    auto pConnection = connections_.find(name);
-    if(pConnection != connections_.end())
+    auto pConnection = queues_.find(name);
+    if(pConnection != queues_.end())
     {
         result = pConnection->second;
     }
@@ -113,4 +113,16 @@ const AsioServicePtr & BuildResources::getAsioService()const
 const MemoryPoolPtr & BuildResources::getMemoryPool()const
 {
     return pool_;
+}
+
+std::string BuildResources::getQueueNames()const
+{
+    std::stringstream msg;
+    std:: string delimiter;
+    for(const auto & entry : queues_)
+    {
+        msg << delimiter << entry.first;
+        delimiter = ", ";
+    }
+    return msg.str();
 }

@@ -148,7 +148,8 @@ bool InputQueue::constructWaitStrategy(const ConfigurationNode & config, WaitStr
 
 void InputQueue::configureResources(BuildResources & resources)
 {
-    resources.addConnection(name_, connection_);
+    resources.addQueue(name_, connection_);
+    resources.requestMessages(parameters_.entryCount_);
     return ThreadedStepToMessage::configureResources(resources);
 }
 
@@ -158,6 +159,7 @@ void InputQueue::attachResources(BuildResources & resources)
     connection_->createLocal(name_, parameters_, pool);
     message_.reset(new Message(pool));
     consumer_.reset(new Consumer(connection_));
+    return ThreadedStepToMessage::attachResources(resources);
 }
 
 void InputQueue::run()

@@ -8,7 +8,8 @@
 using namespace HighQueue;
 
 Connection::Connection()
-: header_(0)
+    : expectedProducers_(0)
+, header_(0)
 {
 }
 
@@ -19,6 +20,17 @@ Connection::~Connection()
         header_->releaseInternalMessages();
     }
 }
+
+void Connection::willProduce()
+{
+    ++expectedProducers_;
+}
+
+bool Connection::canSolo()const
+{
+    return expectedProducers_ == 1;
+}
+
 
 void Connection::close()
 {

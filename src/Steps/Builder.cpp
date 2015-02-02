@@ -101,7 +101,7 @@ bool Builder::constructPipe(const ConfigurationNode & config)
         auto child = rootChildren->getChild();
         auto & key = child->getName();
         auto & step = StepFactory::make(key);
-        if(!step->configure(*child))
+        if(!step || !step->configure(*child))
         {
             return false;
         }
