@@ -2,12 +2,11 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #include <Steps/StepPch.h>
-#ifdef DISABLED
 
 #include "OrderedMerge.h"
 #include <Steps/StepFactory.h>
 #include <Steps/BuildResources.h>
-#include <Steps/BuildResources.h>
+#include <Steps/Configuration.h>
 #include <HighQueue/MemoryPool.h>
 
 using namespace HighQueue;
@@ -16,6 +15,8 @@ using namespace Steps;
 namespace
 {
     StepFactory::Registrar<OrderedMerge> registerStepSmall("ordered_merge");
+
+    const std::string keyLookAhead = "look_ahead";
 }
 
 OrderedMerge::OrderedMerge()
@@ -36,7 +37,31 @@ OrderedMerge::OrderedMerge()
     , statDuplicatesStash_(0)
     , statFuture_(0)
 {
-    setName("OrderedMerge"); // default name
+}
+
+bool OrderedMerge::configureParameter(const std::string & key, const ConfigurationNode & configuration)
+{
+    if(key == keyLookAhead)
+    {
+        uint64_t lookAhead;
+        if(configuration.getValue(lookAhead))
+        {
+            lookAhead_ = size_t(lookAhead);
+            return true;
+        }
+        return false;
+    }
+    else
+    {
+        return StepToMessage::configureParameter(key, configuration);
+    }
+}
+
+void OrderedMerge::configureResources(BuildResources & resources)
+{
+    resources.requestMessageSize(sizeof(GapMessage));
+    resources.requestMessages(lookAhead_);
+    StepToMessage::configureResources(resources);
 }
 
 void OrderedMerge::attachResources(BuildResources & resources)
@@ -52,6 +77,15 @@ void OrderedMerge::attachResources(BuildResources & resources)
     }
 
     StepToMessage::attachResources(resources);
+}
+
+void OrderedMerge::validate()
+{
+    if(pendingMessages_.size() < lookAhead_)
+    {
+        throw std::runtime_error("OrderedMerge: Pending messages not allocated.");
+    }
+    StepToMessage::validate();
 }
 
 void OrderedMerge::handle(Message & message)
@@ -199,6 +233,14 @@ void OrderedMerge::publishPendingMessages()
     }
 }
 
+void OrderedMerge::finish()
+{
+    std::ostringstream msg;
+    writeStats(msg);
+    LogStatistics(msg.str());
+    StepToMessage::finish();
+}
+
 std::ostream & OrderedMerge::writeStats(std::ostream & out)
 {
     return out
@@ -214,4 +256,4 @@ std::ostream & OrderedMerge::writeStats(std::ostream & out)
         << " DuplicatesStash: " << statDuplicatesStash_
         << " Future: " << statFuture_;
 }
-#endif //DISABLED
+

@@ -41,13 +41,18 @@ namespace HighQueue
         /// @param message contains the data to be published.         
         void publish(Message & message);
 
+        /// @brief Cancel the outstanding publish and stop publishing
+        void stop();
+
         /// @brief for diagnosing and performance measurements, dump statistics
         std::ostream & writeStats(std::ostream & out)const;
     private:
-        uint64_t reserve();
+        Position reserve();
+        bool unreserve(Position position);
     private:
         ConnectionPtr connection_;
         bool solo_;
+        bool stopping_;
         HQHeader * header_;
         size_t entryCount_;
         WaitStrategy waitStrategy_;

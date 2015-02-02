@@ -102,8 +102,6 @@ namespace HighQueue
             /// Lifecycle 2a: Give it a name
             void setName(const std::string & name);
 
-            const std::string & getName()const;
-
             /// @brief Attach primary destination
             /// Lifecycle 3: Attach
             virtual void attachDestination(const StepPtr & destination);
@@ -147,6 +145,8 @@ namespace HighQueue
             /// Lifecycle 10: Finish
             virtual void finish();
 
+            
+            const std::string & getName()const;
             bool isStopping()const;
             bool isPaused() const;
         protected:

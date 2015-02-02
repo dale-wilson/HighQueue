@@ -18,11 +18,11 @@ namespace HighQueue
 
             // Implement Step
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-//            virtual void configureResources(BuildResources & resources);
             virtual void attachResources(BuildResources & resources);
             virtual void validate();
             virtual void start();
             virtual void handle(Message & message);
+            virtual void stop();
             
         private:
             std::string queueName_;

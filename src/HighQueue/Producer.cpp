@@ -6,6 +6,7 @@ using namespace HighQueue;
 Producer::Producer(ConnectionPtr & connection)
 : connection_(connection)
 , solo_(connection_->canSolo())
+, stopping_(false)
 , header_(connection_->getHeader())
 , entryCount_(header_->entryCount_)
 , waitStrategy_(header_->producerWaitStrategy_)
@@ -36,7 +37,7 @@ Producer::~Producer()
 }
 
 inline
-uint64_t Producer::reserve()
+Position Producer::reserve()
 {
     if(solo_)
     {
@@ -45,6 +46,27 @@ uint64_t Producer::reserve()
     return reservePosition_++;
 }
 
+inline bool Producer::unreserve(Position reserve)
+{
+    if(solo_)
+    {
+        if(reserve < reserveSoloPosition_)
+        {
+            --reserveSoloPosition_;
+        }
+        return true;
+    }
+    else
+    {
+        if(reserve < reserveSoloPosition_)
+        {
+            Position expected = reserve + 1;
+            return reservePosition_.compare_exchange_strong(expected, reserve);
+        }
+        return true;
+    }
+
+}
 void Producer::publish(Message & message)
 {
     bool published = false;
@@ -67,6 +89,11 @@ void Producer::publish(Message & message)
                 size_t remainingSleeps = waitStrategy_.sleepCount_;
                 while(publishable_ <= reserved)
                 {
+                    if(stopping_ && unreserve(reserved))
+                    {
+                        return;
+                    }
+
                     if(remainingSpins > 0)
                     {
                         ++statSpins_;
@@ -133,6 +160,11 @@ void Producer::publish(Message & message)
         int64_t pending = reserved - publishPosition_;
         while(pending > 0)
         {
+            if(stopping_ && unreserve(reserved))
+            {
+                return;
+            }
+
             ++statPublishWaits_;
             if(pending > 1)
             {
@@ -163,6 +195,13 @@ void Producer::publish(Message & message)
             }
         }
     }
+}
+
+void Producer::stop()
+{
+    stopping_ = true;
+    std::unique_lock<std::mutex> guard(header_->waitMutex_);
+    header_->producerWaitConditionVariable_.notify_all();
 }
 
 std::ostream & Producer::writeStats(std::ostream & out) const

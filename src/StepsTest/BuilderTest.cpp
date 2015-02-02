@@ -81,7 +81,8 @@ R"json({
   "pipe": {
     "small_test_message_producer" : {
       "name" : "MockMessageProducer",
-      "message_count" : 0
+      "message_count" : 0,
+      "producer_number" : 0
     },
     "send_to_queue" : {
         "name" : "SendTestMessagesToQueue1",
@@ -92,6 +93,10 @@ R"json({
     "input_queue" : {
         "name" : "queue1",
         "entry_count" : 100
+    },
+    "ordered_merge" : {
+        "name" : "merge",
+        "look_ahead" : 1000
     },
     "small_test_message_consumer" : {
       "name" : "MockMessageConsumer"

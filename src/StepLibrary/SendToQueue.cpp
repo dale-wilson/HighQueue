@@ -80,4 +80,11 @@ void SendToQueue::handle(Message & message)
     }
 }
 
-
+void SendToQueue::stop()
+{
+    Step::stop();
+    if(producer_)
+    {
+        producer_->stop();
+    }
+}

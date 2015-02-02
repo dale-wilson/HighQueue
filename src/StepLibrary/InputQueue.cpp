@@ -181,10 +181,13 @@ void InputQueue::run()
 
 void InputQueue::stop()
 {
-    if(consumer_)
+    if(!stopping_)
     {
-        consumer_->stop();
+        if(consumer_)
+        {
+            consumer_->stop();
+        }
+        ThreadedStepToMessage::stop();
     }
-    ThreadedStepToMessage::stop();
 }
 

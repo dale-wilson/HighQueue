@@ -43,4 +43,5 @@ void StepToMessage::validate()
     {
         throw std::runtime_error("StepToMessage: Can't initialize output message. No memory pool attached.");
     }
+    Step::validate();
 }        

@@ -2,7 +2,6 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#ifdef DISABLED
 
 #include "OrderedMergeFwd.h"
 
@@ -42,8 +41,11 @@ namespace HighQueue
             virtual void configureResources(BuildResources & resources);
 
             virtual void attachResources(BuildResources & resources);
+            virtual void validate();
 
             virtual void handle(Message & message);
+
+            virtual void finish();
 
             std::ostream & writeStats(std::ostream & out);
 
@@ -79,4 +81,3 @@ namespace HighQueue
 
    }
 }
-#endif //DISABLED
