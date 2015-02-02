@@ -5,8 +5,6 @@
 #include "HeartbeatProducerFwd.h"
 #include <Steps/AsioStepToMessage.h>
 
-#include <Common/Log.h>
-
 namespace HighQueue
 {
     namespace Steps

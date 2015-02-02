@@ -8,6 +8,8 @@
 #include <Steps/Configuration.h>
 #include <Steps/BuildResources.h>
 
+#include <Common/Log.h>
+
 using namespace HighQueue;
 using namespace Steps;
 
@@ -70,6 +72,7 @@ void HeartbeatProducer::start()
     timer_.reset(new Timer(*ioService_));
     LogTrace("Heartbeat: StartTimer " << interval_.total_milliseconds());
     startTimer();
+    AsioStepToMessage::start();
 }
 
 void HeartbeatProducer::stop()
