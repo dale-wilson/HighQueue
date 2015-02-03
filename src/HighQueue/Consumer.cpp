@@ -46,7 +46,9 @@ inline
 void Consumer::incrementReadPosition()
 {
     ++readPosition_;
+#ifdef HIGHQUEUE_CPU_REQUIRES_RELEASE_FENCE
     std::atomic_thread_fence(std::memory_order::memory_order_release);
+#endif //  HIGHQUEUE_CPU_REQUIRES_RELEASE_FENCE
     if(producerUsesMutex_)
     {
         std::unique_lock<std::mutex> guard(header_->waitMutex_);

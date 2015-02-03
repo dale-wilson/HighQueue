@@ -183,7 +183,9 @@ void Producer::publish(Message & message)
             ++statPublishes_;
             if(!consumerUsesMutex_)
             {
+#ifdef HIGHQUEUE_CPU_REQUIRES_RELEASE_FENCE
                 std::atomic_thread_fence(std::memory_order::memory_order_release);
+#endif //  HIGHQUEUE_CPU_REQUIRES_RELEASE_FENCE
                 return;
             }
 
