@@ -1,6 +1,0 @@
-Give stage instances a name for diagnostic purposes.
-
-Define configuration information  
-	(boost::properties?  What alternatives are available.) 
-
-Create an example application (for example: A/B-Mcast->arbitration)
