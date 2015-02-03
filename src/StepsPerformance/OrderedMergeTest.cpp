@@ -62,7 +62,6 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     const uint32_t numberOfProducers = 2;   // Don't change this
     const uint32_t numberOforderedMerges = 1; // Don't change this.
     const uint32_t numberOfShufflers = numberOfProducers + 1 / 2;
-
     const size_t queueCount = numberOforderedMerges + numberOfConsumers; // need a pool for each object that can receive messages
     // how many buffers do we need?
     size_t extraMessages = 0; // in case we need it someday (YAGNI)
@@ -124,7 +123,6 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
         {
             producer->attachDestination(publisher);
         }
-
     }
     auto heartbeat = std::make_shared<HeartbeatProducer>(heartbeatInterval);
     steps.emplace_back(heartbeat);
