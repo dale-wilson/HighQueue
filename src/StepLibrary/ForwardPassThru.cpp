@@ -15,11 +15,9 @@ namespace
     StepFactory::Registrar<ForwardPassThru> registerStep("forward_pass_thru");
 }
 
-ForwardPassThru::ForwardPassThru(uint32_t messageCount)
-    : messageCount_(messageCount)
-    , messagesHandled_(0)
+ForwardPassThru::ForwardPassThru()
+    : messagesHandled_(0)
 {
-    setName("ForwardPassThru"); // default name
 }
 
 void ForwardPassThru::handle(Message & message)
@@ -29,11 +27,11 @@ void ForwardPassThru::handle(Message & message)
         LogTrace("ForwardPassThru copy.");
         send(message);
         ++messagesHandled_;
-        if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
-        {
-            LogTrace("ForwardPassThru stop: message count: " << messagesHandled_);
-            stop();
-        }
     }
+}
+
+void ForwardPassThru::finish()
+{
+    LogStatistics("Forward Pass Thru messages: " << messagesHandled_);
 }
 

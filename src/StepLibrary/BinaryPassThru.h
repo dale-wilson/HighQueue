@@ -15,12 +15,12 @@ namespace HighQueue
         {
 
         public:
-            explicit BinaryPassThru(uint32_t messageCount = 0);
+            explicit BinaryPassThru();
 
             virtual void handle(Message & message);
+            virtual void finish();
  
         private:
-            uint32_t messageCount_;
             uint32_t messagesHandled_;
         };
    }

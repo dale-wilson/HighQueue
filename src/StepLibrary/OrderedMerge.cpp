@@ -21,8 +21,6 @@ namespace
 
 OrderedMerge::OrderedMerge()
     : lookAhead_(0)
-    , expectedShutdowns_(0)// <-- todo make it stop
-    , actualShutdowns_(0)
     , expectedSequenceNumber_(0)
     , lastHeartbeatSequenceNumber_(0)
     , statReceived_(0)
@@ -49,12 +47,12 @@ bool OrderedMerge::configureParameter(const std::string & key, const Configurati
             lookAhead_ = size_t(lookAhead);
             return true;
         }
-        return false;
     }
     else
     {
         return StepToMessage::configureParameter(key, configuration);
     }
+    return false;
 }
 
 void OrderedMerge::configureResources(SharedResources & resources)
@@ -73,7 +71,7 @@ void OrderedMerge::attachResources(SharedResources & resources)
     }
     while(pendingMessages_.size() < lookAhead_)
     {
-        pendingMessages_.emplace_back(memoryPool);
+        pendingMessages_.emplace_back(new Message(memoryPool));
     }
 
     StepToMessage::attachResources(resources);
@@ -114,28 +112,26 @@ void OrderedMerge::handleHeartbeat(Message & message)
     // todo: we might want to skip some heartbeats depending on frequency
     if(expectedSequenceNumber_ == lastHeartbeatSequenceNumber_)
     {
-        ++statHeartbeatWithoutPublish_;
-        findAndPublishGap();
-        publishPendingMessages();
+        if(findAndPublishGap())
+        {
+            ++statHeartbeatWithoutPublish_;
+            publishPendingMessages();
+        }
     }
     lastHeartbeatSequenceNumber_ = expectedSequenceNumber_;
+    send(message);
 }
 
 void OrderedMerge::handleShutdown(Message & message)
 {
-    ++actualShutdowns_;
-    LogTrace("OrderedMerge received shutdown " << actualShutdowns_ << " of " << expectedShutdowns_);
-    if(actualShutdowns_ == expectedShutdowns_)
+    LogTrace("OrderedMerge received shutdown " << statShutdowns_ );
+    while(findAndPublishGap())
     {
-        while(findAndPublishGap())
-        {
-            ++statShutdownPublishedGap_;
-            publishPendingMessages();
-        }
-        // forward the shutdown message
-        send(message);
-        stop();
+        ++statShutdownPublishedGap_;
+        publishPendingMessages();
     }
+    // forward the shutdown message
+    send(message);
 }
 
 void OrderedMerge::handleDataMessage(Message & message)
@@ -163,11 +159,11 @@ void OrderedMerge::handleDataMessage(Message & message)
     else if(sequence - expectedSequenceNumber_ < lookAhead_)
     {
         auto index = sequence % lookAhead_;
-        if(pendingMessages_[index].isEmpty())
+        if(pendingMessages_[index]->isEmpty())
         {
             ++statStashed_;
             LogDebug("OrderedMerge Stash" << sequence);
-            message.moveTo(pendingMessages_[index]);
+            message.moveTo(*pendingMessages_[index]);
         }
         else
         {
@@ -192,7 +188,7 @@ void OrderedMerge::handleDataMessage(Message & message)
         }
         LogDebug("OrderedMerge Stash future " << sequence);
         auto index = sequence % lookAhead_;
-        message.moveTo(pendingMessages_[index]);
+        message.moveTo(*pendingMessages_[index]);
     }
 }
 
@@ -204,7 +200,7 @@ bool OrderedMerge::findAndPublishGap()
     while(gapEnd < endLookahead)
     {
         auto index = gapEnd % lookAhead_;
-        if(!pendingMessages_[index].isEmpty())
+        if(!pendingMessages_[index]->isEmpty())
         {
             publishGapMessage(gapStart, gapEnd);
             return true;
@@ -224,10 +220,10 @@ void OrderedMerge::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
 void OrderedMerge::publishPendingMessages()
 {
     auto index = expectedSequenceNumber_ % lookAhead_;
-    while(!pendingMessages_[index].isEmpty())
+    while(!pendingMessages_[index]->isEmpty())
     {
         LogDebug("OrderedMerge Publish from stash " << expectedSequenceNumber_ );
-        send(pendingMessages_[index]);
+        send(*pendingMessages_[index]);
         ++expectedSequenceNumber_;
         index = expectedSequenceNumber_ % lookAhead_;
     }
@@ -235,10 +231,17 @@ void OrderedMerge::publishPendingMessages()
 
 void OrderedMerge::finish()
 {
-    std::ostringstream msg;
-    writeStats(msg);
-    LogStatistics(msg.str());
-    StepToMessage::finish();
+    LogStatistics("OrderedMerge received: " << statReceived_);
+    LogStatistics("OrderedMerge heartbeat: " << statHeartbeats_);
+    LogStatistics("OrderedMerge shutdown: " << statShutdowns_);
+    LogStatistics("OrderedMerge data: " << statData_);
+    LogStatistics("OrderedMerge heartbeat gap: " << statHeartbeatWithoutPublish_);
+    LogStatistics("OrderedMerge shutdown gap: " << statShutdownPublishedGap_);
+    LogStatistics("OrderedMerge in_order: " << statArrivedInOrder_);
+    LogStatistics("OrderedMerge duplicate_published: " << statDuplicatesPrevious_);
+    LogStatistics("OrderedMerge stashed: " << statStashed_);
+    LogStatistics("OrderedMerge duplicate_stashed: " << statDuplicatesStash_);
+    LogStatistics("OrderedMerge future gap: " << statFuture_);
 }
 
 std::ostream & OrderedMerge::writeStats(std::ostream & out)

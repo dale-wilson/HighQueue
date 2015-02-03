@@ -29,6 +29,7 @@ namespace HighQueue
 
             // implement Step methods
             virtual void handle(Message & message);
+            virtual void finish();
 
         private:
             void hexDump(byte_t * message, size_t size);

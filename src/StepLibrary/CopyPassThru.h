@@ -16,21 +16,19 @@ namespace HighQueue
         {
 
         public:
-            explicit CopyPassThru(uint32_t messageCount = 0);
+            explicit CopyPassThru();
 
             virtual void handle(Message & message);
- 
+
+            virtual void finish();
         private:
-            uint32_t messageCount_;
             uint32_t messagesHandled_;
         };
 
         template<typename CargoType>
-        CopyPassThru<CargoType>::CopyPassThru(uint32_t messageCount)
-            : messageCount_(messageCount)
-            , messagesHandled_(0)
+        CopyPassThru<CargoType>::CopyPassThru()
+            : messagesHandled_(0)
         {
-            setName("CopyPassThru"); // default name
         }
 
         template<typename CargoType>
@@ -42,17 +40,14 @@ namespace HighQueue
                 outMessage_->emplace<CargoType>(*message.get<CargoType>());
                 message.moveMetaInfoTo(*outMessage_);
                 send(*outMessage_);
-                auto type = message.getType();
-                if(type == Message::MessageType::Shutdown)
-                {
-                    stop();
-                }
                 ++messagesHandled_;
-                if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
-                {
-                    stop();
-                }
             }
+        }
+
+        template<typename CargoType>
+        void CopyPassThru<CargoType>::finish()
+        {
+            LogStatistics("Copy Pass Thru messages: " << messagesHandled_);
         }
    }
 }

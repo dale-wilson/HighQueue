@@ -34,7 +34,11 @@ namespace HighQueue
         ///    void allocate(Message & message);
         /// };
         template <typename AllocatorPtr>
-        Message(AllocatorPtr & allocator);
+        explicit Message(AllocatorPtr & allocator);
+
+        Message() = delete;
+        Message(const Message &) = delete;
+        Message(Message &&) = delete;
 
         /// @brief destruct, returning the memory to the pool.
         ~Message();

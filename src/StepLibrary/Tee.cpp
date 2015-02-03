@@ -19,7 +19,6 @@ const std::string Tee::keyOutput = "output";
 Tee::Tee()
     : out_(0)
 {
-    setName("Tee"); // default name
 }
 
 void Tee::attachOutputStream(std::ostream * outputStream)
@@ -38,24 +37,31 @@ bool Tee::configureParameter(const std::string & key, const ConfigurationNode & 
 
 void Tee::start()
 {
-    if(outputName_ == "cout")
+    if(!out_)
     {
-        out_ = & std::cout;
-    }
-    else if(outputName_ == "cerr")
-    {
-        out_ = & std::cerr;
-    }
-    else
-    {
-        outfile_.open(outputName_);
-        if(outfile_.good())
+        if(outputName_ == "cout")
         {
-            out_ = & outfile_;
+            out_ = & std::cout;
+        }
+        else if(outputName_ == "cerr")
+        {
+            out_ = & std::cerr;
+        }
+        else if(outputName_ == "null")
+        {
+            out_ = 0;
         }
         else
         {
-            LogError("Tee processor cannot open output file " << outputName_);
+            outfile_.open(outputName_);
+            if(outfile_.good())
+            {
+                out_ = & outfile_;
+            }
+            else
+            {
+                LogError("Tee processor cannot open output file " << outputName_);
+            }
         }
     }
 }
@@ -68,6 +74,15 @@ void Tee::handle(Message & message)
         LogTrace("Tee copy.");
         hexDump(message.get(), message.getUsed());
         send(message);
+    }
+}
+
+void Tee::finish()
+{
+    if(outfile_.is_open())
+    {
+        outfile_.close();
+        out_ = 0;
     }
 }
     

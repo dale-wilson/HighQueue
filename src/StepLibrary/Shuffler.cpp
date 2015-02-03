@@ -6,6 +6,8 @@
 #include "Shuffler.h"
 #include <Steps/StepFactory.h>
 #include <Steps/SharedResources.h>
+#include <Steps/Configuration.h>
+
 #include <HighQueue/MemoryPool.h>
 
 using namespace HighQueue;
@@ -16,31 +18,52 @@ namespace
     StepFactory::Registrar<Shuffler> registerStep("shuffler");
 
     const std::string keyLookAhead = "look_ahead";
+    const std::string keyPrime = "prime";
 }
 
-Shuffler::Shuffler(size_t lookAhead)
-    : lookAhead_(lookAhead)
+Shuffler::Shuffler()
+    : lookAhead_(0)
+    , prime_(relativelyPrime_)
     , position_(0)
+    , published_(0)
+    , heartbeats_(0)
+    , shutdowns_(0)
 {
-    setName("Shuffler"); // default name
 }
 
-/// @brief Configure 
-/// Lifecycle 2: Configure
 bool Shuffler::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
-    int todo;
-    return StepToMessage::configureParameter(key, configuration);
+    if(key == keyLookAhead)
+    {
+        uint64_t lookAhead;
+        if(configuration.getValue(lookAhead))
+        {
+            lookAhead_ = size_t(lookAhead);
+            return true;
+        }
+    }
+    else if(key == keyPrime)
+    {
+        uint64_t prime;
+        if(configuration.getValue(prime))
+        {
+            prime_ = size_t(prime);
+            return true;
+        }
+    }
+    else
+    {
+        return Step::configureParameter(key, configuration);
+    }
+    return false;
 }
 
 void Shuffler::configureResources(SharedResources & resources)
 {
-    int todo;
-    return StepToMessage::configureResources(resources);
-
+    resources.requestMessages(lookAhead_);
+    return Step::configureResources(resources);
 }
 
-/// @brief Attach resources
 void Shuffler::attachResources(SharedResources & resources)
 {
     auto & memoryPool = resources.getMemoryPool();
@@ -51,18 +74,20 @@ void Shuffler::attachResources(SharedResources & resources)
 
     while(pendingMessages_.size() < lookAhead_)
     {
-        pendingMessages_.emplace_back(memoryPool);
+        pendingMessages_.emplace_back(new Message(memoryPool));
     }
-    StepToMessage::attachResources(resources);
+    Step::attachResources(resources);
 }
 
 void Shuffler::validate()
 {
+    mustHaveDestination();
+
     if(pendingMessages_.size() < lookAhead_)
     {
-        throw std::runtime_error("Shuffler working messages not initialized. Missing call to attachConnection or attachMemoryPool?");
+        throw std::runtime_error("Shuffler working messages not initialized.");
     }
-    StepToMessage::validate();
+    Step::validate();
 }
 
 void Shuffler::handle(Message & message)
@@ -84,34 +109,57 @@ void Shuffler::handle(Message & message)
 
 void Shuffler::handleHeartbeat(Message & message)
 {
+    ++heartbeats_;
     publishPendingMessages();
+    send(message);
 }
 
 void Shuffler::handleShutdown(Message & message)
 {
-    // make the user call stop();
-    handleDataMessage(message);
+    ++shutdowns_;
     publishPendingMessages();
+    send(message);
 }
 
 void Shuffler::handleDataMessage(Message & message)
 {
-    position_ += relativelyPrime_;
+    position_ += prime_;
     size_t index = position_ % lookAhead_;
-    if(!pendingMessages_[index].isEmpty())
+    if(!pendingMessages_[index]->isEmpty())
     {
-        send(pendingMessages_[index]);
+        ++published_;
+        send(*pendingMessages_[index]);
     }
-    message.moveTo(pendingMessages_[index]);
+    message.moveTo(*pendingMessages_[index]);
 }
 
 void Shuffler::publishPendingMessages()
 {
     for(auto & message : pendingMessages_)
     {
-        if(!message.isEmpty())
+        if(!message->isEmpty())
         {
-            send(message);
+            ++published_;
+            send(*message);
         }
+    }
+}
+
+void Shuffler::finish()
+{
+    LogStatistics("Shuffler published: " << published_);
+    LogStatistics("Shuffler heartbeats: " << heartbeats_);
+    LogStatistics("Shuffler shutdowns: " << shutdowns_);
+    size_t leftovers = 0;
+    for(auto & message : pendingMessages_)
+    {
+        if(!message->isEmpty())
+        {
+            ++leftovers;
+        }
+    }
+    if(leftovers != 0)
+    {
+        LogStatistics("Shuffler unpublished: " << leftovers);
     }
 }

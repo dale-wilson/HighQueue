@@ -12,15 +12,14 @@ namespace HighQueue
     {
         class Steps_Export ForwardPassThru: public Step
         {
-
         public:
-            explicit ForwardPassThru(uint32_t messageCount = 0);
+            explicit ForwardPassThru();
 
             // implement Step methods
             virtual void handle(Message & message);
+            virtual void finish();
  
         private:
-            uint32_t messageCount_;
             uint32_t messagesHandled_;
         };
    }

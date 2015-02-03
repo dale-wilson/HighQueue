@@ -60,10 +60,10 @@ namespace HighQueue
 
         private:
             size_t lookAhead_;
-            size_t expectedShutdowns_;
-            size_t actualShutdowns_;
             uint32_t expectedSequenceNumber_;
-            std::vector<Message> pendingMessages_;
+            typedef std::shared_ptr<Message> MessagePtr;
+            typedef std::vector<MessagePtr> Messages;
+            Messages pendingMessages_;
             uint32_t lastHeartbeatSequenceNumber_;
 
             size_t statReceived_;

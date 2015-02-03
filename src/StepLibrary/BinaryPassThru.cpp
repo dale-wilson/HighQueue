@@ -14,11 +14,9 @@ namespace
 }
 
 
-BinaryPassThru::BinaryPassThru(uint32_t messageCount)
-    : messageCount_(messageCount)
-    , messagesHandled_(0)
+BinaryPassThru::BinaryPassThru()
+    : messagesHandled_(0)
 {
-    setName("BinaryPassThru"); // default name
 }
         
 void BinaryPassThru::handle(Message & message)
@@ -29,15 +27,11 @@ void BinaryPassThru::handle(Message & message)
         outMessage_->appendBinaryCopy(message.get(), message.getUsed());
         message.moveMetaInfoTo(*outMessage_);
         send(*outMessage_);
-        auto type = message.getType();
-        if(type == Message::MessageType::Shutdown)
-        {
-            stop();
-        }
         ++messagesHandled_;
-        if(messageCount_ != 0 && messagesHandled_ >= messageCount_)
-        {
-            stop();
-        }
     }
+}
+
+void BinaryPassThru::finish()
+{
+    LogStatistics("Binary Pass Thru messages: " << messagesHandled_);
 }

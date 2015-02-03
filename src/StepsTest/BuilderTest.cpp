@@ -80,12 +80,23 @@ R"json({
   },
   "pipe": {
     "small_test_message_producer" : {
-      "name" : "MockMessageProducer",
-      "message_count" : 0,
+      "name" : "MockMessageProducer_A",
+      "message_count" : 100000,
       "producer_number" : 0
     },
     "send_to_queue" : {
-        "name" : "SendTestMessagesToQueue1",
+        "name" : "SendTestMessagesToQueue1_A",
+        "queue" : "queue1"
+    }
+  },
+  "pipe": {
+    "small_test_message_producer" : {
+      "name" : "MockMessageProducer_B",
+      "message_count" : 400000,
+      "producer_number" : 0
+    },
+    "send_to_queue" : {
+        "name" : "SendTestMessagesToQueue1_B",
         "queue" : "queue1"
     }
   },
@@ -94,9 +105,40 @@ R"json({
         "name" : "queue1",
         "entry_count" : 100
     },
+    "shuffler" : {
+        "name" : "shuffler",
+        "look_ahead" : 100
+    },
     "ordered_merge" : {
         "name" : "merge",
         "look_ahead" : 1000
+    },
+    "small_test_message_consumer" : {
+      "name" : "MockMessageConsumer"
+    }
+  }
+}
+)json";
+
+    std::string testJson5 =
+R"json({
+  "pipe": {
+    "small_test_message_producer" : {
+      "name" : "MockMessageProducer",
+      "message_count" : 10
+    },
+    "binary_copy" : {
+        "name" : "BinaryCopy"
+    },
+    "small_test_message_copy" : {
+        "name" : "ConstructCopy"
+    },
+    "forward_pass_thru" : {
+        "name" : "ForwardPassThru"
+    },
+    "tee" : {
+        "name" : "tee",
+        "output" : "null"
     },
     "small_test_message_consumer" : {
       "name" : "MockMessageConsumer"
@@ -135,7 +177,7 @@ R"json({
     }
 }
 
-#define ENABLE_BUILDER_TEST1 0
+#define ENABLE_BUILDER_TEST1 0 // covered by test4
 #if ENABLE_BUILDER_TEST1
 
 BOOST_AUTO_TEST_CASE(TestBuilder1)
@@ -147,7 +189,7 @@ BOOST_AUTO_TEST_CASE(TestBuilder1)
 
 #endif // ENABLE_BUILDER_TEST1
 
-#define ENABLE_BUILDER_TEST2 0
+#define ENABLE_BUILDER_TEST2 0 // covered by test4
 #if ENABLE_BUILDER_TEST2
 
 BOOST_AUTO_TEST_CASE(TestBuilder2)
@@ -158,7 +200,7 @@ BOOST_AUTO_TEST_CASE(TestBuilder2)
 }
 #endif // ENABLE_BUILDER_TEST2
 
-#define ENABLE_BUILDER_TEST3 0
+#define ENABLE_BUILDER_TEST3 0 // covered by test4
 #if ENABLE_BUILDER_TEST3
 
 BOOST_AUTO_TEST_CASE(TestBuilder3)
@@ -179,4 +221,15 @@ BOOST_AUTO_TEST_CASE(TestBuilder4)
     runBuilderTest(testJson4);
 }
 #endif // ENABLE_BUILDER_TEST4
+
+#define ENABLE_BUILDER_TEST5 01
+#if ENABLE_BUILDER_TEST5
+
+BOOST_AUTO_TEST_CASE(TestBuilder5)
+{
+    std::cout << "Builder test5" << std::endl;
+    listLines(testJson5);
+    runBuilderTest(testJson5);
+}
+#endif // ENABLE_BUILDER_TEST5
 
