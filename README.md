@@ -17,9 +17,9 @@ used for interprocess communication by putting the HighQueue in shared memory.
 HighSteps is framework for creating <b>High</b> performance processing <b>Steps</b>.  Steps are units that can be assembled into a processing pipeline.   HighSteps defines tools for developing the Steps.  When Steps are running within different threads, the messages are passed using a HighQueue.  When they are running within the same thread a direct virtual call is used to pass the message.
 It is still under active development.  Eventually it will also provide the support needed to instantiate and configure those Steps, assemble them into a pipeline and run the resulting program.
 
-As of this writing (mid-January, 2015) HighQueue is reasonably stable.
-
-HighSteps is still undergoing rapid development as it evolves into a complete system.
+###Status
+HighQueue is stable.
+HighSteps is complete.  There is quite a bit of polishing and documentation in progress.
 
 ##Overview 
 
@@ -36,6 +36,12 @@ Each HighQueue instance (each individual queue) supports multiple Producers, but
 The API used by HighQueue Producers and Consumers is designed to simple and to use common C++ idioms.  Experienced C++ programs should be able to get up-to-speed with HighQueue very quickly.
 The HighQueue API is described on [this Wiki page.](https://github.com/dale-wilson/HighQueue/wiki/HighQueue-API)
 
+## HighSteps Overview
+```
+A journey of a thousand megahertz begins with a single Step.
+```
+
+
 ## The HighSteps API
 Developers who are creating pipeline-based applications using the HighSteps framework can use the HighSteps API to create the Steps in this pipeline.
 
@@ -46,7 +52,7 @@ The HighSteps library supplies the plumbing and the tools.  It's up to applicati
 
 The HighSteps API is described on [this Wiki page.](https://github.com/dale-wilson/HighQueue/wiki/HighSteps-API)
 
-##How fast is it?
+##How fast is HighQueue?
 ###The short answer  
 
 Very fast!
@@ -63,14 +69,13 @@ With one producer and one consumer HighQueue can pass a message between threads 
 
 #####Adding producers.
 
-With more than one Producer the producers must contend for the right to publish the next message.  This reduces the throughput to around 14 million messages per second (70 nanoseconds per message) 
+With more than one Producer the producers must contend for the right to publish the next message.  This reduces the throughput to around 16 to 17 million messages per second (50 to 60 nanoseconds per message) 
 
-This rate can be sustained up to six producers and one consumer. Beyond that the threads start competing with the operating system (Win7) and with each other 
-for the available cores and throughput begins to drop.  With 8 producers + 1 consumer + Windows competing for 8 cores, a message is delivered to the consumer thread every 145 nanoseconds.
+This rate can be sustained up to six producers and one consumer. Beyond that the threads start competing with each other for the available cores and throughput begins to drop.  With 8 producers + 1 consumer a message is delivered to the consumer thread every 100 nanoseconds.
 
 Note it would be highly unusual to have more than a couple of producers feeding messages to a single producer, but if the need arises HighQueue can handle it with style.
 
-####HighSteps performance.
+##How fast is HighSteps?
 
 <em>Because HighSteps is very much still under construction, detailed performance numbers are not available, yet, but preliminary results are promising.</em> 
 Watch this space for breaking news.
