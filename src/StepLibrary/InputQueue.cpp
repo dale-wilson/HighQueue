@@ -6,7 +6,7 @@
 #include "InputQueue.h"
 #include <Steps/StepFactory.h>
 #include <Steps/Configuration.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 
 using namespace HighQueue;
 using namespace Steps;
@@ -146,14 +146,14 @@ bool InputQueue::constructWaitStrategy(const ConfigurationNode & config, WaitStr
     return true;
 }
 
-void InputQueue::configureResources(BuildResources & resources)
+void InputQueue::configureResources(SharedResources & resources)
 {
     resources.addQueue(name_, connection_);
     resources.requestMessages(parameters_.entryCount_);
     return ThreadedStepToMessage::configureResources(resources);
 }
 
-void InputQueue::attachResources(BuildResources & resources)
+void InputQueue::attachResources(SharedResources & resources)
 {
     auto pool = resources.getMemoryPool();
     connection_->createLocal(name_, parameters_, pool);

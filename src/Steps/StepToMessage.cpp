@@ -4,7 +4,7 @@
 #include <Steps/StepPch.h>
 
 #include "StepToMessage.h"
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 
 #include <HighQueue/MemoryPool.h>
 #include <HighQueue/Message.h>
@@ -20,13 +20,13 @@ StepToMessage::~StepToMessage()
 {
 }
 
-void StepToMessage::configureResources(BuildResources & resources)
+void StepToMessage::configureResources(SharedResources & resources)
 {
     resources.requestMessages(1);
     return Step::configureResources(resources);
 }
 
-void StepToMessage::attachResources(BuildResources & resources)
+void StepToMessage::attachResources(SharedResources & resources)
 {
     auto & pool = resources.getMemoryPool();
     if(pool)

@@ -21,7 +21,7 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class BuildResources;
-        typedef std::shared_ptr<BuildResources> BuildResourcesPtr;
+        class SharedResources;
+        typedef std::shared_ptr<SharedResources> SharedResourcesPtr;
    }
 }

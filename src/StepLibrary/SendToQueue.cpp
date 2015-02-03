@@ -6,7 +6,7 @@
 #include "SendToQueue.h"
 #include <Steps/StepFactory.h>
 #include <Steps/Configuration.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 
 using namespace HighQueue;
 using namespace Steps;
@@ -36,7 +36,7 @@ bool SendToQueue::configureParameter(const std::string & key, const Configuratio
     }
 }
 
-void SendToQueue::attachResources(BuildResources & resources)
+void SendToQueue::attachResources(SharedResources & resources)
 {
     connection_ = resources.findQueue(queueName_);
     if(connection_)

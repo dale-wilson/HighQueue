@@ -3,7 +3,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "BuildResourcesFwd.h"
+#include "SharedResourcesFwd.h"
 
 #include <Steps/Step_Export.h>
 
@@ -23,11 +23,11 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class Steps_Export BuildResources
+        class Steps_Export SharedResources
         {
         public:
-            BuildResources();
-            ~BuildResources();
+            SharedResources();
+            ~SharedResources();
 
             void requestMessages(size_t count = 1);
             void requestMessageSize(size_t bytes);

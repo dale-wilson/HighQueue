@@ -18,7 +18,7 @@ namespace HighQueue
 
             // Implement Step
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void attachResources(BuildResources & resources);
+            virtual void attachResources(SharedResources & resources);
             virtual void validate();
             virtual void start();
             virtual void handle(Message & message);

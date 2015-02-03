@@ -6,7 +6,7 @@
 #include "HeartbeatProducer.h"
 #include <Steps/StepFactory.h>
 #include <Steps/Configuration.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 
 #include <Common/Log.h>
 
@@ -60,7 +60,7 @@ bool HeartbeatProducer::configureParameter(const std::string & key, const Config
     }
 }
 
-void HeartbeatProducer::configureResources(BuildResources & resources)
+void HeartbeatProducer::configureResources(SharedResources & resources)
 {
     resources.requestMessageSize(sizeof(HeartbeatMessage));
     AsioStepToMessage::configureResources(resources);

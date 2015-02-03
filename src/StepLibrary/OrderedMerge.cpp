@@ -5,7 +5,7 @@
 
 #include "OrderedMerge.h"
 #include <Steps/StepFactory.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 #include <Steps/Configuration.h>
 #include <HighQueue/MemoryPool.h>
 
@@ -57,14 +57,14 @@ bool OrderedMerge::configureParameter(const std::string & key, const Configurati
     }
 }
 
-void OrderedMerge::configureResources(BuildResources & resources)
+void OrderedMerge::configureResources(SharedResources & resources)
 {
     resources.requestMessageSize(sizeof(GapMessage));
     resources.requestMessages(lookAhead_);
     StepToMessage::configureResources(resources);
 }
 
-void OrderedMerge::attachResources(BuildResources & resources)
+void OrderedMerge::attachResources(SharedResources & resources)
 {
     auto & memoryPool = resources.getMemoryPool();
     if(!memoryPool)

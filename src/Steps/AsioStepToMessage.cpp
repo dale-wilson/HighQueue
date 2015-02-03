@@ -4,7 +4,7 @@
 #include <Steps/StepPch.h>
 
 #include "AsioStepToMessage.h"
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 using namespace HighQueue;
 using namespace Steps;
 AsioStepToMessage::AsioStepToMessage()
@@ -15,13 +15,13 @@ AsioStepToMessage::~AsioStepToMessage()
 {
 }
 
-void AsioStepToMessage::configureResources(BuildResources & resources)
+void AsioStepToMessage::configureResources(SharedResources & resources)
 {
     resources.requestAsioThread(0, 1);
     StepToMessage::configureResources(resources);
 }
 
-void AsioStepToMessage::attachResources(BuildResources & resources)
+void AsioStepToMessage::attachResources(SharedResources & resources)
 {
     ioService_ = resources.getAsioService();
     StepToMessage::attachResources(resources);

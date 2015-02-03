@@ -17,7 +17,7 @@ namespace HighQueue
             virtual ~MulticastReceiver();
 
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(BuildResources & resources);
+            virtual void configureResources(SharedResources & resources);
 
             virtual void validate();
             virtual void start();

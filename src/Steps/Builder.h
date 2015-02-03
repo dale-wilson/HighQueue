@@ -4,7 +4,7 @@
 #pragma once
 
 #include <Steps/Step_Export.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 
 #include <Steps/ConfigurationFwd.h>
 #include <Steps/StepFwd.h>
@@ -36,7 +36,7 @@ namespace HighQueue
         private:
             bool constructPipe(const ConfigurationNode & config);
         private:
-            BuildResources resources_;
+            SharedResources resources_;
             Steps Steps_;
         };
    }

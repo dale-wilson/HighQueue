@@ -5,7 +5,7 @@
 
 #include "Shuffler.h"
 #include <Steps/StepFactory.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 #include <HighQueue/MemoryPool.h>
 
 using namespace HighQueue;
@@ -33,7 +33,7 @@ bool Shuffler::configureParameter(const std::string & key, const ConfigurationNo
     return StepToMessage::configureParameter(key, configuration);
 }
 
-void Shuffler::configureResources(BuildResources & resources)
+void Shuffler::configureResources(SharedResources & resources)
 {
     int todo;
     return StepToMessage::configureResources(resources);
@@ -41,7 +41,7 @@ void Shuffler::configureResources(BuildResources & resources)
 }
 
 /// @brief Attach resources
-void Shuffler::attachResources(BuildResources & resources)
+void Shuffler::attachResources(SharedResources & resources)
 {
     auto & memoryPool = resources.getMemoryPool();
     if(!memoryPool)

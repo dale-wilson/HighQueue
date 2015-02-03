@@ -3,34 +3,34 @@
 // See the file license.txt for licensing information.
 #include <Steps/StepPch.h>
 
-#include "BuildResources.h"
+#include "SharedResources.h"
 #include <HighQueue/MemoryPool.h>
 #include <Steps/AsioService.h>
 
 using namespace HighQueue;
 using namespace Steps;
 
-BuildResources::BuildResources()
+SharedResources::SharedResources()
     : numberOfMessagesNeeded_(0)
     , largestMessageSize_(0)
     , tenthsOfAsioThreadsNeeded_(0)
 {
 }
 
-BuildResources::~BuildResources()
+SharedResources::~SharedResources()
 {
 }
             
-void BuildResources::requestAsioThread(size_t threads, size_t tenthsOfThread)
+void SharedResources::requestAsioThread(size_t threads, size_t tenthsOfThread)
 {
     tenthsOfAsioThreadsNeeded_ += threads * 10 + tenthsOfThread;
 }
 
-void BuildResources::requestMessages(size_t count)
+void SharedResources::requestMessages(size_t count)
 {
     numberOfMessagesNeeded_ += count;
 }
-void BuildResources::requestMessageSize(size_t bytes)
+void SharedResources::requestMessageSize(size_t bytes)
 {
     if(bytes > largestMessageSize_)
     {
@@ -38,13 +38,13 @@ void BuildResources::requestMessageSize(size_t bytes)
     }
 }
 
-void BuildResources::addQueue(const std::string & name, const ConnectionPtr & connection)
+void SharedResources::addQueue(const std::string & name, const ConnectionPtr & connection)
 {
     // TODO: check for duplicates?
     queues_[name] = connection;
 }
 
-ConnectionPtr BuildResources::findQueue(const std::string & name) const
+ConnectionPtr SharedResources::findQueue(const std::string & name) const
 {
     ConnectionPtr result;
     auto pConnection = queues_.find(name);
@@ -55,7 +55,7 @@ ConnectionPtr BuildResources::findQueue(const std::string & name) const
     return result;
 }
 
-void BuildResources::createResources()
+void SharedResources::createResources()
 {
     if(numberOfMessagesNeeded_ == 0)
     {
@@ -79,17 +79,17 @@ void BuildResources::createResources()
     }
 }
 
-void BuildResources::start()
+void SharedResources::start()
 {
     if(asio_)
     {
         auto actualThreads = (tenthsOfAsioThreadsNeeded_ + 9) / 10;
-        LogTrace("BuildResources running AsioService with " << tenthsOfAsioThreadsNeeded_ << " threads.");
+        LogTrace("SharedResources running AsioService with " << tenthsOfAsioThreadsNeeded_ << " threads.");
         asio_->runThreads(actualThreads, false);
     }
 }
 
-void BuildResources::stop()
+void SharedResources::stop()
 {
     if(asio_)
     {
@@ -97,7 +97,7 @@ void BuildResources::stop()
     }
 }
 
-void BuildResources::finish()
+void SharedResources::finish()
 {
     if(asio_)
     {
@@ -105,17 +105,17 @@ void BuildResources::finish()
     }
 }
 
-const AsioServicePtr & BuildResources::getAsioService()const
+const AsioServicePtr & SharedResources::getAsioService()const
 {
     return asio_;
 }
 
-const MemoryPoolPtr & BuildResources::getMemoryPool()const
+const MemoryPoolPtr & SharedResources::getMemoryPool()const
 {
     return pool_;
 }
 
-std::string BuildResources::getQueueNames()const
+std::string SharedResources::getQueueNames()const
 {
     std::stringstream msg;
     std:: string delimiter;

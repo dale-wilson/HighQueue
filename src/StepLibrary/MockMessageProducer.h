@@ -5,7 +5,7 @@
 #include <Steps/ThreadedStepToMessage.h>
 #include <Mocks/MockMessage.h>
 #include <Steps/Configuration.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 
 #include <Common/Log.h>
 
@@ -30,7 +30,7 @@ namespace HighQueue
             }
 
             virtual bool configureParameter(const std::string & name,  const ConfigurationNode & config);
-            virtual void configureResources(BuildResources & resources);
+            virtual void configureResources(SharedResources & resources);
             virtual void validate();
             virtual void run();
 
@@ -84,7 +84,7 @@ namespace HighQueue
         }
 
         template<typename MockMessageType>
-        void MockMessageProducer<MockMessageType>::configureResources(BuildResources & resources)
+        void MockMessageProducer<MockMessageType>::configureResources(SharedResources & resources)
         {
             resources.requestMessageSize(sizeof(MockMessageType));
             ThreadedStepToMessage::configureResources(resources);

@@ -5,7 +5,7 @@
 
 #include "StepFwd.h"
 #include <Steps/Step_Export.h>
-#include <Steps/BuildResourcesFwd.h>
+#include <Steps/SharedResourcesFwd.h>
 #include <Steps/ConfigurationFwd.h>
 #include "HighQueue/ConnectionFwd.h"
 #include <HighQueue/MemoryPoolFwd.h>
@@ -96,7 +96,7 @@ namespace HighQueue
             
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
 
-            virtual void configureResources(BuildResources & resources);
+            virtual void configureResources(SharedResources & resources);
 
             /// @brief Configure
             /// Lifecycle 2a: Give it a name
@@ -111,7 +111,7 @@ namespace HighQueue
             virtual void attachDestination(const std::string & name, const StepPtr & destination);
 
             /// @brief Attach resources
-            virtual void attachResources(BuildResources & resources);
+            virtual void attachResources(SharedResources & resources);
 
             /// @brief Validate configuration and attachments
             /// Lifecycle 4: Validate

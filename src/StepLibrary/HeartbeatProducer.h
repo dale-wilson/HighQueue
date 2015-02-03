@@ -15,7 +15,7 @@ namespace HighQueue
             HeartbeatProducer();
             void setInterval(std::chrono::milliseconds interval);
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(BuildResources & resources);
+            virtual void configureResources(SharedResources & resources);
 
             virtual void start();
             virtual void stop();

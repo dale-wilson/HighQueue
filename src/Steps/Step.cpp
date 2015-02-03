@@ -64,7 +64,7 @@ bool Step::configureParameter(const std::string & key, const ConfigurationNode &
     return false; // false meaning "huh?"
 }
 
-void Step::configureResources(BuildResources & resources)
+void Step::configureResources(SharedResources & resources)
 {
     // default do nothing
 }
@@ -89,7 +89,7 @@ void Step::attachDestination(const std::string & name, const StepPtr & destinati
     destinations_.push_back(std::make_pair(name, destination));
 }
 
-void Step::attachResources(BuildResources & resources)
+void Step::attachResources(SharedResources & resources)
 {
     // do nothing
 }

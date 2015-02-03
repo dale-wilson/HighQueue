@@ -7,7 +7,7 @@
 
 #include <Steps/StepFactory.h>
 #include <Steps/Configuration.h>
-#include <Steps/BuildResources.h>
+#include <Steps/SharedResources.h>
 
 #include <Common/Log.h>
 
@@ -80,7 +80,7 @@ bool MulticastReceiver::configureParameter(const std::string & key, const Config
     return true;
 }
 
-void MulticastReceiver::configureResources(BuildResources & resources)
+void MulticastReceiver::configureResources(SharedResources & resources)
 {
     resources.requestMessageSize(packetSize_);
     AsioStepToMessage::configureResources(resources);

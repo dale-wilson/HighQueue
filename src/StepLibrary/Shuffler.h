@@ -18,8 +18,8 @@ namespace HighQueue
             explicit Shuffler(size_t lookAhead = 50);
 
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(BuildResources & resources);
-            virtual void attachResources(BuildResources & resources);
+            virtual void configureResources(SharedResources & resources);
+            virtual void attachResources(SharedResources & resources);
             virtual void validate();
             virtual void handle(Message & message);
 
