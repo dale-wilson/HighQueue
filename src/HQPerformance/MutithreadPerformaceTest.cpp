@@ -126,13 +126,16 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t numberOfConsumers = 1;  // Just for documentation
     static const size_t messageCount = entryCount + numberOfConsumers +  maxNumberOfProducers;
 
-    static const size_t spinCount = 5000;
-    static const size_t yieldCount = 0;
-    static const size_t sleepCount = WaitStrategy::FOREVER;
+    static const size_t consumerSpinCount = 0;
+    static const size_t consumerYieldCount = 0;
+    static const size_t consumerSleepCount = WaitStrategy::FOREVER;
+    static const size_t producerSpinCount = 10;
+    static const size_t producerYieldCount = 1000;
+    static const size_t producerSleepCount = WaitStrategy::FOREVER;
     static const auto sleepTime = std::chrono::nanoseconds(10);
     
-    WaitStrategy consumerStrategy(spinCount, yieldCount, sleepCount, sleepTime);
-    WaitStrategy producerStrategy(spinCount, yieldCount, sleepCount, sleepTime);
+    WaitStrategy consumerStrategy(consumerSpinCount, consumerYieldCount, consumerSleepCount, sleepTime);
+    WaitStrategy producerStrategy(producerSpinCount, producerYieldCount, producerSleepCount, sleepTime);
     bool discardMessagesIfNoConsumer = false;
     CreationParameters parameters(producerStrategy, consumerStrategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
     ConnectionPtr connection = std::make_shared<Connection>();

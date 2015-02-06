@@ -48,16 +48,6 @@ Producer::~Producer()
     --header_->producersPresent_;
 }
 
-inline
-Position Producer::reserve()
-{
-    if(solo_)
-    {
-        return reserveSoloPosition_++;
-    }
-    return reservePosition_++;
-}
-
 inline bool Producer::unreserve(Position reserve)
 {
     if(solo_)
@@ -77,107 +67,150 @@ inline bool Producer::unreserve(Position reserve)
         }
         return true;
     }
+}
 
+inline
+void Producer::waitToPublish(Position reserved)
+{
+    if(publishable_ > reserved)
+    {
+        return;
+    }
+    publishable_ = readPosition_ + entryCount_;
+    if(publishable_ > reserved)
+    {
+        return;
+    }
+    ++statFulls_;
+            
+    if(header_->discardMessagesIfNoConsumer_ && !header_->consumerPresent_)
+    {
+        readPosition_ = publishPosition_;
+        publishable_ = readPosition_ + entryCount_;
+        return;
+    }
+    size_t remainingSpins = waitStrategy_.spinCount_;
+    size_t remainingYields = waitStrategy_.yieldCount_;
+    size_t remainingSleeps = waitStrategy_.sleepCount_;
+    while(publishable_ <= reserved)
+    {
+        if(stopping_ && unreserve(reserved))
+        {
+            return;
+        }
+
+        if(remainingSpins > 0)
+        {
+            spinDelay();
+            ++statSpins_;
+            if(remainingSpins != WaitStrategy::FOREVER)
+            {
+                spinDelay();
+                --remainingSpins;
+            }
+            std::atomic_thread_fence(std::memory_order::memory_order_consume);
+        }
+        else if(remainingYields > 0)
+        {
+            ++statYields_;
+            if(remainingYields != WaitStrategy::FOREVER)
+            {
+                --remainingYields;
+            }
+            std::this_thread::yield();
+        }
+        else if(remainingSleeps > 0)
+        {
+            ++statSleeps_;
+            if(remainingSleeps != WaitStrategy::FOREVER)
+            {
+                --remainingSleeps;
+            }
+            std::this_thread::sleep_for(waitStrategy_.sleepPeriod_);
+        }
+        else
+        {
+            ++statWaits_;
+            std::unique_lock<std::mutex> guard(header_->waitMutex_);
+            publishable_ = readPosition_ + entryCount_;
+            if(publishable_ > reserved)
+            {
+                header_->producerWaiting_ = true;
+                if(header_->producerWaitConditionVariable_.wait_for(guard, waitStrategy_.mutexWaitTimeout_)
+                    == std::cv_status::timeout)
+                {
+                    publishable_ = readPosition_ + entryCount_;
+                    if(publishable_ <= reserved)
+                    {
+                        // todo: define a better exception
+                        throw std::runtime_error("Producer wait timeout.");
+                    }
+                }
+            }
+        }
+        publishable_ = readPosition_ + header_->entryCount_;
+    }
+}
+
+inline
+bool Producer::publish(Position reserved, Message & message)
+{
+    HighQEntry & entry = entryAccessor_[reserved];
+    if(entry.status_ != HighQEntry::Status::SKIP)
+    {
+        message.moveTo(entry.message_);
+        entry.status_ = HighQEntry::Status::OK;
+        return true;
+    }
+    ++statSkips_;
+    return false;
+}
+
+void Producer::notifyConsumer()
+{
+    if(!consumerUsesMutex_)
+    {
+        std::atomic_thread_fence(std::memory_order::memory_order_release);
+        return;
+    }
+
+    std::unique_lock<std::mutex> guard(header_->waitMutex_);
+    if(header_->consumerWaiting_)
+    {
+        header_->consumerWaiting_ = false;
+        header_->consumerWaitConditionVariable_.notify_all();
+    }
 }
 
 void Producer::publish(Message & message)
 {
+    if(solo_)
+    {
+        bool published = false;
+        while(!published && !stopping_)
+        {
+            Position reserved = publishPosition_;
+            waitToPublish(reserved);
+            published = publish(reserved, message);
+            publishPosition_ = reserved + 1;
+            reserveSoloPosition_ = reserved + 1;
+            notifyConsumer();
+        }
+        return;
+    }
+
     bool published = false;
     while(!published)
     {
         SpinLock::Guard guard;
-        if(useSpinLock && !solo_)
+        if(useSpinLock)
         {
             guard = SpinLock::Guard(reserveSpinLock_);
         }
-        auto reserved = reserve();
-        if(publishable_ <= reserved)
-        {
-            publishable_ = readPosition_ + entryCount_;
-            if(publishable_ <= reserved)
-            {
-                ++statFulls_;
-                if(header_->discardMessagesIfNoConsumer_ && !header_->consumerPresent_)
-                {
-                    readPosition_ = publishPosition_;
-                    publishable_ = readPosition_ + entryCount_;
-                }
-                size_t remainingSpins = waitStrategy_.spinCount_;
-                size_t remainingYields = waitStrategy_.yieldCount_;
-                size_t remainingSleeps = waitStrategy_.sleepCount_;
-                while(publishable_ <= reserved)
-                {
-                    if(stopping_ && unreserve(reserved))
-                    {
-                        return;
-                    }
+        auto reserved = reservePosition_++;
+        waitToPublish(reserved);
+        published = publish(reserved, message);
 
-                    if(remainingSpins > 0)
-                    {
-                        spinDelay();
-                        ++statSpins_;
-                        if(remainingSpins != WaitStrategy::FOREVER)
-                        {
-                            spinDelay();
-                            --remainingSpins;
-                        }
-                        std::atomic_thread_fence(std::memory_order::memory_order_consume);
-                    }
-                    else if(remainingYields > 0)
-                    {
-                        ++statYields_;
-                        if(remainingYields != WaitStrategy::FOREVER)
-                        {
-                            --remainingYields;
-                        }
-                        std::this_thread::yield();
-                    }
-                    else if(remainingSleeps > 0)
-                    {
-                        ++statSleeps_;
-                        if(remainingSleeps != WaitStrategy::FOREVER)
-                        {
-                            --remainingSleeps;
-                        }
-                        std::this_thread::sleep_for(waitStrategy_.sleepPeriod_);
-                    }
-                    else
-                    {
-                        ++statWaits_;
-                        std::unique_lock<std::mutex> guard(header_->waitMutex_);
-                        publishable_ = readPosition_ + entryCount_;
-                        if(publishable_ > reserved)
-                        {
-                            header_->producerWaiting_ = true;
-                            if(header_->producerWaitConditionVariable_.wait_for(guard, waitStrategy_.mutexWaitTimeout_)
-                                == std::cv_status::timeout)
-                            {
-                                publishable_ = readPosition_ + entryCount_;
-                                if(publishable_ <= reserved)
-                                {
-                                    // todo: define a better exception
-                                    throw std::runtime_error("Producer wait timeout.");
-                                }
-                            }
-                        }
-                    }
-                    publishable_ = readPosition_ + header_->entryCount_;
-                }
-
-            }
-        }
-        // reserved now pints to a visible entry
-        HighQEntry & entry = entryAccessor_[reserved];
-        if(entry.status_ != HighQEntry::Status::SKIP)
-        {
-            message.moveTo(entry.message_);
-            entry.status_ = HighQEntry::Status::OK;
-            published = true;
-        }
-        else
-        {
-            ++statSkips_;
-        }
         int64_t pending = reserved - publishPosition_;
         while(pending > 0)
         {
@@ -195,27 +228,18 @@ void Producer::publish(Message & message)
             }
             else
             {
+                spinDelay();
                 std::atomic_thread_fence(std::memory_order::memory_order_acquire);
             }
             pending = reserved - publishPosition_;
         }
+
         // The following will *always* be true unless something is broken
         if(pending == 0)
         {
             ++publishPosition_;
             ++statPublishes_;
-            if(!consumerUsesMutex_)
-            {
-                std::atomic_thread_fence(std::memory_order::memory_order_release);
-                return;
-            }
-
-            std::unique_lock<std::mutex> guard(header_->waitMutex_);
-            if(header_->consumerWaiting_)
-            {
-                header_->consumerWaiting_ = false;
-                header_->consumerWaitConditionVariable_.notify_all();
-            }
+            notifyConsumer();
         }
     }
 }
@@ -239,6 +263,7 @@ std::ostream & Producer::writeStats(std::ostream & out) const
                << " Sleep: " << statSleeps_ 
                << " Wait: " << statWaits_
                << " OK: " << statPublishes_
+               << " Solo: " << (solo_ ? "Yes" : "No")
                << std::endl;
 
 }

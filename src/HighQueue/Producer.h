@@ -49,6 +49,9 @@ namespace HighQueue
     private:
         Position reserve();
         bool unreserve(Position position);
+        void waitToPublish(Position reserved);
+        bool publish(Position reserved, Message & message);
+        void notifyConsumer();
     private:
         ConnectionPtr connection_;
         bool solo_;
