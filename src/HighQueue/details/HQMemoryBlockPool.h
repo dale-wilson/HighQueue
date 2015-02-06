@@ -5,7 +5,7 @@
 
 #include <Common/HighQueue_Export.h>
 #include <HighQueue/Message.h>
-#include <Common/Spinlock.h>
+#include <Common/SpinLock.h>
 
 namespace HighQueue
 {
@@ -36,7 +36,7 @@ namespace HighQueue
         size_t rootOffset_;
 
         /// @brief Synchronize access to rootOffset_
-        Spinlock lock_;
+        SpinLock lock_;
 
         /// @brief Construct an empty pool.
         ///

@@ -57,7 +57,8 @@ HQHeader::HQHeader(
 
     reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
     auto reservePosition = resolver.resolve<HighQReservePosition>(reservePosition_);
-    reservePosition->reservePosition_ = entryCount_;
+    new (reservePosition) HighQReservePosition(entryCount_);
+//    reservePosition->reservePosition_ = entryCount_;
     if(pool == 0)
     {
         auto messagePoolSize = HQMemoryBlockPool::spaceNeeded(parameters.messageSize_, parameters.messageCount_);

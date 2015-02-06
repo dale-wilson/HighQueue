@@ -121,18 +121,18 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
                                                                                    // This is worth measauring, but not everytime.
                                                                                    // You can see the beginning of the effect using this number because
                                                                                    // the threads start competing with Windows itself for the last core.
-    static const size_t extraProducers = 2;
+    static const size_t extraProducers = 5;
     static const size_t maxNumberOfProducers = baseNumberOfProducers + extraProducers;                                                                                
     static const size_t numberOfConsumers = 1;  // Just for documentation
     static const size_t messageCount = entryCount + numberOfConsumers +  maxNumberOfProducers;
 
-    static const size_t spinCount = 0;
+    static const size_t spinCount = 5000;
     static const size_t yieldCount = 0;
     static const size_t sleepCount = WaitStrategy::FOREVER;
     static const auto sleepTime = std::chrono::nanoseconds(10);
     
     WaitStrategy consumerStrategy(spinCount, yieldCount, sleepCount, sleepTime);
-    WaitStrategy producerStrategy(spinCount, yieldCount + 10000, sleepCount, sleepTime);
+    WaitStrategy producerStrategy(spinCount, yieldCount, sleepCount, sleepTime);
     bool discardMessagesIfNoConsumer = false;
     CreationParameters parameters(producerStrategy, consumerStrategy, discardMessagesIfNoConsumer, entryCount, messageSize, messageCount);
     ConnectionPtr connection = std::make_shared<Connection>();

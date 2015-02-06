@@ -4,20 +4,34 @@
 #pragma once
 
 #include <atomic>
-
+#define _USE_CRITICAL_SECTION 1
 namespace HighQueue
 {
-    class Spinlock
+    class SpinLock
     {
     public:
-        Spinlock();
+        SpinLock();
 
         class Unguard;
         class Guard
         {
         public:
-            Guard(Spinlock & spinlock, bool acquireNow = true);
+            /// @brief RAII constructor.
+            Guard(SpinLock & spinlock, bool acquireNow = true);
+            /// @brief Move constructor allows delayed attachment to spin lock
+            Guard(Guard && spinlock);   
+
+            /// @Construct an unattached guard
+            Guard();
+
+            /// @brief Copy would be a disaster
+            Guard(const Guard &) = delete;
+            /// @brief RAII destructor
             ~Guard();
+
+            /// @brief assignment is move
+            Guard & operator =(Guard && rhs);
+
             bool isLocked()const;
             void acquire();
  // todo        bool tryAcquire();
@@ -25,7 +39,7 @@ namespace HighQueue
             friend class Unguard;
             bool release();
         private:
-            Spinlock & spinlock_;
+            SpinLock * spinlock_;
             bool owns_;
         };
 
@@ -46,12 +60,19 @@ namespace HighQueue
         void release();
 
     private:
+#if defined(_WIN32) && _USE_CRITICAL_SECTION
+        CRITICAL_SECTION criticalSection_;
+#else // defined(_WIN32) && _USE_CRITICAL_SECTION
         std::atomic_flag flag_;
+#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
     };
 
     inline
-    Spinlock::Spinlock()
+    SpinLock::SpinLock()
     {
+#if defined(_WIN32) && _USE_CRITICAL_SECTION
+        InitializeCriticalSection(&criticalSection_);
+#else // defined(_WIN32) && _USE_CRITICAL_SECTION
         // Note: due to a defect(..er... severe and stupid limitation) in the C++11 standard 
         // the only way to initialize an atomic_flag is via explicit member initialization
         // (added as part of C++ 11).
@@ -60,30 +81,37 @@ namespace HighQueue
         // and here: http://stackoverflow.com/questions/24437396/stdatomic-flag-as-member-variable
         // Fortunately this seems to work although technically it is undefined behavior.
         flag_.clear();
+#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
     }
 
     inline
-    void Spinlock::acquire()
+    void SpinLock::acquire()
     {
-        // todo: consider making the acquisition semantics configurable
+#if defined(_WIN32) && _USE_CRITICAL_SECTION
+        EnterCriticalSection(&criticalSection_);
+#else defined(_WIN32) && _USE_CRITICAL_SECTION
         while(flag_.test_and_set(std::memory_order::memory_order_seq_cst))
         {
-            // todo: consider an initial spin-only before the first yield
-            std::this_thread::yield();
+            spinDelay();
         }
+#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
     }
 
-// todo bool Spinlock::tryAcquire();
+// todo bool SpinLock::tryAcquire();
 
     inline
-    void Spinlock::release()
+    void SpinLock::release()
     {
+#if defined(_WIN32) && _USE_CRITICAL_SECTION
+        LeaveCriticalSection(&criticalSection_);
+#else // defined(_WIN32) && _USE_CRITICAL_SECTION
         flag_.clear();
+#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
     }
 
     inline
-    Spinlock::Guard::Guard(Spinlock & spinlock, bool acquireNow)
-    : spinlock_(spinlock)
+    SpinLock::Guard::Guard(SpinLock & spinlock, bool acquireNow)
+    : spinlock_(&spinlock)
     , owns_(false)
     {
         if(acquireNow)
@@ -93,54 +121,84 @@ namespace HighQueue
     }
 
     inline
-    Spinlock::Guard::~Guard()
+    SpinLock::Guard::Guard(SpinLock::Guard && rhs)
+    : spinlock_(rhs.spinlock_)
+    , owns_(rhs.owns_)
     {
-        if(owns_)
+        rhs.spinlock_ = 0;
+        rhs.spinlock_ = false;
+    }
+
+    inline
+    SpinLock::Guard::Guard()
+    : spinlock_(0)
+    , owns_(false)
+    {
+    }
+
+
+    inline
+    SpinLock::Guard & SpinLock::Guard::operator= (SpinLock::Guard && rhs)
+    {
+        release();
+        std::swap(spinlock_, rhs.spinlock_);
+        std::swap(owns_, rhs.owns_);
+        return *this;
+    }
+
+    inline
+    SpinLock::Guard::~Guard()
+    {
+        if(owns_ && spinlock_)
         {
-            spinlock_.release();
+            spinlock_->release();
         }
     }
 
     inline
-    void Spinlock::Guard::acquire()
+    void SpinLock::Guard::acquire()
     {
-        spinlock_.acquire();
-        owns_ = true;
+        if(spinlock_)
+        { 
+            spinlock_->acquire();
+            owns_ = true;
+        }
     }
 
-    //bool Spinlock::Guard::tryAcquire()
+    //bool SpinLock::Guard::tryAcquire()
 
     inline
-    bool Spinlock::Guard::release()
+    bool SpinLock::Guard::release()
     {
         bool wasOwned = owns_;
-        if(owns_)
+        if(owns_ && spinlock_)
         {
-            spinlock_.release();
+            spinlock_->release();
             owns_ = false;
         }
         return wasOwned;
     }
 
     inline
-    bool Spinlock::Guard::isLocked()const
+    bool SpinLock::Guard::isLocked()const
     {
         return owns_;
     }
 
     inline
-    Spinlock::Unguard::Unguard(Guard & guard)
+    SpinLock::Unguard::Unguard(Guard & guard)
     : guard_(guard)
     , wasLocked_(guard_.release())
     {
     }
 
     inline
-    Spinlock::Unguard::~Unguard()
+    SpinLock::Unguard::~Unguard()
     {
         if(wasLocked_)
         {
             guard_.acquire();
         }
     }
+
 } // namespace HighQueue

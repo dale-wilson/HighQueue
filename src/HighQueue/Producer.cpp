@@ -1,7 +1,12 @@
 #include <Common/HighQueuePch.h>
 #include "Producer.h"
 #include <HighQueue/details/HQReservePosition.h>
+
 using namespace HighQueue;
+
+namespace {
+    const bool useSpinLock = true;
+}
 
 Producer::Producer(ConnectionPtr & connection)
 : connection_(connection)
@@ -14,8 +19,15 @@ Producer::Producer(ConnectionPtr & connection)
 , resolver_(header_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
 , publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
+, reserveStructure_(*resolver_.resolve<volatile HighQReservePosition>(header_->reservePosition_))
+#if 0
 , reservePosition_(resolver_.resolve<volatile HighQReservePosition>(header_->reservePosition_)->reservePosition_)
 , reserveSoloPosition_(reinterpret_cast<volatile Position &>(resolver_.resolve<volatile HighQReservePosition>(header_->reservePosition_)->reservePosition_))
+#else
+, reservePosition_(reserveStructure_.reservePosition_)
+, reserveSoloPosition_(reinterpret_cast<volatile Position &>(reservePosition_))
+, reserveSpinLock_(const_cast<SpinLock &>(reserveStructure_.reserveSpinLock_))
+#endif
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 , publishable_(0)
 , statFulls_(0)
@@ -67,11 +79,17 @@ inline bool Producer::unreserve(Position reserve)
     }
 
 }
+
 void Producer::publish(Message & message)
 {
     bool published = false;
     while(!published)
     {
+        SpinLock::Guard guard;
+        if(useSpinLock && !solo_)
+        {
+            guard = SpinLock::Guard(reserveSpinLock_);
+        }
         auto reserved = reserve();
         if(publishable_ <= reserved)
         {
@@ -96,9 +114,11 @@ void Producer::publish(Message & message)
 
                     if(remainingSpins > 0)
                     {
+                        spinDelay();
                         ++statSpins_;
                         if(remainingSpins != WaitStrategy::FOREVER)
                         {
+                            spinDelay();
                             --remainingSpins;
                         }
                         std::atomic_thread_fence(std::memory_order::memory_order_consume);
@@ -146,6 +166,7 @@ void Producer::publish(Message & message)
 
             }
         }
+        // reserved now pints to a visible entry
         HighQEntry & entry = entryAccessor_[reserved];
         if(entry.status_ != HighQEntry::Status::SKIP)
         {
@@ -160,6 +181,7 @@ void Producer::publish(Message & message)
         int64_t pending = reserved - publishPosition_;
         while(pending > 0)
         {
+            /// todo simplify this now that we aren't using it!
             if(stopping_ && unreserve(reserved))
             {
                 return;
@@ -177,7 +199,8 @@ void Producer::publish(Message & message)
             }
             pending = reserved - publishPosition_;
         }
-        if(publishPosition_ == reserved)
+        // The following will *always* be true unless something is broken
+        if(pending == 0)
         {
             ++publishPosition_;
             ++statPublishes_;

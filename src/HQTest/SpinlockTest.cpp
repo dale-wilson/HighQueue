@@ -2,29 +2,29 @@
 #define BOOST_TEST_NO_MAIN HighQueueTest
 #include <boost/test/unit_test.hpp>
 
-#include <Common/Spinlock.h>
+#include <Common/SpinLock.h>
 using namespace HighQueue;
 
-#define DISABLE_testSpinlockx
-#ifdef DISABLE_testSpinlock
-#pragma message("DISABLE_testSpinlock")
-#else // DISABLE_testSpinlock
-BOOST_AUTO_TEST_CASE(testSpinlock)
+#define DISABLE_testSpinLockx
+#ifdef DISABLE_testSpinLock
+#pragma message("DISABLE_testSpinLock")
+#else // DISABLE_testSpinLock
+BOOST_AUTO_TEST_CASE(testSpinLock)
 {
-    Spinlock lock;
+    SpinLock lock;
     {
-        Spinlock::Guard guard(lock);
+        SpinLock::Guard guard(lock);
         {
             BOOST_CHECK(guard.isLocked());
             {
-                Spinlock::Unguard unguard(guard);
+                SpinLock::Unguard unguard(guard);
                 BOOST_CHECK(!guard.isLocked());
             }
             BOOST_CHECK(guard.isLocked());
         }
     }
 }
-#endif // DISABLE_testSpinlock
+#endif // DISABLE_testSpinLock
 /*
 Still to test:
 

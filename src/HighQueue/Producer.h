@@ -61,11 +61,11 @@ namespace HighQueue
         HighQResolver resolver_;
         volatile Position & readPosition_;
         volatile Position & publishPosition_;
+        volatile HighQReservePosition & reserveStructure_;
         volatile AtomicPosition & reservePosition_;
         volatile Position & reserveSoloPosition_;
+        SpinLock & reserveSpinLock_;
         HighQEntryAccessor entryAccessor_;
-
-
 
         Position publishable_;
 

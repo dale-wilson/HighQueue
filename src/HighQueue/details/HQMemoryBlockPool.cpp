@@ -61,7 +61,7 @@ size_t HQMemoryBlockPool::preAllocate(size_t blockSize, size_t poolSize)
 
 bool HQMemoryBlockPool::tryAllocate(Message & message)
 {
-    Spinlock::Guard guard(lock_);
+    SpinLock::Guard guard(lock_);
     auto offset = rootOffset_;
     auto ok = offset != NULL_OFFSET;
     if(ok)
@@ -89,7 +89,7 @@ void HQMemoryBlockPool::release(Message & message)
         throw std::runtime_error("Message returned to wrong allocator.");
     }
 
-    Spinlock::Guard guard(lock_);
+    SpinLock::Guard guard(lock_);
     LogVerbose("Release " << message.getOffset());
     *message.get<size_t>() = rootOffset_;
     rootOffset_ = message.getOffset();
