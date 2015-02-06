@@ -71,26 +71,14 @@ const size_t CacheLineSize = 64;
 #include <thread>
 #include <vector>
 
-
-#ifdef NEED_BOOST_YET
-#include <boost/shared_array.hpp>
-#include <boost/chrono.hpp>
-#include <boost/date_time/gregorian/gregorian_types.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/intrusive_ptr.hpp>
-#include <boost/scoped_array.hpp>
-#include <boost/function.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/operators.hpp>
-#include <boost/thread.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/bind.hpp>
-#endif // NEED_BOOST_YET
-
+///@brief Distinguish between an 8 bit unsigned integer and an 8 bit non-numeric item.
 typedef uint8_t byte_t;
+
+#ifdef _WIN32
+#define spinDelay() ::YieldProcessor()
+#else
+#define spinDelay() _mm_pause()
+#endif
+
 
 
