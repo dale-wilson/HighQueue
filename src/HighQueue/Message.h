@@ -164,8 +164,8 @@ namespace HighQueue
         size_t addRead(size_t count);
 
         /// @brief How many bytes in this message have been read?
-        /// @param returns the number of bytes read.
-        size_t getRead(size_t read);
+        /// @returns the number of bytes read.
+        size_t getRead() const;
 
         /// @brief read the next T and update the read position.
         /// @returns a reference to the in-place T
@@ -318,7 +318,7 @@ namespace HighQueue
     }
 
     inline
-    size_t Message::getRead(size_t read)
+    size_t Message::getRead() const
     {
         return read_;
     }
