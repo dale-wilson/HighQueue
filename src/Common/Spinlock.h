@@ -4,7 +4,12 @@
 #pragma once
 
 #include <atomic>
-#define _USE_CRITICAL_SECTION 1
+
+#define HIGHQUEUE_USE_CRITICAL_SECTION 1
+#if HIGHQUEUE_USE_CRITICAL_SECTION && !defined(_WIN32)
+#include <linux/spinlock.h>
+#endif
+
 namespace HighQueue
 {
     class SpinLock
@@ -60,41 +65,46 @@ namespace HighQueue
         void release();
 
     private:
-#if defined(_WIN32) && _USE_CRITICAL_SECTION
+#if HIGHQUEUE_USE_CRITICAL_SECTION
+#   if defined(_WIN32)
         CRITICAL_SECTION criticalSection_;
-#else // defined(_WIN32) && _USE_CRITICAL_SECTION
+#   else // _WIN32
+        spinlock_t spinlock_;
+#   endif // _WIN32
+#else // HIGHQUEUE_USE_CRITICAL_SECTION
         std::atomic_flag flag_;
-#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
+#endif // HIGHQUEUE_USE_CRITICAL_SECTION
     };
 
     inline
     SpinLock::SpinLock()
     {
-#if defined(_WIN32) && _USE_CRITICAL_SECTION
+#if HIGHQUEUE_USE_CRITICAL_SECTION
+#   if defined(_WIN32)
         InitializeCriticalSection(&criticalSection_);
-#else // defined(_WIN32) && _USE_CRITICAL_SECTION
-        // Note: due to a defect(..er... severe and stupid limitation) in the C++11 standard 
-        // the only way to initialize an atomic_flag is via explicit member initialization
-        // (added as part of C++ 11).
-        // Alas inline member initialization is not implemented in visual studio (2013).
-        // See discussion here:  http://wg21.cmeerw.net/lwg/issue2159
-        // and here: http://stackoverflow.com/questions/24437396/stdatomic-flag-as-member-variable
-        // Fortunately this seems to work although technically it is undefined behavior.
+#   else // defined(_WIN32)
+        spin_lock_init(&spinlock_);
+#   endif // _WIN32
+#else // HIGHQUEUE_USE_CRITICAL_SECTION
         flag_.clear();
-#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
+#endif // HIGHQUEUE_USE_CRITICAL_SECTION
     }
 
     inline
     void SpinLock::acquire()
     {
-#if defined(_WIN32) && _USE_CRITICAL_SECTION
+#if HIGHQUEUE_USE_CRITICAL_SECTION
+#   if defined(_WIN32)
         EnterCriticalSection(&criticalSection_);
-#else defined(_WIN32) && _USE_CRITICAL_SECTION
+#   else // defined(_WIN32)
+        spin_lock(&spinlock_);
+#   endif _WIN32
+#else //HIGHQUEUE_USE_CRITICAL_SECTION
         while(flag_.test_and_set(std::memory_order::memory_order_seq_cst))
         {
             spinDelay();
         }
-#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
+#endif // defined(_WIN32) && HIGHQUEUE_USE_CRITICAL_SECTION
     }
 
 // todo bool SpinLock::tryAcquire();
@@ -102,11 +112,15 @@ namespace HighQueue
     inline
     void SpinLock::release()
     {
-#if defined(_WIN32) && _USE_CRITICAL_SECTION
+#if HIGHQUEUE_USE_CRITICAL_SECTION
+#   if defined(_WIN32)
         LeaveCriticalSection(&criticalSection_);
-#else // defined(_WIN32) && _USE_CRITICAL_SECTION
+#   else // defined(_WIN32)
+        spin_unlock(&spinlock_);
+#   endif // _WIN32
+#else // HIGHQUEUE_USE_CRITICAL_SECTION
         flag_.clear();
-#endif // defined(_WIN32) && _USE_CRITICAL_SECTION
+#endif // defined(_WIN32) && HIGHQUEUE_USE_CRITICAL_SECTION
     }
 
     inline
