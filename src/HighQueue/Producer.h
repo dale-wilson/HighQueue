@@ -40,6 +40,7 @@ namespace HighQueue
         ///
         /// @param message contains the data to be published.         
         void publish(Message & message);
+        void publish2(Message & message);
 
         /// @brief Cancel the outstanding publish and stop publishing
         void stop();
@@ -49,6 +50,8 @@ namespace HighQueue
     private:
         Position reserve();
         bool unreserve(Position position);
+        bool canPublish(Position position);
+
         void waitToPublish(Position reserved);
         bool publish(Position reserved, Message & message);
         void notifyConsumer();
@@ -60,6 +63,7 @@ namespace HighQueue
         size_t entryCount_;
         WaitStrategy waitStrategy_;
         bool consumerUsesMutex_;
+        bool discardMessagesIfNoConsumer_;
 
         HighQResolver resolver_;
         volatile Position & readPosition_;
@@ -73,6 +77,7 @@ namespace HighQueue
         Position publishable_;
 
         uint64_t statFulls_;
+        uint64_t statDiscards_;
         uint64_t statSkips_;
         uint64_t statPublishWaits_;
         uint64_t statPublishInLine_;
