@@ -5,7 +5,7 @@
 
 #include <atomic>
 
-#define HIGHQUEUE_USE_CRITICAL_SECTION 1
+#define HIGHQUEUE_USE_CRITICAL_SECTION 0
 #if HIGHQUEUE_USE_CRITICAL_SECTION && !defined(_WIN32)
 #include <linux/spinlock.h>
 #endif
@@ -140,7 +140,7 @@ namespace HighQueue
     , owns_(rhs.owns_)
     {
         rhs.spinlock_ = 0;
-        rhs.spinlock_ = false;
+        rhs.owns_ = false;
     }
 
     inline
