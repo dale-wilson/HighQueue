@@ -44,6 +44,7 @@ namespace HighQueue
             uint32_t messageCount_;
 
             uint32_t heartbeats_;
+            uint32_t shutdowns_;
             uint32_t messagesHandled_;
             uint32_t nextSequence_;
             uint32_t sequenceError_;
@@ -57,6 +58,7 @@ namespace HighQueue
         MockMessageConsumer<MockMessageType>::MockMessageConsumer(uint32_t messageCount_)
             : messageCount_(messageCount_)
             , heartbeats_(0)
+            , shutdowns_(0)
             , messagesHandled_(0)
             , nextSequence_(0)
             , sequenceError_(0)
@@ -99,6 +101,7 @@ namespace HighQueue
                     if (messageCount_ == 0)
                     {
                         LogTrace("MockMessageConsumer: received Shutdown");
+                        ++shutdowns_;
                         stop();
                     }
                     return;
@@ -133,6 +136,7 @@ namespace HighQueue
         void MockMessageConsumer<MockMessageType>::finish()
         {
             LogStatistics("MockMessageConsumer::heartbeats:" << heartbeats_);
+            LogStatistics("MockMessageConsumer::shutdowns: "  << shutdowns_);
             LogStatistics("MockMessageConsumer::messagesHandled:" << messagesHandled_);
             LogStatistics("MockMessageConsumer::sequenceError:" << sequenceError_);
             LogStatistics("MockMessageConsumer::unexpectedMessageError:" << unexpectedMessageError_);
