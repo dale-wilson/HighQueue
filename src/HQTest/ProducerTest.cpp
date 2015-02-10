@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     BOOST_CHECK(message.isEmpty());
 
     BOOST_CHECK_EQUAL(*readPosition + 1, *publishPosition);
-    BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
+// Reserve position is no longer updated.    BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 
 
     HighQEntry & firstEntry = accessor[*readPosition];
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(testProducer)
     // todo: think of some way around that.
 
     BOOST_CHECK_EQUAL(*readPosition + entryCount, *publishPosition);
-    BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
+// Reserve position is no longer updated.       BOOST_CHECK_EQUAL(*publishPosition, reservePosition->reservePosition_);
 
     // Be sure the first message is still intact:
     publishedMessage = firstMessage.get<MockMessage>(); 

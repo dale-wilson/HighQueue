@@ -5,7 +5,7 @@
 
 #include <atomic>
 
-#define HIGHQUEUE_USE_CRITICAL_SECTION 0
+#define HIGHQUEUE_USE_CRITICAL_SECTION 1
 #if HIGHQUEUE_USE_CRITICAL_SECTION && !defined(_WIN32)
 #include <linux/spinlock.h>
 #endif
