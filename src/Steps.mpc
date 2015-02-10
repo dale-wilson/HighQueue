@@ -12,7 +12,7 @@ project(*) : HighQueueStep, boost_base, boost_filesystem, boost_system, boost_th
   pch_source = Steps/StepPch.cpp
 
  // TODO: What to do about boost 32 bit builds?
-  libpaths -= $(BOOST_ROOT)/lib
+//  libpaths -= $(BOOST_ROOT)/lib
   libpaths += $(BOOST_LIB_PATH)
 
   Source_Files {

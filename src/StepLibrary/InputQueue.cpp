@@ -93,8 +93,8 @@ bool InputQueue::constructWaitStrategy(const ConfigurationNode & config, WaitStr
         children->has();
         children->next())
     {
-        auto & parameter = children->getChild();
-        auto & key = parameter->getName();
+        const auto & parameter = children->getChild();
+        const auto & key = parameter->getName();
         std::string valueString;
         uint64_t value = WaitStrategy::FOREVER;
         parameter->getValue(valueString);

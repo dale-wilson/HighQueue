@@ -170,12 +170,12 @@ namespace HighQueue
         /// @brief read the next T and update the read position.
         /// @returns a reference to the in-place T
         template <typename T>
-        T & read()const;
+        T & read();
 
         /// @brief read the next T and update the read position.
         /// @returns a reference to the in-place T
         template <typename T>
-        const T & readConst()const;
+        const T & readConst() const;
 
         /// @brief How many obects of type T remain unread in the message
         template <typename T>
@@ -425,10 +425,10 @@ namespace HighQueue
     }
 
     template <typename T>
-    T & Message::read()const
+    T & Message::read()
     {
         auto result = reinterpret_cast<T *>(container_ + offset_ + read_);
-        addRead(sizeof(T));
+        addRead<T>(1);
         return * result;
     }
 
@@ -436,7 +436,7 @@ namespace HighQueue
     const T & Message::readConst()const
     {
         auto result = reinterpret_cast<const T *>(container_ + offset_ + read_);
-        addRead(sizeof(T));
+        addRead<T>(1);
         return & result;
     }
 
@@ -498,7 +498,7 @@ namespace HighQueue
     template <typename T>
     bool Message::needUnread(size_t count) const
     {
-        return unread<T>() >= count;
+        return getUnread<T>() >= count;
     }
 
     template <typename T>

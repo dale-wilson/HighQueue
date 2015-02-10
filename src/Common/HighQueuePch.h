@@ -77,7 +77,8 @@ typedef uint8_t byte_t;
 #ifdef _WIN32
 #define spinDelay() ::YieldProcessor()
 #else
-#define spinDelay() _mm_pause()
+#define spinDelay() __asm__ ( "pause;" );
+// #define spinDelay() _mm_pause()
 #endif
 
 

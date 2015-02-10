@@ -32,7 +32,7 @@ bool Builder::construct(const ConfigurationNode & config)
         rootChildren->next())
     {
         auto child = rootChildren->getChild();
-        auto & key = child->getName();
+        const auto & key = child->getName();
         if(key == keyPipe)
         {
             if(!constructPipe(*child))
@@ -99,8 +99,8 @@ bool Builder::constructPipe(const ConfigurationNode & config)
         rootChildren->next())
     {
         auto child = rootChildren->getChild();
-        auto & key = child->getName();
-        auto & step = StepFactory::make(key);
+        const auto & key = child->getName();
+        const auto & step = StepFactory::make(key);
         if(!step || !step->configure(*child))
         {
             return false;

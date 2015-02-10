@@ -37,8 +37,8 @@ bool Step::configure(const ConfigurationNode & configuration)
         poolChildren->has();
         poolChildren->next())
     {
-        auto & parameter = poolChildren->getChild();
-        auto & key = parameter->getName();
+        const auto & parameter = poolChildren->getChild();
+        const auto & key = parameter->getName();
 
         if(key == keyName)
         {
