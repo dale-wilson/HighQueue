@@ -6,6 +6,4 @@ project {
     Release::genflags += -O3 -g -std=c++11
 	Debug::genflags += -g -std=c++11
   }
-  
-
 }

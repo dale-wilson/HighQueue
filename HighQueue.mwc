@@ -10,5 +10,5 @@ workspace(*) {
   
   src/HighQueue.mpc
   src/Steps.mpc
-
+  src/Applications.mpc
 }

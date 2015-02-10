@@ -1,0 +1,22 @@
+// Copyright (c) 2015 Object Computing, Inc.
+// All rights reserved.
+// See the file license.txt for licensing information.
+
+//////////////////////////////
+// Build the HighQueue Sample Application
+project(Builder) : HighQueueUser, boost_base, boost_filesystem, boost_system, boost_thread {
+  exename = Builder
+
+  libs += Steps
+  after += Steps
+  
+  pch_header = Steps/StepPch.h
+  pch_source = Steps/StepPch.cpp
+	
+  Source_Files {
+	Applications/Builder 
+  }
+  Header_Files {
+	Applications/Builder
+  }
+}

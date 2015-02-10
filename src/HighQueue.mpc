@@ -47,30 +47,18 @@ project(*test) : HighQueueUser, HighQueueAddTest {
 
 ////////////////////////////
 // Build the HighQueue performance tests
-project(*performance) : HighQueueUser, boost_unit_test_framework, boost_base, boost_filesystem, boost_system, boost_thread {
-  exename = HighQueuePerformance
+project(*performance) : HighQueueUser, HighQueueAddTest {
+  exename = *Performance
 
   specific(prop:microsoft) {
-    Release::exeout = $(HighQueue_ROOT)/Output/Release
-    Debug::exeout = $(HighQueue_ROOT)/Output/Debug
     Release::libpaths += $(HighQueue_ROOT)/Output/Release
     Debug::libpaths += $(HighQueue_ROOT)/Output/Debug
   } else {
     libpaths += $(HighQueue_ROOT)/lib
-    exeout = $(HighQueue_ROOT)/bin
-  }
-   specific(make) {
-    // Enable full optimization on gcc/linux
-    Release::genflags += -O3 -g -std=c++11
   }
 
-  // TODO: What to do about boost 32 bit builds?
-  libpaths -= $(BOOST_ROOT)/lib
-  libpaths += $(BOOST_LIB_PATH)
-  
   libs += HighQueue
   after += HighQueue
-  macros += BOOST_TEST_DYN_LINK
   pch_header = Common/HighQueuePch.h
   pch_source = Common/HighQueuePch.cpp
   Source_Files {
@@ -80,4 +68,15 @@ project(*performance) : HighQueueUser, boost_unit_test_framework, boost_base, bo
     HQPerformance
 	Common
   }
+}
+
+project(Other_Test) : HighQueueBase, HighQueueAddTest {
+  exename = OtherTests
+  Source_Files{
+    OtherTests
+  }
+  Header_Files{
+    OtherTests
+  }
+  
 }
