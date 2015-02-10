@@ -88,10 +88,6 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
         << lapse / messageCount << " nsec./message "
         << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
-#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
-        << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-        << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
         << std::endl;
 
     std::cout << "Single thread Statistics" << std::endl;
@@ -121,7 +117,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
                                                                                    // This is worth measauring, but not everytime.
                                                                                    // You can see the beginning of the effect using this number because
                                                                                    // the threads start competing with Windows itself for the last core.
-    static const size_t extraProducers = 5;
+    static const size_t extraProducers = 3;
     static const size_t maxNumberOfProducers = baseNumberOfProducers + extraProducers;                                                                                
     static const size_t numberOfConsumers = 1;  // Just for documentation
     static const size_t messageCount = entryCount + numberOfConsumers +  maxNumberOfProducers;
@@ -211,10 +207,6 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             std::cout
                 << lapse / actualMessageCount << " nsec./message "
                 << std::setprecision(3) << double(actualMessageCount * 1000) / double(lapse) << " MMsg/second "
-#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
-                << std::setprecision(3) << double(actualMessageCount * messageBytes) / double(lapse) << " GByte/second "
-                << std::setprecision(3) << double(actualMessageCount * messageBits) / double(lapse) << " GBit/second."
-#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
                 << std::endl;
         }
 
