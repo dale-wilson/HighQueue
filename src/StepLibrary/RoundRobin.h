@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Steps/Step.h>
+#include <Steps/StepToMessage.h>
 
 #include <Common/Log.h>
 
@@ -10,7 +10,7 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class Steps_Export RoundRobin: public Step
+        class Steps_Export RoundRobin: public StepToMessage
         {
         public:
             explicit RoundRobin();
@@ -21,6 +21,8 @@ namespace HighQueue
  
         private:
             uint32_t messagesHandled_;
+            uint32_t heartbeatsHandled_;
+            uint32_t shutdownsHandled_;
         };
    }
 }
