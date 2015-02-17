@@ -35,6 +35,8 @@ namespace HighQueue
 
         private:
             bool constructPipe(const ConfigurationNode & config, const StepPtr & parentStep);
+            bool configureParameter(const StepPtr & step, const std::string & key, const ConfigurationNode & configuration);
+
         private:
             SharedResources resources_;
             Steps Steps_;

@@ -1,26 +1,26 @@
 {
     "pipe": {
         "small_test_message_producer" : {
-          "name" : "MockMessageProducer",
-          "message_count" : 10
+			"name" : "MockMessageProducer",
+			"message_count" : 10
         },
 		"round_robin" : {
-		  "name" : "roundRobin"
-		},
-		"destination" : {
-		   "small_test_message_consumer" : {
-		     "name" : "Consumer 0"
-		    }
-		},
-		"destination" : {
-			"small_test_message_consumer" : {
-			 "name" : "Consumer 1"
-		    }
-		},
-		"destination" : {
-			"small_test_message_consumer" : {
-			 "name" : "Consumer 2"
-		    }
-        }			
+			"name" : "roundRobin",
+			"destination" : {
+			   "small_test_message_consumer" : {
+				 "name" : "Consumer 0"
+				}
+			},
+			"destination" : {
+				"small_test_message_consumer" : {
+				 "name" : "Consumer 1"
+				}
+			},
+			"destination" : {
+				"small_test_message_consumer" : {
+				 "name" : "Consumer 2"
+				}
+			}					  
+		}
     }
 }

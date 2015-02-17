@@ -90,7 +90,13 @@ void Builder::finish()
         Step->finish();
     }
 }
-
+namespace
+{
+    bool xyzzy(const StepPtr & step, const std::string & str, const ConfigurationNode & node)
+    {
+        return false;
+    }
+}
 bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & parentStep)
 {
     StepPtr previousStep = parentStep;
@@ -100,25 +106,38 @@ bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & pa
     {
         auto child = rootChildren->getChild();
         const auto & key = child->getName();
-        if(key == keyDestination)
+        const auto & step = StepFactory::make(key);
+        if(!step)
         {
-            constructPipe(*child, previousStep);
+            return false;
         }
-        else
+
+#ifdef _WIN32 // VC2013 implementation of std::bind sucks (technical term)
+        step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
+#else // _WIN32
+        step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
+#endif // WIN32
+        if(!step->configure(*child))
         {
-            const auto & step = StepFactory::make(key);
-            if(!step || !step->configure(*child))
-            {
-                return false;
-            }
-            step->configureResources(resources_);
-            Steps_.emplace_back(step);
-            if(previousStep)
-            {
-                previousStep->attachDestination(step->getName(), step);
-            }
-            previousStep = step;
+            return false;
         }
+        step->configureResources(resources_);
+        Steps_.emplace_back(step);
+        if(previousStep)
+        {
+            previousStep->attachDestination(step->getName(), step);
+        }
+        previousStep = step;
     }
     return true;
+}
+
+bool Builder::configureParameter(const StepPtr & step, const std::string & key, const ConfigurationNode & configuration)
+{
+    if(key == keyDestination)
+    {
+        return constructPipe(configuration, step);
+    }
+    LogError("Unknown parameter \"" << key << "\" for " << step->getName());
+    return false; // false meaning "huh?"
 }

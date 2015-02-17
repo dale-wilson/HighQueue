@@ -144,11 +144,13 @@ namespace HighQueue
             /// @brief Final cleanup
             /// Lifecycle 10: Finish
             virtual void finish();
-
             
             const std::string & getName()const;
             bool isStopping()const;
             bool isPaused() const;
+
+            typedef std::function<bool(const StepPtr &, const std::string &, const ConfigurationNode &)> ParameterHandler;
+            void setParameterHandler(ParameterHandler handler);
         protected:
             void mustHaveDestination();
             void mustHaveDestination(const std::string & name);
@@ -166,6 +168,7 @@ namespace HighQueue
             StepPtr primaryDestination_;
             typedef std::pair<std::string,  StepPtr> NamedDestination;
             std::vector<NamedDestination> destinations_;
+            ParameterHandler parameterHandler_;
         };
 
         inline

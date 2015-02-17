@@ -24,7 +24,7 @@ void RoundRobin::handle(Message & message)
 {
     if(!stopping_)
     { 
-        LogTrace("RoundRobin copy.");
+        LogTrace("RoundRobin route " << messagesHandled_ << " to " << (messagesHandled_ % getDestinationCount()));
         send(messagesHandled_ % getDestinationCount(), message);
         ++messagesHandled_;
     }

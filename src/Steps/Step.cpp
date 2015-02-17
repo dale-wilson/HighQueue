@@ -62,6 +62,10 @@ bool Step::configureParameter(const std::string & key, const ConfigurationNode &
         configuration.getValue(name_);
         return true;
     }
+    else if(parameterHandler_)
+    {
+        return parameterHandler_(shared_from_this(), key, configuration);
+    }
     LogError("Unknown parameter \"" << key << "\" for " << name_);
     return false; // false meaning "huh?"
 }
@@ -181,4 +185,10 @@ size_t Step::getDestinationCount()const
 {
     return destinations_.size();
 }
+
+void Step::setParameterHandler(ParameterHandler handler)
+{
+    parameterHandler_ = handler;
+}
+
 
