@@ -1,0 +1,24 @@
+{
+    "pipe": {
+        "small_test_message_producer" : {
+          "name" : "MockMessageProducer",
+          "message_count" : 10
+        },
+        "binary_copy" : {
+            "name" : "BinaryCopy"
+        },
+        "small_test_message_copy" : {
+            "name" : "ConstructCopy"
+        },
+        "forward_pass_thru" : {
+            "name" : "ForwardPassThru"
+        },
+        "tee" : {
+            "name" : "tee",
+            "output" : "null"
+        },
+        "small_test_message_consumer" : {
+          "name" : "MockMessageConsumer"
+        }
+    }
+}
