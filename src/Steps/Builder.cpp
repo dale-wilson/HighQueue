@@ -31,11 +31,12 @@ bool Builder::construct(const ConfigurationNode & config)
         rootChildren->has();
         rootChildren->next())
     {
+        StepPtr noParent;
         auto child = rootChildren->getChild();
         const auto & key = child->getName();
         if(key == keyPipe)
         {
-            if(!constructPipe(*child))
+            if(!constructPipe(*child, noParent))
             {
                 return false;
             }
@@ -64,7 +65,6 @@ bool Builder::construct(const ConfigurationNode & config)
 
 void Builder::start()
 {
-
     for(auto & Step : ReverseRange<Steps>(Steps_))
     {
         Step->start();
@@ -90,28 +90,34 @@ void Builder::finish()
     }
 }
 
-bool Builder::constructPipe(const ConfigurationNode & config)
+bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & parentStep)
 {
-    StepPtr previousStep;
-
+    StepPtr previousStep = parentStep;
     for(auto rootChildren = config.getChildren();
         rootChildren->has();
         rootChildren->next())
     {
         auto child = rootChildren->getChild();
         const auto & key = child->getName();
-        const auto & step = StepFactory::make(key);
-        if(!step || !step->configure(*child))
+        if(key == keyPipe)
         {
-            return false;
+            constructPipe(*child, previousStep);
         }
-        step->configureResources(resources_);
-        Steps_.emplace_back(step);
-        if(previousStep)
+        else
         {
-            previousStep->attachDestination(step);
+            const auto & step = StepFactory::make(key);
+            if(!step || !step->configure(*child))
+            {
+                return false;
+            }
+            step->configureResources(resources_);
+            Steps_.emplace_back(step);
+            if(previousStep)
+            {
+                previousStep->attachDestination(step->getName(), step);
+            }
+            previousStep = step;
         }
-        previousStep = step;
     }
     return true;
 }

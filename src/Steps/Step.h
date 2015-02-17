@@ -154,6 +154,7 @@ namespace HighQueue
             void mustHaveDestination(const std::string & name);
             void mustNotHaveDestination();
             size_t destinationIndex(const std::string & name);
+            size_t getDestinationCount()const;
             void send(Message & message);
             void send(const std::string & name, Message & message);
             void send(size_t index, Message & message);

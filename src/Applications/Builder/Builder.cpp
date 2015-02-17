@@ -12,166 +12,17 @@ using namespace Steps;
 
 namespace
 {
-    std::string testJson1 =
-R"json({
-  "pipe": {
-    "small_test_message_producer" : {
-      "name" : "MockMessageProducer",
-      "message_count" : 10
-    },
-    "small_test_message_consumer" : {
-      "name" : "MockMessageConsumer"
-    }
-  }
-}
-)json";
-
-    std::string testJson2 =
-R"json({
-  "pipe": {
-    "heartbeat" : {
-      "name" : "HeartbeatProducer",
-      "milliseconds" : 100
-    },
-    "small_test_message_consumer" : {
-      "name" : "MockMessageConsumer"
-    }
-  }
-}
-)json";
-
-    std::string testJson3 =
-R"json({
-  "pipe": {
-    "heartbeat" : {
-      "name" : "HeartbeatProducer",
-      "milliseconds" : 100
-    },
-    "send_to_queue" : {
-        "name" : "SendToQueue1",
-        "queue" : "queue1"
-    }
-  },
-  "pipe": {
-    "input_queue" : {
-        "name" : "queue1",
-        "entry_count" : 100
-    },
-    "small_test_message_consumer" : {
-      "name" : "MockMessageConsumer"
-    }
-  }
-}
-)json";
-
-    std::string testJson4 =
-R"json({
-  "pipe": {
-    "heartbeat" : {
-      "name" : "HeartbeatProducer",
-      "milliseconds" : 100
-    },
-    "send_to_queue" : {
-        "name" : "SendHeartbeatsToQueue1",
-        "queue" : "queue1"
-    }
-  },
-  "pipe": {
-    "small_test_message_producer" : {
-      "name" : "MockMessageProducer_A",
-      "message_count" : 100000,
-      "producer_number" : 0
-    },
-    "send_to_queue" : {
-        "name" : "SendTestMessagesToQueue1_A",
-        "queue" : "queue1"
-    }
-  },
-  "pipe": {
-    "small_test_message_producer" : {
-      "name" : "MockMessageProducer_B",
-      "message_count" : 400000,
-      "producer_number" : 0
-    },
-    "send_to_queue" : {
-        "name" : "SendTestMessagesToQueue1_B",
-        "queue" : "queue1"
-    }
-  },
-  "pipe": {
-    "input_queue" : {
-        "name" : "queue1",
-        "entry_count" : 100
-    },
-    "shuffler" : {
-        "name" : "shuffler",
-        "look_ahead" : 100
-    },
-    "ordered_merge" : {
-        "name" : "merge",
-        "look_ahead" : 1000
-    },
-    "small_test_message_consumer" : {
-      "name" : "MockMessageConsumer"
-    }
-  }
-}
-)json";
-
-    std::string testJson5 =
-R"json({
-  "pipe": {
-    "small_test_message_producer" : {
-      "name" : "MockMessageProducer",
-      "message_count" : 10
-    },
-    "binary_copy" : {
-        "name" : "BinaryCopy"
-    },
-    "small_test_message_copy" : {
-        "name" : "ConstructCopy"
-    },
-    "forward_pass_thru" : {
-        "name" : "ForwardPassThru"
-    },
-    "tee" : {
-        "name" : "tee",
-        "output" : "null"
-    },
-    "small_test_message_consumer" : {
-      "name" : "MockMessageConsumer"
-    }
-  }
-}
-)json";
-
-    void listLines(const std::string & lines)
+    void listLines(std::istream & file)
     {
-        std::istringstream testConfig(lines);
         size_t lineNumber = 0;
-        while(!testConfig.eof())
+        while(!file.eof())
         {
             char line[1000];
-            testConfig.getline(line, sizeof(line));
+            file.getline(line, sizeof(line));
             std::cout << ++lineNumber << ": " << line << std::endl;
         }
     }
 
-    void runBuilderTest(const std::string & testJson)
-    {
-        std::istringstream testConfig(testJson);
-
-        std::string streamName = "testJson";
-        BoostPropertyTreeNode properties;
-        properties.loadJson(testConfig, streamName);
-
-        Builder builder;
-        builder.construct(properties);
-        builder.start();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        builder.stop();
-        builder.finish();
-    }
 }
 
 class BuilderApp
@@ -226,34 +77,36 @@ bool BuilderApp::validate()
 {
     bool ok = false;
     if(!configFileName_.empty())
-    {
+    { 
         configFile_.open(configFileName_);
-        if(configFile_.good())
-        {
-            ok = true;
-        }
-        else
-        {
-            std::cerr << "Can't open " << configFileName_ << std::endl;
-        }
     }
-    return configFile_.good();
+    if(configFile_.good())
+    {
+        ok = true;
+    }
+    else
+    {
+        std::cerr << "Can't open " << configFileName_ << std::endl;
+    }
+    return ok;
 }
 
 void BuilderApp::run()
 {
+    listLines(configFile_);
+    configFile_.seekg(0);
 
-    std::stringstream file;
-    while(!configFile_.eof())
+    BoostPropertyTreeNode properties;
+    properties.loadJson(configFile_, configFileName_);
+
+    Builder builder;
+    if(builder.construct(properties))
     {
-        char line[1000];
-        configFile_.getline(line, sizeof(line));
-        file << line;
-        file << '\n';
+        builder.start();
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        builder.stop();
+        builder.finish();
     }
-    std::string cfg = file.str();
-    listLines(cfg);
-    runBuilderTest(cfg);
 }
 
 int main(int argc, char * argv[])

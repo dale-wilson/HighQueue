@@ -80,8 +80,7 @@ namespace HighQueue
                 messageCount_ = uint32_t(messageCount);
                 return true;
             }
-
-            return false;
+            return Step::configureParameter(key, configuration);
         }
 
         template<typename MockMessageType>
@@ -135,11 +134,11 @@ namespace HighQueue
         template<typename MockMessageType>
         void MockMessageConsumer<MockMessageType>::finish()
         {
-            LogStatistics("MockMessageConsumer::heartbeats:" << heartbeats_);
-            LogStatistics("MockMessageConsumer::shutdowns: "  << shutdowns_);
-            LogStatistics("MockMessageConsumer::messagesHandled:" << messagesHandled_);
-            LogStatistics("MockMessageConsumer::sequenceError:" << sequenceError_);
-            LogStatistics("MockMessageConsumer::unexpectedMessageError:" << unexpectedMessageError_);
+            LogStatistics("MockMessageConsumer " << name_ << " heartbeats:" << heartbeats_);
+            LogStatistics("MockMessageConsumer " << name_ << " shutdowns: " << shutdowns_);
+            LogStatistics("MockMessageConsumer " << name_ << " messagesHandled:" << messagesHandled_);
+            LogStatistics("MockMessageConsumer " << name_ << " sequenceError:" << sequenceError_);
+            LogStatistics("MockMessageConsumer " << name_ << " unexpectedMessageError:" << unexpectedMessageError_);
             Step::finish();
         }
 

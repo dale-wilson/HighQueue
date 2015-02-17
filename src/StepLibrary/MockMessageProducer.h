@@ -61,7 +61,7 @@ namespace HighQueue
                 uint64_t messageCount;
                 if(!config.getValue(messageCount))
                 {
-                    LogFatal("MockMessageProducer can't interpret value for " << keyMessageCount);
+                    LogFatal("MockMessageProducer " << name_ << " can't interpret value for " << keyMessageCount);
                     return false;
                 }
                 messageCount_ = uint32_t(messageCount);
@@ -71,7 +71,7 @@ namespace HighQueue
                 uint64_t producerNumber;
                 if(!config.getValue(producerNumber))
                 {
-                    LogFatal("TestMessagProducer can't interpret value for " << keyProducerNumber);
+                    LogFatal("MockMessageProducer " << name_ << " can't interpret value for " << keyProducerNumber);
                     return false;
                 }
                 producerNumber_ = uint32_t(producerNumber);
@@ -113,20 +113,20 @@ namespace HighQueue
                     std::this_thread::yield();
                 }
             }
-            LogTrace("MockMessageProducer Start ");
+            LogTrace("MockMessageProducer Start  " << name_);
             uint32_t messageNumber = 0;
             while(!stopping_ && (messageCount_ == 0 || messageNumber < messageCount_))
             {
-                LogVerbose("MockMessageProducer Publish " << messageNumber << '/' << messageCount_);
+                LogVerbose("MockMessageProducer  " << name_ << " Publish " << messageNumber << '/' << messageCount_);
                 auto testMessage = outMessage_->emplace<ActualMessage>(producerNumber_, messageNumber);
                 outMessage_->setSequence(messageNumber);
                 send(*outMessage_);
                 ++messageNumber;
             }
-            LogDebug("Producer "<< producerNumber_ <<" publish stop message" );
+            LogDebug("Producer  " << name_ << " " << producerNumber_ << " publish stop message");
             outMessage_->setType(Message::Shutdown);
             send(*outMessage_);
-            LogInfo("MockMessageProducer " << producerNumber_ << " published " << messageNumber << " messages.");
+            LogInfo("MockMessageProducer  " << name_ << " " << producerNumber_ << " published " << messageNumber << " messages.");
         }
    }
 }

@@ -34,7 +34,7 @@ namespace HighQueue
             typedef std::vector<StepPtr> Steps;
 
         private:
-            bool constructPipe(const ConfigurationNode & config);
+            bool constructPipe(const ConfigurationNode & config, const StepPtr & parentStep);
         private:
             SharedResources resources_;
             Steps Steps_;

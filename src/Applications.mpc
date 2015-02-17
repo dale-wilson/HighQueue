@@ -6,7 +6,13 @@
 // Build the HighQueue Sample Application
 project(Builder) : HighQueueUser, boost_base, boost_filesystem, boost_system, boost_thread {
   exename = Builder
-
+   specific(prop:microsoft) {
+     Release::exeout = $(HighQueue_ROOT)/Output/Release
+     Debug::exeout = $(HighQueue_ROOT)/Output/Debug
+   } else {
+     exeout = $(HighQueue_ROOT)/bin
+   }
+   
   libs += Steps
   after += Steps
   libpaths -= $(BOOST_ROOT)/lib

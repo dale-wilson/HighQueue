@@ -40,16 +40,13 @@ bool Step::configure(const ConfigurationNode & configuration)
         const auto & parameter = poolChildren->getChild();
         const auto & key = parameter->getName();
 
-        if(key == keyName)
-        {
-            parameter->getValue(name_);
-        }
-        else if(! configureParameter(key, *parameter))
+        if(! configureParameter(key, *parameter))
         {
             return false;
         }
     }
 
+    // if we don't have a name, complain now while we know what configuration we're working on.
     if(name_.empty())
     {
         LogFatal("Missing required parameter " << keyName << " for " << configuration.getName() << ".");
@@ -60,6 +57,11 @@ bool Step::configure(const ConfigurationNode & configuration)
 
 bool Step::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
+    if(key == keyName)
+    {
+        configuration.getValue(name_);
+        return true;
+    }
     LogError("Unknown parameter \"" << key << "\" for " << name_);
     return false; // false meaning "huh?"
 }
@@ -86,6 +88,10 @@ void Step::attachDestination(const StepPtr & destination)
 
 void Step::attachDestination(const std::string & name, const StepPtr & destination)
 {
+    if(!primaryDestination_)
+    {
+        primaryDestination_ = destination;
+    }
     destinations_.push_back(std::make_pair(name, destination));
 }
 
@@ -152,7 +158,7 @@ void Step::mustHaveDestination(const std::string & name)
 
 void Step::mustNotHaveDestination()
 {
-    if(primaryDestination_ || destinations_.size() > 0)
+    if(primaryDestination_)
     {
         throw std::runtime_error("Configuration error: Destination not allowed");
     }
@@ -170,3 +176,9 @@ size_t Step::destinationIndex(const std::string & name)
     }
     return ~size_t(0);
 }
+
+size_t Step::getDestinationCount()const
+{
+    return destinations_.size();
+}
+
