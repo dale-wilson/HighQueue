@@ -4,21 +4,23 @@
           "name" : "MockMessageProducer",
           "message_count" : 10
         },
-        "binary_copy" : {
-            "name" : "BinaryCopy"
-        },
-        "small_test_message_copy" : {
-            "name" : "ConstructCopy"
-        },
-        "forward_pass_thru" : {
-            "name" : "ForwardPassThru"
-        },
-        "tee" : {
-            "name" : "tee",
-            "output" : "null"
-        },
-        "small_test_message_consumer" : {
-          "name" : "MockMessageConsumer"
-        }
+		"round_robin" : {
+		  "name" : "roundRobin"
+		},
+		"destination" : {
+		   "small_test_message_consumer" : {
+		     "name" : "Consumer 0"
+		    }
+		},
+		"destination" : {
+			"small_test_message_consumer" : {
+			 "name" : "Consumer 1"
+		    }
+		},
+		"destination" : {
+			"small_test_message_consumer" : {
+			 "name" : "Consumer 2"
+		    }
+        }			
     }
 }

@@ -15,6 +15,7 @@ using namespace Steps;
 namespace
 {
     std::string keyPipe("pipe");
+    std::string keyDestination("destination");
 }
 
 Builder::Builder()
@@ -99,7 +100,7 @@ bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & pa
     {
         auto child = rootChildren->getChild();
         const auto & key = child->getName();
-        if(key == keyPipe)
+        if(key == keyDestination)
         {
             constructPipe(*child, previousStep);
         }
