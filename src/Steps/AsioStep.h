@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Steps/StepToMessage.h>
+#include <Steps/Step.h>
 #include <Steps/AsioService.h>
 
 #include <Common/Log.h>
@@ -11,12 +11,12 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class  Steps_Export AsioStepToMessage : public StepToMessage
+        class  Steps_Export AsioStep : public Step
         {
 
         public:
-            AsioStepToMessage();
-            virtual ~AsioStepToMessage();
+            AsioStep();
+            virtual ~AsioStep();
             virtual void configureResources(SharedResources & resources);
             virtual void attachResources(SharedResources & resources);
             virtual void validate();

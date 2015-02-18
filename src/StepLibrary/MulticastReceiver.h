@@ -13,6 +13,11 @@ namespace HighQueue
         class MulticastReceiver: public AsioStepToMessage
         {
         public:
+            typedef boost::asio::ip::address Address;
+            typedef boost::asio::ip::udp::endpoint Endpoint;
+            typedef boost::asio::ip::udp::socket Socket;
+            
+        public:
             MulticastReceiver();
             virtual ~MulticastReceiver();
 
@@ -26,13 +31,13 @@ namespace HighQueue
             virtual void resume();
             virtual void stop();
 
-            boost::asio::ip::address listenInterface()const;
+            Address listenInterface()const;
             unsigned short portNumber()const;
-            boost::asio::ip::address multicastGroup()const;
-            boost::asio::ip::address bindAddress()const;
-            boost::asio::ip::udp::endpoint endpoint()const;
-            boost::asio::ip::udp::endpoint senderEndpoint()const;
-            boost::asio::ip::udp::socket & socket();
+            Address multicastGroup()const;
+            Address bindAddress()const;
+            Endpoint endpoint()const;
+            Endpoint senderEndpoint()const;
+            Socket & socket();
             bool joined()const;
 
         private:
@@ -51,19 +56,17 @@ namespace HighQueue
             std::string bindIP_;
             unsigned short portNumber_;
 
-
             AsioServicePtr ioService_;
-            typedef boost::asio::ip::udp::socket Socket;
             std::unique_ptr<Socket> socket_;
 
             struct MCastInfo
             {
-                boost::asio::ip::address multicastGroup_;
+                Address multicastGroup_;
                 uint16_t portNumber_;
-                boost::asio::ip::address listenInterface_;
-                boost::asio::ip::address bindAddress_;
-                boost::asio::ip::udp::endpoint endpoint_;
-                boost::asio::ip::udp::endpoint senderEndpoint_;
+                Address listenInterface_;
+                Address bindAddress_;
+                Endpoint endpoint_;
+                Endpoint senderEndpoint_;
 
                 MCastInfo(
                     const std::string & multicastGroupIP,
@@ -72,10 +75,10 @@ namespace HighQueue
                     const std::string & bindIP
 
                     )
-                    : multicastGroup_(boost::asio::ip::address::from_string(multicastGroupIP))
+                    : multicastGroup_(Address::from_string(multicastGroupIP))
                     , portNumber_(portNumber)
-                    , listenInterface_(boost::asio::ip::address::from_string(listenInterfaceIP))
-                    , bindAddress_(boost::asio::ip::address::from_string(bindIP))
+                    , listenInterface_(Address::from_string(listenInterfaceIP))
+                    , bindAddress_(Address::from_string(bindIP))
                     , endpoint_(listenInterface_, portNumber_)
                 {
                 }

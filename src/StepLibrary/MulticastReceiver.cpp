@@ -106,7 +106,7 @@ void MulticastReceiver::start()
     mcast_.reset(new MCastInfo(multicastGroupIP_, portNumber_, listenInterfaceIP_, bindIP_));
     socket_->open(mcast_->endpoint_.protocol());
     socket_->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    boost::asio::ip::udp::endpoint bindpoint(mcast_->bindAddress_, mcast_->portNumber_);
+    Endpoint bindpoint(mcast_->bindAddress_, mcast_->portNumber_);
     socket_->bind(bindpoint);
 
     // Join the multicast group
@@ -197,7 +197,7 @@ void MulticastReceiver::stop()
     AsioStepToMessage::stop();
 }
 
-boost::asio::ip::address MulticastReceiver::listenInterface()const
+MulticastReceiver::Address MulticastReceiver::listenInterface()const
 {
     return mcast_->listenInterface_;
 }
@@ -209,31 +209,30 @@ unsigned short MulticastReceiver::portNumber()const
 }
 
 
-boost::asio::ip::address MulticastReceiver::multicastGroup()const
+MulticastReceiver::Address MulticastReceiver::multicastGroup()const
 {
     return mcast_->multicastGroup_;
 }
 
 
-boost::asio::ip::address MulticastReceiver::bindAddress()const
+MulticastReceiver::Address MulticastReceiver::bindAddress()const
 {
     return mcast_->bindAddress_;
 }
 
 
-boost::asio::ip::udp::endpoint MulticastReceiver::endpoint()const
+MulticastReceiver::Endpoint MulticastReceiver::endpoint()const
 {
     return mcast_->endpoint_;
 }
 
 
-boost::asio::ip::udp::endpoint MulticastReceiver::senderEndpoint()const
+MulticastReceiver::Endpoint MulticastReceiver::senderEndpoint()const
 {
     return mcast_->senderEndpoint_;
 }
 
-
-boost::asio::ip::udp::socket & MulticastReceiver::socket()
+MulticastReceiver::Socket & MulticastReceiver::socket()
 {
     return *socket_;
 }
