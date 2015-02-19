@@ -33,11 +33,13 @@ namespace HighQueue
             virtual void configureResources(SharedResources & resources);
             virtual void validate();
             virtual void run();
+            virtual void finish();
 
         private:
             volatile bool * startSignal_;
             uint32_t messageCount_;
             uint32_t producerNumber_;
+            uint32_t messageNumber_;
         };
 
         template<typename MockMessageType>
@@ -50,6 +52,7 @@ namespace HighQueue
             : startSignal_(0)
             , messageCount_(~uint32_t(0))
             , producerNumber_(0)
+            , messageNumber_(0)
         {
         }
 
@@ -114,19 +117,24 @@ namespace HighQueue
                 }
             }
             LogTrace("MockMessageProducer Start  " << name_);
-            uint32_t messageNumber = 0;
-            while(!stopping_ && (messageCount_ == 0 || messageNumber < messageCount_))
+            messageNumber_ = 0;
+            while(!stopping_ && (messageCount_ == 0 || messageNumber_ < messageCount_))
             {
                 LogVerbose("MockMessageProducer  " << name_ << " Publish " << messageNumber << '/' << messageCount_);
-                auto testMessage = outMessage_->emplace<ActualMessage>(producerNumber_, messageNumber);
-                outMessage_->setSequence(messageNumber);
+                auto testMessage = outMessage_->emplace<ActualMessage>(producerNumber_, messageNumber_);
+                outMessage_->setSequence(messageNumber_);
                 send(*outMessage_);
-                ++messageNumber;
+                ++messageNumber_;
             }
             LogDebug("Producer  " << name_ << " " << producerNumber_ << " publish stop message");
             outMessage_->setType(Message::Shutdown);
             send(*outMessage_);
-            LogInfo("MockMessageProducer  " << name_ << " " << producerNumber_ << " published " << messageNumber << " messages.");
+        }
+
+        template<typename MockMessageType>
+        void MockMessageProducer<MockMessageType>::finish()
+        {
+            LogInfo("MockMessageProducer  " << name_ << " " << producerNumber_ << " published " << messageNumber_ << " messages.");
         }
    }
 }

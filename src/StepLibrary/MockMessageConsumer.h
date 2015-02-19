@@ -87,6 +87,11 @@ namespace HighQueue
         void MockMessageConsumer<MockMessageType>::handle(Message & message)
         {
             auto type = message.getType();
+            if(type == Message::MulticastPacket)
+            {
+                type = Message::MockMessage;
+                message.setType(type);
+            }
             switch(type)
             {
                 default:
@@ -105,6 +110,7 @@ namespace HighQueue
                     }
                     return;
                 }
+                case Message::MulticastPacket:
                 case Message::MockMessage:
                 {
                     auto testMessage = message.get<ActualMessage>();

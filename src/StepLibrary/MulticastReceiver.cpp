@@ -30,7 +30,10 @@ MulticastReceiver::MulticastReceiver()
     : joined_(false)
     , canceled_(false)
     , packetSize_(0)
+    , listenInterfaceIP_("0.0.0.0")
+    , bindIP_("0.0.0.0")
     , portNumber_(0)
+    , messagesReceived_(0)
 {
 }
 
@@ -95,6 +98,15 @@ void MulticastReceiver::validate()
         throw std::runtime_error(msg.str());
     }
 
+    LogDebug("Multicast Receiver Group IP: " << multicastGroupIP_);
+    multicastGroup_ = Address::from_string(multicastGroupIP_);
+    LogInfo("Multicast Receiver Listen IP: " << listenInterfaceIP_);
+    listenInterface_ = Address::from_string(listenInterfaceIP_);
+    listenEndpoint_ = Endpoint(listenInterface_, portNumber_);
+    LogDebug("Multicast Receiver Bind IP: " << bindIP_);
+    bindAddress_ = Address::from_string(bindIP_);
+    bindpoint_ = Endpoint(bindAddress_, portNumber_);
+
     AsioStepToMessage::validate();
 }
 
@@ -102,17 +114,19 @@ void MulticastReceiver::start()
 {
     AsioStepToMessage::start();
 
+
+    LogDebug("Multicast receiver open socket: " << listenEndpoint_);
     socket_.reset(new Socket(*ioService_));
-    mcast_.reset(new MCastInfo(multicastGroupIP_, portNumber_, listenInterfaceIP_, bindIP_));
-    socket_->open(mcast_->endpoint_.protocol());
+    socket_->open(listenEndpoint_.protocol());
+    LogDebug("Multicast receiver set reuse");
     socket_->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    Endpoint bindpoint(mcast_->bindAddress_, mcast_->portNumber_);
-    socket_->bind(bindpoint);
+    socket_->bind(bindpoint_);
 
     // Join the multicast group
+    LogDebug("Multicast Receiver " << multicastGroup_.to_v4() << " listen: " << listenInterface_.to_v4());
     boost::asio::ip::multicast::join_group joinRequest(
-        mcast_->multicastGroup_.to_v4(),
-        mcast_->listenInterface_.to_v4());
+        multicastGroup_.to_v4(),
+        listenInterface_.to_v4());
     socket_->set_option(joinRequest);
     joined_ = true;
 
@@ -126,11 +140,11 @@ void MulticastReceiver::startRead()
     {
         socket_->async_receive_from(
             boost::asio::buffer(outMessage_->getWritePosition(), outMessage_->available()),
-            mcast_->senderEndpoint_,
+            senderEndpoint_,
             boost::bind(&MulticastReceiver::handleReceive,
-            this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred)
+                this,
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred)
             );
     }
 }
@@ -140,16 +154,17 @@ void MulticastReceiver::handleReceive(
     const boost::system::error_code& error,
     size_t bytesReceived)
 {
+    LogDebug("MulticastReceiver handleReceive");
     if(error)
     {
-        if(canceled_)
+        if(!canceled_)
         {
-            LogError("Error in multicast reader.  Shutting down. Message: " << error);
-            stop();
+            LogError("Error in multicast reader: " << error.message());
         }
     }
     else
     {
+        ++messagesReceived_;
         outMessage_->setType(Message::MulticastPacket);
         auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
         outMessage_->setTimestamp(timestamp);
@@ -166,8 +181,8 @@ void MulticastReceiver::pause()
     if(joined_)
     {
         boost::asio::ip::multicast::leave_group leaveRequest(
-            mcast_->multicastGroup_.to_v4(),
-            mcast_->listenInterface_.to_v4());
+            multicastGroup_.to_v4(),
+            listenInterface_.to_v4());
         socket_->set_option(leaveRequest);
         joined_ = false;
     }
@@ -182,8 +197,8 @@ void MulticastReceiver::resume()
     {
         // rejoin the multicast group
         boost::asio::ip::multicast::join_group joinRequest(
-            mcast_->multicastGroup_.to_v4(),
-            mcast_->listenInterface_.to_v4());
+            multicastGroup_.to_v4(),
+            listenInterface_.to_v4());
         socket_->set_option(joinRequest);
         joined_ = true;
     }
@@ -191,52 +206,16 @@ void MulticastReceiver::resume()
 
 void MulticastReceiver::stop()
 {
-    LogTrace("HeartbeatProducer Stopping:  Cancel Timer");
+    LogTrace("Multicast Receiver Stopping:  Cancel Read");
     canceled_ = true;
     socket_->cancel();
     AsioStepToMessage::stop();
 }
 
-MulticastReceiver::Address MulticastReceiver::listenInterface()const
-{
-    return mcast_->listenInterface_;
-}
-
-
-unsigned short MulticastReceiver::portNumber()const
-{
-    return mcast_->portNumber_;
-}
-
-
-MulticastReceiver::Address MulticastReceiver::multicastGroup()const
-{
-    return mcast_->multicastGroup_;
-}
-
-
-MulticastReceiver::Address MulticastReceiver::bindAddress()const
-{
-    return mcast_->bindAddress_;
-}
-
-
-MulticastReceiver::Endpoint MulticastReceiver::endpoint()const
-{
-    return mcast_->endpoint_;
-}
-
-
 MulticastReceiver::Endpoint MulticastReceiver::senderEndpoint()const
 {
-    return mcast_->senderEndpoint_;
+    return senderEndpoint_;
 }
-
-MulticastReceiver::Socket & MulticastReceiver::socket()
-{
-    return *socket_;
-}
-
 
 bool MulticastReceiver::joined()const
 {

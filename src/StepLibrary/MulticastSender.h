@@ -25,21 +25,20 @@ namespace HighQueue
             virtual void validate();
             virtual void start();
             virtual void handle(Message & message);
-            virtual void stop();
             virtual void finish();
 
             Socket  & socket();
         private:
-            bool canceled_;
             std::string multicastGroupIP_;
             std::string bindIP_;
 
             unsigned short portNumber_;
             Address multicastGroup_;
             Endpoint endpoint_;
+            Endpoint bindpoint_;
 
             std::unique_ptr<Socket> socket_;
-
+            uint32_t messageCount_;
             uint32_t errorCount_;
         };
    }

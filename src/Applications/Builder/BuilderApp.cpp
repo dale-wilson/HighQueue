@@ -103,7 +103,10 @@ void BuilderApp::run()
     if(builder.construct(properties))
     {
         builder.start();
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::cout << "Any key + Enter:";
+        char anyKey = 0;
+        std::cin >> anyKey;
+//        std::this_thread::sleep_for(std::chrono::seconds(5));
         builder.stop();
         builder.finish();
     }

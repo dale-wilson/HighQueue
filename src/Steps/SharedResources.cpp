@@ -84,7 +84,7 @@ void SharedResources::start()
     if(asio_)
     {
         auto actualThreads = (tenthsOfAsioThreadsNeeded_ + 9) / 10;
-        LogTrace("SharedResources running AsioService with " << tenthsOfAsioThreadsNeeded_ << " threads.");
+        LogTrace("SharedResources running AsioService with " << actualThreads << " threads.");
         asio_->runThreads(actualThreads, false);
     }
 }

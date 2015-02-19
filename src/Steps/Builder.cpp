@@ -16,6 +16,7 @@ namespace
 {
     std::string keyPipe("pipe");
     std::string keyDestination("destination");
+    std::string keyComment("comment");
 }
 
 Builder::Builder()
@@ -41,6 +42,10 @@ bool Builder::construct(const ConfigurationNode & config)
             {
                 return false;
             }
+        }
+        else if(key == keyComment)
+        {
+            // simply ignore comments
         }
         else
         {
@@ -137,6 +142,10 @@ bool Builder::configureParameter(const StepPtr & step, const std::string & key, 
     if(key == keyDestination)
     {
         return constructPipe(configuration, step);
+    }
+    if(key == keyComment)
+    {
+        return true; // simply ignore comments
     }
     LogError("Unknown parameter \"" << key << "\" for " << step->getName());
     return false; // false meaning "huh?"

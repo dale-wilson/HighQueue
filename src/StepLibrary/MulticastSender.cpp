@@ -19,12 +19,14 @@ namespace
 
     const std::string keyPort = "port";
     const std::string keyGroup = "group";
+    const std::string keyBind = "bind";
 }
 
 
 MulticastSender::MulticastSender()
-    : canceled_(false)
+    : bindIP_("0.0.0.0")
     , portNumber_(0)
+    , messageCount_(0)
     , errorCount_(0)
 {
 }
@@ -48,6 +50,10 @@ bool MulticastSender::configureParameter(const std::string & key, const Configur
     else if(key == keyGroup)
     {
         configuration.getValue(multicastGroupIP_);
+    }
+    else if(key == keyBind)
+    {
+        configuration.getValue(bindIP_);
     }
     else
     {
@@ -76,51 +82,51 @@ void MulticastSender::validate()
         throw std::runtime_error(msg.str());
     }
 
+    // Resolve the addresses to detect syntax errors here
+    multicastGroup_ = Address::from_string(multicastGroupIP_);
+    endpoint_ = Endpoint(multicastGroup_, portNumber_);
+    bindpoint_ = Endpoint(Address::from_string(bindIP_), 0);
+
     AsioStep::validate();
 }
 
 void MulticastSender::start()
 {
     AsioStep::start();
-    multicastGroup_ = Address::from_string(multicastGroupIP_);
-
-    endpoint_ = boost::asio::ip::udp::endpoint(multicastGroup_, portNumber_);
     socket_.reset(new Socket(*ioService_, endpoint_.protocol()));
     socket_->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    if(!bindIP_.empty())
-    {
-        // pick a NIC
-        Endpoint bindpoint(Address::from_string(bindIP_), portNumber_);
-        socket_->bind(bindpoint);
-    }
+#ifdef HIGHQUEUE_BIND_SOCKET
+    // pick a NIC
+    socket_->bind(bindpoint_);
+#endif // HIGHQUEUE_BIND_SOCKET
 }
 
 void MulticastSender::handle(Message & message)
 {
-    boost::system::error_code error;
-    Socket::message_flags flags(0);
-    socket_->send_to(
-        boost::asio::buffer(message.getConst(), message.getUsed()),
-        endpoint_,
-        flags,
-        error);
-    if(error)
+    // ignore heartbeats and shutdowns.
+    auto type = message.getType();
+    if(type != Message::Heartbeat && type != Message::Shutdown)
     {
-        LogError("Multicast Sender " << name_ << " error: " << error.message());
-        ++errorCount_;
+        ++messageCount_;
+        boost::system::error_code error;
+        Socket::message_flags flags(0);
+        socket_->send_to(
+            boost::asio::buffer(message.getConst(), message.getUsed()),
+            endpoint_,
+            flags,
+            error);
+        if(error)
+        {
+            LogError("Multicast Sender " << name_ << " error: " << error.message());
+            ++errorCount_;
+        }
     }
-}
-
-void MulticastSender::stop()
-{
-    LogTrace("HeartbeatProducer Stopping:  Cancel Timer");
-    canceled_ = true;
-    socket_->cancel();
-    AsioStep::stop();
 }
 
 void MulticastSender::finish()
 {
+    LogStatistics("Multicast Sender " << name_ << " messages: " << messageCount_);
+
     if(errorCount_ > 0)
     {
         LogStatistics("Multicast Sender " << name_ << " errors: " << errorCount_);
