@@ -205,7 +205,7 @@ namespace HighQueue
         void setTimestamp(Timestamp timestamp);
         void setSequence(Sequence sequence);
 
-        void moveMetaInfoTo(Message & rhs);
+        void copyMetaInfoTo(Message & rhs);
 
         static const char * toText(MessageType type);
 
@@ -391,7 +391,7 @@ namespace HighQueue
     }
 
     inline
-    void Message::moveMetaInfoTo(Message & rhs)
+    void Message::copyMetaInfoTo(Message & rhs)
     {
         rhs.type_ = type_;
         rhs.timestamp_ = timestamp_; // todo define units
@@ -406,7 +406,7 @@ namespace HighQueue
         std::swap(offset_, rhs.offset_);
         rhs.used_ = used_;
         rhs.read_ = read_;
-        moveMetaInfoTo(rhs);
+        copyMetaInfoTo(rhs);
         used_ = 0;
         read_ = 0;
     }

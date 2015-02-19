@@ -25,7 +25,7 @@ void BinaryPassThru::handle(Message & message)
     { 
         LogDebug("BinaryPassThru copy.");
         outMessage_->appendBinaryCopy(message.get(), message.getUsed());
-        message.moveMetaInfoTo(*outMessage_);
+        message.copyMetaInfoTo(*outMessage_);
         send(*outMessage_);
         ++messagesHandled_;
     }

@@ -33,7 +33,7 @@ void RoundRobin::handle(Message & message)
             for(size_t nDestination = 0; nDestination < getDestinationCount(); ++nDestination)
             {
                 outMessage_->appendBinaryCopy(message.get(), message.getUsed());
-                message.moveMetaInfoTo(*outMessage_);
+                message.copyMetaInfoTo(*outMessage_);
                 send(nDestination, *outMessage_);
             }
             if(type == Message::Heartbeat)

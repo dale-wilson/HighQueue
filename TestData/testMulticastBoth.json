@@ -1,0 +1,25 @@
+{
+    "pipe": {
+        "small_test_message_producer" : {
+			"name" : "MockMessageProducer",
+			"message_count" : 10
+        },
+		"multicast_sender" : {
+			"name" : "MulticastSender",
+            "port" : 30001,
+            "group" : "239.255.0.1"
+		}
+    },
+    "pipe": {
+        "multicast_receiver" : {
+            "name" : "MulticastReceiver",
+            "port" : 30001,
+            "group" : "239.255.0.1", 
+            "packet_size" : 1000            
+        },
+        "small_test_message_consumer" : {
+            "name": "MockMessageConsumer"
+        }
+    }
+    
+}
