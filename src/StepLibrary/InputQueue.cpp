@@ -13,7 +13,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<InputQueue> registerStep("input_queue");
+    StepFactory::Registrar<InputQueue> registerStep("input_queue", "Define an input queue to receive messages");
 
     const std::string keyConsumerWaitStrategy = "consumer_wait_strategy";
     const std::string keyProducerWaitStrategy = "produder_wait_strategy";

@@ -36,13 +36,14 @@ BOOST_AUTO_TEST_CASE(TestFactory)
 {
     std::cout << "TestFactory" << std::endl;
 
-    const std::string StepName = "MockStep";
+    const std::string stepName = "MockStep";
+    const std::string stepDescription = "Description of a mock step.";
 
-    auto Stepmaker = [](){ return std::make_shared<MockStep>();};
+    auto stepMaker = [](){ return std::make_shared<MockStep>();};
 
-    StepFactory::registerMaker(StepName, Stepmaker);
+    StepFactory::registerMaker(stepName, stepDescription, stepMaker);
 
-    auto madeStep = StepFactory::make(StepName);
+    auto madeStep = StepFactory::make(stepName);
     BOOST_CHECK(madeStep);
 
     auto madeTee = StepFactory::make("tee");

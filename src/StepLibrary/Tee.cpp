@@ -11,7 +11,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<Tee> registerStep("tee");
+    StepFactory::Registrar<Tee> registerStep("tee", "Dump messages to a file while forwarding them to the next Step");
 }
 
 const std::string Tee::keyOutput = "output";

@@ -15,7 +15,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<HeartbeatProducer> registerStep("heartbeat");
+    StepFactory::Registrar<HeartbeatProducer> registerStep("heartbeat", "Generate heartbeat messages");
 
     const std::string keyInterval = "milliseconds";
 

@@ -20,20 +20,21 @@ namespace HighQueue
             template <typename StepType>
             struct Registrar
             {
-                Registrar(const std::string & name)
+                Registrar(const std::string & name, const std::string & description)
                 {
-                    StepFactory::registerMaker(name, [name]()
-                    {
-                        LogTrace("StepFactory Registrar constructing " << name);
-                        return std::make_shared<StepType>();
-                    }
+                    StepFactory::registerMaker(name, description, 
+                        [name]()
+                        {
+                            LogTrace("StepFactory Registrar constructing " << name);
+                            return std::make_shared<StepType>();
+                        }
                     );
                 }
             };
 
             typedef std::function<StepPtr()> Maker;
 
-            static void registerMaker(const std::string & name, const Maker & maker);
+            static void registerMaker(const std::string & name, const std::string & description, const Maker & maker);
             static StepPtr make(const std::string & name);
             static std::ostream & list(std::ostream & out);
         };

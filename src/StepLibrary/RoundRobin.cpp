@@ -13,7 +13,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<RoundRobin> registerStep("round_robin");
+    StepFactory::Registrar<RoundRobin> registerStep("round_robin", "Distribute messages to multiple destinations -- round robin.");
 }
 
 RoundRobin::RoundRobin()

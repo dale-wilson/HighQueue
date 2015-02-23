@@ -10,7 +10,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<BinaryPassThru> registerStep("binary_copy");
+    StepFactory::Registrar<BinaryPassThru> registerStep("binary_copy", "Copy message as binary image.");
 }
 
 

@@ -15,7 +15,7 @@ using namespace HighQueue;
 using namespace Steps;
 namespace
 {
-    StepFactory::Registrar<MulticastSender> registerStep("multicast_sender");
+    StepFactory::Registrar<MulticastSender> registerStep("multicast_sender", "Send messages to multicast feed.");
 
     const std::string keyPort = "port";
     const std::string keyGroup = "group";

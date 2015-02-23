@@ -16,7 +16,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<MulticastReceiver> registerStep("multicast_receiver");
+    StepFactory::Registrar<MulticastReceiver> registerStep("multicast_receiver", "Receive messages from multicast feed.");
 
     const std::string keyPacketSize = "packet_size";
     const std::string keyPort = "port";

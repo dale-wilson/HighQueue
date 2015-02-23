@@ -15,11 +15,14 @@ namespace
     void listLines(std::istream & file)
     {
         size_t lineNumber = 0;
-        while(!file.eof())
+        while(file.good())
         {
             char line[1000];
             file.getline(line, sizeof(line));
-            std::cout << ++lineNumber << ": " << line << std::endl;
+            if(file.good())
+            {
+                std::cout << ++lineNumber << ": " << line << std::endl;
+            }
         }
     }
 
@@ -38,7 +41,6 @@ public:
 private:
     std::string configFileName_;
     std::ifstream configFile_;
-
 };
 
 BuilderApp::BuilderApp()
@@ -94,7 +96,8 @@ bool BuilderApp::validate()
 void BuilderApp::run()
 {
     listLines(configFile_);
-    configFile_.seekg(0);
+    configFile_.close();
+    configFile_.open(configFileName_);
 
     BoostPropertyTreeNode properties;
     properties.loadJson(configFile_, configFileName_);

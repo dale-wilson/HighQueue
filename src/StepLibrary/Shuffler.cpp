@@ -15,7 +15,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<Shuffler> registerStep("shuffler");
+    StepFactory::Registrar<Shuffler> registerStep("shuffler", "***TESTING*** send messages out of order.");
 
     const std::string keyLookAhead = "look_ahead";
     const std::string keyPrime = "prime";

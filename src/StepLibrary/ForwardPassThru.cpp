@@ -12,7 +12,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<ForwardPassThru> registerStep("forward_pass_thru");
+    StepFactory::Registrar<ForwardPassThru> registerStep("forward_pass_thru", "Pass the message to the next stage as-is with no copy.");
 }
 
 ForwardPassThru::ForwardPassThru()

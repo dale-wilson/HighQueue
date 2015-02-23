@@ -95,13 +95,8 @@ void Builder::finish()
         Step->finish();
     }
 }
-namespace
-{
-    bool xyzzy(const StepPtr & step, const std::string & str, const ConfigurationNode & node)
-    {
-        return false;
-    }
-}
+
+
 bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & parentStep)
 {
     StepPtr previousStep = parentStep;
@@ -111,28 +106,32 @@ bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & pa
     {
         auto child = rootChildren->getChild();
         const auto & key = child->getName();
-        const auto & step = StepFactory::make(key);
-        if(!step)
+        if(key != keyComment)
         {
-            return false;
-        }
+            const auto & step = StepFactory::make(key);
+            if(!step)
+            {
+                std::cout << "Step factory denied " << key << std::endl;
+                return false;
+            }
 
 #ifdef _WIN32 // VC2013 implementation of std::bind sucks (technical term)
-        step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
+            step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
 #else // _WIN32
-        step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
+            step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
 #endif // WIN32
-        if(!step->configure(*child))
-        {
-            return false;
+            if(!step->configure(*child))
+            {
+                return false;
+            }
+            step->configureResources(resources_);
+            Steps_.emplace_back(step);
+            if(previousStep)
+            {
+                previousStep->attachDestination(step->getName(), step);
+            }
+            previousStep = step;
         }
-        step->configureResources(resources_);
-        Steps_.emplace_back(step);
-        if(previousStep)
-        {
-            previousStep->attachDestination(step->getName(), step);
-        }
-        previousStep = step;
     }
     return true;
 }

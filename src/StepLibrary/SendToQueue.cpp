@@ -13,7 +13,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<SendToQueue> registerStep("send_to_queue");
+    StepFactory::Registrar<SendToQueue> registerStep("send_to_queue", "Send messages to an input queue defined elsewehere.");
 
     const std::string keyQueueName = "queue";
 }

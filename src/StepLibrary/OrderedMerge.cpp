@@ -14,7 +14,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<OrderedMerge> registerStepSmall("ordered_merge");
+    StepFactory::Registrar<OrderedMerge> registerStepSmall("ordered_merge", "Merge streams of messages, sorting, eliminating duplicates, identifying gaps.");
 
     const std::string keyLookAhead = "look_ahead";
 }

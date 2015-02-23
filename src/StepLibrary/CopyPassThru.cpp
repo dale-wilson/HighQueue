@@ -11,7 +11,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<CopyPassThru<SmallMockMessage> > registerStepSmall("small_test_message_copy");
-    StepFactory::Registrar<CopyPassThru<MediumMockMessage> > registerStepMedium("medium_test_message_copy");
-    StepFactory::Registrar<CopyPassThru<LargeMockMessage> > registerStepLarge("large_test_message_copy");
+    StepFactory::Registrar<CopyPassThru<SmallMockMessage> > registerStepSmall("small_test_message_copy", "Copy small message using constructor");
+    StepFactory::Registrar<CopyPassThru<MediumMockMessage> > registerStepMedium("medium_test_message_copy", "Copy medium message using constructor");
+    StepFactory::Registrar<CopyPassThru<LargeMockMessage> > registerStepLarge("large_test_message_copy", "Copy large message using constructor");
 }
