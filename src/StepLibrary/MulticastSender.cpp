@@ -35,6 +35,14 @@ MulticastSender::~MulticastSender()
 {
 }
 
+std::ostream & MulticastSender::usage(std::ostream & out) const
+{
+    out << "    " << keyPort << ": Port on which to send packets" << std::endl;
+    out << "    " << keyGroup << ": Multicast group to which to send packets" << std::endl;
+    out << "    " << keyBind << ": Identifies NIC on which to send join packets (0.0.0.0 means let the system choose)" << std::endl;
+    return AsioStep::usage(out);
+}
+
 bool MulticastSender::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     if(key == keyPort)

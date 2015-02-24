@@ -36,6 +36,12 @@ HeartbeatProducer::HeartbeatProducer()
 {
 }
 
+std::ostream & HeartbeatProducer::usage(std::ostream & out) const
+{
+    out << "    " << keyInterval << ": Milliseconds between heartbeats" << std::endl; 
+    return AsioStepToMessage::usage(out);
+}
+
 void HeartbeatProducer::setInterval(std::chrono::milliseconds interval)
 {
     interval_ = Interval(interval.count());

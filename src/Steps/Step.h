@@ -94,8 +94,19 @@ namespace HighQueue
             /// Lifecycle 2: Configure
             virtual bool configure(const ConfigurationNode & configuration);
             
+            /// @brief Configure a single parameter
+            /// Called from the default implementation of configure();
+            /// @param key the key to identifiy the parameter.
+            /// @param configuration the node containing the value of the parameter.
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
 
+            /// @brief Write a "usage" message to out.
+            /// Will be called if configure fails, so it should mention any configuration parameters
+            /// expected by configure.
+            virtual std::ostream & usage(std::ostream & out) const;
+
+            /// @brief Prepare shared resources based on information gleanded from configure.
+            /// @param resources has "need*" methods which this step can used to indicated what resources it will use.
             virtual void configureResources(SharedResources & resources);
 
             /// @brief Configure

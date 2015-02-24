@@ -34,6 +34,15 @@ Leaker::Leaker()
 {
 }
 
+std::ostream & Leaker::usage(std::ostream & out) const
+{
+    out << "    " << keyCount << ": How many consecutive messages to leak." << std::endl;
+    out << "    " << keyEvery << ": How often to leak a block of messages" << std::endl;
+    out << "    " << keyHeartbeats << ": Can heartbeats leak? (default is false)" << std::endl;
+    out << "    " << keyShutdowns << ": Can shutdown requests leak? (default is false)" << std::endl;
+    return Step::usage(out);
+}
+
 bool Leaker::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     if(key == keyCount)

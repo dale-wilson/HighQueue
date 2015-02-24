@@ -12,9 +12,9 @@ using namespace Steps;
 namespace
 {
     StepFactory::Registrar<Tee> registerStep("tee", "Dump messages to a file while forwarding them to the next Step");
+    const std::string keyOutput = "output";
 }
 
-const std::string Tee::keyOutput = "output";
 
 Tee::Tee()
     : out_(0)
@@ -24,6 +24,12 @@ Tee::Tee()
 void Tee::attachOutputStream(std::ostream * outputStream)
 {
     out_ = outputStream;
+}
+
+std::ostream & Tee::usage(std::ostream & out) const
+{
+    out << "    " << keyOutput << ": The name of a file to which messages will be dumped. \"cout\" and \"cerr\" are recognized as stdout and stderr." << std::endl;
+    return Step::usage(out);
 }
 
 bool Tee::configureParameter(const std::string & key, const ConfigurationNode & configuration)

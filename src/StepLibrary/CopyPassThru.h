@@ -19,8 +19,8 @@ namespace HighQueue
             explicit CopyPassThru();
 
             virtual void handle(Message & message);
-
             virtual void finish();
+
         private:
             uint32_t messagesHandled_;
         };

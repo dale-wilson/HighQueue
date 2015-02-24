@@ -14,7 +14,6 @@ namespace HighQueue
         class Steps_Export Tee: public Step
         {
         public:
-            static const std::string keyOutput;
             /// @brief hard code the line width.
             static const size_t bytesPerLine = 16;
 
@@ -30,7 +29,7 @@ namespace HighQueue
             // implement Step methods
             virtual void handle(Message & message);
             virtual void finish();
-
+            virtual std::ostream & usage(std::ostream & out) const;
         private:
             void hexDump(byte_t * message, size_t size);
         private:

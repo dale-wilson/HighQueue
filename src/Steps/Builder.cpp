@@ -146,6 +146,5 @@ bool Builder::configureParameter(const StepPtr & step, const std::string & key, 
     {
         return true; // simply ignore comments
     }
-    LogError("Unknown parameter \"" << key << "\" for " << step->getName());
     return false; // false meaning "huh?"
 }

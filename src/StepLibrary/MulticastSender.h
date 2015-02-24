@@ -26,6 +26,7 @@ namespace HighQueue
             virtual void start();
             virtual void handle(Message & message);
             virtual void finish();
+            virtual std::ostream & usage(std::ostream & out) const;
 
             Socket  & socket();
         private:

@@ -62,12 +62,24 @@ bool Step::configureParameter(const std::string & key, const ConfigurationNode &
         configuration.getValue(name_);
         return true;
     }
-    else if(parameterHandler_)
+    else if(parameterHandler_ && parameterHandler_(shared_from_this(), key, configuration))
     {
-        return parameterHandler_(shared_from_this(), key, configuration);
+        return true;
     }
-    LogError("Unknown parameter \"" << key << "\" for " << name_);
+    std::ostringstream msg;
+    msg << "Unknown parameter \"" << key << "\" for " << name_ << std::endl
+        << "Expecting one of " << std::endl;
+    usage(msg);
+    auto str = msg.str();
+    LogError(str);
+    
     return false; // false meaning "huh?"
+}
+
+std::ostream & Step::usage(std::ostream & out) const
+{
+    out << "    " << keyName << ": Name this step (required)" << std::endl;
+    return out;
 }
 
 void Step::configureResources(SharedResources & resources)

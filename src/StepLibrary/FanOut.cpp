@@ -13,7 +13,7 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<FanOut> registerStep("fan_out");
+    StepFactory::Registrar<FanOut> registerStep("fan_out", "Distribute identical copies of messges to all destinations.");
 }
 
 FanOut::FanOut()

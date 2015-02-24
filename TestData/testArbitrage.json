@@ -1,0 +1,87 @@
+{
+    "comment": "Generate messages; duplicate into two streams; shuffle one; leak from the other",
+    "pipe": {
+        "small_test_message_producer" : {
+			"name" : "MockMessageProducer",
+			"message_count" : 10000
+        },
+        "fan_out" : {
+            "name" : "multiple_sources",
+            "destination" : {
+                "shuffler": {
+                    "name": "shuffler",
+                    "look_ahead": 150
+                },
+                "multicast_sender" : {
+                    "name" : "send_port_30001",
+                    "port" : 30001,
+                    "group" : "239.255.0.1"
+                }
+            },
+            "destination": {
+                "leaker": {
+                    "name": "Leak messages",
+                    "every": 47,
+                    "count": 2
+                },
+                "multicast_sender" : {
+                    "name" : "send_port_30002",
+                    "port" : 30002,
+                    "group" : "239.255.0.1"
+                }
+            }               
+        }
+    }, 
+    
+    "comment" : "Receive port 30001; push into Queue",
+    "pipe": {
+        "multicast_receiver" : {
+            "name" : "MulticastReceiver_30001",
+            "port" : 30001,
+            "group" : "239.255.0.1", 
+            "packet_size" : 1000            
+        },
+        "send_to_queue" : {
+            "name" : "send_30001_to_queue",
+            "queue" : "subscriber_queue"
+        }
+    },
+    
+    "comment" : "Receive port 30002; push into Queue",
+    "pipe": {
+        "multicast_receiver" : {
+            "name" : "MulticastReceiver_30002",
+            "port" : 30002,
+            "group" : "239.255.0.1", 
+            "packet_size" : 1000            
+        },
+        "send_to_queue" : {
+            "name" : "send_30002_to_queue",
+            "queue" : "subscriber_queue"
+        }
+    },
+
+    "comment" : "Push heartbeats into Queue",
+    "pipe": {
+        "heartbeat" : {
+            "name": "HeartbeatGenerator",
+            "interval": 500
+        },
+        "send_to_queue" : {
+            "name" : "send_30001_to_queue",
+            "queue" : "subscriber_queue"
+        }
+    },
+    
+    "comment": "Process messages from queue; arbitrage; check the results (expecting gaps, but correct ordering.",
+    "pipe":{
+        "input_queue":{
+            "name": "subscriber_queue",
+            "entries" : 100
+        },
+        "comment": "ordered_merge goes here.",
+        "small_test_message_consumer" : {
+            "name": "MockMessageConsumer"
+        }
+    }
+}

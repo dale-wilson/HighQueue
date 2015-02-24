@@ -31,6 +31,14 @@ Shuffler::Shuffler()
 {
 }
 
+std::ostream & Shuffler::usage(std::ostream & out) const
+{
+    out << "    " << keyLookAhead << " The size of the \"deck\" to be shuffled (maximum distance moved)." << std::endl;
+    out << "    " << keyPrime << ": A small prime number to seed the shuffle." << std::endl;
+    return Step::usage(out);
+}
+
+
 bool Shuffler::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     if(key == keyLookAhead)

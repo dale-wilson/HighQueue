@@ -22,6 +22,7 @@ namespace HighQueue
             virtual void attachResources(SharedResources & resources);
             virtual void run();
             virtual void stop();
+            virtual std::ostream & usage(std::ostream & out) const;
 
             void setStopOnShutdownMessage(bool value);
 

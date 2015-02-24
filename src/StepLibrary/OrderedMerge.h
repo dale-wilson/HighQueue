@@ -46,6 +46,7 @@ namespace HighQueue
             virtual void handle(Message & message);
 
             virtual void finish();
+            virtual std::ostream & usage(std::ostream & out) const;
 
             std::ostream & writeStats(std::ostream & out);
 

@@ -30,6 +30,7 @@ namespace HighQueue
             virtual void pause();
             virtual void resume();
             virtual void stop();
+            virtual std::ostream & usage(std::ostream & out) const;
 
             Endpoint senderEndpoint()const;
             bool joined()const;

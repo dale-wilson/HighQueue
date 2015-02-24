@@ -23,6 +23,12 @@ SendToQueue::SendToQueue()
 {
 }
 
+std::ostream & SendToQueue::usage(std::ostream & out) const
+{
+    out << "    " << keyQueueName << ": Identifies the queue to which messages will be sent.  Should match the name of an input_queue." << std::endl;
+    return Step::usage(out);
+}
+
 bool SendToQueue::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     if(key == keyQueueName)

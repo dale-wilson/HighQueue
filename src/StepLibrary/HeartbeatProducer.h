@@ -19,6 +19,7 @@ namespace HighQueue
 
             virtual void start();
             virtual void stop();
+            virtual std::ostream & usage(std::ostream & out) const;
 
         private:
             void startTimer();

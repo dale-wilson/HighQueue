@@ -23,7 +23,8 @@ namespace HighQueue
             virtual void start();
             virtual void handle(Message & message);
             virtual void stop();
-            
+            virtual std::ostream & usage(std::ostream & out) const;
+
         private:
             std::string queueName_;
             ConnectionPtr connection_;

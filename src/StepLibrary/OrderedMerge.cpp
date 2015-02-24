@@ -19,6 +19,13 @@ namespace
     const std::string keyLookAhead = "look_ahead";
 }
 
+std::ostream & OrderedMerge::usage(std::ostream & out) const
+{
+    out << "    " << keyLookAhead << ": The maximum number of messages to keep before declaring a gap (missing message)." << std::endl;
+    return StepToMessage::usage(out);
+}
+
+
 OrderedMerge::OrderedMerge()
     : lookAhead_(0)
     , expectedSequenceNumber_(0)

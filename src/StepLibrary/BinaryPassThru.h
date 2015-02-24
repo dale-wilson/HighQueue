@@ -13,13 +13,12 @@ namespace HighQueue
     {
         class Steps_Export BinaryPassThru : public StepToMessage
         {
-
         public:
             explicit BinaryPassThru();
 
             virtual void handle(Message & message);
             virtual void finish();
- 
+      
         private:
             uint32_t messagesHandled_;
         };

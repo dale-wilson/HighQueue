@@ -42,6 +42,16 @@ MulticastReceiver::~MulticastReceiver()
 
 }
 
+std::ostream & MulticastReceiver::usage(std::ostream & out) const
+{
+    out << "    " << keyPacketSize << ": Expected maximum message size and/or UDP MTU" << std::endl;
+    out << "    " << keyPort << ": Port on which to listen" << std::endl;
+    out << "    " << keyGroup << ": Multicast group to join" << std::endl;
+    out << "    " << keyListen << ": Identifies NIC on which to listen (0.0.0.0 lets the system choose)" << std::endl;
+    out << "    " << keyBind << ": Identifies NIC on which to send join request (almost always = listen)" << std::endl;
+    return AsioStepToMessage::usage(out);
+}
+
 bool MulticastReceiver::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
     if(key == keyPacketSize)

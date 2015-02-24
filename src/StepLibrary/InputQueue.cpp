@@ -39,6 +39,24 @@ InputQueue::InputQueue()
 {
 }
 
+std::ostream & InputQueue::usage(std::ostream & out) const
+{
+    out << "    " << keyEntryCount << ": The maximum number of messages the queue can hold." << std::endl;
+    out << "    " << keyConsumerWaitStrategy << ": Strategy for consumer when queue is empty." << std::endl;
+    out << "    " << keyProducerWaitStrategy << ": Strategy for producers when queue is full." << std::endl;
+    out << "    " << keyCommonWaitStrategy << ": Wait strategy for both consumer and producers" << std::endl;
+    out << "         For each wait strategy:" << std::endl;
+
+    out << "        " << keySpinCount << ": How many times to spin before yielding." << std::endl;
+    out << "        " << keyYieldCount << ": How many times to yield before sleaping" << std::endl;
+    out << "        " << keySleepCount << ": How many times to sleep before waiting with a Mutex/Condition Variable" << std::endl;
+    out << "        " << keySleepPeriod << ": How many nanoseconds to sleep each time." << std::endl;
+    out << "        " << keyMutexWaitTimeout << ": How long to wait for a Mutex/Condition Variable before failing" << std::endl;
+    out << "             " << valueForever << ": can appear rather than a number for any of the counts above" << std::endl;
+
+    out << "    " << keyDiscardMessagesIfNoConsumer << ": If no consumer is attached to the queue, simply discard messages." << std::endl;
+    return ThreadedStepToMessage::usage(out);
+}
 
 bool InputQueue::configureParameter(const std::string & key, const ConfigurationNode & configuration)
 {
