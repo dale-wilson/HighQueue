@@ -3,7 +3,7 @@
     "pipe": {
         "small_test_message_producer" : {
 			"name" : "MockMessageProducer",
-			"message_count" : 100
+			"message_count" : 10000
         },
         "fan_out" : {
             "name" : "multiple_sources",
@@ -12,9 +12,10 @@
                     "name": "shuffler",
                     "look_ahead": 150
                 },
-                "send_to_queue" : {
-                    "name" : "send_30001_to_queue",
-                    "queue" : "subscriber_queue"
+                "multicast_sender" : {
+                    "name" : "send_port_30001",
+                    "port" : 30001,
+                    "group" : "239.255.0.1"
                 }
             },
             "destination": {
@@ -23,14 +24,49 @@
                     "every": 47,
                     "count": 2
                 },
-                "send_to_queue" : {
-                    "name" : "send_30002_to_queue",
-                    "queue" : "subscriber_queue"
+                "multicast_sender" : {
+                    "name" : "send_port_30002",
+                    "port" : 30002,
+                    "group" : "239.255.0.1"
                 }
             }               
         }
     }, 
     
+    "comment" : "Receive port 30001; push into Queue",
+    "pipe": {
+        "multicast_receiver" : {
+            "name" : "MulticastReceiver_30001",
+            "port" : 30001,
+            "group" : "239.255.0.1", 
+            "packet_size" : 1000            
+        },
+        "test_message_analyzer": {
+            "name" : "analyze_30001"
+        },
+        "send_to_queue" : {
+            "name" : "send_30001_to_queue",
+            "queue" : "subscriber_queue"
+        }
+    },
+    
+    "comment" : "Receive port 30002; push into Queue",
+    "pipe": {
+        "multicast_receiver" : {
+            "name" : "MulticastReceiver_30002",
+            "port" : 30002,
+            "group" : "239.255.0.1", 
+            "packet_size" : 1000            
+        },
+        "test_message_analyzer": {
+            "name" : "analyze_30001"
+        },
+        "send_to_queue" : {
+            "name" : "send_30002_to_queue",
+            "queue" : "subscriber_queue"
+        }
+    },
+
     "comment" : "Push heartbeats into Queue",
     "pipe": {
         "heartbeat" : {
@@ -53,7 +89,7 @@
             "name": "Arbitrage",
             "look_ahead":500,
             "max_delay_heartbeats": 1
-            },
+        },
         "small_test_message_consumer" : {
             "name": "MockMessageConsumer"
         }
