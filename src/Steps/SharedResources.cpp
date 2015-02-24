@@ -4,9 +4,9 @@
 #include <Steps/StepPch.h>
 
 #include "SharedResources.h"
-#include <HighQueue/MemoryPool.h>
 #include <Steps/AsioService.h>
-
+#include <HighQueue/MemoryPool.h>
+#include <HighQueue/details/HQMemoryBlockPool.h> // for diagnostic message (block count)
 using namespace HighQueue;
 using namespace Steps;
 
@@ -24,12 +24,15 @@ SharedResources::~SharedResources()
 void SharedResources::requestAsioThread(size_t threads, size_t tenthsOfThread)
 {
     tenthsOfAsioThreadsNeeded_ += threads * 10 + tenthsOfThread;
+    LogDebug("Request Asio threads " << threads << "." << tenthsOfThread << " -> " << tenthsOfAsioThreadsNeeded_);
 }
 
 void SharedResources::requestMessages(size_t count)
 {
     numberOfMessagesNeeded_ += count;
+    LogDebug("Request messages: " << count << " -> " << numberOfMessagesNeeded_);
 }
+
 void SharedResources::requestMessageSize(size_t bytes)
 {
     if(bytes > largestMessageSize_)
@@ -67,6 +70,8 @@ void SharedResources::createResources()
     }
     LogInfo("Creating Memory Pool : " << numberOfMessagesNeeded_ << " messages. " << largestMessageSize_ << " bytes each.");
     pool_ = std::make_shared<MemoryPool>(largestMessageSize_, numberOfMessagesNeeded_);
+    auto & detail = pool_->getPool();
+    LogDebug("Memory pool contains " << detail.getBlockCount() << " blocks of " << detail.getBlockCapacity() << " bytes.");
 
     if(tenthsOfAsioThreadsNeeded_ > 0)
     { 

@@ -175,7 +175,6 @@ void InputQueue::attachResources(SharedResources & resources)
 {
     auto pool = resources.getMemoryPool();
     connection_->createLocal(name_, parameters_, pool);
-    message_.reset(new Message(pool));
     consumer_.reset(new Consumer(connection_));
     return ThreadedStepToMessage::attachResources(resources);
 }
@@ -184,10 +183,10 @@ void InputQueue::run()
 {
     while(!stopping_)
     {
-        if(consumer_->getNext(*message_))
+        if(consumer_->getNext(*outMessage_))
         {
-            auto type = message_->getType();
-            send(*message_);            
+            auto type = outMessage_->getType();
+            send(*outMessage_);            
         }
         else
         {

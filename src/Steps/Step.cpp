@@ -84,6 +84,7 @@ std::ostream & Step::usage(std::ostream & out) const
 
 void Step::configureResources(SharedResources & resources)
 {
+    LogDebug("Step::configureResources called for " << name_);
     // default do nothing
 }
 

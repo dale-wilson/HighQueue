@@ -35,11 +35,12 @@ namespace HighQueue
             return pool_;
         }
 
+        size_t numberOfAllocations()const;
+
     private:
         size_t allocatedSize_;
         std::shared_ptr<byte_t> memory_;
         HQMemoryBlockPool & pool_;
-
-
+        size_t numberOfAllocations_;
     };
 }

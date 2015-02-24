@@ -35,7 +35,7 @@ namespace HighQueue
             CreationParameters parameters_;
 
             std::unique_ptr<Consumer> consumer_;
-            std::unique_ptr<Message> message_;
+//            std::unique_ptr<Message> message_;
         };
 
     }

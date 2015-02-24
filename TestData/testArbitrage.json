@@ -65,7 +65,7 @@
     "pipe": {
         "heartbeat" : {
             "name": "HeartbeatGenerator",
-            "interval": 500
+            "milliseconds": 500
         },
         "send_to_queue" : {
             "name" : "send_30001_to_queue",
@@ -77,7 +77,7 @@
     "pipe":{
         "input_queue":{
             "name": "subscriber_queue",
-            "entries" : 100
+            "entry_count" : 100
         },
         "comment": "ordered_merge goes here.",
         "small_test_message_consumer" : {

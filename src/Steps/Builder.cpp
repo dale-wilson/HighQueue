@@ -7,6 +7,7 @@
 #include <Steps/Configuration.h>
 #include <Steps/Step.h>
 #include <Steps/StepFactory.h>
+#include <HighQueue/MemoryPool.h>
 #include <Common/ReverseRange.h>
 
 using namespace HighQueue;
@@ -56,9 +57,11 @@ bool Builder::construct(const ConfigurationNode & config)
 
     // we have created all Steps, and used them to configure the build resources.
     resources_.createResources();
-    for(auto & Step : Steps_)
+    for(auto & step : Steps_)
     {
-        Step->attachResources(resources_);
+        LogTrace("Attach resources for " << step->getName() << " (" << resources_.getMemoryPool()->numberOfAllocations() << ")");
+
+        step->attachResources(resources_);
     }
     // now check to see if we got it right.
     for(auto & Step : Steps_)
