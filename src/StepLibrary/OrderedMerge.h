@@ -4,34 +4,13 @@
 #pragma once
 
 #include "OrderedMergeFwd.h"
-
+#include <StepLibrary/GapMesssage.h>
 #include <Steps/StepToMessage.h>
 
 namespace HighQueue
 {
     namespace Steps
     {
-        class GapMessage
-        {
-        public:
-            GapMessage(uint32_t startGap, uint32_t gapEnd = 0)
-                : startGap_(startGap)
-                , endGap_(gapEnd)
-            {
-            }
-            uint32_t & startGap()
-            {
-                return startGap_;
-            }
-            uint32_t & gapEnd()
-            {
-                return endGap_;
-            }
-        private:
-            uint32_t startGap_;
-            uint32_t endGap_;
-        };
-
         class Steps_Export OrderedMerge : public StepToMessage
         {
         public:
@@ -48,7 +27,7 @@ namespace HighQueue
             virtual void finish();
             virtual std::ostream & usage(std::ostream & out) const;
 
-            std::ostream & writeStats(std::ostream & out);
+            virtual void publishStats();
 
         private:
             bool findAndPublishGap();
@@ -61,11 +40,15 @@ namespace HighQueue
 
         private:
             size_t lookAhead_;
+            size_t maxDelayHeartbeats_;
+            size_t heartbeatDelays_;
             uint32_t expectedSequenceNumber_;
+            uint32_t highestStashed_;
             typedef std::shared_ptr<Message> MessagePtr;
             typedef std::vector<MessagePtr> Messages;
             Messages pendingMessages_;
             uint32_t lastHeartbeatSequenceNumber_;
+            uint32_t lastHeartbeatHighestStashed_;
 
             size_t statReceived_;
             size_t statHeartbeats_;
@@ -74,7 +57,7 @@ namespace HighQueue
             size_t statHeartbeatWithoutPublish_;
             size_t statShutdownPublishedGap_;
             size_t statArrivedInOrder_;
-            size_t statDuplicatesPrevious_;
+            size_t statPrevious_;
             size_t statStashed_;
             size_t statDuplicatesStash_;
             size_t statFuture_;

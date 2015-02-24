@@ -24,6 +24,7 @@ namespace HighQueue
             virtual void handle(Message & message);
             virtual void finish();
             virtual std::ostream & usage(std::ostream & out) const;
+            virtual void logStats();
 
         private:
             void publishPendingMessages();
@@ -42,6 +43,7 @@ namespace HighQueue
             size_t published_;
             size_t heartbeats_;
             size_t shutdowns_;
+            size_t leftovers_;
         };
 
    }

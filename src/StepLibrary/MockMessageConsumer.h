@@ -2,8 +2,9 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Steps/Step.h>
 #include <Mocks/MockMessage.h>
+#include <StepLibrary/GapMesssage.h>
+#include <Steps/Step.h>
 #include <Steps/Configuration.h>
 
 #include <Common/Log.h>
@@ -39,12 +40,14 @@ namespace HighQueue
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
             virtual void handle(Message & message);
             virtual void finish();
-
+            virtual void logStats();
+        
         private:
             uint32_t messageCount_;
 
             uint32_t heartbeats_;
             uint32_t shutdowns_;
+            uint32_t gaps_;
             uint32_t messagesHandled_;
             uint32_t nextSequence_;
             uint32_t sequenceError_;
@@ -59,12 +62,12 @@ namespace HighQueue
             : messageCount_(messageCount_)
             , heartbeats_(0)
             , shutdowns_(0)
+            , gaps_(0)
             , messagesHandled_(0)
             , nextSequence_(0)
             , sequenceError_(0)
             , unexpectedMessageError_(0)
         {
-            setName("MockMessageConsumer"); // default name
         }
 
         template<typename MockMessageType>
@@ -75,7 +78,7 @@ namespace HighQueue
                 uint64_t messageCount;
                 if(!configuration.getValue(messageCount))
                 {
-                    LogFatal("TestMessagConsumer can't interpret value for " << keyMessageCount);
+                    LogFatal("MockMessageConsumer can't interpret value for " << keyMessageCount);
                 }
                 messageCount_ = uint32_t(messageCount);
                 return true;
@@ -110,11 +113,9 @@ namespace HighQueue
                     }
                     return;
                 }
-                case Message::MulticastPacket:
                 case Message::MockMessage:
                 {
                     auto testMessage = message.get<ActualMessage>();
-                    LogDebug("MockMessageConsumer: " << testMessage->getSequence());
                     if(nextSequence_ != testMessage->getSequence())
                     {
                         LogWarningLimited(10, "Expecting " << nextSequence_ << " received " << testMessage->getSequence());
@@ -134,11 +135,24 @@ namespace HighQueue
                 {
                     ++heartbeats_;
                 }
+                case Message::Gap:
+                {
+                    auto gapMessage = message.get<GapMessage>();
+                    LogTrace("MockMessageConsumer " << name_ << " received gap [" << gapMessage->startGap() << ", " << gapMessage->endGap() << ")");
+                    nextSequence_ = gapMessage->endGap();
+                    ++gaps_;
+                }
             }
         }
 
         template<typename MockMessageType>
         void MockMessageConsumer<MockMessageType>::finish()
+        {
+            logStats();
+        }
+
+        template<typename MockMessageType>
+        void MockMessageConsumer<MockMessageType>::logStats()
         {
             LogStatistics("MockMessageConsumer " << name_ << " heartbeats:" << heartbeats_);
             LogStatistics("MockMessageConsumer " << name_ << " shutdowns: " << shutdowns_);

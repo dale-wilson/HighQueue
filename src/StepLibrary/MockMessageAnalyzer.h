@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 #pragma once
-#include <Steps/StepToMessage.h>
+#include <Steps/Step.h>
 
 #include <Common/Log.h>
 
@@ -10,18 +10,17 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class Steps_Export FanOut: public StepToMessage
+        class Steps_Export MockMessageAnalyzer: public Step
         {
         public:
-            explicit FanOut();
+            explicit MockMessageAnalyzer();
 
             // implement Step methods
             virtual void handle(Message & message);
             virtual void finish();
- 
+
         private:
             uint32_t messagesHandled_;
-            uint32_t messagesSent_;
         };
    }
 }

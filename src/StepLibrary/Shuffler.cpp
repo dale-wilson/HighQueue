@@ -28,6 +28,7 @@ Shuffler::Shuffler()
     , published_(0)
     , heartbeats_(0)
     , shutdowns_(0)
+    , leftovers_(0)
 {
 }
 
@@ -155,19 +156,25 @@ void Shuffler::publishPendingMessages()
 
 void Shuffler::finish()
 {
-    LogStatistics("Shuffler published: " << published_);
-    LogStatistics("Shuffler heartbeats: " << heartbeats_);
-    LogStatistics("Shuffler shutdowns: " << shutdowns_);
-    size_t leftovers = 0;
+    leftovers_ = 0;
     for(auto & message : pendingMessages_)
     {
         if(!message->isEmpty())
         {
-            ++leftovers;
+            ++leftovers_;
         }
     }
-    if(leftovers != 0)
+    logStats();
+    Step::finish();
+}
+
+void Shuffler::logStats()
+{
+    LogStatistics("Shuffler published: " << published_);
+    if(leftovers_ != 0)
     {
-        LogStatistics("Shuffler unpublished: " << leftovers);
+        LogStatistics("Shuffler unpublished: " << leftovers_);
     }
+    LogStatistics("Shuffler heartbeats: " << heartbeats_);
+    LogStatistics("Shuffler shutdowns: " << shutdowns_);
 }

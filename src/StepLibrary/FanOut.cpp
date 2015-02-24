@@ -13,11 +13,12 @@ using namespace Steps;
 
 namespace
 {
-    StepFactory::Registrar<FanOut> registerStep("fan_out", "Distribute identical copies of messges to all destinations.");
+    StepFactory::Registrar<FanOut> registerStep("fan_out", "Distribute identical copies of messages to all destinations.");
 }
 
 FanOut::FanOut()
     : messagesHandled_(0)
+    , messagesSent_(0)
 {
 }
 
@@ -30,13 +31,15 @@ void FanOut::handle(Message & message)
             outMessage_->appendBinaryCopy(message.get(), message.getUsed());
             message.copyMetaInfoTo(*outMessage_);
             send(nDestination, *outMessage_);
-            ++messagesHandled_;
+            ++messagesSent_;
         }
+        ++messagesHandled_;
     }
 }
 
 void FanOut::finish()
 {
-    LogStatistics("FanOut messages: " << messagesHandled_);
+    LogStatistics("FanOut " << name_ <<" messages received: " << messagesHandled_);
+    LogStatistics("FanOut " << name_ <<" messages sent: " << messagesSent_);
 }
 

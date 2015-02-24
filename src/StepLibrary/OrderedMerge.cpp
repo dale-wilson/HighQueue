@@ -17,19 +17,25 @@ namespace
     StepFactory::Registrar<OrderedMerge> registerStepSmall("ordered_merge", "Merge streams of messages, sorting, eliminating duplicates, identifying gaps.");
 
     const std::string keyLookAhead = "look_ahead";
+    const std::string keyDelayHeartbeats = "max_delay_heartbeats";
 }
 
 std::ostream & OrderedMerge::usage(std::ostream & out) const
 {
-    out << "    " << keyLookAhead << ": The maximum number of messages to keep before declaring a gap (missing message)." << std::endl;
+    out << "    " << keyLookAhead << ": The maximum number of messages to keep before declaring a gap (missing message(s))." << std::endl;
+    out << "    " << keyDelayHeartbeats << ": The maximum number of heartbeats to delay before declaring a gap." << std::endl;
     return StepToMessage::usage(out);
 }
 
 
 OrderedMerge::OrderedMerge()
     : lookAhead_(0)
+    , maxDelayHeartbeats_(1)
+    , heartbeatDelays_(0)            
     , expectedSequenceNumber_(0)
+    , highestStashed_(0)
     , lastHeartbeatSequenceNumber_(0)
+    , lastHeartbeatHighestStashed_(0)
     , statReceived_(0)
     , statHeartbeats_(0)
     , statShutdowns_(0)
@@ -37,7 +43,7 @@ OrderedMerge::OrderedMerge()
     , statHeartbeatWithoutPublish_(0)
     , statShutdownPublishedGap_(0)
     , statArrivedInOrder_(0)
-    , statDuplicatesPrevious_(0)
+    , statPrevious_(0)
     , statStashed_(0)
     , statDuplicatesStash_(0)
     , statFuture_(0)
@@ -48,10 +54,19 @@ bool OrderedMerge::configureParameter(const std::string & key, const Configurati
 {
     if(key == keyLookAhead)
     {
-        uint64_t lookAhead;
-        if(configuration.getValue(lookAhead))
+        uint64_t value;
+        if(configuration.getValue(value))
         {
-            lookAhead_ = size_t(lookAhead);
+            lookAhead_ = size_t(value);
+            return true;
+        }
+    }
+    else if(key == keyDelayHeartbeats)
+    {
+        uint64_t value;
+        if(configuration.getValue(value))
+        {
+            maxDelayHeartbeats_ = size_t(value);
             return true;
         }
     }
@@ -116,16 +131,30 @@ void OrderedMerge::handle(Message & message)
 
 void OrderedMerge::handleHeartbeat(Message & message)
 {
-    // todo: we might want to skip some heartbeats depending on frequency
     if(expectedSequenceNumber_ == lastHeartbeatSequenceNumber_)
     {
-        if(findAndPublishGap())
+        ++heartbeatDelays_;
+        if(heartbeatDelays_ >= maxDelayHeartbeats_)
         {
-            ++statHeartbeatWithoutPublish_;
-            publishPendingMessages();
+            while(expectedSequenceNumber_ < lastHeartbeatHighestStashed_)
+            {
+                if(findAndPublishGap())
+                {
+                    ++statHeartbeatWithoutPublish_;
+                    publishPendingMessages();
+                }
+            }
+            lastHeartbeatSequenceNumber_ = expectedSequenceNumber_;
+            lastHeartbeatHighestStashed_ = highestStashed_;
+            heartbeatDelays_ = 0;
         }
     }
-    lastHeartbeatSequenceNumber_ = expectedSequenceNumber_;
+    else
+    {
+        lastHeartbeatSequenceNumber_ = expectedSequenceNumber_;
+        lastHeartbeatHighestStashed_ = highestStashed_;
+        heartbeatDelays_ = 0;
+    }
     send(message);
 }
 
@@ -147,8 +176,9 @@ void OrderedMerge::handleDataMessage(Message & message)
     if(expectedSequenceNumber_ == 0)
     {
         expectedSequenceNumber_ = sequence;
+        highestStashed_ = sequence;
     }
-    LogVerbose("OrderedMerge sequence :" << sequence << " expected " << expectedSequenceNumber_);
+    LogDebug("OrderedMerge sequence :" << sequence << " expected " << expectedSequenceNumber_);
     if(sequence == expectedSequenceNumber_)
     {
         ++statArrivedInOrder_;
@@ -159,8 +189,8 @@ void OrderedMerge::handleDataMessage(Message & message)
     }
     else if(sequence < expectedSequenceNumber_)
     {
-        ++statDuplicatesPrevious_;
-        LogDebug("OrderedMerge Previous Duplicate " << sequence);
+        ++statPrevious_;
+        LogDebug("OrderedMerge Previous " << sequence);
         // ignore this one.  We've already seen it.
     }
     else if(sequence - expectedSequenceNumber_ < lookAhead_)
@@ -169,13 +199,17 @@ void OrderedMerge::handleDataMessage(Message & message)
         if(pendingMessages_[index]->isEmpty())
         {
             ++statStashed_;
-            LogDebug("OrderedMerge Stash" << sequence);
+            LogDebug("OrderedMerge Stash" << sequence << " in " << index);
             message.moveTo(*pendingMessages_[index]);
         }
         else
         {
-            LogDebug("OrderedMerge Duplicates Stash " << sequence);
+            LogDebug("OrderedMerge Duplicates Stash " << sequence << " :: [" << index << "] " << pendingMessages_[index]->getSequence());
             // ignore this one we are already holding a copy.
+        }
+        if(sequence > highestStashed_)
+        {
+            highestStashed_ = sequence;
         }
     }
     else // Sequence number is beyond the look-ahead window size
@@ -196,6 +230,7 @@ void OrderedMerge::handleDataMessage(Message & message)
         LogDebug("OrderedMerge Stash future " << sequence);
         auto index = sequence % lookAhead_;
         message.moveTo(*pendingMessages_[index]);
+        highestStashed_ = sequence;
     }
 }
 
@@ -238,32 +273,21 @@ void OrderedMerge::publishPendingMessages()
 
 void OrderedMerge::finish()
 {
-    LogStatistics("OrderedMerge received: " << statReceived_);
-    LogStatistics("OrderedMerge heartbeat: " << statHeartbeats_);
-    LogStatistics("OrderedMerge shutdown: " << statShutdowns_);
-    LogStatistics("OrderedMerge data: " << statData_);
-    LogStatistics("OrderedMerge heartbeat gap: " << statHeartbeatWithoutPublish_);
-    LogStatistics("OrderedMerge shutdown gap: " << statShutdownPublishedGap_);
-    LogStatistics("OrderedMerge in_order: " << statArrivedInOrder_);
-    LogStatistics("OrderedMerge duplicate_published: " << statDuplicatesPrevious_);
-    LogStatistics("OrderedMerge stashed: " << statStashed_);
-    LogStatistics("OrderedMerge duplicate_stashed: " << statDuplicatesStash_);
-    LogStatistics("OrderedMerge future gap: " << statFuture_);
+    publishStats();
 }
 
-std::ostream & OrderedMerge::writeStats(std::ostream & out)
+void OrderedMerge::publishStats()
 {
-    return out
-        << " Received: " << statReceived_
-        << " Heartbeats: " << statHeartbeats_
-        << " Shutdowns: " << statShutdowns_
-        << " Data: " << statData_
-        << " HeartbeatWithoutPublish: " << statHeartbeatWithoutPublish_
-        << " ShutdownPublishedGap: " << statShutdownPublishedGap_
-        << " ArrivedInOrder: " << statArrivedInOrder_
-        << " DuplicatesPrevious: " << statDuplicatesPrevious_
-        << " Stashed: " << statStashed_
-        << " DuplicatesStash: " << statDuplicatesStash_
-        << " Future: " << statFuture_;
+    LogStatistics("OrderedMerge "<< name_ <<" received: " << statReceived_);
+    LogStatistics("OrderedMerge "<< name_ <<" heartbeat: " << statHeartbeats_);
+    LogStatistics("OrderedMerge "<< name_ <<" shutdown: " << statShutdowns_);
+    LogStatistics("OrderedMerge "<< name_ <<" data: " << statData_);
+    LogStatistics("OrderedMerge "<< name_ <<" heartbeat gap: " << statHeartbeatWithoutPublish_);
+    LogStatistics("OrderedMerge "<< name_ <<" shutdown gap: " << statShutdownPublishedGap_);
+    LogStatistics("OrderedMerge "<< name_ <<" in_order: " << statArrivedInOrder_);
+    LogStatistics("OrderedMerge "<< name_ <<" duplicate_published: " << statPrevious_);
+    LogStatistics("OrderedMerge "<< name_ <<" stashed: " << statStashed_);
+    LogStatistics("OrderedMerge "<< name_ <<" duplicate_stashed: " << statDuplicatesStash_);
+    LogStatistics("OrderedMerge "<< name_ <<" future gap: " << statFuture_);
 }
 
