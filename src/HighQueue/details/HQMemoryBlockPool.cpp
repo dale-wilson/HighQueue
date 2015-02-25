@@ -90,7 +90,6 @@ void HQMemoryBlockPool::release(Message & message)
     }
 
     SpinLock::Guard guard(lock_);
-    LogVerbose("Release " << message.getOffset());
     *message.get<size_t>() = rootOffset_;
     rootOffset_ = message.getOffset();
     message.reset();
