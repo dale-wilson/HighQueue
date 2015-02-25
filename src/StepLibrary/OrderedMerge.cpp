@@ -178,11 +178,10 @@ void OrderedMerge::handleDataMessage(Message & message)
         expectedSequenceNumber_ = sequence;
         highestStashed_ = sequence;
     }
-    LogDebug("OrderedMerge sequence :" << sequence << " expected " << expectedSequenceNumber_);
     if(sequence == expectedSequenceNumber_)
     {
         ++statArrivedInOrder_;
-        LogDebug("OrderedMerge Publish " << sequence);
+        LogDebug("OrderedMerge Publish immediate" << sequence);
         send(message);
         ++expectedSequenceNumber_;
         publishPendingMessages();
@@ -190,7 +189,7 @@ void OrderedMerge::handleDataMessage(Message & message)
     else if(sequence < expectedSequenceNumber_)
     {
         ++statPrevious_;
-        LogDebug("OrderedMerge Previous " << sequence);
+        LogDebug("OrderedMerge ignore ancient " << sequence);
         // ignore this one.  We've already seen it.
     }
     else if(sequence - expectedSequenceNumber_ < lookAhead_)
@@ -201,15 +200,15 @@ void OrderedMerge::handleDataMessage(Message & message)
             ++statStashed_;
             LogDebug("OrderedMerge Stash" << sequence << " in " << index);
             message.moveTo(*pendingMessages_[index]);
+            if(sequence > highestStashed_)
+            {
+                highestStashed_ = sequence;
+            }
         }
         else
         {
             LogDebug("OrderedMerge Duplicates Stash " << sequence << " :: [" << index << "] " << pendingMessages_[index]->getSequence());
             // ignore this one we are already holding a copy.
-        }
-        if(sequence > highestStashed_)
-        {
-            highestStashed_ = sequence;
         }
     }
     else // Sequence number is beyond the look-ahead window size
@@ -264,7 +263,7 @@ void OrderedMerge::publishPendingMessages()
     auto index = expectedSequenceNumber_ % lookAhead_;
     while(!pendingMessages_[index]->isEmpty())
     {
-        LogDebug("OrderedMerge Publish from stash " << expectedSequenceNumber_ );
+        LogDebug("OrderedMerge Publish from stash " << expectedSequenceNumber_ << '[' << index << "] = " << pendingMessages_[index]->getSequence() );
         send(*pendingMessages_[index]);
         ++expectedSequenceNumber_;
         index = expectedSequenceNumber_ % lookAhead_;
