@@ -24,7 +24,7 @@ Log::Level Log::runtimeLevel = Log::Level(
 
 void Log::log(Log::Level level, const char * file, const char * function, uint16_t line, const std::string & message)
 {
-    if(level && runtimeLevel != 0)
+    if((level & runtimeLevel) != 0)
     {
 #ifdef LOG_INCLUDES_LOCATION
         std::cerr << toText(level) 

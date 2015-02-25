@@ -27,7 +27,8 @@
 #if !defined(COMPILE_TIME_LOG_LEVEL)
 #   if defined(_DEBUG)
 #       define COMPILE_TIME_LOG_LEVEL (LOG_LEVEL_FORCE | LOG_LEVEL_FATAL | LOG_LEVEL_ERROR | LOG_LEVEL_WARNING | \
-                                      LOG_LEVEL_INFO | LOG_LEVEL_STATISTICS | LOG_LEVEL_TRACE | LOG_LEVEL_DEBUG)
+                                      LOG_LEVEL_INFO | LOG_LEVEL_STATISTICS | LOG_LEVEL_TRACE | LOG_LEVEL_DEBUG | \
+                                      LOG_LEVEL_VERBOSE)
 #   else
 #       define COMPILE_TIME_LOG_LEVEL (LOG_LEVEL_FORCE | LOG_LEVEL_FATAL | LOG_LEVEL_ERROR | LOG_LEVEL_WARNING | LOG_LEVEL_STATISTICS)
 #   endif // _DEBUG
