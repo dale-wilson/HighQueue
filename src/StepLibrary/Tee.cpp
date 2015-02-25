@@ -48,10 +48,12 @@ void Tee::start()
         if(outputName_ == "cout")
         {
             out_ = & std::cout;
+            LogTrace("Tee processor will write to stdout");
         }
         else if(outputName_ == "cerr")
         {
             out_ = & std::cerr;
+            LogTrace("Tee processor will write to stderr");
         }
         else if(outputName_ == "null")
         {
@@ -63,6 +65,7 @@ void Tee::start()
             if(outfile_.good())
             {
                 out_ = & outfile_;
+                LogTrace("Tee processor will write to file: " << outputName_);
             }
             else
             {
@@ -75,9 +78,11 @@ void Tee::start()
 
 void Tee::handle(Message & message)
 {
-    if(!stopping_)
+    if(!stopping_ && out_ != 0)
     { 
-        LogTrace("Tee copy.");
+        *out_ << "Message type: " << message.getType() 
+            << " Sequence: " << message.getSequence() 
+            << " Time: " << message.getTimestamp() << std::endl;
         hexDump(message.get(), message.getUsed());
         send(message);
     }
@@ -97,7 +102,7 @@ void Tee::hexDump(byte_t * message, size_t size)
     if (out_)
     {
         *out_ << std::hex << std::setfill('0');
-        for (size_t position = 0; position < size + bytesPerLine; position += bytesPerLine)
+        for (size_t position = 0; position < size; position += bytesPerLine)
         {
             *out_ << std::setw(4) << position << ':';
             size_t pos = position;
