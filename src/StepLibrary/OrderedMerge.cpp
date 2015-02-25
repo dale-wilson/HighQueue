@@ -236,24 +236,35 @@ void OrderedMerge::handleDataMessage(Message & message)
 bool OrderedMerge::findAndPublishGap()
 {
     auto gapStart = expectedSequenceNumber_;
-    auto gapEnd = gapStart + 1; // the first message that's NOT in the gap
-    auto endLookahead = gapStart + lookAhead_;
-    while(gapEnd < endLookahead)
+    auto index = gapStart % lookAhead_;
+    if(pendingMessages_[index]->isEmpty())
     {
-        auto index = gapEnd % lookAhead_;
-        if(!pendingMessages_[index]->isEmpty())
+        auto gapEnd = gapStart + 1; // the first message that's NOT in the gap
+        auto endLookahead = gapStart + lookAhead_;
+        LogDebug("Find and publish gap looking for unpublished messages in [" << gapStart << ", " << endLookahead << ')');
+        while(gapEnd < endLookahead)
         {
-            publishGapMessage(gapStart, gapEnd);
-            return true;
+            index = gapEnd % lookAhead_;
+            if(!pendingMessages_[index]->isEmpty())
+            {
+                LogDebug("Find and publish gap unpublished message: Publishing gap  [" << gapStart << ", " << gapEnd << ')');
+                publishGapMessage(gapStart, gapEnd);
+                return true;
+            }
+            ++gapEnd;
         }
-        ++gapEnd;
+        LogDebug("Find and publish gap found no unpublished messages, hence no gap.");
+        return false;
     }
-    return false;
+    LogDebug("Find and publish gap: First message was unpublished at " << gapStart);
+    return true;
 }
 
 void OrderedMerge::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
 {
+    LogDebug("Publish Gap message [" << gapStart << ", " << gapEnd << ']');
     outMessage_->setType(Message::Gap);
+    outMessage_->setSequence(gapEnd);
     outMessage_->emplace<GapMessage>(gapStart, gapEnd - 1);
     expectedSequenceNumber_ = gapEnd;
 }

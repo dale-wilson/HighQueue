@@ -13,16 +13,12 @@ namespace HighQueue
 {
     namespace Steps
     {
-        template<typename MockMessageType>
-        class MockMessageConsumer : public Step
+        class BaseMessageConsumer : public Step
         {
         public:
-            typedef MockMessageType ActualMessage;
-            static const std::string keyMessageCount;
-
-            explicit MockMessageConsumer(uint32_t messageCount_ = 0);
-         
-            uint32_t errors()const
+            BaseMessageConsumer();
+            virtual ~BaseMessageConsumer();
+/*            uint32_t errors()const
             {
                 return sequenceError_ + unexpectedMessageError_;
             }
@@ -34,15 +30,14 @@ namespace HighQueue
             {
                 return heartbeats_;
             }
-
+*/
             ////////////////////////////
             // Implement Step
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void handle(Message & message);
             virtual void finish();
             virtual void logStats();
-        
-        private:
+
+        protected:
             uint32_t messageCount_;
 
             uint32_t heartbeats_;
@@ -55,35 +50,24 @@ namespace HighQueue
         };
 
         template<typename MockMessageType>
-        const std::string MockMessageConsumer<MockMessageType>::keyMessageCount = "message_count";
+        class MockMessageConsumer : public BaseMessageConsumer
+        {
+        public:
+            typedef MockMessageType ActualMessage;
+            static const std::string keyMessageCount;
+
+            explicit MockMessageConsumer(uint32_t messageCount_ = 0);         
+
+            ////////////////////////////
+            // Implement Step
+            virtual void handle(Message & message);
+        
+        };
 
         template<typename MockMessageType>
-        MockMessageConsumer<MockMessageType>::MockMessageConsumer(uint32_t messageCount_)
-            : messageCount_(messageCount_)
-            , heartbeats_(0)
-            , shutdowns_(0)
-            , gaps_(0)
-            , messagesHandled_(0)
-            , nextSequence_(0)
-            , sequenceError_(0)
-            , unexpectedMessageError_(0)
+        MockMessageConsumer<MockMessageType>::MockMessageConsumer(uint32_t messageCount)
         {
-        }
-
-        template<typename MockMessageType>
-        bool MockMessageConsumer<MockMessageType>::configureParameter(const std::string & key, const ConfigurationNode & configuration)
-        {
-            if(key == keyMessageCount)
-            {
-                uint64_t messageCount;
-                if(!configuration.getValue(messageCount))
-                {
-                    LogFatal("MockMessageConsumer can't interpret value for " << keyMessageCount);
-                }
-                messageCount_ = uint32_t(messageCount);
-                return true;
-            }
-            return Step::configureParameter(key, configuration);
+            messageCount_ = messageCount;
         }
 
         template<typename MockMessageType>
@@ -134,6 +118,7 @@ namespace HighQueue
                 case Message::Heartbeat:
                 {
                     ++heartbeats_;
+                    return;
                 }
                 case Message::Gap:
                 {
@@ -144,23 +129,5 @@ namespace HighQueue
                 }
             }
         }
-
-        template<typename MockMessageType>
-        void MockMessageConsumer<MockMessageType>::finish()
-        {
-            logStats();
-        }
-
-        template<typename MockMessageType>
-        void MockMessageConsumer<MockMessageType>::logStats()
-        {
-            LogStatistics("MockMessageConsumer " << name_ << " heartbeats:" << heartbeats_);
-            LogStatistics("MockMessageConsumer " << name_ << " shutdowns: " << shutdowns_);
-            LogStatistics("MockMessageConsumer " << name_ << " messagesHandled:" << messagesHandled_);
-            LogStatistics("MockMessageConsumer " << name_ << " sequenceError:" << sequenceError_);
-            LogStatistics("MockMessageConsumer " << name_ << " unexpectedMessageError:" << unexpectedMessageError_);
-            Step::finish();
-        }
-
    }
 }
