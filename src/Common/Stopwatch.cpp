@@ -1,8 +1,8 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Common/HighQueuePch.h>
-#include "Stopwatch.h"
+#include <Common/HighQueuePch.hpp>
+#include "Stopwatch.hpp"
 
 using namespace HighQueue;
 #ifdef _WIN32 // use QPC on windows 'cause chrono is brain-dead

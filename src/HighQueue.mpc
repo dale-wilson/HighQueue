@@ -8,7 +8,7 @@ project(*) : HighQueueBase {
   sharedname = *
   dynamicflags += HIGHQUEUE_BUILD_DLL
   includes += $(HighQueue_ROOT)/src
-  pch_header = Common/HighQueuePch.h
+  pch_header = Common/HighQueuePch.hpp
   pch_source = Common/HighQueuePch.cpp
   Source_Files {
 	HighQueue
@@ -34,7 +34,7 @@ project(*) : HighQueueBase {
 project(*test) : HighQueueUser, HighQueueAddTest {
   exename = HighQueueTest
 
-  pch_header = Common/HighQueuePch.h
+  pch_header = Common/HighQueuePch.hpp
   pch_source = Common/HighQueuePch.cpp
   Source_Files {
     HQTest
@@ -59,7 +59,7 @@ project(*performance) : HighQueueUser, HighQueueAddTest {
 
   libs += HighQueue
   after += HighQueue
-  pch_header = Common/HighQueuePch.h
+  pch_header = Common/HighQueuePch.hpp
   pch_source = Common/HighQueuePch.cpp
   Source_Files {
     HQPerformance

@@ -1,4 +1,4 @@
-#include "Common/HighQueuePch.h"
+#include <Common/HighQueuePch.hpp>
 
 #ifdef _WIN32 /// right now this test only works on windows.
 #define BOOST_TEST_NO_MAIN HighQueueOtherTests
@@ -10,7 +10,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
-#include <Common/Stopwatch.h>
+#include <Common/Stopwatch.hpp>
 #include <iostream>
 #include <cstdint>
 #include <limits>

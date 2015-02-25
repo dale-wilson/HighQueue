@@ -2,10 +2,10 @@
 // All rights reserved.
 // See the file license.txt for licensing information.
 
-#include <Common/HighQueuePch.h>
+#include <Common/HighQueuePch.hpp>
 
-#include <HighQueue/details/HQMemoryBlockPool.h>
-#include <Common/Log.h>
+#include <HighQueue/details/HQMemoryBlockPool.hpp>
+#include <Common/Log.hpp>
 using namespace HighQueue;
 
 HQMemoryBlockPool::HQMemoryBlockPool()

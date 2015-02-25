@@ -18,7 +18,7 @@ project(Builder) : HighQueueUser, boost_base, boost_filesystem, boost_system, bo
   libpaths -= $(BOOST_ROOT)/lib
   libpaths += $(BOOST_LIB_PATH)
 
-  pch_header = Steps/StepPch.h
+  pch_header = Steps/StepPch.hpp
   pch_source = Steps/StepPch.cpp
 	
   Source_Files {

@@ -1,22 +1,22 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 #define BOOST_TEST_NO_MAIN StepsPerformance
 #include <boost/test/unit_test.hpp>
 
-#include <StepLibrary/MockMessageProducer.h>
-#include <StepLibrary/MockMessageConsumer.h>
+#include <StepLibrary/MockMessageProducer.hpp>
+#include <StepLibrary/MockMessageConsumer.hpp>
 
-#include <StepLibrary/InputQueue.h>
-#include <StepLibrary/SendToQueue.h>
-#include <StepLibrary/CopyPassThru.h>
-#include <StepLibrary/ForwardPassThru.h>
-#include <StepLibrary/BinaryPassThru.h>
+#include <StepLibrary/InputQueue.hpp>
+#include <StepLibrary/SendToQueue.hpp>
+#include <StepLibrary/CopyPassThru.hpp>
+#include <StepLibrary/ForwardPassThru.hpp>
+#include <StepLibrary/BinaryPassThru.hpp>
 
-#include <Common/Stopwatch.h>
-#include <Common/Stopwatch.h>
-#include <Mocks/MockMessage.h>
+#include <Common/Stopwatch.hpp>
+#include <Common/Stopwatch.hpp>
+#include <Mocks/MockMessage.hpp>
 
 
 using namespace HighQueue;

@@ -1,9 +1,9 @@
 /// @file Connection.cpp
-#include <Common/HighQueuePch.h>
-#include "Connection.h"
-#include <HighQueue/details/HQAllocator.h>
-#include <HighQueue/details/HQEntry.h>
-#include <HighQueue/details/HQResolver.h>
+#include <Common/HighQueuePch.hpp>
+#include "Connection.hpp"
+#include <HighQueue/details/HQAllocator.hpp>
+#include <HighQueue/details/HQEntry.hpp>
+#include <HighQueue/details/HQResolver.hpp>
 
 using namespace HighQueue;
 

@@ -1,21 +1,21 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 #define BOOST_TEST_NO_MAIN StepsPerformance
 #include <boost/test/unit_test.hpp>
 
-#include <StepLibrary/OrderedMerge.h>
-#include <StepLibrary/Shuffler.h>
-#include <StepLibrary/HeartbeatProducer.h>
-#include <StepLibrary/MockMessageProducer.h>
-#include <StepLibrary/MockMessageConsumer.h>
-#include <StepLibrary/InputQueue.h>
-#include <StepLibrary/SendToQueue.h>
+#include <StepLibrary/OrderedMerge.hpp>
+#include <StepLibrary/Shuffler.hpp>
+#include <StepLibrary/HeartbeatProducer.hpp>
+#include <StepLibrary/MockMessageProducer.hpp>
+#include <StepLibrary/MockMessageConsumer.hpp>
+#include <StepLibrary/InputQueue.hpp>
+#include <StepLibrary/SendToQueue.hpp>
 
-#include <Common/ReverseRange.h>
+#include <Common/ReverseRange.hpp>
 
-#include <Common/Stopwatch.h>
+#include <Common/Stopwatch.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

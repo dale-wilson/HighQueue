@@ -1,10 +1,10 @@
 // Copyright (c) 2014 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Common/HighQueuePch.h>
+#include <Common/HighQueuePch.hpp>
 
-#include "Message.h"
-#include <HighQueue/details/HQMemoryBlockPool.h>
+#include "Message.hpp"
+#include <HighQueue/details/HQMemoryBlockPool.hpp>
 
 using namespace HighQueue;
 

@@ -8,7 +8,7 @@ project(*) : HighQueueStep, boost_base, boost_filesystem, boost_system, boost_th
   sharedname = *
   dynamicflags += STEP_BUILD_DLL
 
-  pch_header = Steps/StepPch.h
+  pch_header = Steps/StepPch.hpp
   pch_source = Steps/StepPch.cpp
 
  // TODO: What to do about boost 32 bit builds?
@@ -34,7 +34,7 @@ project(*Test) : HighQueueStep, HighQueueAddTest, boost_unit_test_framework, boo
   libs += Steps
   after += Steps
   
-  pch_header = Steps/StepPch.h
+  pch_header = Steps/StepPch.hpp
   pch_source = Steps/StepPch.cpp
 	
   Source_Files {
@@ -55,7 +55,7 @@ project(*Performance) : HighQueueStep, HighQueueAddTest, boost_unit_test_framewo
   libs += Steps
   after += Steps
   
-  pch_header = Steps/StepPch.h
+  pch_header = Steps/StepPch.hpp
   pch_source = Steps/StepPch.cpp
 	
   Source_Files {

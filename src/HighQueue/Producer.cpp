@@ -1,6 +1,6 @@
-#include <Common/HighQueuePch.h>
-#include "Producer.h"
-#include <HighQueue/details/HQReservePosition.h>
+#include <Common/HighQueuePch.hpp>
+#include "Producer.hpp"
+#include <HighQueue/details/HQReservePosition.hpp>
 
 using namespace HighQueue;
 

@@ -1,8 +1,8 @@
-#include "Common/HighQueuePch.h"
+#include <Common/HighQueuePch.hpp>
 #define BOOST_TEST_NO_MAIN HighQueueTest
 #include <boost/test/unit_test.hpp>
 
-#include <Common/SpinLock.h>
+#include <Common/SpinLock.hpp>
 using namespace HighQueue;
 
 #define DISABLE_testSpinLockx

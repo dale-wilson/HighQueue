@@ -1,12 +1,12 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include <Steps/BoostPropertyTreeConfiguration.h>
-#include <Steps/Builder.h>
-#include <Steps/Step.h>
-#include <Steps/StepFactory.h>
+#include <Steps/BoostPropertyTreeConfiguration.hpp>
+#include <Steps/Builder.hpp>
+#include <Steps/Step.hpp>
+#include <Steps/StepFactory.hpp>
 using namespace HighQueue;
 using namespace Steps;
 

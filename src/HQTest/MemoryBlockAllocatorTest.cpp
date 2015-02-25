@@ -1,9 +1,9 @@
-#include "Common/HighQueuePch.h"
+#include <Common/HighQueuePch.hpp>
 #define BOOST_TEST_NO_MAIN HighQueueTest
 #include <boost/test/unit_test.hpp>
 
-#include <HighQueue/details/HQMemoryBlockPool.h>
-#include <Common/CacheLIne.h>
+#include <HighQueue/details/HQMemoryBlockPool.hpp>
+#include <Common/CacheLIne.hpp>
 
 using namespace HighQueue;
 

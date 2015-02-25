@@ -1,9 +1,9 @@
-#include "Common/HighQueuePch.h"
+#include <Common/HighQueuePch.hpp>
 #define BOOST_TEST_NO_MAIN HighQueueTest
 #include <boost/test/unit_test.hpp>
 
-#include <HighQueue/Producer.h>
-#include <HighQueue/Consumer.h>
+#include <HighQueue/Producer.hpp>
+#include <HighQueue/Consumer.hpp>
 
 using namespace HighQueue;
 

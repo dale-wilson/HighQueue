@@ -1,10 +1,10 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "BoostPropertyTreeConfiguration.h"
-#include <Common/Log.h>
+#include "BoostPropertyTreeConfiguration.hpp"
+#include <Common/Log.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 using namespace HighQueue;

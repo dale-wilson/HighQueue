@@ -1,7 +1,7 @@
 /// @file Consumer.cpp
-#include <Common/HighQueuePch.h>
-#include "Consumer.h"
-#include <HighQueue/details/HQReservePosition.h>
+#include <Common/HighQueuePch.hpp>
+#include "Consumer.hpp"
+#include <HighQueue/details/HQReservePosition.hpp>
 using namespace HighQueue;
 
 Consumer::Consumer(ConnectionPtr & connection)

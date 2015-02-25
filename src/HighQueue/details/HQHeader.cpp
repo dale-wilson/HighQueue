@@ -1,14 +1,14 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Common/HighQueuePch.h>
-#include "HQHeader.h"
-#include <HighQueue/CreationParameters.h>
-#include <HighQueue/details/HQAllocator.h>
-#include <HighQueue/details/HQResolver.h>
-#include <HighQueue/details/HQEntry.h>
-#include <HighQueue/details/HQReservePosition.h>
-#include <HighQueue/details/HQMemoryBlockPool.h>
+#include <Common/HighQueuePch.hpp>
+#include "HQHeader.hpp"
+#include <HighQueue/CreationParameters.hpp>
+#include <HighQueue/details/HQAllocator.hpp>
+#include <HighQueue/details/HQResolver.hpp>
+#include <HighQueue/details/HQEntry.hpp>
+#include <HighQueue/details/HQReservePosition.hpp>
+#include <HighQueue/details/HQMemoryBlockPool.hpp>
 
 using namespace HighQueue;
 

@@ -1,15 +1,15 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "MulticastSender.h"
+#include "MulticastSender.hpp"
 
-#include <Steps/StepFactory.h>
-#include <Steps/Configuration.h>
-#include <Steps/SharedResources.h>
+#include <Steps/StepFactory.hpp>
+#include <Steps/Configuration.hpp>
+#include <Steps/SharedResources.hpp>
 
-#include <Common/Log.h>
+#include <Common/Log.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

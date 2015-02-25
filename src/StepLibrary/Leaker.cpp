@@ -1,14 +1,14 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "Leaker.h"
-#include <Steps/StepFactory.h>
-#include <Steps/SharedResources.h>
-#include <Steps/Configuration.h>
+#include "Leaker.hpp"
+#include <Steps/StepFactory.hpp>
+#include <Steps/SharedResources.hpp>
+#include <Steps/Configuration.hpp>
 
-#include <HighQueue/MemoryPool.h>
+#include <HighQueue/MemoryPool.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

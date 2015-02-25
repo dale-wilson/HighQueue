@@ -1,11 +1,11 @@
-#include "Common/HighQueuePch.h"
+#include <Common/HighQueuePch.hpp>
 
 #define BOOST_TEST_NO_MAIN HighQueueTest
 #include <boost/test/unit_test.hpp>
 
-#include <HighQueue/Connection.h>
-#include <HighQueue/details/HQResolver.h>
-#include <HighQueue/details/HQReservePosition.h>
+#include <HighQueue/Connection.hpp>
+#include <HighQueue/details/HQResolver.hpp>
+#include <HighQueue/details/HQReservePosition.hpp>
 
 using namespace HighQueue;
 

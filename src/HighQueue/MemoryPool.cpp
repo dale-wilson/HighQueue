@@ -1,7 +1,7 @@
 /// @file MemoryPool.cpp
-#include <Common/HighQueuePch.h>
-#include "MemoryPool.h"
-#include <HighQueue/details/HQAllocator.h>
+#include <Common/HighQueuePch.hpp>
+#include "MemoryPool.hpp"
+#include <HighQueue/details/HQAllocator.hpp>
 
 using namespace HighQueue;
 

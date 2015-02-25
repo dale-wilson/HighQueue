@@ -1,14 +1,14 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "Builder.h"
-#include <Steps/Configuration.h>
-#include <Steps/Step.h>
-#include <Steps/StepFactory.h>
-#include <HighQueue/MemoryPool.h>
-#include <Common/ReverseRange.h>
+#include "Builder.hpp"
+#include <Steps/Configuration.hpp>
+#include <Steps/Step.hpp>
+#include <Steps/StepFactory.hpp>
+#include <HighQueue/MemoryPool.hpp>
+#include <Common/ReverseRange.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

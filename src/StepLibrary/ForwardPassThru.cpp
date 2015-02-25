@@ -1,11 +1,11 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "ForwardPassThru.h"
+#include "ForwardPassThru.hpp"
 
-#include <Steps/StepFactory.h>
+#include <Steps/StepFactory.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

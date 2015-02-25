@@ -1,14 +1,14 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include "Steps/StepPch.h"
+#include <Steps/StepPch.hpp>
 #define BOOST_TEST_NO_MAIN StepsPerformance
 #include <boost/test/unit_test.hpp>
 
-#include <StepLibrary/MulticastReceiver.h>
-#include <Steps/AsioService.h>
-#include <HighQueue/Connection.h>
-#include <Mocks/MockMessage.h>
+#include <StepLibrary/MulticastReceiver.hpp>
+#include <Steps/AsioService.hpp>
+#include <HighQueue/Connection.hpp>
+#include <Mocks/MockMessage.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

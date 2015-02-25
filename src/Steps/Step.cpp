@@ -1,11 +1,11 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "Step.h"
-#include <Steps/Configuration.h>
-#include <Common/Log.h>
+#include "Step.hpp"
+#include <Steps/Configuration.hpp>
+#include <Common/Log.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

@@ -1,13 +1,13 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "StepToMessage.h"
-#include <Steps/SharedResources.h>
+#include "StepToMessage.hpp"
+#include <Steps/SharedResources.hpp>
 
-#include <HighQueue/MemoryPool.h>
-#include <HighQueue/Message.h>
+#include <HighQueue/MemoryPool.hpp>
+#include <HighQueue/Message.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

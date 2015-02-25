@@ -1,12 +1,12 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Steps/StepPch.h>
+#include <Steps/StepPch.hpp>
 
-#include "SharedResources.h"
-#include <Steps/AsioService.h>
-#include <HighQueue/MemoryPool.h>
-#include <HighQueue/details/HQMemoryBlockPool.h> // for diagnostic message (block count)
+#include "SharedResources.hpp"
+#include <Steps/AsioService.hpp>
+#include <HighQueue/MemoryPool.hpp>
+#include <HighQueue/details/HQMemoryBlockPool.hpp> // for diagnostic message (block count)
 using namespace HighQueue;
 using namespace Steps;
 

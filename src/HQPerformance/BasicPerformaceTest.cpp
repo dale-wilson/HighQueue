@@ -1,11 +1,11 @@
-#include "Common/HighQueuePch.h"
+#include <Common/HighQueuePch.hpp>
 #define BOOST_TEST_NO_MAIN HighQueuePerformanceTest
 #include <boost/test/unit_test.hpp>
 
-#include <HighQueue/Producer.h>
-#include <HighQueue/Consumer.h>
-#include <Mocks/MockMessage.h>
-#include <Common/Stopwatch.h>
+#include <HighQueue/Producer.hpp>
+#include <HighQueue/Consumer.hpp>
+#include <Mocks/MockMessage.hpp>
+#include <Common/Stopwatch.hpp>
 
 using namespace HighQueue;
 typedef MockMessage<20> ActualMessage;

@@ -1,8 +1,8 @@
 // Copyright (c) 2015 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
-#include <Common/HighQueuePch.h>
-#include "Log.h"
+#include <Common/HighQueuePch.hpp>
+#include "Log.hpp"
 
 using namespace HighQueue;
 
