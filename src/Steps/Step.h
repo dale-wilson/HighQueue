@@ -210,6 +210,7 @@ namespace HighQueue
                 if(destName /*named.first */ == name)
                 {
                     named.second->handle(message);
+                    message.setEmpty();
                     return;
                 }
             }
@@ -220,6 +221,7 @@ namespace HighQueue
         void Step::send(size_t index, Message & message)
         {
             destinations_[index].second->handle(message);
+            message.setEmpty();
         }
    }
 }
