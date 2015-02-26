@@ -155,8 +155,6 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         step->finish();
     }
 
-    auto messageBits = messageBytes * 8;
-
     std::cout << "Steped Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " step: ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
@@ -169,10 +167,6 @@ BOOST_AUTO_TEST_CASE(testPipeline)
         std::cout
             << lapse / messageCount << " nsec./message "
             << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
-#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
-            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
             << std::endl;
     }
 }
@@ -257,9 +251,6 @@ BOOST_AUTO_TEST_CASE(testDirectPipeline)
     }
     consumer->finish();
 
-
-    auto messageBits = messageBytes * 8;
-
     std::cout << "Direct Pipeline " << (numberOfProducers + numberOfCopiers + numberOfConsumers) << " step: ";
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
@@ -272,10 +263,6 @@ BOOST_AUTO_TEST_CASE(testDirectPipeline)
         std::cout
             << lapse / messageCount << " nsec./message "
             << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
-#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
-            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
             << std::endl;
     }
 }

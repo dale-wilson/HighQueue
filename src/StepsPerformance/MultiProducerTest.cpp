@@ -143,7 +143,6 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
         }
 
         auto messageBytes = sizeof(ActualMessage);
-        auto messageBits = sizeof(ActualMessage) * 8;
         std::cout << "Stepd Test " << producerCount << " producer(s) ";
         std::cout << "passed " << perProducer << ' ' << messageBytes << " byte messages each in "
             << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
@@ -156,10 +155,6 @@ BOOST_AUTO_TEST_CASE(TestMultiProducers)
             std::cout
                 << lapse / perConsumer << " nsec./message "
                 << std::setprecision(3) << double(perConsumer) * 1000.0L / double(lapse) << " MMsg/second "
-#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
-                << std::setprecision(3) << double(perConsumer * messageBytes) / double(lapse) << " GByte/second "
-                << std::setprecision(3) << double(perConsumer * messageBits) / double(lapse) << " GBit/second."
-#endif // DISPLAY_PRONGHORN_STYLE_RESULTS
                 << std::endl;
         }
     }

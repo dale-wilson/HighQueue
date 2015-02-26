@@ -40,7 +40,6 @@ namespace HighQueue
         ///
         /// @param message contains the data to be published.         
         void publish(Message & message);
-        void publish2(Message & message);
 
         /// @brief Cancel the outstanding publish and stop publishing
         void stop();

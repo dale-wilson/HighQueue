@@ -41,8 +41,45 @@ namespace
             return;
         }
     }
-}
 
+    void displayResults(
+            std::ostream & out,  
+            size_t producerCount,
+            size_t messageCount,
+            size_t messageBytes,
+            uint64_t lapse,
+            bool & header
+        )
+    {
+        if(header)
+        {
+            header = false;
+            out << "Producers"
+                << "\tMessages"
+                << "\tBytes/message"
+                << "\tSeconds"
+                << "\tNanosecond/message"
+                << "\tM message/second"
+                << std::endl;
+        }
+        out << producerCount
+            << '\t' << messageCount 
+            << '\t' << messageBytes
+            << '\t' << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond)
+            << '\t' << lapse / messageCount;
+        if(lapse == 0)
+        {
+            out << "\t0\tRun time too short to measure.   Use a larger messageCount" << std::endl;
+        }
+        else
+        {
+            out << '\t' << std::setprecision(3) << double(messageCount * 1000) / double(lapse)
+            << std::endl;
+        }
+    }
+
+    bool needHeader = true;
+} // namespace
 
 #define ENABLE_ST_PERFORMANCE 1
 #if ENABLE_ST_PERFORMANCE
@@ -65,8 +102,6 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
     Message producerMessage(connection);
     Message consumerMessage(connection);
 
-    std::cout << "Single threaded: ";
-
     Stopwatch timer;
 
     for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
@@ -82,21 +117,21 @@ BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
         }
     }
     auto lapse = timer.nanoseconds();
-    auto messageBytes = sizeof(ActualMessage);
-    auto messageBits = sizeof(ActualMessage) * 8;
-    std::cout << "Passed " << messageCount << ' ' << messageBytes << " byte messages in "
-        << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
-        << lapse / messageCount << " nsec./message "
-        << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
-        << std::endl;
+    
+    displayResults(
+        std::cout,
+        0,
+        messageCount,
+        sizeof(ActualMessage),
+        lapse,
+        needHeader);
 
-    std::cout << "Single thread Statistics" << std::endl;
-    std::cout << "Producer: ";
-    producer.writeStats(std::cout);
+    std::cerr << "Producer: ";
+    producer.writeStats(std::cerr);
 
-    std::cout << "Consumer: ";
-    consumer.writeStats(std::cout);
-    std::cout << std::endl;
+    std::cerr << "Consumer: ";
+    consumer.writeStats(std::cerr);
+    std::cerr << std::endl;
 
 }
 #endif // ENABLEST_PERFORMANCE
@@ -117,7 +152,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
                                                                                    // This is worth measauring, but not everytime.
                                                                                    // You can see the beginning of the effect using this number because
                                                                                    // the threads start competing with Windows itself for the last core.
-    static const size_t extraProducers = 3;
+    static const size_t extraProducers = 9;
     static const size_t maxNumberOfProducers = baseNumberOfProducers + extraProducers;                                                                                
     static const size_t numberOfConsumers = 1;  // Just for documentation
     static const size_t messageCount = entryCount + numberOfConsumers +  maxNumberOfProducers;
@@ -193,31 +228,21 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
             producerThreads[nTh].join();
         }
 
-        auto messageBytes = sizeof(ActualMessage);
-        auto messageBits = sizeof(ActualMessage) * 8;
-        std::cout << "HighQueue Test " << producerCount << " producer" << std::fixed;
-        std::cout << " passed " << actualMessageCount << ' ' << messageBytes << " byte messages in "
-            << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
-        if(lapse == 0)
-        {
-            std::cout << "Run time too short to measure.   Use a larger messageCount" << std::endl;
-        }
-        else
-        {
-            std::cout
-                << lapse / actualMessageCount << " nsec./message "
-                << std::setprecision(3) << double(actualMessageCount * 1000) / double(lapse) << " MMsg/second "
-                << std::endl;
-        }
+        displayResults(
+            std::cout,
+            producerCount,
+            actualMessageCount,
+            sizeof(ActualMessage),
+            lapse,
+            needHeader);
 
-        std::cout << "Multithread Statistics" << std::endl;
         for(auto & out : stats)
         {
-            std::cout << "Producer: " << out.str();
+            std::cerr << "Producer: " << out.str();
         }
-        std::cout << "Consumer: ";
-        consumer.writeStats(std::cout);
-        std::cout << std::endl;
+        std::cerr << "Consumer: ";
+        consumer.writeStats(std::cerr);
+        std::cerr << std::endl;
     }
 }
 #endif // ENABLE_MultithreadMessagePassingPerformance

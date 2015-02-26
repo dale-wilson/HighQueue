@@ -47,8 +47,8 @@ project(*test) : HighQueueUser, HighQueueAddTest {
 
 ////////////////////////////
 // Build the HighQueue performance tests
-project(*performance) : HighQueueUser, HighQueueAddTest {
-  exename = *Performance
+project(*Performance) : HighQueueUser, HighQueueAddTest {
+  exename = *
 
   specific(prop:microsoft) {
     Release::libpaths += $(HighQueue_ROOT)/Output/Release

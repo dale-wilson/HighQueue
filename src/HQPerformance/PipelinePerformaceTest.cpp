@@ -9,24 +9,11 @@
 
 
 using namespace HighQueue;
-#define USE_PRONGHORN_MESSAGE 1
 #define VALIDATE_OUTPUT 0
 namespace
 {
     typedef MockMessage<13> ActualMessage;
-#if USE_PRONGHORN_MESSAGE
-    byte_t testArray[] = 
-#if 1
-    "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@";// this is Pronghorn's test message
-#elif 0
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@@0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@@@@";
-#else
-    "";
-#endif
-    auto messageBytes = sizeof(testArray);
-#else // USE_PRONGHORN_MESSAGE
     auto messageBytes = sizeof(ActualMessage);
-#endif // USE_PRONGHORN_MESSAGE
 
     volatile std::atomic<uint32_t> threadsReady;
     volatile bool producerGo = false;
@@ -47,11 +34,7 @@ namespace
 
             for(uint32_t messageNumber = 0; messageNumber < messageCount; ++messageNumber)
             {
-#if USE_PRONGHORN_MESSAGE
-                producerMessage.appendBinaryCopy(testArray, sizeof(testArray));
-#else // USE_PRONGHORN_MESSAGE
                 auto testMessage = producerMessage.emplace<ActualMessage>(producerNumber, messageNumber);
-#endif //USE_PRONGHORN_MESSAGE
                 producer.publish(producerMessage);
             }
             // send an empty message
@@ -161,7 +144,7 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     static const size_t numberOfConsumers = 1;   // Don't change this
     static const size_t maxNumberOfProducers = 1;   // Don't change this
 
-    static const size_t copyLimit = 1;       // This you can change.
+    static const size_t copyLimit = 6;       // This you can change.
 
     static const size_t entryCount = 10000;
     static const uint32_t targetMessageCount = 100000000; //3000000;
@@ -251,8 +234,6 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         thread.join();
     }
 
-    auto messageBits = messageBytes * 8;
-
     std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
     if(lapse == 0)
@@ -264,14 +245,9 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
         std::cout
             << lapse / targetMessageCount << " nsec./message "
             << std::setprecision(3) << (double(targetMessageCount) * 1000.0L) / double(lapse) << " MMsg/second "
-#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
-            << std::setprecision(3) << double(targetMessageCount * messageBytes) / double(lapse) << " GByte/second "
-            << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
-#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
             << std::endl;
     }
-    std::cout << "Pipeline Statistics:" << std::endl;
-    consumer.writeStats(std::cout);
-    std::cout << std::endl;
+    consumer.writeStats(std::cerr);
+    std::cerr << std::endl;
 }
 #endif // ENABLEORDEREDMERGEPERFORMANCE

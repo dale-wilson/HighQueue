@@ -4,10 +4,6 @@
 
 using namespace HighQueue;
 
-namespace {
-    const bool useSpinLock = true;
-}
-
 Producer::Producer(ConnectionPtr & connection)
 : connection_(connection)
 , solo_(connection_->canSolo())
@@ -278,68 +274,6 @@ void Producer::publish(Message & message)
     notifyConsumer();
 }
 
-void Producer::publish2(Message & message)
-{
-    if(solo_)
-    {
-        bool published = false;
-        while(!published && !stopping_)
-        {
-            Position reserved = publishPosition_;
-            waitToPublish(reserved);
-            published = publish(reserved, message);
-            publishPosition_ = reserved + 1;
-            reserveSoloPosition_ = reserved + 1;
-            notifyConsumer();
-        }
-        return;
-    }
-
-    bool published = false;
-    while(!published)
-    {
-        SpinLock::Guard guard;
-        if(useSpinLock)
-        {
-            guard = SpinLock::Guard(reserveSpinLock_);
-        }
-        auto reserved = reservePosition_++;
-        waitToPublish(reserved);
-        published = publish(reserved, message);
-
-        int64_t pending = reserved - publishPosition_;
-        while(pending > 0)
-        {
-            /// todo simplify this now that we aren't using it!
-            if(stopping_ && unreserve(reserved))
-            {
-                return;
-            }
-
-            ++statPublishWaits_;
-            if(pending > 1)
-            {
-                ++statPublishInLine_;
-                std::this_thread::yield();
-            }
-            else
-            {
-                spinDelay();
-                std::atomic_thread_fence(std::memory_order::memory_order_acquire);
-            }
-            pending = reserved - publishPosition_;
-        }
-
-        // The following will *always* be true unless something is broken
-        if(pending == 0)
-        {
-            ++publishPosition_;
-            ++statPublishes_;
-            notifyConsumer();
-        }
-    }
-}
-
 void Producer::stop()
 {
     stopping_ = true;
@@ -358,7 +292,6 @@ std::ostream & Producer::writeStats(std::ostream & out) const
                << " Yield: " << statYields_ 
                << " Sleep: " << statSleeps_ 
                << " Wait: " << statWaits_
-               << " OK: " << statPublishes_
                << " Solo: " << (solo_ ? "Yes" : "No")
                << std::endl;
 

@@ -105,7 +105,6 @@ BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
     auto lapse = timer.nanoseconds();
 
     auto messageBytes = sizeof(ActualMessage);
-    auto messageBits = sizeof(ActualMessage) * 8;
     std::cout << "HighQueue Test with no Consumer: " << producerCount << " producer" << std::fixed;
     std::cout << " published " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  ";
@@ -118,10 +117,6 @@ BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
         std::cout
             << std::setprecision(3) << double(lapse) / double(messageCount) << " nsec./message "
             << std::setprecision(3) << double(messageCount * 1000) / double(lapse) << " MMsg/second "
-#if defined(DISPLAY_PRONGHORN_STYLE_RESULTS)
-            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-#endif //DISPLAY_PRONGHORN_STYLE_RESULTS
             << std::endl;
     }
     std::cout << "No-consumer statistics:" << std::endl;

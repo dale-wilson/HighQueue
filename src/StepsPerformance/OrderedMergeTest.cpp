@@ -187,8 +187,6 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     BOOST_CHECK_EQUAL(consumer->messagesHandled(), messageCount);
     BOOST_CHECK_EQUAL(consumer->errors(), 0U); // this test will not be valid if we introduce gaps.
 
-    auto messageBits = messageBytes * 8;
-
     std::cout << "OrderedMerge: " << std::fixed;
     std::cout << " Passed " << messageCount << ' ' << messageBytes << " byte messages in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  "
@@ -201,10 +199,6 @@ BOOST_AUTO_TEST_CASE(testOrderedMerge)
     {
         std::cout
             << std::setprecision(3) << double(messageCount) * 1000.0L / double(lapse) << " MMsg/second "
-#ifdef DISPLAY_PRONGHORN_STYLE_RESULTS
-            << std::setprecision(3) << double(messageCount * messageBytes) / double(lapse) << " GByte/second "
-            << std::setprecision(3) << double(messageCount * messageBits) / double(lapse) << " GBit/second."
-#endif // DISPLAY_PRONGHORN_STYLE_RESULTS
             << std::endl;
     }
     std::cout << "Ordered Merge statistics: " << std::endl;

@@ -11,7 +11,7 @@ using namespace HighQueue;
 namespace
 {
     byte_t testArray[] = 
-    "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@";// this is Pronghorn's test message
+    "0123456789ABCDEFGHIJKLMNOHighQRSTUVWXYZ:,.-_+()*@@@@@@@@@@@";
     auto messageBytes = sizeof(testArray);
     static const size_t numberOfConsumers = 1;   // Don't change this
     static const size_t maxNumberOfProducers = 1;   // Don't change this
@@ -219,16 +219,10 @@ BOOST_AUTO_TEST_CASE(testBachedPipelinePerformance)
         thread.join();
     }
 
-    auto messageBits = messageBytes * 8;
-
     std::cout << " Passed " << targetMessageCount << ' ' << messageBytes << " byte messages in batches of " << batchSize << " in "
         << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << " seconds.  " 
         << lapse / targetMessageCount << " nsec./message "
         << std::setprecision(3) << (double(targetMessageCount) * 1000.0L) / double(lapse) << " MMsg/second "
-#ifdef DISPLAY_PRONGHORN_STYLE_RESULTS
-        << std::setprecision(3) << double(targetMessageCount * messageBytes) / double(lapse) << " GByte/second "
-        << std::setprecision(3) << double(targetMessageCount * messageBits) / double(lapse) << " GBit/second."
-#endif // DISPLAY_PRONGHORN_STYLE_RESULTS
         << std::endl;
     std::cout << "Batched pipeline statistics." << std::endl;
     consumer.writeStats(std::cout);
