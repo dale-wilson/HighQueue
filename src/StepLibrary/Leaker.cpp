@@ -124,7 +124,7 @@ void Leaker::handle(Message & message)
     }
 }
 
-void Leaker::finish()
+void Leaker::logStats()
 {
     LogStatistics("Leaker published: " << published_);
     LogStatistics("Leaker leaked: " << leaked_);

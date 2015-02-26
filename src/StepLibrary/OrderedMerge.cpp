@@ -281,12 +281,7 @@ void OrderedMerge::publishPendingMessages()
     }
 }
 
-void OrderedMerge::finish()
-{
-    publishStats();
-}
-
-void OrderedMerge::publishStats()
+void OrderedMerge::logStats()
 {
     LogStatistics("OrderedMerge "<< name_ <<" received: " << statReceived_);
     LogStatistics("OrderedMerge "<< name_ <<" heartbeat: " << statHeartbeats_);

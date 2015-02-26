@@ -13,12 +13,6 @@ namespace HighQueue
 {
     namespace Steps
     {
-        namespace
-        {
-            // Top level
-            const std::string keyPipe = "pipe";
-        }
-
         class Steps_Export Builder
         {
         public:
@@ -28,10 +22,8 @@ namespace HighQueue
             bool construct(const ConfigurationNode & config);
             void start();
             void stop();
+            void wait();
             void finish();
-
-        public:
-            typedef std::vector<StepPtr> Steps;
 
         private:
             bool constructPipe(const ConfigurationNode & config, const StepPtr & parentStep);
@@ -39,7 +31,6 @@ namespace HighQueue
 
         private:
             SharedResourcesPtr resources_;
-            Steps Steps_;
         };
    }
 }

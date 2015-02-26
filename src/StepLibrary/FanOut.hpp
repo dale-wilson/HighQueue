@@ -17,7 +17,7 @@ namespace HighQueue
 
             // implement Step methods
             virtual void handle(Message & message);
-            virtual void finish();
+            virtual void logStats();
  
         private:
             uint32_t messagesHandled_;

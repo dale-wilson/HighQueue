@@ -5,8 +5,11 @@
 
 #include "SharedResources.hpp"
 #include <Steps/AsioService.hpp>
+#include <Steps/Step.hpp>
 #include <HighQueue/MemoryPool.hpp>
 #include <HighQueue/details/HQMemoryBlockPool.hpp> // for diagnostic message (block count)
+#include <Common/ReverseRange.hpp>
+
 using namespace HighQueue;
 using namespace Steps;
 
@@ -14,11 +17,17 @@ SharedResources::SharedResources()
     : numberOfMessagesNeeded_(0)
     , largestMessageSize_(0)
     , tenthsOfAsioThreadsNeeded_(0)
+    , stopping_(false)
 {
 }
 
 SharedResources::~SharedResources()
 {
+}
+
+void SharedResources::addStep(const StepPtr & step)
+{
+    steps_.emplace_back(step);
 }
             
 void SharedResources::requestAsioThread(size_t threads, size_t tenthsOfThread)
@@ -82,6 +91,18 @@ void SharedResources::createResources()
     {
         LogInfo("No requests for asio.  AsioService not created.");
     }
+
+   for(auto & step : steps_)
+    {
+        LogTrace("Attach resources for " << step->getName() << " (" << resources_->getMemoryPool()->numberOfAllocations() << ")");
+
+        step->attachResources(shared_from_this());
+    }
+    // now check to see if we got it right.
+    for(auto & step : steps_)
+    {
+        step->validate();
+    }
 }
 
 void SharedResources::start()
@@ -92,6 +113,12 @@ void SharedResources::start()
         LogTrace("SharedResources running AsioService with " << actualThreads << " threads.");
         asio_->runThreads(actualThreads, false);
     }
+    
+    for(auto & step : ReverseRange<Steps>(steps_))
+    {
+        step->start();
+    }
+
 }
 
 void SharedResources::stop()
@@ -100,6 +127,13 @@ void SharedResources::stop()
     {
         asio_->stopService();
     }
+    for(auto & step : steps_)
+    {
+        step->stop();
+    }
+    std::unique_lock<std::mutex> lock(mutex_);
+    stopping_ = true;
+    condition_.notify_all();
 }
 
 void SharedResources::finish()
@@ -107,6 +141,10 @@ void SharedResources::finish()
     if(asio_)
     {
         asio_->joinThreads();
+    }
+    for(auto & step : steps_)
+    {
+        step->finish();
     }
 }
 
@@ -131,3 +169,13 @@ std::string SharedResources::getQueueNames()const
     }
     return msg.str();
 }
+
+void SharedResources::wait()
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    while(!stopping_)
+    {
+        condition_.wait(lock);
+    }
+}
+

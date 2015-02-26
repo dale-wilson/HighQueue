@@ -89,7 +89,7 @@ namespace HighQueue
                     auto testMessage = message.get<ActualMessage>();
                     if(nextSequence_ != testMessage->getSequence())
                     {
-                        LogWarningLimited(10, "Expecting " << nextSequence_ << " received " << testMessage->getSequence());
+                        LogWarningLimited(10, "MockMessageConsumer Expecting " << nextSequence_ << " received " << testMessage->getSequence());
                         ++sequenceError_;
                         nextSequence_ = testMessage->getSequence();
                     }

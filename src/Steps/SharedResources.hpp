@@ -23,7 +23,7 @@ namespace HighQueue
 {
     namespace Steps
     {
-        class Steps_Export SharedResources
+        class Steps_Export SharedResources : public std::enable_shared_from_this<SharedResources>
         {
         public:
             SharedResources();
@@ -33,10 +33,14 @@ namespace HighQueue
             void requestMessageSize(size_t bytes);
             void requestAsioThread(size_t threads = 1, size_t tenthsOfThread = 0);
 
+            void addStep(const StepPtr & step);
+
             void addQueue(const std::string & name, const ConnectionPtr & connection);
             ConnectionPtr findQueue(const std::string & name) const;
 
             void createResources();
+
+            void attachResources();
 
             const MemoryPoolPtr & getMemoryPool()const;
             const AsioServicePtr & getAsioService()const;
@@ -46,9 +50,11 @@ namespace HighQueue
             void start();
             void stop();
             void finish();
+            void wait();
 
         public:
             typedef std::map<std::string, ConnectionPtr> Queues;
+            typedef std::vector<StepPtr> Steps;
 
         private:
             /// @brief use a single memory pool for all users.
@@ -63,6 +69,9 @@ namespace HighQueue
             /// @brief A named collection of HighQueue Queues
             Queues queues_;
 
+            /// @brief An ordered collection of HighStep Steps (creation order)
+            Steps steps_;
+
             //////////////////////////
             // Memory Pool Parameters
             size_t numberOfMessagesNeeded_;
@@ -71,6 +80,11 @@ namespace HighQueue
             //////////////////
             // Asio parameters
             size_t tenthsOfAsioThreadsNeeded_;
+
+            bool stopping_;
+
+            std::mutex mutex_;
+            std::condition_variable condition_;
 
         };
    }

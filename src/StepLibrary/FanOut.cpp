@@ -37,7 +37,7 @@ void FanOut::handle(Message & message)
     }
 }
 
-void FanOut::finish()
+void FanOut::logStats()
 {
     LogStatistics("FanOut " << name_ <<" messages received: " << messagesHandled_);
     LogStatistics("FanOut " << name_ <<" messages sent: " << messagesSent_);

@@ -8,16 +8,15 @@
 #include <Steps/Step.hpp>
 #include <Steps/StepFactory.hpp>
 #include <HighQueue/MemoryPool.hpp>
-#include <Common/ReverseRange.hpp>
 
 using namespace HighQueue;
 using namespace Steps;
 
 namespace
 {
-    std::string keyPipe("pipe");
-    std::string keyDestination("destination");
-    std::string keyComment("comment");
+    const std::string keyPipe("pipe");
+    const std::string keyDestination("destination");
+    const std::string keyComment("comment");
 }
 
 Builder::Builder()
@@ -58,48 +57,28 @@ bool Builder::construct(const ConfigurationNode & config)
 
     // we have created all Steps, and used them to configure the build resources.
     resources_->createResources();
-    for(auto & step : Steps_)
-    {
-        LogTrace("Attach resources for " << step->getName() << " (" << resources_->getMemoryPool()->numberOfAllocations() << ")");
-
-        step->attachResources(resources_);
-    }
-    // now check to see if we got it right.
-    for(auto & Step : Steps_)
-    {
-        Step->validate();
-    }
-
     return true;
 }
 
 void Builder::start()
 {
-    for(auto & Step : ReverseRange<Steps>(Steps_))
-    {
-        Step->start();
-    }
     resources_->start();
 }
 
 void Builder::stop()
 {
     resources_->stop();
-    for(auto & Step : Steps_)
-    {
-        Step->stop();
-    }
 }
 
 void Builder::finish()
 {
     resources_->finish();
-    for(auto & Step : Steps_)
-    {
-        Step->finish();
-    }
 }
 
+void Builder::wait()
+{
+    resources_->wait();
+}
 
 bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & parentStep)
 {
@@ -129,7 +108,7 @@ bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & pa
                 return false;
             }
             step->configureResources(resources_);
-            Steps_.emplace_back(step);
+            resources_->addStep(step);
             if(previousStep)
             {
                 previousStep->attachDestination(step->getName(), step);

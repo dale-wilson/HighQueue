@@ -57,6 +57,5 @@ void BaseMessageConsumer::logStats()
     LogStatistics("MessageConsumer " << name_ << " messagesHandled:" << messagesHandled_);
     LogStatistics("MessageConsumer " << name_ << " sequenceError:" << sequenceError_);
     LogStatistics("MessageConsumer " << name_ << " unexpectedMessageError:" << unexpectedMessageError_);
-    Step::finish();
 }
 

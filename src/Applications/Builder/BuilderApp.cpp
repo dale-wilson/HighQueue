@@ -95,6 +95,9 @@ bool BuilderApp::validate()
 
 void BuilderApp::run()
 {
+    bool interactive = false;
+    uint32_t timeout = 0;
+
     listLines(configFile_);
     configFile_.close();
     configFile_.open(configFileName_);
@@ -105,12 +108,26 @@ void BuilderApp::run()
     Builder builder;
     if(builder.construct(properties))
     {
-        std::cout << "Any key + Enter:";
+        if(interactive)
+        {
+            std::cout << "Any key + Enter:";
+        }
         builder.start();
-        char anyKey = 0;
-        std::cin >> anyKey;
-//        std::this_thread::sleep_for(std::chrono::seconds(5));
-        builder.stop();
+        if(interactive)
+        {
+            char anyKey = 0;
+            std::cin >> anyKey;
+            builder.stop();
+        }
+        else if(timeout != 0)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            builder.stop();
+        }
+        else
+        {
+            builder.wait();
+        }
         builder.finish();
     }
 }

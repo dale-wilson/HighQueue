@@ -88,6 +88,7 @@ bool Step::configureParameter(const std::string & key, const ConfigurationNode &
 
 std::ostream & Step::usage(std::ostream & out) const
 {
+    out << "    " << keyLogStatisticsOnExit << ": Write statistics to log while shutting down." << std::endl;
     out << "    " << keyName << ": Name this step (required)" << std::endl;
     return out;
 }
