@@ -93,9 +93,9 @@ bool MulticastReceiver::configureParameter(const std::string & key, const Config
     return true;
 }
 
-void MulticastReceiver::configureResources(SharedResources & resources)
+void MulticastReceiver::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.requestMessageSize(packetSize_);
+    resources->requestMessageSize(packetSize_);
     AsioStepToMessage::configureResources(resources);
 }
 

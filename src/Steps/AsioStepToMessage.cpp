@@ -15,15 +15,15 @@ AsioStepToMessage::~AsioStepToMessage()
 {
 }
 
-void AsioStepToMessage::configureResources(SharedResources & resources)
+void AsioStepToMessage::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.requestAsioThread(0, 1);
+    resources->requestAsioThread(0, 1);
     StepToMessage::configureResources(resources);
 }
 
-void AsioStepToMessage::attachResources(SharedResources & resources)
+void AsioStepToMessage::attachResources(const SharedResourcesPtr & resources)
 {
-    ioService_ = resources.getAsioService();
+    ioService_ = resources->getAsioService();
     StepToMessage::attachResources(resources);
 }
 

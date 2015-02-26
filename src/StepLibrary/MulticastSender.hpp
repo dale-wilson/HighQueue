@@ -20,7 +20,7 @@ namespace HighQueue
             virtual ~MulticastSender();
 
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(SharedResources & resources);
+            virtual void configureResources(const SharedResourcesPtr & resources);
 
             virtual void validate();
             virtual void start();

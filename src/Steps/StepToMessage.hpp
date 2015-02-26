@@ -19,8 +19,8 @@ namespace HighQueue
             virtual ~StepToMessage();
 
             // implement Step methods
-            virtual void configureResources(SharedResources & resources);
-            virtual void attachResources(SharedResources & resources);
+            virtual void configureResources(const SharedResourcesPtr & resources);
+            virtual void attachResources(const SharedResourcesPtr & resources);
             virtual void validate();
  
         protected:

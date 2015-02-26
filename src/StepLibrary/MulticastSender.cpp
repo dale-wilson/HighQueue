@@ -70,7 +70,7 @@ bool MulticastSender::configureParameter(const std::string & key, const Configur
     return true;
 }
 
-void MulticastSender::configureResources(SharedResources & resources)
+void MulticastSender::configureResources(const SharedResourcesPtr & resources)
 {
     AsioStep::configureResources(resources);
 }

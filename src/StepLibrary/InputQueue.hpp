@@ -18,8 +18,8 @@ namespace HighQueue
 
             // Implement ThreadedStepToMessage
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(SharedResources & resources);
-            virtual void attachResources(SharedResources & resources);
+            virtual void configureResources(const SharedResourcesPtr & resources);
+            virtual void attachResources(const SharedResourcesPtr & resources);
             virtual void run();
             virtual void stop();
             virtual std::ostream & usage(std::ostream & out) const;

@@ -66,9 +66,9 @@ bool HeartbeatProducer::configureParameter(const std::string & key, const Config
     }
 }
 
-void HeartbeatProducer::configureResources(SharedResources & resources)
+void HeartbeatProducer::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.requestMessageSize(sizeof(HeartbeatMessage));
+    resources->requestMessageSize(sizeof(HeartbeatMessage));
     AsioStepToMessage::configureResources(resources);
 }
 

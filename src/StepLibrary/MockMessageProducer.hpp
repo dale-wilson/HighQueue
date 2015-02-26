@@ -42,7 +42,7 @@ namespace HighQueue
 
             MockMessageProducer();
 
-            virtual void configureResources(SharedResources & resources);
+            virtual void configureResources(const SharedResourcesPtr & resources);
             virtual void run();
         };
 
@@ -52,9 +52,9 @@ namespace HighQueue
         }
 
         template<typename MockMessageType>
-        void MockMessageProducer<MockMessageType>::configureResources(SharedResources & resources)
+        void MockMessageProducer<MockMessageType>::configureResources(const SharedResourcesPtr & resources)
         {
-            resources.requestMessageSize(sizeof(MockMessageType));
+            resources->requestMessageSize(sizeof(MockMessageType));
             BaseMessageProducer::configureResources(resources);
         }
 

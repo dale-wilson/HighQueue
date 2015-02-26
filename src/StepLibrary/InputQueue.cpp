@@ -164,16 +164,16 @@ bool InputQueue::constructWaitStrategy(const ConfigurationNode & config, WaitStr
     return true;
 }
 
-void InputQueue::configureResources(SharedResources & resources)
+void InputQueue::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.addQueue(name_, connection_);
-    resources.requestMessages(parameters_.entryCount_);
+    resources->addQueue(name_, connection_);
+    resources->requestMessages(parameters_.entryCount_);
     return ThreadedStepToMessage::configureResources(resources);
 }
 
-void InputQueue::attachResources(SharedResources & resources)
+void InputQueue::attachResources(const SharedResourcesPtr & resources)
 {
-    auto pool = resources.getMemoryPool();
+    auto pool = resources->getMemoryPool();
     connection_->createLocal(name_, parameters_, pool);
     consumer_.reset(new Consumer(connection_));
     return ThreadedStepToMessage::attachResources(resources);

@@ -77,16 +77,16 @@ bool OrderedMerge::configureParameter(const std::string & key, const Configurati
     return false;
 }
 
-void OrderedMerge::configureResources(SharedResources & resources)
+void OrderedMerge::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.requestMessageSize(sizeof(GapMessage));
-    resources.requestMessages(lookAhead_);
+    resources->requestMessageSize(sizeof(GapMessage));
+    resources->requestMessages(lookAhead_);
     StepToMessage::configureResources(resources);
 }
 
-void OrderedMerge::attachResources(SharedResources & resources)
+void OrderedMerge::attachResources(const SharedResourcesPtr & resources)
 {
-    auto & memoryPool = resources.getMemoryPool();
+    auto & memoryPool = resources->getMemoryPool();
     if(!memoryPool)
     {
         throw std::runtime_error("OrderedMerge: no memory pool available.");

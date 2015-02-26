@@ -42,16 +42,16 @@ bool SendToQueue::configureParameter(const std::string & key, const Configuratio
     }
 }
 
-void SendToQueue::attachResources(SharedResources & resources)
+void SendToQueue::attachResources(const SharedResourcesPtr & resources)
 {
-    connection_ = resources.findQueue(queueName_);
+    connection_ = resources->findQueue(queueName_);
     if(connection_)
     {
         connection_->willProduce();
     }
     else
     {
-        LogError("SendToQueue can't find queue \"" << queueName_ << "\" in [" << resources.getQueueNames() << "]");
+        LogError("SendToQueue can't find queue \"" << queueName_ << "\" in [" << resources->getQueueNames() << "]");
 
     }
     Step::attachResources(resources);

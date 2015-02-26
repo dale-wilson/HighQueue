@@ -21,6 +21,7 @@ namespace
 }
 
 Builder::Builder()
+    : resources_(new SharedResources)
 {
 }
 
@@ -56,10 +57,10 @@ bool Builder::construct(const ConfigurationNode & config)
     }
 
     // we have created all Steps, and used them to configure the build resources.
-    resources_.createResources();
+    resources_->createResources();
     for(auto & step : Steps_)
     {
-        LogTrace("Attach resources for " << step->getName() << " (" << resources_.getMemoryPool()->numberOfAllocations() << ")");
+        LogTrace("Attach resources for " << step->getName() << " (" << resources_->getMemoryPool()->numberOfAllocations() << ")");
 
         step->attachResources(resources_);
     }
@@ -78,12 +79,12 @@ void Builder::start()
     {
         Step->start();
     }
-    resources_.start();
+    resources_->start();
 }
 
 void Builder::stop()
 {
-    resources_.stop();
+    resources_->stop();
     for(auto & Step : Steps_)
     {
         Step->stop();
@@ -92,7 +93,7 @@ void Builder::stop()
 
 void Builder::finish()
 {
-    resources_.finish();
+    resources_->finish();
     for(auto & Step : Steps_)
     {
         Step->finish();

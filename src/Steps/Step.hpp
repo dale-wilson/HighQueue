@@ -106,7 +106,7 @@ namespace HighQueue
 
             /// @brief Prepare shared resources based on information gleanded from configure.
             /// @param resources has "need*" methods which this step can used to indicated what resources it will use.
-            virtual void configureResources(SharedResources & resources);
+            virtual void configureResources(const SharedResourcesPtr & resources);
 
             /// @brief Configure
             /// Lifecycle 2a: Give it a name
@@ -121,7 +121,7 @@ namespace HighQueue
             virtual void attachDestination(const std::string & name, const StepPtr & destination);
 
             /// @brief Attach resources
-            virtual void attachResources(SharedResources & resources);
+            virtual void attachResources(const SharedResourcesPtr & resources);
 
             /// @brief Validate configuration and attachments
             /// Lifecycle 4: Validate

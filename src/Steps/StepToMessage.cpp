@@ -20,15 +20,15 @@ StepToMessage::~StepToMessage()
 {
 }
 
-void StepToMessage::configureResources(SharedResources & resources)
+void StepToMessage::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.requestMessages(1);
+    resources->requestMessages(1);
     return Step::configureResources(resources);
 }
 
-void StepToMessage::attachResources(SharedResources & resources)
+void StepToMessage::attachResources(const SharedResourcesPtr & resources)
 {
-    auto & pool = resources.getMemoryPool();
+    auto & pool = resources->getMemoryPool();
     if(pool)
     {
         outMessage_.reset(new Message(pool));

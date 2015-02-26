@@ -38,7 +38,7 @@ namespace HighQueue
             bool configureParameter(const StepPtr & step, const std::string & key, const ConfigurationNode & configuration);
 
         private:
-            SharedResources resources_;
+            SharedResourcesPtr resources_;
             Steps Steps_;
         };
    }

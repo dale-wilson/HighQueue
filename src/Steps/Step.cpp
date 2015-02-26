@@ -92,7 +92,7 @@ std::ostream & Step::usage(std::ostream & out) const
     return out;
 }
 
-void Step::configureResources(SharedResources & resources)
+void Step::configureResources(const SharedResourcesPtr & resources)
 {
     LogDebug("Step::configureResources called for " << name_);
     // default do nothing
@@ -122,7 +122,7 @@ void Step::attachDestination(const std::string & name, const StepPtr & destinati
     destinations_.push_back(std::make_pair(name, destination));
 }
 
-void Step::attachResources(SharedResources & resources)
+void Step::attachResources(const SharedResourcesPtr & resources)
 {
     // do nothing
 }

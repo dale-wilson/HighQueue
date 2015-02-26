@@ -15,15 +15,15 @@ AsioStep::~AsioStep()
 {
 }
 
-void AsioStep::configureResources(SharedResources & resources)
+void AsioStep::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.requestAsioThread(0, 1);
+    resources->requestAsioThread(0, 1);
     Step::configureResources(resources);
 }
 
-void AsioStep::attachResources(SharedResources & resources)
+void AsioStep::attachResources(const SharedResourcesPtr & resources)
 {
-    ioService_ = resources.getAsioService();
+    ioService_ = resources->getAsioService();
     Step::attachResources(resources);
 }
 

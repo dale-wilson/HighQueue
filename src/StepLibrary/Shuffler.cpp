@@ -67,15 +67,15 @@ bool Shuffler::configureParameter(const std::string & key, const ConfigurationNo
     return false;
 }
 
-void Shuffler::configureResources(SharedResources & resources)
+void Shuffler::configureResources(const SharedResourcesPtr & resources)
 {
-    resources.requestMessages(lookAhead_);
+    resources->requestMessages(lookAhead_);
     return Step::configureResources(resources);
 }
 
-void Shuffler::attachResources(SharedResources & resources)
+void Shuffler::attachResources(const SharedResourcesPtr & resources)
 {
-    auto & memoryPool = resources.getMemoryPool();
+    auto & memoryPool = resources->getMemoryPool();
     if(!memoryPool)
     {
         throw std::runtime_error("OrderedMerge: no memory pool available.");
