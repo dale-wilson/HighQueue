@@ -164,7 +164,6 @@ void Shuffler::finish()
             ++leftovers_;
         }
     }
-    logStats();
     Step::finish();
 }
 

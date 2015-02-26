@@ -18,23 +18,10 @@ namespace HighQueue
         public:
             BaseMessageConsumer();
             virtual ~BaseMessageConsumer();
-/*            uint32_t errors()const
-            {
-                return sequenceError_ + unexpectedMessageError_;
-            }
-            uint32_t messagesHandled()const
-            {
-                return messagesHandled_;
-            }
-            uint32_t heartbeatsReceived()const
-            {
-                return heartbeats_;
-            }
-*/
+
             ////////////////////////////
             // Implement Step
             virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void finish();
             virtual void logStats();
 
         protected:

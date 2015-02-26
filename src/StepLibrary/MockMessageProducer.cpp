@@ -83,11 +83,6 @@ void BaseMessageProducer::setStartSignal(volatile bool * startSignal)
     startSignal_ = startSignal;
 }
 
-void BaseMessageProducer::finish()
-{
-    logStats();
-}
-
 void BaseMessageProducer::logStats()
 {
     LogStatistics("MockMessageProducer  " << name_ << " " << producerNumber_ << " messages published:" << messageNumber_ );

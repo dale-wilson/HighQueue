@@ -25,7 +25,6 @@ namespace HighQueue
             virtual std::ostream & usage(std::ostream & out) const;
             virtual bool configureParameter(const std::string & name,  const ConfigurationNode & config);
             virtual void validate();
-            virtual void finish();
             virtual void logStats();
 
         protected:

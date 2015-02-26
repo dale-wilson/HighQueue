@@ -10,11 +10,16 @@
 using namespace HighQueue;
 using namespace Steps;
 
-const std::string Step::keyName = "name";
+namespace
+{
+    const std::string keyName = "name";
+    const std::string keyLogStatisticsOnExit = "log_stats_on_exit";
+}
 
 Step::Step()
     : paused_(false)
     , stopping_(false)
+    , logStatsOnExit_(false)
 {
 }
 
@@ -60,6 +65,11 @@ bool Step::configureParameter(const std::string & key, const ConfigurationNode &
     if(key == keyName)
     {
         configuration.getValue(name_);
+        return true;
+    }
+    else if(key == keyLogStatisticsOnExit)
+    {
+        configuration.getValue(logStatsOnExit_);
         return true;
     }
     else if(parameterHandler_ && parameterHandler_(shared_from_this(), key, configuration))
@@ -149,10 +159,17 @@ void Step::stop()
     stopping_ = true;
 }
 
-
 void Step::finish()
 {
-    // default to do nothing.
+    if(logStatsOnExit_)
+    {
+        logStats();
+    }
+}
+
+void Step::logStats()
+{
+    // no statistics here
 }
 
 void Step::mustHaveDestination()

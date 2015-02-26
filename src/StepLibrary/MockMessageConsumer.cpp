@@ -50,11 +50,6 @@ bool BaseMessageConsumer::configureParameter(const std::string & key, const Conf
     return Step::configureParameter(key, configuration);
 }
 
-void BaseMessageConsumer::finish()
-{
-    logStats();
-}
-
 void BaseMessageConsumer::logStats()
 {
     LogStatistics("MessageConsumer " << name_ << " heartbeats:" << heartbeats_);

@@ -81,7 +81,6 @@ namespace HighQueue
         class Steps_Export Step: public std::enable_shared_from_this<Step>
         {
         public:
-            static const std::string keyName;
             /// @brief Construct 
             /// Lifecycle 1: Constuct
             Step();
@@ -155,6 +154,9 @@ namespace HighQueue
             /// @brief Final cleanup
             /// Lifecycle 10: Finish
             virtual void finish();
+
+            /// @brief Write statistics to log
+            virtual void logStats();
             
             const std::string & getName()const;
             bool isStopping()const;
@@ -176,6 +178,7 @@ namespace HighQueue
             bool paused_;
             bool stopping_;
             std::string name_;
+            bool logStatsOnExit_;
             StepPtr primaryDestination_;
             typedef std::pair<std::string,  StepPtr> NamedDestination;
             std::vector<NamedDestination> destinations_;
