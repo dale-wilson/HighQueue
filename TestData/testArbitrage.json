@@ -54,8 +54,13 @@
             "look_ahead":500,
             "max_delay_heartbeats": 1
             },
+        "stopper":{
+            "name": "Stopper",
+            "shutdowns": 1
+        },
         "small_test_message_consumer" : {
-            "name": "MockMessageConsumer"
+            "name": "MockMessageConsumer",
+            "log_stats_on_exit": true
         }
     }
 }
