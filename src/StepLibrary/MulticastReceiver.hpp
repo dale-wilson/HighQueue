@@ -21,16 +21,16 @@ namespace HighQueue
             MulticastReceiver();
             virtual ~MulticastReceiver();
 
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(const SharedResourcesPtr & resources);
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void configureResources(const SharedResourcesPtr & resources) override;
 
-            virtual void validate();
-            virtual void start();
+            virtual void validate() override;
+            virtual void start() override;
 
-            virtual void pause();
-            virtual void resume();
-            virtual void stop();
-            virtual std::ostream & usage(std::ostream & out) const;
+            virtual void pause() override;
+            virtual void resume() override;
+            virtual void stop() override;
+            virtual std::ostream & usage(std::ostream & out) const override;
 
             Endpoint senderEndpoint()const;
             bool joined()const;

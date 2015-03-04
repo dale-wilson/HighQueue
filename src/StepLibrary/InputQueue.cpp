@@ -98,7 +98,6 @@ bool InputQueue::configureParameter(const std::string & key, const Configuration
     return ThreadedStepToMessage::configureParameter(key, configuration);
 }
 
-
 bool InputQueue::constructWaitStrategy(const ConfigurationNode & config, WaitStrategy & strategy)
 {
     size_t spinCount = WaitStrategy::FOREVER;
@@ -207,4 +206,3 @@ void InputQueue::stop()
         ThreadedStepToMessage::stop();
     }
 }
-

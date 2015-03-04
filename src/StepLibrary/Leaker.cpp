@@ -17,6 +17,7 @@ namespace
 {
     StepFactory::Registrar<Leaker> registerStep("leaker", "**TESTING**: Discard selected messages.  Pass the rest true to the next step.");
 
+    const std::string keyStart = "offset";
     const std::string keyCount = "count";
     const std::string keyEvery = "every";
     const std::string keyHeartbeats = "heartbeats";
@@ -26,6 +27,7 @@ namespace
 Leaker::Leaker()
     : count_(0)
     , every_(0)
+    , offset_(0)
     , leakHeartbeats_(false)
     , leakShutdowns_(false)
     , messageNumber_(0)
@@ -36,6 +38,7 @@ Leaker::Leaker()
 
 std::ostream & Leaker::usage(std::ostream & out) const
 {
+    out << "    " << keyStart << ": How many messages not to leak at beginning." << std::endl;
     out << "    " << keyCount << ": How many consecutive messages to leak." << std::endl;
     out << "    " << keyEvery << ": How often to leak a block of messages" << std::endl;
     out << "    " << keyHeartbeats << ": Can heartbeats leak? (default is false)" << std::endl;
@@ -54,7 +57,16 @@ bool Leaker::configureParameter(const std::string & key, const ConfigurationNode
             return true;
         }
     }
-    if(key == keyEvery)
+    else if(key == keyStart)
+    {
+        uint64_t value;
+        if(configuration.getValue(value))
+        {
+            offset_ = size_t(value);
+            return true;
+        }
+    }
+    else if(key == keyEvery)
     {
         uint64_t value;
         if(configuration.getValue(value))
@@ -111,7 +123,7 @@ void Leaker::handle(Message & message)
     if(leak)
     {
         ++messageNumber_;
-        auto p = messageNumber_ % every_;
+        auto p = (messageNumber_ + offset_ ) % every_;
         if(p >= count_)
         {
             send(message);

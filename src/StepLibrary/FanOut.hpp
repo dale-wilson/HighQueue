@@ -4,8 +4,6 @@
 #pragma once
 #include <Steps/StepToMessage.hpp>
 
-#include <Common/Log.hpp>
-
 namespace HighQueue
 {
     namespace Steps
@@ -16,8 +14,8 @@ namespace HighQueue
             explicit FanOut();
 
             // implement Step methods
-            virtual void handle(Message & message);
-            virtual void logStats();
+            virtual void handle(Message & message) override;
+            virtual void logStats() override;
  
         private:
             uint32_t messagesHandled_;

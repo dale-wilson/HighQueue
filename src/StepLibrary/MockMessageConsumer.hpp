@@ -21,8 +21,8 @@ namespace HighQueue
 
             ////////////////////////////
             // Implement Step
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void logStats();
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void logStats() override;
 
         protected:
             uint32_t messageCount_;
@@ -47,7 +47,7 @@ namespace HighQueue
 
             ////////////////////////////
             // Implement Step
-            virtual void handle(Message & message);
+            virtual void handle(Message & message) override;
         
         };
 

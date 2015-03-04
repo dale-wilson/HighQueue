@@ -4,8 +4,6 @@
 #pragma once
 #include <Steps/Step.hpp>
 
-#include <Common/Log.hpp>
-
 namespace HighQueue
 {
     namespace Steps
@@ -16,8 +14,8 @@ namespace HighQueue
             explicit ForwardPassThru();
 
             // implement Step methods
-            virtual void handle(Message & message);
-            virtual void finish();
+            virtual void handle(Message & message) override;
+            virtual void finish() override;
 
         private:
             uint32_t messagesHandled_;

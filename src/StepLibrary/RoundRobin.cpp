@@ -54,7 +54,7 @@ void RoundRobin::handle(Message & message)
     }
 }
 
-void RoundRobin::finish()
+void RoundRobin::logStats()
 {
     LogStatistics("RoundRobin messages: " << messagesHandled_);
     LogStatistics("RoundRobin heartbeats: " << heartbeatsHandled_);

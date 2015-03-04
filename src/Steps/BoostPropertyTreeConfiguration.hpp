@@ -20,10 +20,10 @@ namespace HighQueue
             void set(boost::property_tree::ptree::iterator iterator);
 
             virtual ~BoostPropertyTreeChildren();
-            virtual bool has() const;
-            virtual bool first();
-            virtual bool next();
-            virtual ConfigurationNodePtr getChild();
+            virtual bool has() const override;
+            virtual bool first() override;
+            virtual bool next() override;
+            virtual ConfigurationNodePtr getChild() override;
 
         private:
             boost::property_tree::ptree & ptree_;
@@ -44,13 +44,13 @@ namespace HighQueue
             void loadJson(std::istream & propertyFile, const std::string & name = "json");
             void loadJson(const std::string & propertyFileName);
 
-            virtual ConfigurationChildrenPtr getChildren() const;
-            virtual std::string getName()const;
-            virtual bool getValue(std::string & value, const std::string & defaultValue = "") const;
-            virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const;
-            virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const;
-            virtual bool getValue(double & value, double defaultValue = 0L) const;
-            virtual bool getValue(bool & value, bool defaultValue) const;
+            virtual ConfigurationChildrenPtr getChildren() const override;
+            virtual std::string getName()const override;
+            virtual bool getValue(std::string & value, const std::string & defaultValue = "") const override;
+            virtual bool getValue(int64_t & value, int64_t defaultValue = 0LL) const override;
+            virtual bool getValue(uint64_t & value, uint64_t defaultValue = 0ULL) const override;
+            virtual bool getValue(double & value, double defaultValue = 0L) const override;
+            virtual bool getValue(bool & value, bool defaultValue) const override;
         private:
             template <typename Type, typename DefaultType>
             bool getTypedValue(Type & value, DefaultType defaultValue) const;

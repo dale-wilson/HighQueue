@@ -20,16 +20,15 @@ namespace HighQueue
             /// @brief construct
             Tee();
 
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void start();
-
             /// @brief Attach an ostream.  If none, don't dump the data.
             void attachOutputStream(std::ostream * outputStream);
 
             // implement Step methods
-            virtual void handle(Message & message);
-            virtual void finish();
-            virtual std::ostream & usage(std::ostream & out) const;
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void start() override;
+            virtual void handle(Message & message) override;
+            virtual void finish() override;
+            virtual std::ostream & usage(std::ostream & out) const override;
         private:
             void hexDump(byte_t * message, size_t size);
         private:

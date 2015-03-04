@@ -17,12 +17,12 @@ namespace HighQueue
         public:
             AsioStep();
             virtual ~AsioStep();
-            virtual void configureResources(const SharedResourcesPtr & resources);
-            virtual void attachResources(const SharedResourcesPtr & resources);
-            virtual void validate();
+            virtual void configureResources(const SharedResourcesPtr & resources) override;
+            virtual void attachResources(const SharedResourcesPtr & resources) override;
+            virtual void validate() override;
 
-            virtual void start();
-            virtual void finish();
+            virtual void start() override;
+            virtual void finish() override;
         protected:
             AsioServicePtr ioService_;
             std::shared_ptr<Step> me_;

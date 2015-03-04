@@ -3,7 +3,7 @@
     "pipe": {
         "small_test_message_producer" : {
 			"name" : "MockMessageProducer",
-			"message_count" : 100
+			"message_count" : 0
         },
         "fan_out" : {
             "name" : "multiple_sources",
@@ -20,6 +20,7 @@
             "destination": {
                 "leaker": {
                     "name": "Leak messages",
+                    "offset": 10,
                     "every": 47,
                     "count": 2
                 },

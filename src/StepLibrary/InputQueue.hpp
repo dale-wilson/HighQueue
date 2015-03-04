@@ -17,14 +17,13 @@ namespace HighQueue
             InputQueue();
 
             // Implement ThreadedStepToMessage
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(const SharedResourcesPtr & resources);
-            virtual void attachResources(const SharedResourcesPtr & resources);
-            virtual void run();
-            virtual void stop();
-            virtual std::ostream & usage(std::ostream & out) const;
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void configureResources(const SharedResourcesPtr & resources) override;
+            virtual void attachResources(const SharedResourcesPtr & resources) override;
+            virtual void stop() override;
+            virtual std::ostream & usage(std::ostream & out) const override;
 
-            void setStopOnShutdownMessage(bool value);
+            virtual void run() override;
 
         private:
             bool constructWaitStrategy(const ConfigurationNode & config, WaitStrategy & strategy);

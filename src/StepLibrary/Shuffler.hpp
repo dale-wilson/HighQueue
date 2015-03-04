@@ -17,14 +17,14 @@ namespace HighQueue
             static const size_t relativelyPrime_ = 101;
             Shuffler();
 
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(const SharedResourcesPtr & resources);
-            virtual void attachResources(const SharedResourcesPtr & resources);
-            virtual void validate();
-            virtual void handle(Message & message);
-            virtual void finish();
-            virtual std::ostream & usage(std::ostream & out) const;
-            virtual void logStats();
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void configureResources(const SharedResourcesPtr & resources) override;
+            virtual void attachResources(const SharedResourcesPtr & resources) override;
+            virtual void validate() override;
+            virtual void handle(Message & message) override;
+            virtual void finish() override;
+            virtual std::ostream & usage(std::ostream & out) const override;
+            virtual void logStats() override;
 
         private:
             void publishPendingMessages();

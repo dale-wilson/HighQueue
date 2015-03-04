@@ -22,10 +22,10 @@ namespace HighQueue
             /// @brief startSignal should be false initially then become true when it's time to begin producing messages
             void setStartSignal(volatile bool * startSignal);
 
-            virtual std::ostream & usage(std::ostream & out) const;
-            virtual bool configureParameter(const std::string & name,  const ConfigurationNode & config);
-            virtual void validate();
-            virtual void logStats();
+            virtual std::ostream & usage(std::ostream & out) const override;
+            virtual bool configureParameter(const std::string & name,  const ConfigurationNode & config) override;
+            virtual void validate() override;
+            virtual void logStats() override;
 
         protected:
             volatile bool * startSignal_;
@@ -42,8 +42,8 @@ namespace HighQueue
 
             MockMessageProducer();
 
-            virtual void configureResources(const SharedResourcesPtr & resources);
-            virtual void run();
+            virtual void configureResources(const SharedResourcesPtr & resources) override;
+            virtual void run() override;
         };
 
         template<typename MockMessageType>

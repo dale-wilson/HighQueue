@@ -17,15 +17,16 @@ namespace HighQueue
             static const size_t relativelyPrime_ = 101;
             Leaker();
 
-            virtual std::ostream & usage(std::ostream & out) const;
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void validate();
-            virtual void handle(Message & message);
-            virtual void logStats();
+            virtual std::ostream & usage(std::ostream & out) const override;
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void validate() override;
+            virtual void handle(Message & message) override;
+            virtual void logStats() override;
 
         private:
             size_t count_;
             size_t every_;
+            size_t offset_;
             bool leakHeartbeats_;
             bool leakShutdowns_;
             size_t messageNumber_;

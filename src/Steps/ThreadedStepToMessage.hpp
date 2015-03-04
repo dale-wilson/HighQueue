@@ -14,8 +14,8 @@ namespace HighQueue
         public:
             ThreadedStepToMessage();
             virtual ~ThreadedStepToMessage();
-            virtual void start();
-            virtual void finish();
+            virtual void start() override;
+            virtual void finish() override;
             virtual void run() = 0;
         protected:
             void startThread();

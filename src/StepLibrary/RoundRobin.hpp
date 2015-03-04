@@ -16,8 +16,8 @@ namespace HighQueue
             explicit RoundRobin();
 
             // implement Step methods
-            virtual void handle(Message & message);
-            virtual void finish();
+            virtual void handle(Message & message) override;
+            virtual void logStats() override;
  
         private:
             uint32_t messagesHandled_;

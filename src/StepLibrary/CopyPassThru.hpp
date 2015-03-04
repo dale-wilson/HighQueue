@@ -5,8 +5,6 @@
 #include <Steps/StepToMessage.hpp>
 #include <HighQueue/Message.hpp>
 
-#include <Common/Log.hpp>
-
 namespace HighQueue
 {
     namespace Steps
@@ -18,8 +16,8 @@ namespace HighQueue
         public:
             explicit CopyPassThru();
 
-            virtual void handle(Message & message);
-            virtual void finish();
+            virtual void handle(Message & message) override;
+            virtual void finish() override;
 
         private:
             uint32_t messagesHandled_;

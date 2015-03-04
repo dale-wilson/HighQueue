@@ -19,14 +19,14 @@ namespace HighQueue
             MulticastSender();
             virtual ~MulticastSender();
 
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void configureResources(const SharedResourcesPtr & resources);
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void configureResources(const SharedResourcesPtr & resources) override;
 
-            virtual void validate();
-            virtual void start();
-            virtual void handle(Message & message);
-            virtual void finish();
-            virtual std::ostream & usage(std::ostream & out) const;
+            virtual void validate() override;
+            virtual void start() override;
+            virtual void handle(Message & message) override;
+            virtual void finish() override;
+            virtual std::ostream & usage(std::ostream & out) const override;
 
             Socket  & socket();
         private:

@@ -17,13 +17,13 @@ namespace HighQueue
             SendToQueue();
 
             // Implement Step
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual void attachResources(const SharedResourcesPtr & resources);
-            virtual void validate();
-            virtual void start();
-            virtual void handle(Message & message);
-            virtual void stop();
-            virtual std::ostream & usage(std::ostream & out) const;
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual void attachResources(const SharedResourcesPtr & resources) override;
+            virtual void validate() override;
+            virtual void start() override;
+            virtual void handle(Message & message) override;
+            virtual void stop() override;
+            virtual std::ostream & usage(std::ostream & out) const override;
 
         private:
             std::string queueName_;
