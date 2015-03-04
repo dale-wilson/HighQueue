@@ -3,9 +3,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include <Steps/Step.hpp>
-#include <HighQueue/MessageFwd.hpp>
-
-#include <Common/Log.hpp>
 
 namespace HighQueue
 {
@@ -25,6 +22,7 @@ namespace HighQueue
  
         protected:
             std::unique_ptr<Message> outMessage_;
+            bool destinationIsRequired_;
         };
 
    }

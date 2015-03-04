@@ -158,8 +158,16 @@ const MemoryPoolPtr & SharedResources::getMemoryPool()const
     return pool_;
 }
 
-std::string SharedResources::getQueueNames()const
+const SharedResources::Queues & SharedResources::getQueues()const
 {
+    return queues_;
+}
+
+const SharedResources::Steps & SharedResources::getSteps()const
+{
+    return steps_;
+}
+#if 0
     std::stringstream msg;
     std:: string delimiter;
     for(const auto & entry : queues_)
@@ -169,6 +177,7 @@ std::string SharedResources::getQueueNames()const
     }
     return msg.str();
 }
+#endif
 
 void SharedResources::wait()
 {

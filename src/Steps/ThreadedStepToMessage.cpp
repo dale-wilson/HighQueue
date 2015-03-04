@@ -4,6 +4,7 @@
 #include <Steps/StepPch.hpp>
 
 #include "ThreadedStepToMessage.hpp"
+#include <HighQueue/Message.hpp>
 
 using namespace HighQueue;
 using namespace Steps;

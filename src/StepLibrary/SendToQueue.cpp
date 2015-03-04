@@ -51,8 +51,15 @@ void SendToQueue::attachResources(const SharedResourcesPtr & resources)
     }
     else
     {
-        LogError("SendToQueue can't find queue \"" << queueName_ << "\" in [" << resources->getQueueNames() << "]");
-
+        std::stringstream qnames;
+        std::string delimiter;
+        auto & queues = resources->getQueues();
+        for(auto queue : queues)
+        {
+            qnames << delimiter << queue.first;
+            delimiter = ", ";
+        }
+        LogError("SendToQueue can't find queue \"" << queueName_ << "\" in [" << qnames.str() << "]");
     }
     Step::attachResources(resources);
 }

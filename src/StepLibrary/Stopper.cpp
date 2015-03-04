@@ -7,7 +7,6 @@
 #include <Steps/StepFactory.hpp>
 #include <Steps/SharedResources.hpp>
 #include <Steps/Configuration.hpp>
-#include <Common/Log.hpp>
 
 using namespace HighQueue;
 using namespace Steps;
@@ -78,6 +77,7 @@ std::ostream & Stopper::usage(std::ostream & out) const
 void Stopper::attachResources(const SharedResourcesPtr & resources)
 {
     resources_ = resources;
+    Step::attachResources(resources);
 }
 
 void Stopper::handle(Message & message)

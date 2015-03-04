@@ -13,6 +13,7 @@ using namespace HighQueue;
 using namespace Steps;
 
 StepToMessage::StepToMessage()
+    : destinationIsRequired_(true)
 {
 }
 
@@ -38,10 +39,13 @@ void StepToMessage::attachResources(const SharedResourcesPtr & resources)
 
 void StepToMessage::validate()
 {
-    mustHaveDestination();
-    if(!outMessage_)
-    {
-        throw std::runtime_error("StepToMessage: Can't initialize output message. No memory pool attached.");
+    if(destinationIsRequired_)
+    { 
+        mustHaveDestination();
+        if(!outMessage_)
+        {
+            throw std::runtime_error("StepToMessage: Can't initialize output message. No memory pool attached.");
+        }
     }
     Step::validate();
 }        

@@ -4,8 +4,6 @@
 #pragma once
 #include <Steps/Step.hpp>
 
-#include <Common/Log.hpp>
-
 namespace HighQueue
 {
     namespace Steps
@@ -13,13 +11,13 @@ namespace HighQueue
         class Steps_Export Stopper: public Step
         {
         public:
-            explicit Stopper();
+            Stopper();
 
             // implement Step methods
-            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration);
-            virtual std::ostream & usage(std::ostream & out) const;
-            virtual void handle(Message & message);
-            virtual void attachResources(const SharedResourcesPtr & resources);
+            virtual bool configureParameter(const std::string & key, const ConfigurationNode & configuration) override;
+            virtual std::ostream & usage(std::ostream & out) const  override;
+            virtual void handle(Message & message) override;
+            virtual void attachResources(const SharedResourcesPtr & resources) override;
 
         private:
             uint32_t messagesExpected_;

@@ -177,7 +177,9 @@ void Step::mustHaveDestination()
 {
     if(!primaryDestination_)
     {
-        throw std::runtime_error("Configuration error: Destination required");
+        std::stringstream msg;
+        msg << "Configuration error " << name_ << ": Destination required";
+        throw std::runtime_error(msg.str());
     }
 }
 

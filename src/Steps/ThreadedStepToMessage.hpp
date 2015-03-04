@@ -3,9 +3,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 #include <Steps/StepToMessage.hpp>
-#include <HighQueue/Message.hpp>
-
-#include <Common/Log.hpp>
 
 namespace HighQueue
 {

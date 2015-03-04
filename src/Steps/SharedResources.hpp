@@ -26,6 +26,9 @@ namespace HighQueue
         class Steps_Export SharedResources : public std::enable_shared_from_this<SharedResources>
         {
         public:
+            typedef std::map<std::string, ConnectionPtr> Queues;
+            typedef std::vector<StepPtr> Steps;
+        public:
             SharedResources();
             ~SharedResources();
 
@@ -45,16 +48,14 @@ namespace HighQueue
             const MemoryPoolPtr & getMemoryPool()const;
             const AsioServicePtr & getAsioService()const;
 
-            std::string getQueueNames()const;
+            const Queues & getQueues()const;
+            const Steps & getSteps()const;
 
             void start();
             void stop();
             void finish();
             void wait();
 
-        public:
-            typedef std::map<std::string, ConnectionPtr> Queues;
-            typedef std::vector<StepPtr> Steps;
 
         private:
             /// @brief use a single memory pool for all users.
