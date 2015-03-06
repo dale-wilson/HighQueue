@@ -1,0 +1,28 @@
+{
+    "pipe": {
+        "small_test_message_producer" : {
+			"name" : "MockMessageProducer",
+			"message_count" : 0
+        },
+        "send_to_queue" : {
+            "name" : "send_30001_to_queue",
+            "queue" : "subscriber_queue"
+        }
+    }, 
+    "pipe":{
+        "input_queue":{
+            "name": "subscriber_queue",
+            "entry_count" : 1000
+        },
+        "small_test_message_consumer" : {
+            "name": "MockMessageConsumer",
+            "log_stats_on_exit": true
+        }
+    },
+    "comment": "Control from console.",
+    "pipe":{
+        "console":{
+            "name" : "console"
+        }
+    }
+}

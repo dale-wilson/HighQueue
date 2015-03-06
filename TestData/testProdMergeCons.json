@@ -1,0 +1,23 @@
+{
+    "pipe": {
+        "small_test_message_producer" : {
+			"name" : "MockMessageProducer",
+			"message_count" : 0
+        },
+        "ordered_merge":{
+            "name": "Arbitrage",
+            "look_ahead":500,
+            "max_delay_heartbeats": 1
+            },
+        "small_test_message_consumer" : {
+            "name": "MockMessageConsumer",
+            "log_stats_on_exit": true
+        }
+    },
+    "comment": "Control from console.",
+    "pipe":{
+        "console":{
+            "name" : "console"
+        }
+    }
+}
