@@ -87,7 +87,7 @@ void Stopper::handle(Message & message)
         auto type = message.getType();
         switch(type)
         {
-            case Message::Heartbeat:
+            case Message::MessageType::Heartbeat:
             {
                 ++heartbeatsHandled_;
                 LogVerbose("Stopper: heartbeats: " << heartbeatsHandled_ << '/' << heartbeatsExpected_);
@@ -99,7 +99,7 @@ void Stopper::handle(Message & message)
                 }
                 break;
             }
-            case Message::Shutdown:
+            case Message::MessageType::Shutdown:
             {
                 ++shutdownsHandled_;
                 LogVerbose("Stopper: shutdowns: " << shutdownsHandled_ << '/' << shutdownsExpected_);

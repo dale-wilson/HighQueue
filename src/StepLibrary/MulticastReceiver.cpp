@@ -175,7 +175,7 @@ void MulticastReceiver::handleReceive(
     else
     {
         ++messagesReceived_;
-        outMessage_->setType(Message::MulticastPacket);
+        outMessage_->setType(Message::MessageType::MulticastPacket);
         auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
         outMessage_->setTimestamp(timestamp);
         outMessage_->addUsed(bytesReceived);

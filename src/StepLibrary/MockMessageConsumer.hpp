@@ -61,11 +61,6 @@ namespace HighQueue
         void MockMessageConsumer<MockMessageType>::handle(Message & message)
         {
             auto type = message.getType();
-            if(type == Message::MulticastPacket)
-            {
-                type = Message::MockMessage;
-                message.setType(type);
-            }
             switch(type)
             {
                 default:
@@ -74,7 +69,7 @@ namespace HighQueue
                     ++unexpectedMessageError_;  
                     return;
                 }
-                case Message::Shutdown:
+                case Message::MessageType::Shutdown:
                 {
                     if (messageCount_ == 0)
                     {
@@ -84,7 +79,7 @@ namespace HighQueue
                     }
                     return;
                 }
-                case Message::MockMessage:
+                case Message::MessageType::MockMessage:
                 {
                     auto testMessage = message.get<ActualMessage>();
                     if(nextSequence_ != testMessage->getSequence())
@@ -102,12 +97,12 @@ namespace HighQueue
                     }
                     return;
                 }
-                case Message::Heartbeat:
+                case Message::MessageType::Heartbeat:
                 {
                     ++heartbeats_;
                     return;
                 }
-                case Message::Gap:
+                case Message::MessageType::Gap:
                 {
                     auto gapMessage = message.get<GapMessage>();
                     LogTrace("MockMessageConsumer " << name_ << " received gap [" << gapMessage->startGap() << ", " << gapMessage->endGap() << ")");

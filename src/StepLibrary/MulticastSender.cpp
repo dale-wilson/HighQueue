@@ -113,7 +113,7 @@ void MulticastSender::handle(Message & message)
 {
     // ignore heartbeats and shutdowns.
     auto type = message.getType();
-    if(type != Message::Heartbeat && type != Message::Shutdown)
+    if(type != Message::MessageType::Heartbeat && type != Message::MessageType::Shutdown)
     {
         ++messageCount_;
         boost::system::error_code error;

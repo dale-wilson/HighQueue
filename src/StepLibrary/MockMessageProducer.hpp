@@ -61,7 +61,7 @@ namespace HighQueue
         template<typename MockMessageType>
         void MockMessageProducer<MockMessageType>::run()
         {
-            outMessage_->setType(Message::MockMessage);
+            outMessage_->setType(Message::MessageType::MockMessage);
             if(startSignal_)
             {
                 while(!*startSignal_)
@@ -80,7 +80,7 @@ namespace HighQueue
                 ++messageNumber_;
             }
             LogDebug("Producer  " << name_ << " " << producerNumber_ << " publish stop message");
-            outMessage_->setType(Message::Shutdown);
+            outMessage_->setType(Message::MessageType::Shutdown);
             send(*outMessage_);
         }
    }

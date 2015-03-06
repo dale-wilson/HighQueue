@@ -111,7 +111,7 @@ void HeartbeatProducer::handleTimer(const boost::system::error_code& error)
     }
     else if(!paused_)
     {
-        outMessage_->setType(Message::Heartbeat);
+        outMessage_->setType(Message::MessageType::Heartbeat);
         auto now = std::chrono::steady_clock::now().time_since_epoch();
         auto timestamp = now.count();
         outMessage_->setTimestamp(timestamp);

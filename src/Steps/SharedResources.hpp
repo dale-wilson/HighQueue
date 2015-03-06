@@ -18,6 +18,7 @@
 #include <HighQueue/CreationParametersFwd.hpp>
 
 #include <Common/Log.hpp>
+#include <Common/Stopwatch.hpp>
 
 namespace HighQueue
 {
@@ -56,7 +57,6 @@ namespace HighQueue
             void finish();
             void wait();
 
-
         private:
             /// @brief use a single memory pool for all users.
             /// Note this is a simplification.  If there are dramatic differences in message
@@ -81,6 +81,9 @@ namespace HighQueue
             //////////////////
             // Asio parameters
             size_t tenthsOfAsioThreadsNeeded_;
+
+            Stopwatch timer_;
+            uint64_t runTime_;
 
             bool stopping_;
 

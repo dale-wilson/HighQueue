@@ -13,7 +13,7 @@ namespace HighQueue
     {
     public:
 
-        enum MessageType : uint16_t
+        enum class MessageType : uint16_t
         {
             Unused,
             Shutdown,
@@ -25,6 +25,7 @@ namespace HighQueue
             LocalType4, LocalType5, LocalType6, LocalType7,   // for locally defined private purposes to avoid redefining this class. 
             ExtraTypeBase
         };        
+        static const char * typeName(MessageType type);
         typedef uint64_t Timestamp;
         typedef uint32_t Sequence;
 
@@ -269,7 +270,7 @@ namespace HighQueue
         , offset_(0)
         , used_(0)
         , read_(0)
-        , type_(Message::Unused)
+        , type_(Message::MessageType::Unused)
         , timestamp_(0)
         , sequence_(0)
     {
@@ -519,5 +520,48 @@ namespace HighQueue
         std::memcpy(position, data, count * sizeof(T));
         return reinterpret_cast<T *>(position);
     }
+
+   inline
+   std::ostream & operator << (std::ostream & out, Message::MessageType type)
+   {
+       return out << Message::typeName(type);
+   }
+   inline const char * Message::typeName(Message::MessageType type)
+   {
+       switch(type)
+       {
+            case MessageType::Unused:
+                return "Unused";
+            case MessageType::Shutdown:
+                return "Shutdown";
+            case MessageType::Heartbeat:
+                return "Heartbeat";
+            case MessageType::MulticastPacket: 
+                return "MulticastPacket";
+            case MessageType::Gap:
+                return "Gap";
+            case MessageType::MockMessage:
+                return "MockMessage";
+            case MessageType::LocalType0: 
+                return "LocalType0";
+            case MessageType::LocalType1: 
+                return "LocalType1";
+            case MessageType::LocalType2: 
+                return "LocalType2";
+            case MessageType::LocalType3:
+                return "LocalType3";
+            case MessageType::LocalType4: 
+                return "LocalType4";
+            case MessageType::LocalType5: 
+                return "LocalType5";
+            case MessageType::LocalType6: 
+                return "LocalType6";
+            case MessageType::LocalType7:
+                return "LocalType7";
+            default:
+               return "ApplicationDefinedType";
+       }
+   }
+
 } // namespace HighQueue
 

@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
     Message message1(pool);
     BOOST_CHECK_EQUAL(message1.getUsed(), 0u);
     BOOST_CHECK(message1.isEmpty());
-    BOOST_CHECK_EQUAL(message1.getType(), Message::Unused);
-    message1.setType(Message::LocalType0);
+    BOOST_CHECK_EQUAL(message1.getType(), Message::MessageType::Unused);
+    message1.setType(Message::MessageType::LocalType0);
 
     message1.appendBinaryCopy(alphabet.data(), letterCount);
     BOOST_CHECK_EQUAL(message1.getUsed(), letterCount);
@@ -56,12 +56,12 @@ BOOST_AUTO_TEST_CASE(testNormalMessages)
 
     message1.moveTo(message2);
 
-    BOOST_CHECK_EQUAL(message1.getType(), Message::LocalType0);
+    BOOST_CHECK_EQUAL(message1.getType(), Message::MessageType::LocalType0);
     BOOST_CHECK_EQUAL(message1.getUsed(), 0U);
     BOOST_CHECK(message1.isEmpty());
     BOOST_CHECK(message1.needAvailable(2 * letterCount));
 
-    BOOST_CHECK_EQUAL(message2.getType(), Message::LocalType0);
+    BOOST_CHECK_EQUAL(message2.getType(), Message::MessageType::LocalType0);
     BOOST_CHECK_EQUAL(message2.getUsed(), letterCount);
     BOOST_CHECK(!message2.isEmpty());
 

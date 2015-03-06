@@ -263,7 +263,7 @@ bool OrderedMerge::findAndPublishGap()
 void OrderedMerge::publishGapMessage(uint32_t gapStart, uint32_t gapEnd)
 {
     LogDebug("Publish Gap message [" << gapStart << ", " << gapEnd << ']');
-    outMessage_->setType(Message::Gap);
+    outMessage_->setType(Message::MessageType::Gap);
     outMessage_->setSequence(gapEnd);
     outMessage_->emplace<GapMessage>(gapStart, gapEnd - 1);
     expectedSequenceNumber_ = gapEnd;

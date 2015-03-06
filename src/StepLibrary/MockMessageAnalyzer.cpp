@@ -26,9 +26,9 @@ void MockMessageAnalyzer::handle(Message & message)
     if(!stopping_)
     {
         auto type = message.getType();
-        if(type == Message::MulticastPacket)
+        if(type == Message::MessageType::MulticastPacket)
         {
-            message.setType(Message::MockMessage);
+            message.setType(Message::MessageType::MockMessage);
             auto mockMessage = message.get<MockMessage<0> >();
             message.setSequence(mockMessage->getSequence());
         }

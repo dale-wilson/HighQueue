@@ -17,6 +17,7 @@ SharedResources::SharedResources()
     : numberOfMessagesNeeded_(0)
     , largestMessageSize_(0)
     , tenthsOfAsioThreadsNeeded_(0)
+    , runTime_(0)
     , stopping_(false)
 {
 }
@@ -114,15 +115,16 @@ void SharedResources::start()
         asio_->runThreads(actualThreads, false);
     }
     
+    timer_.reset();
     for(auto & step : ReverseRange<Steps>(steps_))
     {
         step->start();
     }
-
 }
 
 void SharedResources::stop()
 {
+    runTime_ = timer_.nanoseconds();
     if(asio_)
     {
         asio_->stopService();
@@ -134,6 +136,7 @@ void SharedResources::stop()
     std::unique_lock<std::mutex> lock(mutex_);
     stopping_ = true;
     condition_.notify_all();
+    LogStatistics("Runtime (seconds): " << std::setprecision(9) << (double(runTime_) / double(Stopwatch::nanosecondsPerSecond)) );
 }
 
 void SharedResources::finish()
@@ -167,17 +170,6 @@ const SharedResources::Steps & SharedResources::getSteps()const
 {
     return steps_;
 }
-#if 0
-    std::stringstream msg;
-    std:: string delimiter;
-    for(const auto & entry : queues_)
-    {
-        msg << delimiter << entry.first;
-        delimiter = ", ";
-    }
-    return msg.str();
-}
-#endif
 
 void SharedResources::wait()
 {

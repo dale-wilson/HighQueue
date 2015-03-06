@@ -5,12 +5,9 @@ namespace HighQueue
     template<size_t ExtraCount = 0>
     struct MockMessage
     {
-        enum Indexes : uint32_t
-        {
-            SequenceNumber = 0,
-            ProducerNumber,
-            ExtraStart
-        };
+        static const size_t SequenceNumber = 0;
+        static const size_t ProducerNumber = 1;
+        static const size_t ExtraStart = 2;
 
         uint32_t message_[ExtraCount + ExtraStart];
         inline

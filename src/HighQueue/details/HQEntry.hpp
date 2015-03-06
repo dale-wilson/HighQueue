@@ -12,7 +12,7 @@ namespace HighQueue
     PRE_CACHE_ALIGN
     struct HighQEntry
     {
-        enum Status : uint8_t
+        enum class Status : uint8_t
         {
             OK,
             EMPTY,
@@ -34,4 +34,20 @@ namespace HighQueue
         }
 
     } POST_CACHE_ALIGN;
+
+    inline
+    std::ostream & operator <<(std::ostream & out, HighQEntry::Status status)
+    {
+        switch(status)
+        {
+            case HighQEntry::Status::OK:
+                return out << "OK";
+            case HighQEntry::Status::EMPTY:
+                return out << "Empty";
+            case HighQEntry::Status::SKIP:
+                return out << "Skip";
+            default:
+                return out << "Unknown";
+        }
+    }
 }

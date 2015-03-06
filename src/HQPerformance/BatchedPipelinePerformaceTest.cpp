@@ -35,7 +35,7 @@ namespace
     static const size_t sleepCount = WaitStrategy::FOREVER;
     static const std::chrono::nanoseconds sleepPeriod(2);
 
-    enum CopyType
+    enum class CopyType
     {
         PassThru,
         BufferSwap,
@@ -43,7 +43,7 @@ namespace
         CopyConstruct
     };
 
-    CopyType copyType = BinaryCopy;
+    CopyType copyType = CopyType::BinaryCopy;
     // BufferSwap;
     // BinaryCopy;
 
@@ -100,7 +100,7 @@ namespace
             ++threadsReady;
             switch(copyType)
             {
-                case PassThru:
+                case CopyType::PassThru:
                 {
                     while(consumer.getNext(consumerMessage))
                     {
@@ -113,7 +113,7 @@ namespace
                     }
                     break;
                 }
-                case BufferSwap:
+                case CopyType::BufferSwap:
                     while(consumer.getNext(consumerMessage))
                     {
                         auto used = consumerMessage.getUsed();
@@ -125,7 +125,7 @@ namespace
                         }
                     }
                     break;
-                case BinaryCopy:
+                case CopyType::BinaryCopy:
                 {
                     while(consumer.getNext(consumerMessage))
                     {

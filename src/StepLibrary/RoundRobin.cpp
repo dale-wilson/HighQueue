@@ -28,7 +28,7 @@ void RoundRobin::handle(Message & message)
     if(!stopping_)
     { 
         auto type = message.getType();
-        if(type == Message::Heartbeat || type == Message::Shutdown)
+        if(type == Message::MessageType::Heartbeat || type == Message::MessageType::Shutdown)
         {
             for(size_t nDestination = 0; nDestination < getDestinationCount(); ++nDestination)
             {
@@ -36,7 +36,7 @@ void RoundRobin::handle(Message & message)
                 message.copyMetaInfoTo(*outMessage_);
                 send(nDestination, *outMessage_);
             }
-            if(type == Message::Heartbeat)
+            if(type == Message::MessageType::Heartbeat)
             {
                 ++heartbeatsHandled_;
             }

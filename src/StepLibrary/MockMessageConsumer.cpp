@@ -52,10 +52,10 @@ bool BaseMessageConsumer::configureParameter(const std::string & key, const Conf
 
 void BaseMessageConsumer::logStats()
 {
-    LogStatistics("MessageConsumer " << name_ << " heartbeats:" << heartbeats_);
+    LogStatistics("MessageConsumer " << name_ << " heartbeats: " << heartbeats_);
     LogStatistics("MessageConsumer " << name_ << " shutdowns: " << shutdowns_);
-    LogStatistics("MessageConsumer " << name_ << " messagesHandled:" << messagesHandled_);
-    LogStatistics("MessageConsumer " << name_ << " sequenceError:" << sequenceError_);
-    LogStatistics("MessageConsumer " << name_ << " unexpectedMessageError:" << unexpectedMessageError_);
+    LogStatistics("MessageConsumer " << name_ << " messagesHandled: " << messagesHandled_);
+    LogStatistics("MessageConsumer " << name_ << " sequenceError: " << sequenceError_);
+    LogStatistics("MessageConsumer " << name_ << " unexpectedMessageError: " << unexpectedMessageError_);
 }
 

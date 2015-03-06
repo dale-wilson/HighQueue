@@ -47,7 +47,7 @@ namespace
         }
     }
 
-    enum CopyType
+    enum class CopyType
     {
         PassThru,
         BufferSwap,
@@ -55,6 +55,23 @@ namespace
         CopyConstruct
     };
 
+    inline
+    std::ostream & operator << (std::ostream & out, CopyType type)
+    {
+        switch(type)
+        {
+        case CopyType::PassThru:
+            return out << "PassThru";
+        case CopyType::BufferSwap:
+            return out << "BufferSwap";
+        case CopyType::BinaryCopy:
+            return out << "BinaryCopy";
+        case CopyType::CopyConstruct:
+            return out << "CopyConstruct";
+        default:
+            return out << "Unknown";
+        }
+    }
     void copyFunction(ConnectionPtr & inConnection, ConnectionPtr & outConnection, CopyType copyType)
     {
         try
@@ -68,7 +85,7 @@ namespace
             ++threadsReady;
             switch(copyType)
             {
-                case PassThru:
+                case CopyType::PassThru:
                 {
                     while(consumer.getNext(consumerMessage))
                     {
@@ -81,7 +98,7 @@ namespace
                     }
                     break;
                 }
-                case BufferSwap:
+                case CopyType::BufferSwap:
                     while(consumer.getNext(consumerMessage))
                     {
                         auto used = consumerMessage.getUsed();
@@ -94,7 +111,7 @@ namespace
                         }
                     }
                     break;
-                case BinaryCopy:
+                case CopyType::BinaryCopy:
                 {
                     while(consumer.getNext(consumerMessage))
                     {
@@ -108,7 +125,7 @@ namespace
                     }
                     break;
                 }
-                case CopyConstruct:
+                case CopyType::CopyConstruct:
                 {
                     {
                         while(consumer.getNext(consumerMessage))
@@ -158,9 +175,8 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     static const size_t yieldCount = 0;//1;//100;
     static const size_t sleepCount = WaitStrategy::FOREVER;
     static const std::chrono::nanoseconds sleepPeriod(2);
-    CopyType copyType = BinaryCopy;
-                      // BufferSwap;
-                      // BinaryCopy;
+    CopyType copyType = CopyType::BinaryCopy;
+                      // CopyType::BufferSwap;
 
     std::cout << "HighQueue Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 

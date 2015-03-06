@@ -41,7 +41,7 @@ StepPtr StepFactory::make(const std::string & name)
     }
     else
     {
-        if(Log::isEnabled(Log::WARNING))
+        if(Log::isEnabled(Log::Level::WARNING))
         {
             std::stringstream msg;
             msg << "No Step Factory Registry entry found for " << name << "." << std::endl;
