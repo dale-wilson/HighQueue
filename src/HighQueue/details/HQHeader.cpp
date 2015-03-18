@@ -48,11 +48,11 @@ HQHeader::HQHeader(
 
     entries_ = allocator.allocate(HighQEntry::alignedSize() * entryCount_, CacheLineSize);
     readPosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
-    auto readPosition = resolver.resolve<Position>(readPosition_);
+    auto readPosition = resolver.resolve<AtomicPosition>(readPosition_);
     *readPosition = entryCount_;
 
     publishPosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
-    auto publishPosition = resolver.resolve<Position>(publishPosition_);
+    auto publishPosition = resolver.resolve<AtomicPosition>(publishPosition_);
     *publishPosition = entryCount_;
 
     reservePosition_ = allocator.allocate(CacheLineSize, CacheLineSize);
