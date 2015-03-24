@@ -61,7 +61,7 @@ namespace HighQueue
         HighQResolver resolver_;
         HighQEntryAccessor entryAccessor_;
         volatile Position & readPosition_;
-        volatile Position & publishPosition_;
+        AtomicPosition & publishPosition_;
         Position cachedPublishPosition_;
         const WaitStrategy & waitStrategy_;
         size_t spins_;

@@ -15,7 +15,7 @@ Producer::Producer(ConnectionPtr & connection)
 , discardMessagesIfNoConsumer_(header_->discardMessagesIfNoConsumer_)
 , resolver_(header_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
-, publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
+, publishPosition_(*resolver_.resolve<AtomicPosition>(header_->publishPosition_))
 , reserveStructure_(*resolver_.resolve<volatile HighQReservePosition>(header_->reservePosition_))
 , reservePosition_(reserveStructure_.reservePosition_)
 , reserveSoloPosition_(reinterpret_cast<volatile Position &>(reservePosition_))
@@ -75,7 +75,7 @@ bool Producer::canPublish(Position position)
     if(discardMessagesIfNoConsumer_ && !header_->consumerPresent_)
     {
         ++statDiscards_;
-        readPosition_ = publishPosition_;
+        readPosition_ = publishPosition_.load(std::memory_order_consume);
         publishable_ = readPosition_ + entryCount_;
         return true;
     }
@@ -185,11 +185,11 @@ void Producer::publish(Message & message)
         bool published = false;
         while(!published && !stopping_)
         {
-            auto position = publishPosition_;
+            Position position = publishPosition_; // solo: atomic not needed
             if(canPublish(position))
             {
                 published = publish(position, message);
-                publishPosition_ = position + 1;
+                publishPosition_.store(position + 1, std::memory_order_release);
             }
             else
             {
@@ -200,19 +200,19 @@ void Producer::publish(Message & message)
         return;
     }
 
-    size_t remainingSpins = waitStrategy_.spinCount_;
-    size_t remainingYields = waitStrategy_.yieldCount_;
-    size_t remainingSleeps = waitStrategy_.sleepCount_;
-    bool mutexTimedOut = false;
-    bool published = false;
+    auto remainingSpins = waitStrategy_.spinCount_;
+    auto remainingYields = waitStrategy_.yieldCount_;
+    auto remainingSleeps = waitStrategy_.sleepCount_;
+    auto mutexTimedOut = false;
+    auto published = false;
     SpinLock::Guard guard(reserveSpinLock_);
     while(!published)
     {
-        auto position = publishPosition_;
+        Position position = publishPosition_; // protected by spin lock.   Atomic not needed
         if(canPublish(position))
         {
             published = publish(position, message);
-            publishPosition_ = position + 1;
+            publishPosition_ .store(position + 1, std::memory_order_release);
         }
         else
         {
@@ -256,7 +256,7 @@ void Producer::publish(Message & message)
                 std::unique_lock<std::mutex> mutexGuard(header_->waitMutex_);
                 // This position was acquired without the spinlock. 
                 // Check it, but don't use it to publish!
-                position = publishPosition_;
+                position = publishPosition_; // Mutex protected.  Atomic not needed
                 if(!canPublish(position))
                 {
                     header_->producerWaiting_ = true;

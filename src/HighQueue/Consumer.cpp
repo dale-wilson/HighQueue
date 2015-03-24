@@ -11,7 +11,7 @@ Consumer::Consumer(ConnectionPtr & connection)
 , resolver_(header_)
 , entryAccessor_(resolver_, header_->entries_, header_->entryCount_)
 , readPosition_(*resolver_.resolve<volatile Position>(header_->readPosition_))
-, publishPosition_(*resolver_.resolve<volatile Position>(header_->publishPosition_))
+, publishPosition_(*resolver_.resolve<AtomicPosition>(header_->publishPosition_))
 , cachedPublishPosition_(publishPosition_)
 , waitStrategy_(header_->consumerWaitStrategy_)
 , spins_(waitStrategy_.spinCount_)
@@ -68,7 +68,7 @@ bool Consumer::tryGetNext(Message & message)
         {
             std::atomic_thread_fence(std::memory_order::memory_order_consume);
             readPosition = readPosition_;
-            cachedPublishPosition_ = publishPosition_;
+            cachedPublishPosition_ = publishPosition_.load(std::memory_order_consume);
             if(readPosition >= cachedPublishPosition_)
             {
                 return false;
