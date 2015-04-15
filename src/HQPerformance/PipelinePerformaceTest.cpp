@@ -175,8 +175,9 @@ BOOST_AUTO_TEST_CASE(testPipelinePerformance)
     static const size_t yieldCount = 0;//1;//100;
     static const size_t sleepCount = WaitStrategy::FOREVER;
     static const std::chrono::nanoseconds sleepPeriod(2);
-    CopyType copyType = CopyType::BinaryCopy;
+    CopyType copyType = //CopyType::BinaryCopy;
                       // CopyType::BufferSwap;
+                      CopyType::PassThru;
 
     std::cout << "HighQueue Pipeline " << (maxNumberOfProducers + copyLimit + numberOfConsumers) << " stage. Copy type: " << copyType << ": ";
 
