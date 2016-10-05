@@ -17,6 +17,8 @@ x64/
 *.suo
 *.suo.*
 ipch/
+*.VC.VC.opendb
+*.VC.db
 # my private command files -- dale
 s.cmd
 r.cmd

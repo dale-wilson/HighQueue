@@ -4,7 +4,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <Common/HighQueue_Export.hpp>
+#include <HighQueue/IConsumer.hpp>
 #include <HighQueue/Connection.hpp>
 #include <HighQueue/details/HQResolver.hpp>
 #include <HighQueue/details/HQReservePosition.hpp>
@@ -16,7 +16,7 @@ namespace HighQueue
     /// In addition to having the Connection which is used to construct
     /// this object, you will need a Message which has been initialized
     /// by calling the Connection::allocate() method.
-    class HighQueue_Export Consumer
+    class HighQueue_Export Consumer : public IConsumer
     {
     public:
         /// @brief Construct and attach to a connection

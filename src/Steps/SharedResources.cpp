@@ -95,7 +95,7 @@ void SharedResources::createResources()
 
    for(auto & step : steps_)
     {
-        LogTrace("Attach resources for " << step->getName() << " (" << resources_->getMemoryPool()->numberOfAllocations() << ")");
+        LogTrace("Attach resources for " << step->getName() << " (" << getMemoryPool()->numberOfAllocations() << ")");
 
         step->attachResources(shared_from_this());
     }

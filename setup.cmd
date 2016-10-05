@@ -12,6 +12,7 @@ REM Setting up HighQueue environment
 @REM Also you should customize HighQueue.features to enable particular features on your system.
 @REM Delete the following line when you finishing customizing this file.
 @echo See remarks in %0 for information about setting your build environment
+
 @echo off
 
 REM =====================================================================================
@@ -41,6 +42,15 @@ REM You can short-circuit this by setting VCVER before running this
 REM However this also avoids the check to see if VC is installed in the expected place.
 set SETUP_CHECKING=Setup checking visual studio common tools
 if not "a" == "a%VCVER%" goto setup_is_ok
+
+set VCVER=15
+set SETUP_CHECKING=VS150COMNTOOLS=%VS150COMNTOOLS%
+if exist "%VS150COMNTOOLS%VSVARS32.BAT" goto setup_is_ok
+
+set VCVER=14
+set SETUP_CHECKING=VS140COMNTOOLS=%VS140COMNTOOLS%
+if exist "%VS140COMNTOOLS%VSVARS32.BAT" goto setup_is_ok
+
 set VCVER=12
 set SETUP_CHECKING=VS120COMNTOOLS=%VS120COMNTOOLS%
 if exist "%VS120COMNTOOLS%VSVARS32.BAT" goto setup_is_ok
@@ -66,6 +76,8 @@ set SETUP_CHECKING=
 set HighQueue_ROOT=%CD%
 
 rem must be outside the if because of the parens in the directory name [what was microsoft thinking?]
+if %VCVER%==15 goto isVC15
+if %VCVER%==14 goto isVC14
 if %VCVER%==12 goto isVC12
 if %VCVER%==11 goto isVC11
 if %VCVER%==10 goto isVC10
@@ -75,10 +87,16 @@ goto end
 :isVC10
 :isVC11
 :isVC12
+:isVC14
+:isVC15
 set VC_ROOT=C:\%PROGRAM_FILES_X86%\Microsoft Visual Studio %VCVER%.0\VC\bin
 call "%VC_ROOT%\VCVARS32.BAT" >nul
 
 :vcIsSet
+
+echo Found MPC at: %MPC_ROOT%
+echo Found BOOST at: %BOOST_ROOT%
+echo Found Visual Studio version %VCVER%
 
 REM: This avoids growing PATH and INCLUDE every time setup is run
 if "a" == "a%BASE_PATH%" set BASE_PATH=%PATH%

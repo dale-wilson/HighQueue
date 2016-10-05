@@ -22,7 +22,7 @@ Log::Level Log::runtimeLevel = Log::Level(
     Log::INFO | Log::STATISTICS);
 #endif
 
-void Log::log(Log::Level level, const char * file, const char * function, uint16_t line, const std::string & message)
+void Log::log(Log::Level level, const char * file, const char * function, long line, const std::string & message)
 {
     if((level & runtimeLevel) != 0)
     {
