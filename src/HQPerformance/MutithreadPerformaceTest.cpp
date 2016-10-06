@@ -54,26 +54,27 @@ namespace
         if(header)
         {
             header = false;
-            out << "Producers"
-                << "\tMessages"
-                << "\tBytes/message"
-                << "\tSeconds"
-                << "\tNanosecond/message"
-                << "\tM message/second"
-                << std::endl;
+            out << std::setw(6) << "Queues" << '\t' 
+                << std::setw(10) << "Producers" << '\t' 
+                << std::setw(10) << "Messages" << '\t' 
+                << std::setw(14) << "Bytes/message" << '\t' 
+                << std::setw(10) << "Seconds" << '\t' 
+                << std::setw(18) << "Nanosecond/message" << '\t' 
+                << std::setw(16) << "M message/second" << std::endl;
         }
-        out << producerCount
-            << '\t' << messageCount 
-            << '\t' << messageBytes
-            << '\t' << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond)
-            << '\t' << lapse / messageCount;
+        out << std::setw(6) << 1 << '\t' 
+            << std::setw(10) << producerCount << '\t' 
+            << std::setw(10) << messageCount << '\t' 
+            << std::setw(14) << messageBytes << '\t' 
+            << std::setw(10) << std::setprecision(9) << double(lapse) / double(Stopwatch::nanosecondsPerSecond) << '\t' 
+            << std::setw(18) << lapse / messageCount << '\t'; 
         if(lapse == 0)
         {
-            out << "\t0\tRun time too short to measure.   Use a larger messageCount" << std::endl;
+            out << "0\tRun time too short to measure.   Use a larger messageCount" << std::endl;
         }
         else
         {
-            out << '\t' << std::setprecision(3) << double(messageCount * 1000) / double(lapse)
+            out << std::setw(16) << std::setprecision(3) << double(messageCount * 1000) / double(lapse)
             << std::endl;
         }
     }
@@ -165,7 +166,7 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t producerSleepCount = WaitStrategy::FOREVER;
     static const auto sleepTime = std::chrono::nanoseconds(10);
 
-    std::cout << "***** BEGIN MultiProducerSingleQueueMessagePassingPerformance test *****" << std::endl;
+    std::cerr << "***** BEGIN MultiProducerSingleQueueMessagePassingPerformance test *****" << std::endl;
     
     WaitStrategy consumerStrategy(consumerSpinCount, consumerYieldCount, consumerSleepCount, sleepTime);
     WaitStrategy producerStrategy(producerSpinCount, producerYieldCount, producerSleepCount, sleepTime);
@@ -246,6 +247,6 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         consumer.writeStats(std::cerr);
         std::cerr << std::endl;
     }
-    std::cout << "***** END MultiProducerSingleQueueMessagePassingPerformance test *****" << std::endl;
+    std::cerr << "***** END MultiProducerSingleQueueMessagePassingPerformance test *****" << std::endl;
 }
 #endif // ENABLE_MultithreadMessagePassingPerformance

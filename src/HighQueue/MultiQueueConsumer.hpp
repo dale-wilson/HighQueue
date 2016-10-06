@@ -20,7 +20,7 @@ namespace HighQueue
 
         /// @brief Add a new queue to the collection we are listening to.
         /// @param connection Is the connection to the HighQueue
-        void addQueue(ConnectionPtr & connection);
+        void addQueue(ConnectionPtr & connection, const std::string & name = "");
 
         /// @brief Get the next message-full of data if it is available
         ///

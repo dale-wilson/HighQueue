@@ -14,10 +14,20 @@ MultiQueueConsumer::~MultiQueueConsumer()
 {
 }
 
-void MultiQueueConsumer::addQueue(ConnectionPtr & connection)
+void MultiQueueConsumer::addQueue(ConnectionPtr & connection, const std::string & name)
 {
     ConsumerPtr consumer = std::make_shared<Consumer>(connection);
-    consumer->setName(std::string(connection->getHeader()->name_, sizeof(HQHeader::name_)));
+
+    if(name.empty())
+    {
+        std::stringstream ss;
+        ss << "#" << consumers_.size();
+        consumer->setName(ss.str());
+    }
+    else
+    {
+        consumer->setName(name);
+    }
     consumers_.push_back(consumer);
 }
 
