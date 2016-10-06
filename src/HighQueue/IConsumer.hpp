@@ -1,4 +1,4 @@
-/// @file Consumer.h
+/// @file IConsumer.h
 // Copyright (c) 2016 Object Computing, Inc.
 // All rights reserved.
 // See the file license.txt for licensing information.
@@ -10,7 +10,7 @@
 
 namespace HighQueue
 {
-/// @brief Iterface for classes that consume messages from an HighQueue
+/// @brief Base for classes that consume messages from an HighQueue
 class HighQueue_Export IConsumer
 {
 public:
@@ -42,5 +42,17 @@ public:
 
     /// @brief stop receiving messages.
     virtual void stop() = 0;
+    
+    void setName(const std::string & name)
+    {
+        name_ = name;
+    }
+
+    const std::string & getName() const
+    {
+        return name_;
+    }
+private:
+    std::string name_;
 };
 }

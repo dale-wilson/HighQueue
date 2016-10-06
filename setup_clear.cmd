@@ -9,5 +9,6 @@ set HighQueue_ROOT=
 set MPC_ROOT=
 set BOOST_VERSION=
 set BOOST_ROOT=
-set VCVER=
+set BOOST_LIB_DIRECTORY=
+set BOOST_LIB_PATH=
 set VC_ROOT=

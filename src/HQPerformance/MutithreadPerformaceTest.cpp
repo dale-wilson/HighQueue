@@ -81,7 +81,7 @@ namespace
     bool needHeader = true;
 } // namespace
 
-#define ENABLE_ST_PERFORMANCE 1
+#define ENABLE_ST_PERFORMANCE 0
 #if ENABLE_ST_PERFORMANCE
 BOOST_AUTO_TEST_CASE(testSingleThreadedMessagePassingPerformance)
 {
@@ -164,6 +164,8 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
     static const size_t producerYieldCount = 1000;
     static const size_t producerSleepCount = WaitStrategy::FOREVER;
     static const auto sleepTime = std::chrono::nanoseconds(10);
+
+    std::cout << "***** BEGIN MultiProducerSingleQueueMessagePassingPerformance test *****" << std::endl;
     
     WaitStrategy consumerStrategy(consumerSpinCount, consumerYieldCount, consumerSleepCount, sleepTime);
     WaitStrategy producerStrategy(producerSpinCount, producerYieldCount, producerSleepCount, sleepTime);
@@ -244,5 +246,6 @@ BOOST_AUTO_TEST_CASE(testMultithreadMessagePassingPerformance)
         consumer.writeStats(std::cerr);
         std::cerr << std::endl;
     }
+    std::cout << "***** END MultiProducerSingleQueueMessagePassingPerformance test *****" << std::endl;
 }
 #endif // ENABLE_MultithreadMessagePassingPerformance

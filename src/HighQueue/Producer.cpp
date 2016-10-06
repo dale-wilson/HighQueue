@@ -180,6 +180,7 @@ void Producer::notifyConsumer()
 
 void Producer::publish(Message & message)
 {
+    ++statPublishes_;
     if(solo_)
     {
         bool published = false;

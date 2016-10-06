@@ -2,6 +2,7 @@
 Makefile*
 *.o
 *.gch
+.vs/
 /bin
 /lib
 #Windows

@@ -10,7 +10,7 @@
 using namespace HighQueue;
 typedef MockMessage<20> ActualMessage;
 
-#define ENABLE_CONSUME_SEPARATELY 1
+#define ENABLE_CONSUME_SEPARATELY 0
 #if ENABLE_CONSUME_SEPARATELY
 BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 {
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(testPublishConsumeSeparately)
 }
 #endif // ENABLECONSUME_SEPARATELY
 
-#define ENABLE_NO_CONSUMER 1
+#define ENABLE_NO_CONSUMER 0
 #if ENABLE_NO_CONSUMER
 BOOST_AUTO_TEST_CASE(testPublishWithNoConsumer)
 {

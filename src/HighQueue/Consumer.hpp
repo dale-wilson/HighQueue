@@ -69,6 +69,7 @@ namespace HighQueue
         size_t sleeps_;
 
         bool stopping_;
+        uint64_t statConsumed_;
         uint64_t statGets_;
         uint64_t statTrys_;
         uint64_t statSpins_;

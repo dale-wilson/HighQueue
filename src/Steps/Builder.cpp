@@ -98,11 +98,9 @@ bool Builder::constructPipe(const ConfigurationNode & config, const StepPtr & pa
                 return false;
             }
 
-#ifdef _WIN32 // VC2013 implementation of std::bind sucks (technical term)
+            // VC2013 implementation of std::bind sucks (technical term)
+            // so use boost::bind
             step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
-#else // _WIN32
-            step->setParameterHandler(boost::bind(&Builder::configureParameter, this, _1, _2, _3));
-#endif // WIN32
             if(!step->configure(*child))
             {
                 return false;

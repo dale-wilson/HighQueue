@@ -18,6 +18,7 @@ Consumer::Consumer(ConnectionPtr & connection)
 , yields_(waitStrategy_.yieldCount_)
 , sleeps_(waitStrategy_.sleepCount_)
 , stopping_(false)
+, statConsumed_(0)
 , statGets_(0)
 , statTrys_(0)
 , statSpins_(0)
@@ -79,6 +80,7 @@ bool Consumer::tryGetNext(Message & message)
         {
             entry.message_.moveTo(message);
             incrementReadPosition();
+            ++statConsumed_;
             return true;
         }
         incrementReadPosition();
@@ -88,7 +90,7 @@ bool Consumer::tryGetNext(Message & message)
 
 std::ostream & Consumer::writeStats(std::ostream & out)const
 {
-    return out << "Get: " << statGets_ << " Try: " << statTrys_ << " Spin: " << statSpins_ << " Yield: " << statYields_ << " Sleep: " << statSleeps_ << " Wait: " << statWaits_ << std::endl;
+    return out << "Consumed: " << statConsumed_ << " Get: " << statGets_ << " Try: " << statTrys_ << " Spin: " << statSpins_ << " Yield: " << statYields_ << " Sleep: " << statSleeps_ << " Wait: " << statWaits_ << std::endl;
 }
 
 bool Consumer::getNext(Message & message)
