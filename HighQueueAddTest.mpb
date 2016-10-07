@@ -9,7 +9,7 @@ project : boost_unit_test_framework, boost_base, boost_filesystem, boost_system,
   }
 
   Header_Files {
-	$(HighQUeue_Root)/src/Mocks
+	$(HighQueue_Root)/src/Mocks
   }
   // TODO: What to do about boost 32 bit builds?
   libpaths -= $(BOOST_ROOT)/lib
