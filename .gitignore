@@ -23,4 +23,5 @@ ipch/
 *.VC.db
 # my private command files -- dale
 s.cmd
+s.sh
 r.cmd
