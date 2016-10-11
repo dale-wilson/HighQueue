@@ -98,7 +98,7 @@ namespace HighQueue
         EnterCriticalSection(&criticalSection_);
 #   else // defined(_WIN32)
         spin_lock(&spinlock_);
-#   endif _WIN32
+#   endif //  _WIN32
 #else //HIGHQUEUE_USE_CRITICAL_SECTION
         while(flag_.test_and_set(std::memory_order::memory_order_seq_cst))
         {
