@@ -5,6 +5,8 @@ project {
     // Enable full optimization on gcc/linux
     Release::genflags += -O3 -g -std=c++11
 	Debug::genflags += -g -std=c++11
+    includes += $(LINUX_INCLUDE)
+    includes += $(ARCH_INCLUDE)
   }
   specific(prop:microsoft) {
 	Release::genflags += -O2i
